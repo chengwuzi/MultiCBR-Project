@@ -22,6 +22,20 @@ def get_cmd():
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
+
+    # Hard Negative arguments
+    parser.add_argument("--hard_neg_enable", type=str, default=None, help="enable hard negative sampling")
+    parser.add_argument("--hard_neg_strategy", type=str, default=None, help="hard negative strategy")
+    parser.add_argument("--hard_sample_ratio", type=float, default=None, help="ratio of hard negatives")
+    parser.add_argument("--hard_window_low", type=float, default=None, help="hard negative window low")
+    parser.add_argument("--hard_window_high", type=float, default=None, help="hard negative window high")
+    parser.add_argument("--hard_min_intersection", type=int, default=None, help="hard negative min intersection")
+    parser.add_argument("--hard_topk", type=int, default=None, help="hard negative topk")
+    parser.add_argument("--hard_pool_cache_dir", type=str, default=None, help="hard pool cache dir")
+    parser.add_argument("--hard_pool_force_rebuild", type=str, default=None, help="force rebuild hard pool")
+    parser.add_argument("--hard_pool_use_precomputed", type=str, default=None, help="use precomputed hard pool")
+    parser.add_argument("--hard_debug_print", type=str, default=None, help="debug print")
+
     args = parser.parse_args()
 
     return args
@@ -46,16 +60,30 @@ def main(args=None):
         conf = conf[dataset_name]
     conf["dataset"] = dataset_name
     conf["model"] = paras["model"]
-    dataset = Datasets(conf)
-
-    conf["gpu"] = paras["gpu"]
-    conf["info"] = paras["info"]
 
     # Override config with any additional parameters passed in args
     for key, value in paras.items():
         if key not in ["dataset", "model", "gpu", "info"] and value is not None:
              # Only override if the key exists in the specific dataset config or create new one
-             conf[key] = value
+             # Special handling for boolean strings
+             if key in ["hard_neg_enable", "hard_pool_force_rebuild", "hard_pool_use_precomputed", "hard_debug_print"]:
+                 if isinstance(value, str):
+                     if value.lower() == "true":
+                         conf[key] = True
+                     elif value.lower() == "false":
+                         conf[key] = False
+                     else:
+                         conf[key] = value # Should not happen if passed correctly
+                 else:
+                     conf[key] = value
+             else:
+                 conf[key] = value
+
+    dataset = Datasets(conf)
+
+    conf["gpu"] = paras["gpu"]
+    conf["info"] = paras["info"]
+
 
     conf["num_users"] = dataset.num_users
     conf["num_bundles"] = dataset.num_bundles
@@ -108,6 +136,23 @@ def main(args=None):
         conf["c_lambda"] = c_lambda
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
+
+        # Add Hard Negative setting to log string
+        if conf.get("hard_neg_enable", False):
+            hn_str = "HN" + str(conf.get("hard_neg_strategy", "random"))
+            if conf.get("hard_neg_strategy") == "mix":
+                hn_str += str(conf.get("hard_sample_ratio"))
+            
+            # Optional: Add thresholds to string to distinguish experiments
+            hn_str += "_J%.2f-%.2f_I%d_K%d" % (
+                conf.get("hard_window_low", 0.05),
+                conf.get("hard_window_high", 0.2),
+                conf.get("hard_min_intersection", 1),
+                conf.get("hard_topk", 200)
+            )
+            settings += [hn_str]
+        else:
+            settings += ["HNoff"]
 
         setting = "_".join(settings)
         log_path = log_path + "/" + setting

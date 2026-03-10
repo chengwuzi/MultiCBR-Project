@@ -27,11 +27,15 @@ def get_cmd():
     return args
 
 
-def main():
+def main(args=None):
     conf = yaml.safe_load(open("./config.yaml"))
     print("load config file done!")
 
-    paras = get_cmd().__dict__
+    if args is None:
+        paras = get_cmd().__dict__
+    else:
+        paras = args
+
     dataset_name = paras["dataset"]
 
     assert paras["model"] in ["MultiCBR"], "Pls select models from: MultiCBR"
@@ -46,6 +50,12 @@ def main():
 
     conf["gpu"] = paras["gpu"]
     conf["info"] = paras["info"]
+
+    # Override config with any additional parameters passed in args
+    for key, value in paras.items():
+        if key not in ["dataset", "model", "gpu", "info"] and value is not None:
+             # Only override if the key exists in the specific dataset config or create new one
+             conf[key] = value
 
     conf["num_users"] = dataset.num_users
     conf["num_bundles"] = dataset.num_bundles

@@ -98,7 +98,24 @@ class Datasets():
         self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
-        self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
+        # High-order substitution pre-computation
+        if conf.get('enable_high_order_replace', False):
+            print("Generating high-order adjacency lists...")
+            # bundle -> users -> items (B-U-I)
+            # u_b_graph_train is (users, bundles), so transpose for (bundles, users)
+            bundle_bui_adj = u_b_graph_train.T @ u_i_graph
+            self.bundle2bui_items = self._build_high_order_adj(bundle_bui_adj, conf.get('bui_topk', 20))
+            
+            # user -> bundles -> items (U-B-I)
+            user_ubi_adj = u_b_graph_train @ b_i_graph
+            self.user2ubi_items = self._build_high_order_adj(user_ubi_adj, conf.get('ubi_topk', 20))
+            
+            print("High-order adjacency lists generated.")
+        else:
+            self.bundle2bui_items = None
+            self.user2ubi_items = None
+
+        self.graphs = [u_b_graph_train, u_i_graph, b_i_graph, self.bundle2bui_items, self.user2ubi_items]
 
         self.train_loader = DataLoader(self.bundle_train_data, batch_size=batch_size_train, shuffle=True, num_workers=10, drop_last=True)
         self.val_loader = DataLoader(self.bundle_val_data, batch_size=batch_size_test, shuffle=False, num_workers=20)
@@ -111,6 +128,47 @@ class Datasets():
             name = name.split("_")[0]
         with open(os.path.join(self.path, self.name, '{}_data_size.txt'.format(name)), 'r') as f:
             return [int(s) for s in f.readline().split('\t')][:3]
+
+
+    def _build_high_order_adj(self, adj_matrix, topk):
+        # Convert sparse matrix to dict: {entity_id: [(item_id, weight), ...]}
+        adj_dict = {}
+        # Ensure adj_matrix is CSR for efficient row slicing
+        adj_matrix = adj_matrix.tocsr()
+        num_rows = adj_matrix.shape[0]
+
+        for i in range(num_rows):
+            start = adj_matrix.indptr[i]
+            end = adj_matrix.indptr[i+1]
+            
+            if start == end:
+                adj_dict[i] = []
+                continue
+            
+            indices = adj_matrix.indices[start:end]
+            data = adj_matrix.data[start:end]
+            
+            if len(data) > topk:
+                # Find indices of top-k largest elements
+                top_k_idx = np.argpartition(data, -topk)[-topk:]
+                top_k_indices = indices[top_k_idx]
+                top_k_data = data[top_k_idx]
+            else:
+                top_k_indices = indices
+                top_k_data = data
+            
+            # Sort by weight descending
+            sorted_idx = np.argsort(top_k_data)[::-1]
+            final_indices = top_k_indices[sorted_idx]
+            final_data = top_k_data[sorted_idx]
+            
+            # Normalize weights (sum to 1)
+            total = np.sum(final_data)
+            final_weights = final_data / (total + 1e-12)
+            
+            adj_dict[i] = list(zip(final_indices.tolist(), final_weights.tolist()))
+            
+        return adj_dict
 
 
     def get_bi(self):

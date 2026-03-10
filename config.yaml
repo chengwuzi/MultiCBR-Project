@@ -11,6 +11,11 @@ NetEase:
   embedding_sizes: [64] # the embedding size for user, bundle, and item
   num_layerss: [2] # number of layers for the information propagation over all graphs
 
+  # High-order substitution settings
+  bui_topk: 20
+  ubi_topk: 20
+  enable_high_order_replace: true
+
   # the following dropout rates are with respect to the "aug_type", i.e., if aug_type is ED, the following dropout rates are for ED.
   UB_ratios: [0.0] # the dropout ratio for UB graph
   UI_ratios: [0.0] # the dropout ratio for UI graph
@@ -47,6 +52,10 @@ iFashion:
   embedding_sizes: [64]
   num_layerss: [2]
 
+  bui_topk: 20
+  ubi_topk: 20
+  enable_high_order_replace: true
+
   UB_ratios: [0.05]
   UI_ratios: [0.0]
   BI_ratios: [0.15]
@@ -78,6 +87,10 @@ Youshu:
   ed_interval: 1
   embedding_sizes: [64]
   num_layerss: [2]
+
+  bui_topk: 20
+  ubi_topk: 20
+  enable_high_order_replace: true
 
   UB_ratios: [0.2]
   UI_ratios: [0.1]

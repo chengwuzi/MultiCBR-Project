@@ -66,7 +66,22 @@ class MultiCBR(nn.Module):
         self.init_fusion_weights()
 
         assert isinstance(raw_graph, list)
-        self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
+        if len(raw_graph) == 3:
+            self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
+            self.bundle2bui_items = None
+            self.user2ubi_items = None
+        elif len(raw_graph) == 5:
+            self.ub_graph, self.ui_graph, self.bi_graph, self.bundle2bui_items, self.user2ubi_items = raw_graph
+        else:
+            raise ValueError("raw_graph must have 3 or 5 elements")
+
+        # Pre-process high-order adjacency if enabled
+        if self.conf.get("enable_high_order_replace", False) and self.bundle2bui_items is not None:
+            self.bui_sparse, self.bui_mask = self._convert_dict_to_sparse(self.bundle2bui_items, (self.num_bundles, self.num_items))
+            self.ubi_sparse, self.ubi_mask = self._convert_dict_to_sparse(self.user2ubi_items, (self.num_users, self.num_items))
+        else:
+            self.bui_sparse = None
+            self.ubi_sparse = None
 
         # generate the graph without any dropouts for testing
         self.UB_propagation_graph_ori = self.get_propagation_graph(self.ub_graph)
@@ -209,6 +224,64 @@ class MultiCBR(nn.Module):
         return aggregated_feature
 
 
+    def _convert_dict_to_sparse(self, adj_dict, shape):
+        # adj_dict: {entity_id: [(item_id, weight), ...]}
+        # shape: (num_entities, num_items)
+        indices = []
+        values = []
+        has_high_order = torch.zeros(shape[0], dtype=torch.bool)
+        
+        for entity_id, items in adj_dict.items():
+            if not items:
+                continue
+            has_high_order[entity_id] = True
+            for item_id, weight in items:
+                indices.append([entity_id, item_id])
+                values.append(weight)
+                
+        if not indices:
+            return None, has_high_order
+            
+        indices = torch.LongTensor(indices).t()
+        values = torch.FloatTensor(values)
+        
+        # Keep on CPU until needed
+        return (indices, values), has_high_order
+
+
+    def aggregate_high_order_items(self, sparse_components, mask, item_feature, fallback_feature):
+        """
+        sparse_components: (indices, values) on CPU
+        mask: boolean tensor indicating which entities have high-order neighbors
+        item_feature: [num_items, dim] on GPU
+        fallback_feature: [num_entities, dim] on GPU
+        """
+        if sparse_components is None:
+            return fallback_feature
+
+        indices, values = sparse_components
+        
+        # Move sparse structure to device only when needed
+        indices = indices.to(self.device)
+        values = values.to(self.device)
+        mask = mask.to(self.device)
+        
+        shape = torch.Size([fallback_feature.shape[0], item_feature.shape[0]])
+        
+        # Create sparse tensor
+        adj = torch.sparse_coo_tensor(indices, values, shape, device=self.device)
+        
+        # Aggregate
+        out = torch.sparse.mm(adj, item_feature)
+        
+        # Combine with fallback
+        # Entities with high-order items use `out`, others use `fallback_feature`
+        mask = mask.unsqueeze(1).float()
+        final_out = mask * out + (1 - mask) * fallback_feature
+        
+        return final_out
+
+
     def fuse_users_bundles_feature(self, users_feature, bundles_feature):
         users_feature = torch.stack(users_feature, dim=0)
         bundles_feature = torch.stack(bundles_feature, dim=0)
@@ -230,18 +303,34 @@ class MultiCBR(nn.Module):
         #  =============================  UI graph propagation  =============================
         if test:
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph_ori, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
-            UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_ori, UI_items_feature, "BI", test)
+            UI_bundles_feature_fallback = self.aggregate(self.BI_aggregation_graph_ori, UI_items_feature, "BI", test)
         else:
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
-            UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
+            UI_bundles_feature_fallback = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
+
+        # UI view: Bundle representation replacement (B-U-I high order)
+        if self.conf.get("enable_high_order_replace", False) and self.bui_sparse is not None:
+            UI_bundles_feature = self.aggregate_high_order_items(
+                self.bui_sparse, self.bui_mask, UI_items_feature, UI_bundles_feature_fallback
+            )
+        else:
+            UI_bundles_feature = UI_bundles_feature_fallback
 
         #  =============================  BI graph propagation  =============================
         if test:
             BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph_ori, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
-            BI_users_feature = self.aggregate(self.UI_aggregation_graph_ori, BI_items_feature, "UI", test)
+            BI_users_feature_fallback = self.aggregate(self.UI_aggregation_graph_ori, BI_items_feature, "UI", test)
         else:
             BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
-            BI_users_feature = self.aggregate(self.UI_aggregation_graph, BI_items_feature, "UI", test)
+            BI_users_feature_fallback = self.aggregate(self.UI_aggregation_graph, BI_items_feature, "UI", test)
+
+        # BI view: User representation replacement (U-B-I high order)
+        if self.conf.get("enable_high_order_replace", False) and self.ubi_sparse is not None:
+            BI_users_feature = self.aggregate_high_order_items(
+                self.ubi_sparse, self.ubi_mask, BI_items_feature, BI_users_feature_fallback
+            )
+        else:
+            BI_users_feature = BI_users_feature_fallback
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]

@@ -60,10 +60,19 @@ class MultiCBR(nn.Module):
         self.num_layers = self.conf["num_layers"]
         self.c_temp = self.conf["c_temp"]
 
+        # Pair Fusion Scheme
+        self.pair_fusion_scheme = conf.get("pair_fusion_scheme", {
+            "enabled": False,
+            "pair_gate_hidden_dim": 64,
+            "pair_gate_dropout": 0.2,
+            "pair_gate_use_bias": True
+        })
+
         self.fusion_weights = conf['fusion_weights']
 
         self.init_emb()
         self.init_fusion_weights()
+        self.init_pair_fusion()
 
         assert isinstance(raw_graph, list)
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
@@ -144,6 +153,34 @@ class MultiCBR(nn.Module):
         self.BI_layer_coefs = BI_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
 
 
+    def init_pair_fusion(self):
+        if not self.pair_fusion_scheme.get("enabled", False):
+            return
+
+        hidden_dim = self.pair_fusion_scheme.get("pair_gate_hidden_dim", 64)
+        dropout = self.pair_fusion_scheme.get("pair_gate_dropout", 0.2)
+        use_bias = self.pair_fusion_scheme.get("pair_gate_use_bias", True)
+
+        # Input dimension: 6 views * embedding_size (3 user views + 3 bundle views)
+        input_dim = 6 * self.embedding_size
+
+        self.pair_fusion_gate = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim, bias=use_bias),
+            nn.ReLU(),
+            nn.Dropout(dropout),
+            nn.Linear(hidden_dim, 3, bias=use_bias)
+        )
+
+        # Init weights
+        for m in self.pair_fusion_gate.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_normal_(m.weight)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+        
+        self.pair_fusion_gate.to(self.device)
+
+
     def get_propagation_graph(self, bipartite_graph, modification_ratio=0):
         device = self.device
         propagation_graph = sp.bmat([[sp.csr_matrix((bipartite_graph.shape[0], bipartite_graph.shape[0])), bipartite_graph], [bipartite_graph.T, sp.csr_matrix((bipartite_graph.shape[1], bipartite_graph.shape[1]))]])
@@ -220,7 +257,7 @@ class MultiCBR(nn.Module):
         return users_rep, bundles_rep
 
 
-    def get_multi_modal_representations(self, test=False):
+    def get_multi_view_representations(self, test=False):
         #  =============================  UB graph propagation  =============================
         if test:
             UB_users_feature, UB_bundles_feature = self.propagate(self.UB_propagation_graph_ori, self.users_feature, self.bundles_feature, "UB", self.UB_layer_coefs, test)
@@ -246,8 +283,12 @@ class MultiCBR(nn.Module):
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]
 
-        users_rep, bundles_rep = self.fuse_users_bundles_feature(users_feature, bundles_feature)
+        return users_feature, bundles_feature
 
+
+    def get_multi_modal_representations(self, test=False):
+        users_feature, bundles_feature = self.get_multi_view_representations(test)
+        users_rep, bundles_rep = self.fuse_users_bundles_feature(users_feature, bundles_feature)
         return users_rep, bundles_rep
 
 
@@ -286,6 +327,29 @@ class MultiCBR(nn.Module):
         return bpr_loss, c_loss
 
 
+    def pair_aware_score(self, user_view_feats, bundle_view_feats):
+        # user_view_feats: list of [B, D] or [B, 1+neg, D]
+        # bundle_view_feats: list of [B, 1+neg, D]
+        
+        # Calculate view-specific scores: [B, 1+neg, 3]
+        view_scores = torch.stack([
+            torch.sum(u * b, dim=-1) for u, b in zip(user_view_feats, bundle_view_feats)
+        ], dim=-1)
+
+        # Calculate Pair Weights
+        # Concatenate features: [B, 1+neg, 6*D]
+        # user_views + bundle_views
+        pair_input = torch.cat(user_view_feats + bundle_view_feats, dim=-1)
+        
+        logits = self.pair_fusion_gate(pair_input) # [B, 1+neg, 3]
+        weights = F.softmax(logits, dim=-1) # [B, 1+neg, 3]
+
+        # Weighted Sum
+        final_scores = torch.sum(view_scores * weights, dim=-1) # [B, 1+neg]
+        
+        return final_scores
+
+
     def forward(self, batch, ED_drop=False):
         # the edge drop can be performed by every batch or epoch, should be controlled in the train loop
         if ED_drop:
@@ -300,17 +364,94 @@ class MultiCBR(nn.Module):
         # users: [bs, 1]
         # bundles: [bs, 1+neg_num]
         users, bundles = batch
-        users_rep, bundles_rep = self.get_multi_modal_representations()
-
+        
+        # Get raw view representations
+        users_view_list, bundles_view_list = self.get_multi_view_representations()
+        
+        # Get fused representations for Contrastive Loss (Baseline Fallback / Aux Loss)
+        users_rep, bundles_rep = self.fuse_users_bundles_feature(users_view_list, bundles_view_list)
+        
+        # Expand user/bundle features for Contrastive Loss
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
         bundles_embedding = bundles_rep[bundles]
+        
+        # Calculate BPR Loss
+        if self.pair_fusion_scheme.get("enabled", False):
+            # --- Pair-Aware Scoring ---
+            # Expand user view features: [B, D] -> [B, 1+neg, D]
+            u_view_expanded = [feat[users].expand(-1, bundles.shape[1], -1) for feat in users_view_list]
+            b_view_selected = [feat[bundles] for feat in bundles_view_list]
+            
+            pred = self.pair_aware_score(u_view_expanded, b_view_selected)
+        else:
+            # --- Baseline Scoring ---
+            pred = torch.sum(users_embedding * bundles_embedding, 2)
+            
+        bpr_loss = cal_bpr_loss(pred)
 
-        bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding)
+        # cl is abbr. of "contrastive loss"
+        u_view_cl = self.cal_c_loss(users_embedding, users_embedding)
+        b_view_cl = self.cal_c_loss(bundles_embedding, bundles_embedding)
+
+        c_losses = [u_view_cl, b_view_cl]
+
+        c_loss = sum(c_losses) / len(c_losses)
 
         return bpr_loss, c_loss
 
 
-    def evaluate(self, propagate_result, users):
+    def evaluate_baseline(self, propagate_result, users):
+        # Baseline: propagate_result is (users_rep, bundles_rep)
         users_feature, bundles_feature = propagate_result
         scores = torch.mm(users_feature[users], bundles_feature.t())
         return scores
+
+
+    def evaluate_pair_fusion(self, propagate_result, users):
+        # Pair-Aware: propagate_result is (users_view_list, bundles_view_list)
+        users_view_list, bundles_view_list = propagate_result
+        
+        # users: [B_u, 1] -> squeeze -> [B_u]
+        user_indices = users.squeeze()
+        if user_indices.dim() == 0:
+             user_indices = user_indices.unsqueeze(0)
+        
+        # Select user view features: List of [B_u, D]
+        u_view_selected = [feat[user_indices] for feat in users_view_list]
+        
+        # All bundles: List of [Num_Bundles, D]
+        b_view_all = bundles_view_list
+        
+        num_bundles = b_view_all[0].shape[0]
+        num_users = user_indices.shape[0]
+        
+        # Pre-allocate score matrix
+        final_scores = torch.zeros(num_users, num_bundles, device=self.device)
+        
+        # Chunking to avoid OOM
+        chunk_size = 1000 
+        
+        for i in range(0, num_bundles, chunk_size):
+            end = min(i + chunk_size, num_bundles)
+            
+            # Chunked Bundle Features: List of [chunk_size, D]
+            # Expand for Broadcasting: [1, chunk, D] -> [B_u, chunk, D]
+            b_view_chunk = [feat[i:end].unsqueeze(0).expand(num_users, -1, -1) for feat in b_view_all]
+            
+            # Expand User Features for Broadcasting: [B_u, D] -> [B_u, 1, D] -> [B_u, chunk, D]
+            u_view_exp = [feat.unsqueeze(1).expand(-1, end-i, -1) for feat in u_view_selected]
+            
+            # Calculate scores for this chunk
+            # Result: [B_u, chunk]
+            chunk_scores = self.pair_aware_score(u_view_exp, b_view_chunk)
+            
+            final_scores[:, i:end] = chunk_scores
+            
+        return final_scores
+
+
+    def evaluate(self, propagate_result, users):
+        if not self.pair_fusion_scheme.get("enabled", False):
+            return self.evaluate_baseline(propagate_result, users)
+        else:
+            return self.evaluate_pair_fusion(propagate_result, users)

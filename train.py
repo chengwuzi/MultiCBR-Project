@@ -99,6 +99,14 @@ def main():
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
 
+        # Add Pair Fusion Scheme to Settings
+        p_scheme = conf.get("pair_fusion_scheme", {})
+        if p_scheme.get("enabled", False):
+            settings += ["PairFusion_ON"]
+            settings += [str(p_scheme.get("pair_gate_hidden_dim", 64)), str(p_scheme.get("pair_gate_dropout", 0.2))]
+        else:
+            settings += ["PairFusion_OFF"]
+
         setting = "_".join(settings)
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting
@@ -237,7 +245,14 @@ def test(model, dataloader, conf):
 
     device = conf["device"]
     model.eval()
-    rs = model.get_multi_modal_representations(test=True)
+    
+    # Select representation interface based on Pair Fusion Scheme
+    p_scheme = conf.get("pair_fusion_scheme", {})
+    if p_scheme.get("enabled", False):
+        rs = model.get_multi_view_representations(test=True)
+    else:
+        rs = model.get_multi_modal_representations(test=True)
+
     for users, ground_truth_u_b, train_mask_u_b in dataloader:
         pred_b = model.evaluate(rs, users.to(device))
         pred_b -= 1e8 * train_mask_u_b.to(device)

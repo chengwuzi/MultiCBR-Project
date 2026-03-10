@@ -25,6 +25,12 @@ NetEase:
     UI_layer: [0.25, 0.65, 0.1] # layer aggregation coefficients in UI graph
     BI_layer: [0.4, 0.4, 0.2] # layer aggregation coefficients in BI graph
 
+  fusion_scheme:
+    user_mode: "static" # options: static, adaptive
+    bundle_mode: "static" # options: static, adaptive
+    gate_hidden_dim: 64
+    gate_dropout: 0.2
+
   lrs: [1.0e-3] # learning rate
   l2_regs: [1.0e-5] # the l2 regularization weight: lambda_2
   c_lambdas: [0.05] # the contrastive loss weight: lambda_1
@@ -57,6 +63,12 @@ iFashion:
     UI_layer: [0.3, 0.2, 0.5]
     BI_layer: [0.5, 0.5, 0.0]
 
+  fusion_scheme:
+    user_mode: "static" # options: static, adaptive
+    bundle_mode: "static" # options: static, adaptive
+    gate_hidden_dim: 64
+    gate_dropout: 0.2
+
   lrs: [1.0e-3]
   l2_regs: [1.0e-5]
   c_lambdas: [0.1]
@@ -88,6 +100,12 @@ Youshu:
     UB_layer: [0.7, 0.2, 0.1]
     UI_layer: [0.6, 0.2, 0.2]
     BI_layer: [0.6, 0.1, 0.3]
+
+  fusion_scheme:
+    user_mode: "static" # options: static, adaptive
+    bundle_mode: "static" # options: static, adaptive
+    gate_hidden_dim: 64
+    gate_dropout: 0.2
 
   lrs: [1.0e-3]
   l2_regs: [1.0e-5]

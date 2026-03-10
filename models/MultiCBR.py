@@ -60,10 +60,19 @@ class MultiCBR(nn.Module):
         self.num_layers = self.conf["num_layers"]
         self.c_temp = self.conf["c_temp"]
 
+        # Fusion Scheme Config
+        self.fusion_scheme = conf.get("fusion_scheme", {
+            "user_mode": "static",
+            "bundle_mode": "static",
+            "gate_hidden_dim": 64,
+            "gate_dropout": 0.2
+        })
+
         self.fusion_weights = conf['fusion_weights']
 
         self.init_emb()
         self.init_fusion_weights()
+        self.init_adaptive_fusion()
 
         assert isinstance(raw_graph, list)
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
@@ -144,6 +153,62 @@ class MultiCBR(nn.Module):
         self.BI_layer_coefs = BI_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
 
 
+    def init_adaptive_fusion(self):
+        user_mode = self.fusion_scheme.get("user_mode", "static")
+        bundle_mode = self.fusion_scheme.get("bundle_mode", "static")
+        hidden_dim = self.fusion_scheme.get("gate_hidden_dim", 64)
+        dropout = self.fusion_scheme.get("gate_dropout", 0.2)
+
+        # User side adaptive fusion gate
+        if user_mode == "adaptive":
+            self.user_fusion_gate = nn.Sequential(
+                nn.Linear(3 * self.embedding_size, hidden_dim),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden_dim, 3)
+            )
+            # Init weights
+            for m in self.user_fusion_gate.modules():
+                if isinstance(m, nn.Linear):
+                    nn.init.xavier_normal_(m.weight)
+                    nn.init.constant_(m.bias, 0)
+            self.user_fusion_gate.to(self.device)
+
+        # Bundle side adaptive fusion gate
+        if bundle_mode == "adaptive":
+            self.bundle_fusion_gate = nn.Sequential(
+                nn.Linear(3 * self.embedding_size, hidden_dim),
+                nn.ReLU(),
+                nn.Dropout(dropout),
+                nn.Linear(hidden_dim, 3)
+            )
+            # Init weights
+            for m in self.bundle_fusion_gate.modules():
+                if isinstance(m, nn.Linear):
+                    nn.init.xavier_normal_(m.weight)
+                    nn.init.constant_(m.bias, 0)
+            self.bundle_fusion_gate.to(self.device)
+
+
+    def compute_adaptive_weights(self, features_list, gate_net):
+        # features_list: [feat1, feat2, feat3], each is [N, emb]
+        # concat -> [N, 3*emb]
+        concated_features = torch.cat(features_list, dim=1)
+
+        # Gate forward
+        logits = gate_net(concated_features) # [N, 3]
+        weights = F.softmax(logits, dim=1) # [N, 3]
+
+        # Reshape for broadcasting: [N, 3, 1]
+        weights = weights.unsqueeze(-1)
+
+        # stack -> [N, 3, emb]
+        stacked_features = torch.stack(features_list, dim=1)
+
+        return weights, stacked_features
+
+
+
     def get_propagation_graph(self, bipartite_graph, modification_ratio=0):
         device = self.device
         propagation_graph = sp.bmat([[sp.csr_matrix((bipartite_graph.shape[0], bipartite_graph.shape[0])), bipartite_graph], [bipartite_graph.T, sp.csr_matrix((bipartite_graph.shape[1], bipartite_graph.shape[1]))]])
@@ -210,12 +275,28 @@ class MultiCBR(nn.Module):
 
 
     def fuse_users_bundles_feature(self, users_feature, bundles_feature):
-        users_feature = torch.stack(users_feature, dim=0)
-        bundles_feature = torch.stack(bundles_feature, dim=0)
+        user_mode = self.fusion_scheme.get("user_mode", "static")
+        bundle_mode = self.fusion_scheme.get("bundle_mode", "static")
 
-        # Modal aggregation
-        users_rep = torch.sum(users_feature * self.modal_coefs, dim=0)
-        bundles_rep = torch.sum(bundles_feature * self.modal_coefs, dim=0)
+        # --- User Fusion ---
+        if user_mode == "adaptive":
+            user_weights, user_stacked = self.compute_adaptive_weights(users_feature, self.user_fusion_gate)
+            # Weighted sum: sum( [N, 3, emb] * [N, 3, 1], dim=1 ) -> [N, emb]
+            users_rep = torch.sum(user_stacked * user_weights, dim=1)
+        else:
+            # Static fusion
+            users_stacked = torch.stack(users_feature, dim=0) # [3, N, emb]
+            # self.modal_coefs: [3, 1, 1]
+            users_rep = torch.sum(users_stacked * self.modal_coefs, dim=0)
+
+        # --- Bundle Fusion ---
+        if bundle_mode == "adaptive":
+            bundle_weights, bundle_stacked = self.compute_adaptive_weights(bundles_feature, self.bundle_fusion_gate)
+            bundles_rep = torch.sum(bundle_stacked * bundle_weights, dim=1)
+        else:
+            # Static fusion
+            bundles_stacked = torch.stack(bundles_feature, dim=0)
+            bundles_rep = torch.sum(bundles_stacked * self.modal_coefs, dim=0)
 
         return users_rep, bundles_rep
 

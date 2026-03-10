@@ -99,6 +99,16 @@ def main():
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
 
+        # Add Fusion Scheme to Settings
+        f_scheme = conf.get("fusion_scheme", {})
+        u_mode = f_scheme.get("user_mode", "static")
+        b_mode = f_scheme.get("bundle_mode", "static")
+
+        settings += [f"U_{u_mode}", f"B_{b_mode}"]
+
+        if u_mode == "adaptive" or b_mode == "adaptive":
+            settings += [str(f_scheme.get("gate_hidden_dim", 64)), str(f_scheme.get("gate_dropout", 0.2))]
+
         setting = "_".join(settings)
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting

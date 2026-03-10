@@ -1,0 +1,6 @@
+torch>=1.9.0
+numpy
+scipy
+tqdm
+pyyaml
+tensorboard

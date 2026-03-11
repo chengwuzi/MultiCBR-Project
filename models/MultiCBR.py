@@ -293,6 +293,10 @@ class MultiCBR(nn.Module):
         return users_rep, bundles_rep
 
 
+    def fuse_simple_and_high_order(self, simple_feature, high_order_feature, alpha):
+        return alpha * simple_feature + (1.0 - alpha) * high_order_feature
+
+
     def get_multi_modal_representations(self, test=False):
         #  =============================  UB graph propagation  =============================
         if test:
@@ -310,9 +314,11 @@ class MultiCBR(nn.Module):
 
         # UI view: Bundle representation replacement (B-U-I high order)
         if self.conf.get("enable_high_order_replace", False) and self.bui_sparse is not None:
-            UI_bundles_feature = self.aggregate_high_order_items(
+            UI_bundles_feature_high = self.aggregate_high_order_items(
                 self.bui_sparse, self.bui_mask, UI_items_feature, UI_bundles_feature_fallback
             )
+            alpha = self.conf.get("ui_bundle_high_order_alpha", 0.8)
+            UI_bundles_feature = self.fuse_simple_and_high_order(UI_bundles_feature_fallback, UI_bundles_feature_high, alpha)
         else:
             UI_bundles_feature = UI_bundles_feature_fallback
 
@@ -326,9 +332,11 @@ class MultiCBR(nn.Module):
 
         # BI view: User representation replacement (U-B-I high order)
         if self.conf.get("enable_high_order_replace", False) and self.ubi_sparse is not None:
-            BI_users_feature = self.aggregate_high_order_items(
+            BI_users_feature_high = self.aggregate_high_order_items(
                 self.ubi_sparse, self.ubi_mask, BI_items_feature, BI_users_feature_fallback
             )
+            alpha = self.conf.get("bi_user_high_order_alpha", 0.8)
+            BI_users_feature = self.fuse_simple_and_high_order(BI_users_feature_fallback, BI_users_feature_high, alpha)
         else:
             BI_users_feature = BI_users_feature_fallback
 

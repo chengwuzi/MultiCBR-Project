@@ -5,6 +5,7 @@ import os
 import yaml
 import json
 import argparse
+import hashlib
 from tqdm import tqdm
 from itertools import product
 from datetime import datetime
@@ -102,8 +103,13 @@ def main(args=None):
         conf["BI_ratio"] = BI_ratio
         conf["num_layers"] = num_layers
         settings += [str(UB_ratio), str(UI_ratio), str(BI_ratio), str(num_layers)]
-        settings += ["_".join([str(conf['fusion_weights']["modal_weight"]), str(conf['fusion_weights']["UB_layer"]),
-                               str(conf['fusion_weights']["UI_layer"]), str(conf['fusion_weights']["BI_layer"])])]
+
+        # Helper to format list to string without spaces and brackets
+        def fmt_list(l):
+            return str(l).replace(" ", "").replace("[", "").replace("]", "").replace(",", "-")
+
+        settings += ["_".join([fmt_list(conf['fusion_weights']["modal_weight"]), fmt_list(conf['fusion_weights']["UB_layer"]),
+                               fmt_list(conf['fusion_weights']["UI_layer"]), fmt_list(conf['fusion_weights']["BI_layer"])])]
 
         conf["c_lambda"] = c_lambda
         conf["c_temp"] = c_temp
@@ -118,6 +124,14 @@ def main(args=None):
             settings += ["PairFusion_OFF"]
 
         setting = "_".join(settings)
+
+        # Windows path length limit fix: shorten setting string if too long
+        if len(setting) > 100:
+            hash_object = hashlib.md5(setting.encode())
+            setting_hash = hash_object.hexdigest()[:8]
+            # Truncate to keep it short and append hash for uniqueness
+            setting = setting[:100] + "_" + setting_hash
+
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting
         checkpoint_model_path = checkpoint_model_path + "/" + setting

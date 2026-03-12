@@ -146,7 +146,10 @@ def main(args=None):
         else:
             raise ValueError("Unimplemented model %s" % (conf["model"]))
 
-        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=conf["l2_reg"])
+        optimizer = optim.Adam([
+            {'params': model.get_base_params(), 'lr': lr},
+            {'params': model.get_gate_params(), 'lr': conf['fusion_scheme'].get('gate_lr', 1e-4)}
+        ], weight_decay=conf["l2_reg"])
 
         batch_cnt = len(dataset.train_loader)
         test_interval_bs = int(batch_cnt * conf["test_interval"])

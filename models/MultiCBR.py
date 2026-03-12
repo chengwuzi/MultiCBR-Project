@@ -429,6 +429,19 @@ class MultiCBR(nn.Module):
         return bpr_loss, c_loss
 
 
+    def get_gate_params(self):
+        params = []
+        if hasattr(self, 'user_fusion_gate'):
+            params.extend(list(self.user_fusion_gate.parameters()))
+        if hasattr(self, 'bundle_fusion_gate'):
+            params.extend(list(self.bundle_fusion_gate.parameters()))
+        return params
+
+    def get_base_params(self):
+        gate_params = set(self.get_gate_params())
+        base_params = [p for p in self.parameters() if p not in gate_params]
+        return base_params
+
     def forward(self, batch, ED_drop=False):
         # the edge drop can be performed by every batch or epoch, should be controlled in the train loop
         if ED_drop:

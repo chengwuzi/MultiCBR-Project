@@ -32,7 +32,7 @@ def get_cmd():
 
 
 def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml"))
+    conf = yaml.safe_load(open("./config.yaml", encoding='utf-8'))
     print("load config file done!")
 
     if args is None:

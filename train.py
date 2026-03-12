@@ -161,8 +161,8 @@ def main(args=None):
         for epoch in range(conf['epochs']):
             epoch_anchor = epoch * batch_cnt
             model.train(True)
-            # mininterval=30: 减少进度条刷新频率，避免日志刷屏
-            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), mininterval=30)
+            # 禁用 tqdm 进度条，只保留每轮结束后的关键日志打印
+            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)
 
             for batch_i, batch in pbar:
                 model.train(True)
@@ -232,6 +232,8 @@ def write_log(run, log_path, topk, step, metrics):
 
     print(val_str)
     print(test_str)
+    # 增加一个空行，让不同组的指标打印之间有间隔
+    print("-" * 20) 
 
 
 def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch):

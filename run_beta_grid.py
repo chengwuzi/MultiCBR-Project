@@ -44,8 +44,11 @@ def run_experiment(ui_beta, bi_beta):
             if not char and process.poll() is not None:
                 break
             if char:
+                # 实时写入控制台（保留回车符，实现进度条原地刷新）
                 sys.stdout.write(char)
                 sys.stdout.flush()
+                # 累积输出用于保存，但不在此处做任何过滤
+                # 这样文件里会保存完整的历史，而控制台视觉上是正常的进度条
                 stdout_lines.append(char)
         
         returncode = process.poll()
@@ -56,6 +59,11 @@ def run_experiment(ui_beta, bi_beta):
             def __init__(self, args, returncode, stdout, stderr):
                 self.args = args
                 self.returncode = returncode
+                # 过滤掉进度条刷新过程中产生的重复行，只保留最终状态或关键日志
+                # tqdm 的进度条通常包含 \r，如果不处理直接写入文件会很乱
+                # 这里简单处理：保留所有行，但文件查看器通常能处理回车符
+                # 如果觉得文件太大，可以在这里做进一步清洗，例如：
+                # self.stdout = re.sub(r'.*\r', '', stdout) 
                 self.stdout = stdout
                 self.stderr = stderr
         

@@ -161,7 +161,8 @@ def main(args=None):
         for epoch in range(conf['epochs']):
             epoch_anchor = epoch * batch_cnt
             model.train(True)
-            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader))
+            # mininterval=30: 减少进度条刷新频率，避免日志刷屏
+            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), mininterval=30)
 
             for batch_i, batch in pbar:
                 model.train(True)

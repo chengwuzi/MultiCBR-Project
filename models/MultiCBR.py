@@ -177,8 +177,40 @@ class MultiCBR(nn.Module):
                 nn.init.xavier_normal_(m.weight)
                 if m.bias is not None:
                     nn.init.constant_(m.bias, 0)
+
+        # Initialize last layer to match modal_weight
+        self.init_pair_gate_with_modal_weight(self.pair_fusion_gate)
         
         self.pair_fusion_gate.to(self.device)
+
+
+    def init_pair_gate_with_modal_weight(self, gate_net):
+        # Get modal weights from config
+        modal_weight = torch.FloatTensor(self.fusion_weights['modal_weight']).to(self.device)
+
+        # Calculate Squared Normalized Weights:
+        # 1. Square the weights: w^2
+        sq_weight = modal_weight ** 2
+        
+        # 2. Normalize: w^2 / sum(w^2)
+        # Add epsilon to denominator to avoid division by zero
+        eps = 1e-12
+        sq_weight = sq_weight / (sq_weight.sum() + eps)
+
+        # Calculate initial bias: log(sq_weight + eps)
+        bias_init = torch.log(sq_weight + eps)
+
+        # The last module in the sequential container is the output Linear layer
+        last_layer = gate_net[-1]
+
+        if isinstance(last_layer, nn.Linear):
+            # Initialize weights to 0
+            nn.init.zeros_(last_layer.weight)
+
+            # Initialize bias to log(sq_weight)
+            if last_layer.bias is not None:
+                with torch.no_grad():
+                    last_layer.bias.copy_(bias_init)
 
 
     def get_propagation_graph(self, bipartite_graph, modification_ratio=0):

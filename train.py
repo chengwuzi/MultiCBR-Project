@@ -23,6 +23,8 @@ def get_cmd():
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
+    parser.add_argument("--ui_bundle_user_agg_beta", default=None, type=float, help="coefficient for user-side aggregation in UI view")
+    parser.add_argument("--bi_user_bundle_agg_beta", default=None, type=float, help="coefficient for bundle-side aggregation in BI view")
     args = parser.parse_args()
 
     return args
@@ -57,6 +59,12 @@ def main(args=None):
         if key not in ["dataset", "model", "gpu", "info"] and value is not None:
              # Only override if the key exists in the specific dataset config or create new one
              conf[key] = value
+
+    # Ensure beta parameters are set if passed via command line
+    if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
+        conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
+    if "bi_user_bundle_agg_beta" in paras and paras["bi_user_bundle_agg_beta"] is not None:
+        conf["bi_user_bundle_agg_beta"] = paras["bi_user_bundle_agg_beta"]
 
     conf["num_users"] = dataset.num_users
     conf["num_bundles"] = dataset.num_bundles

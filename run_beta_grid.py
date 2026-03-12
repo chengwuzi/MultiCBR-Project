@@ -10,51 +10,46 @@ UI_BETAS = [0.0, 0.05, 0.1, 0.2]
 BI_BETAS = [0.0, 0.05, 0.1, 0.2]
 OUTPUT_FILE = "grid_search_results.txt"
 TAIL_LINES = None # 保存最后 N 行输出，设为 None 则保存全部
+EPOCHS = 38 # 在这里配置 epoch 数量
 
 def run_experiment(ui_beta, bi_beta):
     cmd = [
-        sys.executable, "train.py",
+        sys.executable, "-u", "train.py", # -u: unbuffered binary stdout/stderr
         "--dataset", DATASET,
         "--ui_bundle_user_agg_beta", str(ui_beta),
-        "--bi_user_bundle_agg_beta", str(bi_beta)
+        "--bi_user_bundle_agg_beta", str(bi_beta),
+        "--epochs", str(EPOCHS)
     ]
     
     print(f"Running: {' '.join(cmd)}")
     
     try:
-        # 使用 subprocess.Popen 实时捕获输出并显示
+        # 使用 subprocess.Popen 实时捕获输出
+        # stderr=subprocess.STDOUT: 将 stderr 合并到 stdout，这样 tqdm 进度条也能被捕获
         process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT, 
             text=True,
-            bufsize=1  # 行缓冲
+            bufsize=1,  # 行缓冲
+            encoding='utf-8', 
+            errors='replace'
         )
 
         stdout_lines = []
-        stderr_lines = []
-
-        # 实时读取 stdout 并打印
-        # 注意：这里会阻塞直到子进程结束，或者 stdout 关闭
-        # 为了更完美的实时显示，通常需要多线程或 select，但简单起见，我们优先处理 stdout
-        # 另一种简单方法是让 stdout 直接继承父进程，但那样我们就捕获不到内容用于写入文件了
-        # 下面采用一种折中方案：逐行读取并 print，同时保存到 list
         
         while True:
-            line = process.stdout.readline()
-            if not line and process.poll() is not None:
+            # read(1) 逐字符读取，确保能捕获 \r 刷新
+            char = process.stdout.read(1)
+            if not char and process.poll() is not None:
                 break
-            if line:
-                print(line, end='') # 实时打印到控制台
-                stdout_lines.append(line)
+            if char:
+                sys.stdout.write(char)
+                sys.stdout.flush()
+                stdout_lines.append(char)
         
-        # 读取剩余的 stderr
-        stderr_content = process.stderr.read()
-        if stderr_content:
-            print(stderr_content, end='', file=sys.stderr)
-            stderr_lines = stderr_content.splitlines(keepends=True)
-
         returncode = process.poll()
+        full_output = "".join(stdout_lines)
         
         # 构造一个类似 subprocess.CompletedProcess 的对象返回
         class CompletedProcess:
@@ -64,7 +59,8 @@ def run_experiment(ui_beta, bi_beta):
                 self.stdout = stdout
                 self.stderr = stderr
         
-        return CompletedProcess(cmd, returncode, "".join(stdout_lines), "".join(stderr_lines))
+        # 因为 stderr 已经合并到 stdout，所以 stderr 为空字符串
+        return CompletedProcess(cmd, returncode, full_output, "")
 
     except Exception as e:
         print(f"Error running command: {e}")
@@ -80,6 +76,7 @@ def save_result(file_path, ui_beta, bi_beta, result):
         f.write(f"dataset: {DATASET}\n")
         f.write(f"ui_bundle_user_agg_beta: {ui_beta}\n")
         f.write(f"bi_user_bundle_agg_beta: {bi_beta}\n")
+        f.write(f"epochs: {EPOCHS}\n")
         f.write(f"status: {status}\n")
         
         command_str = ' '.join(result.args) if result else 'N/A'

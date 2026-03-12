@@ -122,7 +122,7 @@ def main(args=None):
         settings += [f"U_{u_mode}", f"B_{b_mode}"]
 
         if u_mode == "adaptive" or b_mode == "adaptive":
-            settings += [str(f_scheme.get("gate_hidden_dim", 64)), str(f_scheme.get("gate_dropout", 0.2))]
+            settings += [str(f_scheme.get("gate_hidden_dim", 64)), str(f_scheme.get("gate_dropout", 0.2)), str(f_scheme.get("gate_temp", 1.0))]
 
         setting = "_".join(settings)
 

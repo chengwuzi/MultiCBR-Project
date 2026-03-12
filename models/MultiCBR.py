@@ -207,7 +207,9 @@ class MultiCBR(nn.Module):
         # Calculate initial bias: log(weight + eps)
         # Using epsilon to avoid log(0)
         eps = 1e-12
-        bias_init = torch.log(modal_weight + eps)
+        # Apply temperature scaling to bias initialization as well to match the forward pass
+        temp = self.fusion_scheme.get("gate_temp", 1.0)
+        bias_init = torch.log(modal_weight + eps) * temp
 
         # The last module in the sequential container is the output Linear layer
         last_layer = gate_net[-1]
@@ -228,7 +230,10 @@ class MultiCBR(nn.Module):
 
         # Gate forward
         logits = gate_net(concated_features) # [N, 3]
-        weights = F.softmax(logits, dim=1) # [N, 3]
+        
+        # Apply temperature to smooth the distribution
+        temp = self.fusion_scheme.get("gate_temp", 1.0)
+        weights = F.softmax(logits / temp, dim=1) # [N, 3]
 
         # Reshape for broadcasting: [N, 3, 1]
         weights = weights.unsqueeze(-1)

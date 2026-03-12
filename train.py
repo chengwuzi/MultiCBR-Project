@@ -251,6 +251,14 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
         json.dump(dump_conf, open(checkpoint_conf_path, "w"))
         best_epoch = epoch
         curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 获取当前运行的 beta 参数，如果不存在则默认为 0.0
+        ui_beta = conf.get("ui_bundle_user_agg_beta", 0.0)
+        bi_beta = conf.get("bi_user_bundle_agg_beta", 0.0)
+        param_info = "当前网格参数: %.1f + %.1f" % (ui_beta if ui_beta is not None else 0.0, bi_beta if bi_beta is not None else 0.0)
+        print(param_info)
+        log.write(param_info + "\n")
+
         for topk in conf['topk']:
             for key, res in best_metrics.items():
                 for metric in res:

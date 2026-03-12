@@ -1,0 +1,1927 @@
+[1/6] Testing ui_beta=0.0, bi_beta=0.0
+Running: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.0 --bi_user_bundle_agg_beta 0.0 --epochs 40
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.0, 'bi_user_bundle_agg_beta': 0.0, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+2026-03-12 19:38:21, Top_10, Val:  recall: 0.103120, ndcg: 0.075638
+2026-03-12 19:38:21, Top_10, Test: recall: 0.104703, ndcg: 0.102275
+--------------------
+2026-03-12 19:38:21, Top_20, Val:  recall: 0.146039, ndcg: 0.089826
+2026-03-12 19:38:21, Top_20, Test: recall: 0.147629, ndcg: 0.119563
+--------------------
+2026-03-12 19:38:21, Top_40, Val:  recall: 0.199347, ndcg: 0.104261
+2026-03-12 19:38:21, Top_40, Test: recall: 0.200452, ndcg: 0.138117
+--------------------
+2026-03-12 19:38:21, Top_80, Val:  recall: 0.262457, ndcg: 0.118583
+2026-03-12 19:38:21, Top_80, Test: recall: 0.263428, ndcg: 0.156872
+--------------------
+top20 as the final evaluation standard
+2026-03-12 19:38:21, Best in epoch 4, TOP 10: REC_V=0.10312, NDCG_V=0.07564
+2026-03-12 19:38:21, Best in epoch 4, TOP 10: REC_T=0.10470, NDCG_T=0.10227
+2026-03-12 19:38:21, Best in epoch 4, TOP 20: REC_V=0.14604, NDCG_V=0.08983
+2026-03-12 19:38:21, Best in epoch 4, TOP 20: REC_T=0.14763, NDCG_T=0.11956
+2026-03-12 19:38:21, Best in epoch 4, TOP 40: REC_V=0.19935, NDCG_V=0.10426
+2026-03-12 19:38:21, Best in epoch 4, TOP 40: REC_T=0.20045, NDCG_T=0.13812
+2026-03-12 19:38:21, Best in epoch 4, TOP 80: REC_V=0.26246, NDCG_V=0.11858
+2026-03-12 19:38:21, Best in epoch 4, TOP 80: REC_T=0.26343, NDCG_T=0.15687
+2026-03-12 19:45:04, Top_10, Val:  recall: 0.103403, ndcg: 0.075535
+2026-03-12 19:45:04, Top_10, Test: recall: 0.105222, ndcg: 0.102294
+--------------------
+2026-03-12 19:45:04, Top_20, Val:  recall: 0.146419, ndcg: 0.089731
+2026-03-12 19:45:04, Top_20, Test: recall: 0.148592, ndcg: 0.119746
+--------------------
+2026-03-12 19:45:04, Top_40, Val:  recall: 0.199319, ndcg: 0.104035
+2026-03-12 19:45:04, Top_40, Test: recall: 0.202291, ndcg: 0.138578
+--------------------
+2026-03-12 19:45:04, Top_80, Val:  recall: 0.263990, ndcg: 0.118701
+2026-03-12 19:45:04, Top_80, Test: recall: 0.265062, ndcg: 0.157278
+--------------------
+top20 as the final evaluation standard
+2026-03-12 19:51:51, Top_10, Val:  recall: 0.104237, ndcg: 0.076056
+2026-03-12 19:51:51, Top_10, Test: recall: 0.104957, ndcg: 0.102119
+--------------------
+2026-03-12 19:51:51, Top_20, Val:  recall: 0.146826, ndcg: 0.090122
+2026-03-12 19:51:51, Top_20, Test: recall: 0.149223, ndcg: 0.119964
+--------------------
+2026-03-12 19:51:51, Top_40, Val:  recall: 0.200500, ndcg: 0.104633
+2026-03-12 19:51:51, Top_40, Test: recall: 0.202644, ndcg: 0.138710
+--------------------
+2026-03-12 19:51:51, Top_80, Val:  recall: 0.264303, ndcg: 0.119121
+2026-03-12 19:51:51, Top_80, Test: recall: 0.265837, ndcg: 0.157517
+--------------------
+top20 as the final evaluation standard
+2026-03-12 19:51:51, Best in epoch 14, TOP 10: REC_V=0.10424, NDCG_V=0.07606
+2026-03-12 19:51:51, Best in epoch 14, TOP 10: REC_T=0.10496, NDCG_T=0.10212
+2026-03-12 19:51:51, Best in epoch 14, TOP 20: REC_V=0.14683, NDCG_V=0.09012
+2026-03-12 19:51:51, Best in epoch 14, TOP 20: REC_T=0.14922, NDCG_T=0.11996
+2026-03-12 19:51:51, Best in epoch 14, TOP 40: REC_V=0.20050, NDCG_V=0.10463
+2026-03-12 19:51:51, Best in epoch 14, TOP 40: REC_T=0.20264, NDCG_T=0.13871
+2026-03-12 19:51:51, Best in epoch 14, TOP 80: REC_V=0.26430, NDCG_V=0.11912
+2026-03-12 19:51:51, Best in epoch 14, TOP 80: REC_T=0.26584, NDCG_T=0.15752
+2026-03-12 19:58:34, Top_10, Val:  recall: 0.103814, ndcg: 0.075723
+2026-03-12 19:58:34, Top_10, Test: recall: 0.105633, ndcg: 0.102696
+--------------------
+2026-03-12 19:58:34, Top_20, Val:  recall: 0.147234, ndcg: 0.090041
+2026-03-12 19:58:34, Top_20, Test: recall: 0.148535, ndcg: 0.119972
+--------------------
+2026-03-12 19:58:34, Top_40, Val:  recall: 0.200644, ndcg: 0.104484
+2026-03-12 19:58:34, Top_40, Test: recall: 0.201766, ndcg: 0.138658
+--------------------
+2026-03-12 19:58:34, Top_80, Val:  recall: 0.264564, ndcg: 0.118955
+2026-03-12 19:58:34, Top_80, Test: recall: 0.264388, ndcg: 0.157299
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:05:26, Top_10, Val:  recall: 0.104500, ndcg: 0.076073
+2026-03-12 20:05:26, Top_10, Test: recall: 0.105798, ndcg: 0.102787
+--------------------
+2026-03-12 20:05:26, Top_20, Val:  recall: 0.148504, ndcg: 0.090624
+2026-03-12 20:05:26, Top_20, Test: recall: 0.149066, ndcg: 0.120207
+--------------------
+2026-03-12 20:05:26, Top_40, Val:  recall: 0.202340, ndcg: 0.105200
+2026-03-12 20:05:26, Top_40, Test: recall: 0.202799, ndcg: 0.139116
+--------------------
+2026-03-12 20:05:26, Top_80, Val:  recall: 0.265404, ndcg: 0.119506
+2026-03-12 20:05:26, Top_80, Test: recall: 0.266900, ndcg: 0.158171
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:05:26, Best in epoch 24, TOP 10: REC_V=0.10450, NDCG_V=0.07607
+2026-03-12 20:05:26, Best in epoch 24, TOP 10: REC_T=0.10580, NDCG_T=0.10279
+2026-03-12 20:05:26, Best in epoch 24, TOP 20: REC_V=0.14850, NDCG_V=0.09062
+2026-03-12 20:05:26, Best in epoch 24, TOP 20: REC_T=0.14907, NDCG_T=0.12021
+2026-03-12 20:05:26, Best in epoch 24, TOP 40: REC_V=0.20234, NDCG_V=0.10520
+2026-03-12 20:05:26, Best in epoch 24, TOP 40: REC_T=0.20280, NDCG_T=0.13912
+2026-03-12 20:05:26, Best in epoch 24, TOP 80: REC_V=0.26540, NDCG_V=0.11951
+2026-03-12 20:05:26, Best in epoch 24, TOP 80: REC_T=0.26690, NDCG_T=0.15817
+2026-03-12 20:12:19, Top_10, Val:  recall: 0.104404, ndcg: 0.075893
+2026-03-12 20:12:19, Top_10, Test: recall: 0.105772, ndcg: 0.102603
+--------------------
+2026-03-12 20:12:19, Top_20, Val:  recall: 0.147865, ndcg: 0.090214
+2026-03-12 20:12:19, Top_20, Test: recall: 0.150155, ndcg: 0.120495
+--------------------
+2026-03-12 20:12:19, Top_40, Val:  recall: 0.201721, ndcg: 0.104787
+2026-03-12 20:12:19, Top_40, Test: recall: 0.203512, ndcg: 0.139235
+--------------------
+2026-03-12 20:12:19, Top_80, Val:  recall: 0.265499, ndcg: 0.119280
+2026-03-12 20:12:19, Top_80, Test: recall: 0.266739, ndcg: 0.158051
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:19:11, Top_10, Val:  recall: 0.103814, ndcg: 0.075762
+2026-03-12 20:19:11, Top_10, Test: recall: 0.105900, ndcg: 0.102590
+--------------------
+2026-03-12 20:19:11, Top_20, Val:  recall: 0.147805, ndcg: 0.090279
+2026-03-12 20:19:11, Top_20, Test: recall: 0.149273, ndcg: 0.120069
+--------------------
+2026-03-12 20:19:11, Top_40, Val:  recall: 0.201358, ndcg: 0.104799
+2026-03-12 20:19:11, Top_40, Test: recall: 0.202568, ndcg: 0.138785
+--------------------
+2026-03-12 20:19:11, Top_80, Val:  recall: 0.265293, ndcg: 0.119302
+2026-03-12 20:19:11, Top_80, Test: recall: 0.266248, ndcg: 0.157735
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:26:02, Top_10, Val:  recall: 0.104073, ndcg: 0.075465
+2026-03-12 20:26:02, Top_10, Test: recall: 0.105902, ndcg: 0.102696
+--------------------
+2026-03-12 20:26:02, Top_20, Val:  recall: 0.147787, ndcg: 0.089904
+2026-03-12 20:26:02, Top_20, Test: recall: 0.149975, ndcg: 0.120453
+--------------------
+2026-03-12 20:26:02, Top_40, Val:  recall: 0.200786, ndcg: 0.104231
+2026-03-12 20:26:02, Top_40, Test: recall: 0.203556, ndcg: 0.139269
+--------------------
+2026-03-12 20:26:02, Top_80, Val:  recall: 0.265148, ndcg: 0.118866
+2026-03-12 20:26:02, Top_80, Test: recall: 0.265905, ndcg: 0.157821
+--------------------
+top20 as the final evaluation standard
+
+[2/6] Testing ui_beta=0.0, bi_beta=0.1
+Running: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.0 --bi_user_bundle_agg_beta 0.1 --epochs 40
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.0, 'bi_user_bundle_agg_beta': 0.1, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+2026-03-12 20:33:21, Top_10, Val:  recall: 0.102679, ndcg: 0.074275
+2026-03-12 20:33:21, Top_10, Test: recall: 0.104447, ndcg: 0.100586
+--------------------
+2026-03-12 20:33:21, Top_20, Val:  recall: 0.146536, ndcg: 0.088749
+2026-03-12 20:33:21, Top_20, Test: recall: 0.148776, ndcg: 0.118434
+--------------------
+2026-03-12 20:33:21, Top_40, Val:  recall: 0.201917, ndcg: 0.103739
+2026-03-12 20:33:21, Top_40, Test: recall: 0.203020, ndcg: 0.137521
+--------------------
+2026-03-12 20:33:21, Top_80, Val:  recall: 0.266191, ndcg: 0.118338
+2026-03-12 20:33:21, Top_80, Test: recall: 0.267532, ndcg: 0.156744
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:33:21, Best in epoch 4, TOP 10: REC_V=0.10268, NDCG_V=0.07427
+2026-03-12 20:33:21, Best in epoch 4, TOP 10: REC_T=0.10445, NDCG_T=0.10059
+2026-03-12 20:33:21, Best in epoch 4, TOP 20: REC_V=0.14654, NDCG_V=0.08875
+2026-03-12 20:33:21, Best in epoch 4, TOP 20: REC_T=0.14878, NDCG_T=0.11843
+2026-03-12 20:33:21, Best in epoch 4, TOP 40: REC_V=0.20192, NDCG_V=0.10374
+2026-03-12 20:33:21, Best in epoch 4, TOP 40: REC_T=0.20302, NDCG_T=0.13752
+2026-03-12 20:33:21, Best in epoch 4, TOP 80: REC_V=0.26619, NDCG_V=0.11834
+2026-03-12 20:33:21, Best in epoch 4, TOP 80: REC_T=0.26753, NDCG_T=0.15674
+2026-03-12 20:40:14, Top_10, Val:  recall: 0.102693, ndcg: 0.073674
+2026-03-12 20:40:14, Top_10, Test: recall: 0.104162, ndcg: 0.099916
+--------------------
+2026-03-12 20:40:14, Top_20, Val:  recall: 0.147602, ndcg: 0.088527
+2026-03-12 20:40:14, Top_20, Test: recall: 0.149057, ndcg: 0.118066
+--------------------
+2026-03-12 20:40:14, Top_40, Val:  recall: 0.201732, ndcg: 0.103171
+2026-03-12 20:40:14, Top_40, Test: recall: 0.203664, ndcg: 0.137235
+--------------------
+2026-03-12 20:40:14, Top_80, Val:  recall: 0.267230, ndcg: 0.118044
+2026-03-12 20:40:14, Top_80, Test: recall: 0.268356, ndcg: 0.156501
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:47:10, Top_10, Val:  recall: 0.102657, ndcg: 0.073682
+2026-03-12 20:47:10, Top_10, Test: recall: 0.104231, ndcg: 0.099773
+--------------------
+2026-03-12 20:47:10, Top_20, Val:  recall: 0.147938, ndcg: 0.088647
+2026-03-12 20:47:10, Top_20, Test: recall: 0.149265, ndcg: 0.117962
+--------------------
+2026-03-12 20:47:10, Top_40, Val:  recall: 0.203088, ndcg: 0.103596
+2026-03-12 20:47:10, Top_40, Test: recall: 0.204415, ndcg: 0.137313
+--------------------
+2026-03-12 20:47:10, Top_80, Val:  recall: 0.268094, ndcg: 0.118372
+2026-03-12 20:47:10, Top_80, Test: recall: 0.269400, ndcg: 0.156670
+--------------------
+top20 as the final evaluation standard
+2026-03-12 20:54:03, Top_10, Val:  recall: 0.102807, ndcg: 0.073794
+2026-03-12 20:54:03, Top_10, Test: recall: 0.104808, ndcg: 0.100472
+--------------------
+2026-03-12 20:54:03, Top_20, Val:  recall: 0.147156, ndcg: 0.088477
+2026-03-12 20:54:03, Top_20, Test: recall: 0.149944, ndcg: 0.118672
+--------------------
+2026-03-12 20:54:03, Top_40, Val:  recall: 0.202717, ndcg: 0.103500
+2026-03-12 20:54:03, Top_40, Test: recall: 0.204237, ndcg: 0.137734
+--------------------
+2026-03-12 20:54:03, Top_80, Val:  recall: 0.267800, ndcg: 0.118275
+2026-03-12 20:54:03, Top_80, Test: recall: 0.269722, ndcg: 0.157208
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:01:00, Top_10, Val:  recall: 0.103056, ndcg: 0.073729
+2026-03-12 21:01:00, Top_10, Test: recall: 0.104233, ndcg: 0.100074
+--------------------
+2026-03-12 21:01:00, Top_20, Val:  recall: 0.147449, ndcg: 0.088412
+2026-03-12 21:01:00, Top_20, Test: recall: 0.149345, ndcg: 0.118273
+--------------------
+2026-03-12 21:01:00, Top_40, Val:  recall: 0.202774, ndcg: 0.103390
+2026-03-12 21:01:00, Top_40, Test: recall: 0.204223, ndcg: 0.137545
+--------------------
+2026-03-12 21:01:00, Top_80, Val:  recall: 0.267562, ndcg: 0.118101
+2026-03-12 21:01:00, Top_80, Test: recall: 0.269186, ndcg: 0.156848
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:07:52, Top_10, Val:  recall: 0.102827, ndcg: 0.073848
+2026-03-12 21:07:52, Top_10, Test: recall: 0.104735, ndcg: 0.100175
+--------------------
+2026-03-12 21:07:52, Top_20, Val:  recall: 0.148005, ndcg: 0.088770
+2026-03-12 21:07:52, Top_20, Test: recall: 0.149850, ndcg: 0.118393
+--------------------
+2026-03-12 21:07:52, Top_40, Val:  recall: 0.203361, ndcg: 0.103762
+2026-03-12 21:07:52, Top_40, Test: recall: 0.204827, ndcg: 0.137698
+--------------------
+2026-03-12 21:07:52, Top_80, Val:  recall: 0.269015, ndcg: 0.118669
+2026-03-12 21:07:52, Top_80, Test: recall: 0.269561, ndcg: 0.156956
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:07:52, Best in epoch 29, TOP 10: REC_V=0.10283, NDCG_V=0.07385
+2026-03-12 21:07:52, Best in epoch 29, TOP 10: REC_T=0.10473, NDCG_T=0.10018
+2026-03-12 21:07:52, Best in epoch 29, TOP 20: REC_V=0.14800, NDCG_V=0.08877
+2026-03-12 21:07:52, Best in epoch 29, TOP 20: REC_T=0.14985, NDCG_T=0.11839
+2026-03-12 21:07:52, Best in epoch 29, TOP 40: REC_V=0.20336, NDCG_V=0.10376
+2026-03-12 21:07:52, Best in epoch 29, TOP 40: REC_T=0.20483, NDCG_T=0.13770
+2026-03-12 21:07:52, Best in epoch 29, TOP 80: REC_V=0.26902, NDCG_V=0.11867
+2026-03-12 21:07:52, Best in epoch 29, TOP 80: REC_T=0.26956, NDCG_T=0.15696
+2026-03-12 21:14:49, Top_10, Val:  recall: 0.103198, ndcg: 0.073846
+2026-03-12 21:14:49, Top_10, Test: recall: 0.103978, ndcg: 0.099910
+--------------------
+2026-03-12 21:14:49, Top_20, Val:  recall: 0.147651, ndcg: 0.088519
+2026-03-12 21:14:49, Top_20, Test: recall: 0.149705, ndcg: 0.118392
+--------------------
+2026-03-12 21:14:49, Top_40, Val:  recall: 0.202558, ndcg: 0.103379
+2026-03-12 21:14:49, Top_40, Test: recall: 0.204998, ndcg: 0.137778
+--------------------
+2026-03-12 21:14:49, Top_80, Val:  recall: 0.268350, ndcg: 0.118320
+2026-03-12 21:14:49, Top_80, Test: recall: 0.269649, ndcg: 0.157012
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:21:46, Top_10, Val:  recall: 0.103419, ndcg: 0.074287
+2026-03-12 21:21:46, Top_10, Test: recall: 0.104865, ndcg: 0.100377
+--------------------
+2026-03-12 21:21:46, Top_20, Val:  recall: 0.148016, ndcg: 0.089047
+2026-03-12 21:21:46, Top_20, Test: recall: 0.149508, ndcg: 0.118414
+--------------------
+2026-03-12 21:21:46, Top_40, Val:  recall: 0.202971, ndcg: 0.103941
+2026-03-12 21:21:46, Top_40, Test: recall: 0.204482, ndcg: 0.137693
+--------------------
+2026-03-12 21:21:46, Top_80, Val:  recall: 0.269254, ndcg: 0.118973
+2026-03-12 21:21:46, Top_80, Test: recall: 0.269347, ndcg: 0.157022
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:21:46, Best in epoch 39, TOP 10: REC_V=0.10342, NDCG_V=0.07429
+2026-03-12 21:21:46, Best in epoch 39, TOP 10: REC_T=0.10487, NDCG_T=0.10038
+2026-03-12 21:21:46, Best in epoch 39, TOP 20: REC_V=0.14802, NDCG_V=0.08905
+2026-03-12 21:21:46, Best in epoch 39, TOP 20: REC_T=0.14951, NDCG_T=0.11841
+2026-03-12 21:21:46, Best in epoch 39, TOP 40: REC_V=0.20297, NDCG_V=0.10394
+2026-03-12 21:21:46, Best in epoch 39, TOP 40: REC_T=0.20448, NDCG_T=0.13769
+2026-03-12 21:21:46, Best in epoch 39, TOP 80: REC_V=0.26925, NDCG_V=0.11897
+2026-03-12 21:21:46, Best in epoch 39, TOP 80: REC_T=0.26935, NDCG_T=0.15702
+
+[3/6] Testing ui_beta=0.0, bi_beta=0.2
+Running: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.0 --bi_user_bundle_agg_beta 0.2 --epochs 40
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.0, 'bi_user_bundle_agg_beta': 0.2, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+2026-03-12 21:29:12, Top_10, Val:  recall: 0.101219, ndcg: 0.072124
+2026-03-12 21:29:12, Top_10, Test: recall: 0.102312, ndcg: 0.097513
+--------------------
+2026-03-12 21:29:12, Top_20, Val:  recall: 0.146049, ndcg: 0.086915
+2026-03-12 21:29:12, Top_20, Test: recall: 0.147566, ndcg: 0.115831
+--------------------
+2026-03-12 21:29:12, Top_40, Val:  recall: 0.201495, ndcg: 0.101910
+2026-03-12 21:29:12, Top_40, Test: recall: 0.203753, ndcg: 0.135562
+--------------------
+2026-03-12 21:29:12, Top_80, Val:  recall: 0.268838, ndcg: 0.117213
+2026-03-12 21:29:12, Top_80, Test: recall: 0.269545, ndcg: 0.155120
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:29:12, Best in epoch 4, TOP 10: REC_V=0.10122, NDCG_V=0.07212
+2026-03-12 21:29:12, Best in epoch 4, TOP 10: REC_T=0.10231, NDCG_T=0.09751
+2026-03-12 21:29:12, Best in epoch 4, TOP 20: REC_V=0.14605, NDCG_V=0.08692
+2026-03-12 21:29:12, Best in epoch 4, TOP 20: REC_T=0.14757, NDCG_T=0.11583
+2026-03-12 21:29:12, Best in epoch 4, TOP 40: REC_V=0.20150, NDCG_V=0.10191
+2026-03-12 21:29:12, Best in epoch 4, TOP 40: REC_T=0.20375, NDCG_T=0.13556
+2026-03-12 21:29:12, Best in epoch 4, TOP 80: REC_V=0.26884, NDCG_V=0.11721
+2026-03-12 21:29:12, Best in epoch 4, TOP 80: REC_T=0.26954, NDCG_T=0.15512
+2026-03-12 21:36:06, Top_10, Val:  recall: 0.100312, ndcg: 0.071053
+2026-03-12 21:36:06, Top_10, Test: recall: 0.101685, ndcg: 0.096237
+--------------------
+2026-03-12 21:36:06, Top_20, Val:  recall: 0.146058, ndcg: 0.086151
+2026-03-12 21:36:06, Top_20, Test: recall: 0.147721, ndcg: 0.114880
+--------------------
+2026-03-12 21:36:06, Top_40, Val:  recall: 0.202798, ndcg: 0.101484
+2026-03-12 21:36:06, Top_40, Test: recall: 0.204481, ndcg: 0.134814
+--------------------
+2026-03-12 21:36:06, Top_80, Val:  recall: 0.269035, ndcg: 0.116536
+2026-03-12 21:36:06, Top_80, Test: recall: 0.271249, ndcg: 0.154684
+--------------------
+top20 as the final evaluation standard
+2026-03-12 21:43:03, Top_10, Val:  recall: 0.100707, ndcg: 0.071390
+2026-03-12 21:43:03, Top_10, Test: recall: 0.101142, ndcg: 0.096268
+--------------------
+2026-03-12 21:43:03, Top_20, Val:  recall: 0.146413, ndcg: 0.086494
+2026-03-12 21:43:03, Top_20, Test: recall: 0.147915, ndcg: 0.115152
+--------------------
+2026-03-12 21:43:03, Top_40, Val:  recall: 0.203077, ndcg: 0.101814
+2026-03-12 21:43:03, Top_40, Test: recall: 0.204751, ndcg: 0.135110
+--------------------
+2026-03-12 21:43:03, Top_80, Val:  recall: 0.270671, ndcg: 0.117186
+2026-03-12 21:43:03, Top_80, Test: recall: 0.270915, ndcg: 0.154793
+
+
+iFashion -- 实验结果
+
+
+
+==================================================
+Timestamp: 2026-03-12 22:54:45
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.0
+bi_user_bundle_agg_beta: 0.2
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.0 --bi_user_bundle_agg_beta 0.2 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.0, 'bi_user_bundle_agg_beta': 0.2, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:07:00, Top_10, Val:  recall: 0.100704, ndcg: 0.071757
+2026-03-12 22:07:00, Top_10, Test: recall: 0.102296, ndcg: 0.097538
+--------------------
+2026-03-12 22:07:00, Top_20, Val:  recall: 0.146429, ndcg: 0.086855
+2026-03-12 22:07:00, Top_20, Test: recall: 0.147525, ndcg: 0.115830
+--------------------
+2026-03-12 22:07:00, Top_40, Val:  recall: 0.201930, ndcg: 0.101908
+2026-03-12 22:07:00, Top_40, Test: recall: 0.204384, ndcg: 0.135781
+--------------------
+2026-03-12 22:07:00, Top_80, Val:  recall: 0.268564, ndcg: 0.117030
+2026-03-12 22:07:00, Top_80, Test: recall: 0.270337, ndcg: 0.155406
+--------------------
+top20 as the final evaluation standard
+2026-03-12 22:07:00, Best in epoch 4, TOP 10: REC_V=0.10070, NDCG_V=0.07176
+2026-03-12 22:07:00, Best in epoch 4, TOP 10: REC_T=0.10230, NDCG_T=0.09754
+2026-03-12 22:07:00, Best in epoch 4, TOP 20: REC_V=0.14643, NDCG_V=0.08686
+2026-03-12 22:07:00, Best in epoch 4, TOP 20: REC_T=0.14753, NDCG_T=0.11583
+2026-03-12 22:07:00, Best in epoch 4, TOP 40: REC_V=0.20193, NDCG_V=0.10191
+2026-03-12 22:07:00, Best in epoch 4, TOP 40: REC_T=0.20438, NDCG_T=0.13578
+2026-03-12 22:07:00, Best in epoch 4, TOP 80: REC_V=0.26856, NDCG_V=0.11703
+2026-03-12 22:07:00, Best in epoch 4, TOP 80: REC_T=0.27034, NDCG_T=0.15541
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:13:50, Top_10, Val:  recall: 0.100544, ndcg: 0.071178
+2026-03-12 22:13:50, Top_10, Test: recall: 0.102255, ndcg: 0.096941
+--------------------
+2026-03-12 22:13:50, Top_20, Val:  recall: 0.146016, ndcg: 0.086171
+2026-03-12 22:13:50, Top_20, Test: recall: 0.147777, ndcg: 0.115346
+--------------------
+2026-03-12 22:13:50, Top_40, Val:  recall: 0.202226, ndcg: 0.101360
+2026-03-12 22:13:50, Top_40, Test: recall: 0.203873, ndcg: 0.135051
+--------------------
+2026-03-12 22:13:50, Top_80, Val:  recall: 0.269707, ndcg: 0.116660
+2026-03-12 22:13:50, Top_80, Test: recall: 0.270493, ndcg: 0.154886
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:20:37, Top_10, Val:  recall: 0.100435, ndcg: 0.070983
+2026-03-12 22:20:37, Top_10, Test: recall: 0.101656, ndcg: 0.096537
+--------------------
+2026-03-12 22:20:37, Top_20, Val:  recall: 0.145689, ndcg: 0.085949
+2026-03-12 22:20:37, Top_20, Test: recall: 0.147707, ndcg: 0.115179
+--------------------
+2026-03-12 22:20:37, Top_40, Val:  recall: 0.202369, ndcg: 0.101319
+2026-03-12 22:20:37, Top_40, Test: recall: 0.205606, ndcg: 0.135520
+--------------------
+2026-03-12 22:20:37, Top_80, Val:  recall: 0.268888, ndcg: 0.116436
+2026-03-12 22:20:37, Top_80, Test: recall: 0.271930, ndcg: 0.155240
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:27:29, Top_10, Val:  recall: 0.100039, ndcg: 0.070962
+2026-03-12 22:27:29, Top_10, Test: recall: 0.101379, ndcg: 0.096266
+--------------------
+2026-03-12 22:27:29, Top_20, Val:  recall: 0.146168, ndcg: 0.086205
+2026-03-12 22:27:29, Top_20, Test: recall: 0.147718, ndcg: 0.114972
+--------------------
+2026-03-12 22:27:29, Top_40, Val:  recall: 0.202398, ndcg: 0.101447
+2026-03-12 22:27:29, Top_40, Test: recall: 0.204860, ndcg: 0.135025
+--------------------
+2026-03-12 22:27:29, Top_80, Val:  recall: 0.269411, ndcg: 0.116679
+2026-03-12 22:27:29, Top_80, Test: recall: 0.271404, ndcg: 0.154823
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:34:19, Top_10, Val:  recall: 0.099713, ndcg: 0.070992
+2026-03-12 22:34:19, Top_10, Test: recall: 0.101958, ndcg: 0.096799
+--------------------
+2026-03-12 22:34:19, Top_20, Val:  recall: 0.144897, ndcg: 0.085940
+2026-03-12 22:34:19, Top_20, Test: recall: 0.148007, ndcg: 0.115388
+--------------------
+2026-03-12 22:34:19, Top_40, Val:  recall: 0.202631, ndcg: 0.101540
+2026-03-12 22:34:19, Top_40, Test: recall: 0.204596, ndcg: 0.135300
+--------------------
+2026-03-12 22:34:19, Top_80, Val:  recall: 0.270282, ndcg: 0.116919
+2026-03-12 22:34:19, Top_80, Test: recall: 0.271056, ndcg: 0.155058
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:41:08, Top_10, Val:  recall: 0.100659, ndcg: 0.071105
+2026-03-12 22:41:08, Top_10, Test: recall: 0.101643, ndcg: 0.096308
+--------------------
+2026-03-12 22:41:08, Top_20, Val:  recall: 0.146887, ndcg: 0.086391
+2026-03-12 22:41:08, Top_20, Test: recall: 0.147696, ndcg: 0.114979
+--------------------
+2026-03-12 22:41:08, Top_40, Val:  recall: 0.204426, ndcg: 0.101951
+2026-03-12 22:41:08, Top_40, Test: recall: 0.205143, ndcg: 0.135143
+--------------------
+2026-03-12 22:41:08, Top_80, Val:  recall: 0.271007, ndcg: 0.117086
+2026-03-12 22:41:08, Top_80, Test: recall: 0.271866, ndcg: 0.155008
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:47:56, Top_10, Val:  recall: 0.100155, ndcg: 0.070910
+2026-03-12 22:47:56, Top_10, Test: recall: 0.101816, ndcg: 0.096291
+--------------------
+2026-03-12 22:47:56, Top_20, Val:  recall: 0.145998, ndcg: 0.086050
+2026-03-12 22:47:56, Top_20, Test: recall: 0.148551, ndcg: 0.115218
+--------------------
+2026-03-12 22:47:56, Top_40, Val:  recall: 0.202440, ndcg: 0.101324
+2026-03-12 22:47:56, Top_40, Test: recall: 0.205459, ndcg: 0.135219
+--------------------
+2026-03-12 22:47:56, Top_80, Val:  recall: 0.270586, ndcg: 0.116794
+2026-03-12 22:47:56, Top_80, Test: recall: 0.271937, ndcg: 0.155002
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 22:54:43, Top_10, Val:  recall: 0.100456, ndcg: 0.071456
+2026-03-12 22:54:43, Top_10, Test: recall: 0.101771, ndcg: 0.096333
+--------------------
+2026-03-12 22:54:43, Top_20, Val:  recall: 0.146454, ndcg: 0.086635
+2026-03-12 22:54:43, Top_20, Test: recall: 0.148027, ndcg: 0.114979
+--------------------
+2026-03-12 22:54:43, Top_40, Val:  recall: 0.203735, ndcg: 0.102129
+2026-03-12 22:54:43, Top_40, Test: recall: 0.204905, ndcg: 0.134962
+--------------------
+2026-03-12 22:54:43, Top_80, Val:  recall: 0.270481, ndcg: 0.117286
+2026-03-12 22:54:43, Top_80, Test: recall: 0.271568, ndcg: 0.154827
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-12 23:48:23
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.1
+bi_user_bundle_agg_beta: 0.0
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.1 --bi_user_bundle_agg_beta 0.0 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.1, 'bi_user_bundle_agg_beta': 0.0, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:01:55, Top_10, Val:  recall: 0.102574, ndcg: 0.074983
+2026-03-12 23:01:55, Top_10, Test: recall: 0.105174, ndcg: 0.102670
+--------------------
+2026-03-12 23:01:55, Top_20, Val:  recall: 0.145614, ndcg: 0.089207
+2026-03-12 23:01:55, Top_20, Test: recall: 0.148478, ndcg: 0.120095
+--------------------
+2026-03-12 23:01:55, Top_40, Val:  recall: 0.198386, ndcg: 0.103502
+2026-03-12 23:01:55, Top_40, Test: recall: 0.201217, ndcg: 0.138611
+--------------------
+2026-03-12 23:01:55, Top_80, Val:  recall: 0.262428, ndcg: 0.118057
+2026-03-12 23:01:55, Top_80, Test: recall: 0.263857, ndcg: 0.157267
+--------------------
+top20 as the final evaluation standard
+2026-03-12 23:01:55, Best in epoch 4, TOP 10: REC_V=0.10257, NDCG_V=0.07498
+2026-03-12 23:01:55, Best in epoch 4, TOP 10: REC_T=0.10517, NDCG_T=0.10267
+2026-03-12 23:01:55, Best in epoch 4, TOP 20: REC_V=0.14561, NDCG_V=0.08921
+2026-03-12 23:01:55, Best in epoch 4, TOP 20: REC_T=0.14848, NDCG_T=0.12009
+2026-03-12 23:01:55, Best in epoch 4, TOP 40: REC_V=0.19839, NDCG_V=0.10350
+2026-03-12 23:01:55, Best in epoch 4, TOP 40: REC_T=0.20122, NDCG_T=0.13861
+2026-03-12 23:01:55, Best in epoch 4, TOP 80: REC_V=0.26243, NDCG_V=0.11806
+2026-03-12 23:01:55, Best in epoch 4, TOP 80: REC_T=0.26386, NDCG_T=0.15727
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:08:33, Top_10, Val:  recall: 0.103970, ndcg: 0.075513
+2026-03-12 23:08:33, Top_10, Test: recall: 0.105838, ndcg: 0.102435
+--------------------
+2026-03-12 23:08:33, Top_20, Val:  recall: 0.146680, ndcg: 0.089603
+2026-03-12 23:08:33, Top_20, Test: recall: 0.149349, ndcg: 0.119921
+--------------------
+2026-03-12 23:08:33, Top_40, Val:  recall: 0.200326, ndcg: 0.104101
+2026-03-12 23:08:33, Top_40, Test: recall: 0.201989, ndcg: 0.138417
+--------------------
+2026-03-12 23:08:33, Top_80, Val:  recall: 0.264936, ndcg: 0.118737
+2026-03-12 23:08:33, Top_80, Test: recall: 0.265024, ndcg: 0.157159
+--------------------
+top20 as the final evaluation standard
+2026-03-12 23:08:33, Best in epoch 9, TOP 10: REC_V=0.10397, NDCG_V=0.07551
+2026-03-12 23:08:33, Best in epoch 9, TOP 10: REC_T=0.10584, NDCG_T=0.10244
+2026-03-12 23:08:33, Best in epoch 9, TOP 20: REC_V=0.14668, NDCG_V=0.08960
+2026-03-12 23:08:33, Best in epoch 9, TOP 20: REC_T=0.14935, NDCG_T=0.11992
+2026-03-12 23:08:33, Best in epoch 9, TOP 40: REC_V=0.20033, NDCG_V=0.10410
+2026-03-12 23:08:33, Best in epoch 9, TOP 40: REC_T=0.20199, NDCG_T=0.13842
+2026-03-12 23:08:33, Best in epoch 9, TOP 80: REC_V=0.26494, NDCG_V=0.11874
+2026-03-12 23:08:33, Best in epoch 9, TOP 80: REC_T=0.26502, NDCG_T=0.15716
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:15:14, Top_10, Val:  recall: 0.103701, ndcg: 0.075300
+2026-03-12 23:15:14, Top_10, Test: recall: 0.105643, ndcg: 0.102243
+--------------------
+2026-03-12 23:15:14, Top_20, Val:  recall: 0.146953, ndcg: 0.089601
+2026-03-12 23:15:14, Top_20, Test: recall: 0.149826, ndcg: 0.119994
+--------------------
+2026-03-12 23:15:14, Top_40, Val:  recall: 0.201278, ndcg: 0.104281
+2026-03-12 23:15:14, Top_40, Test: recall: 0.203074, ndcg: 0.138712
+--------------------
+2026-03-12 23:15:14, Top_80, Val:  recall: 0.266023, ndcg: 0.118966
+2026-03-12 23:15:14, Top_80, Test: recall: 0.266418, ndcg: 0.157569
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:21:53, Top_10, Val:  recall: 0.103612, ndcg: 0.075301
+2026-03-12 23:21:53, Top_10, Test: recall: 0.105647, ndcg: 0.102330
+--------------------
+2026-03-12 23:21:53, Top_20, Val:  recall: 0.147567, ndcg: 0.089789
+2026-03-12 23:21:53, Top_20, Test: recall: 0.149470, ndcg: 0.119966
+--------------------
+2026-03-12 23:21:53, Top_40, Val:  recall: 0.201330, ndcg: 0.104339
+2026-03-12 23:21:53, Top_40, Test: recall: 0.202695, ndcg: 0.138659
+--------------------
+2026-03-12 23:21:53, Top_80, Val:  recall: 0.265681, ndcg: 0.118956
+2026-03-12 23:21:53, Top_80, Test: recall: 0.265434, ndcg: 0.157324
+--------------------
+top20 as the final evaluation standard
+2026-03-12 23:21:53, Best in epoch 19, TOP 10: REC_V=0.10361, NDCG_V=0.07530
+2026-03-12 23:21:53, Best in epoch 19, TOP 10: REC_T=0.10565, NDCG_T=0.10233
+2026-03-12 23:21:53, Best in epoch 19, TOP 20: REC_V=0.14757, NDCG_V=0.08979
+2026-03-12 23:21:53, Best in epoch 19, TOP 20: REC_T=0.14947, NDCG_T=0.11997
+2026-03-12 23:21:53, Best in epoch 19, TOP 40: REC_V=0.20133, NDCG_V=0.10434
+2026-03-12 23:21:53, Best in epoch 19, TOP 40: REC_T=0.20270, NDCG_T=0.13866
+2026-03-12 23:21:53, Best in epoch 19, TOP 80: REC_V=0.26568, NDCG_V=0.11896
+2026-03-12 23:21:53, Best in epoch 19, TOP 80: REC_T=0.26543, NDCG_T=0.15732
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:28:29, Top_10, Val:  recall: 0.104911, ndcg: 0.076344
+2026-03-12 23:28:29, Top_10, Test: recall: 0.106164, ndcg: 0.102831
+--------------------
+2026-03-12 23:28:29, Top_20, Val:  recall: 0.148425, ndcg: 0.090680
+2026-03-12 23:28:29, Top_20, Test: recall: 0.150098, ndcg: 0.120532
+--------------------
+2026-03-12 23:28:29, Top_40, Val:  recall: 0.202176, ndcg: 0.105247
+2026-03-12 23:28:29, Top_40, Test: recall: 0.203001, ndcg: 0.139112
+--------------------
+2026-03-12 23:28:29, Top_80, Val:  recall: 0.265830, ndcg: 0.119706
+2026-03-12 23:28:29, Top_80, Test: recall: 0.266381, ndcg: 0.157955
+--------------------
+top20 as the final evaluation standard
+2026-03-12 23:28:29, Best in epoch 24, TOP 10: REC_V=0.10491, NDCG_V=0.07634
+2026-03-12 23:28:29, Best in epoch 24, TOP 10: REC_T=0.10616, NDCG_T=0.10283
+2026-03-12 23:28:29, Best in epoch 24, TOP 20: REC_V=0.14842, NDCG_V=0.09068
+2026-03-12 23:28:29, Best in epoch 24, TOP 20: REC_T=0.15010, NDCG_T=0.12053
+2026-03-12 23:28:29, Best in epoch 24, TOP 40: REC_V=0.20218, NDCG_V=0.10525
+2026-03-12 23:28:29, Best in epoch 24, TOP 40: REC_T=0.20300, NDCG_T=0.13911
+2026-03-12 23:28:29, Best in epoch 24, TOP 80: REC_V=0.26583, NDCG_V=0.11971
+2026-03-12 23:28:29, Best in epoch 24, TOP 80: REC_T=0.26638, NDCG_T=0.15796
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:35:05, Top_10, Val:  recall: 0.104049, ndcg: 0.075836
+2026-03-12 23:35:05, Top_10, Test: recall: 0.105429, ndcg: 0.102275
+--------------------
+2026-03-12 23:35:05, Top_20, Val:  recall: 0.147733, ndcg: 0.090270
+2026-03-12 23:35:05, Top_20, Test: recall: 0.149052, ndcg: 0.119828
+--------------------
+2026-03-12 23:35:05, Top_40, Val:  recall: 0.202270, ndcg: 0.105012
+2026-03-12 23:35:05, Top_40, Test: recall: 0.202103, ndcg: 0.138442
+--------------------
+2026-03-12 23:35:05, Top_80, Val:  recall: 0.266474, ndcg: 0.119569
+2026-03-12 23:35:05, Top_80, Test: recall: 0.265728, ndcg: 0.157380
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:41:44, Top_10, Val:  recall: 0.104536, ndcg: 0.076145
+2026-03-12 23:41:44, Top_10, Test: recall: 0.105791, ndcg: 0.102794
+--------------------
+2026-03-12 23:41:44, Top_20, Val:  recall: 0.147361, ndcg: 0.090320
+2026-03-12 23:41:44, Top_20, Test: recall: 0.149781, ndcg: 0.120486
+--------------------
+2026-03-12 23:41:44, Top_40, Val:  recall: 0.201513, ndcg: 0.104990
+2026-03-12 23:41:44, Top_40, Test: recall: 0.202780, ndcg: 0.139102
+--------------------
+2026-03-12 23:41:44, Top_80, Val:  recall: 0.265001, ndcg: 0.119388
+2026-03-12 23:41:44, Top_80, Test: recall: 0.266322, ndcg: 0.158025
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:48:21, Top_10, Val:  recall: 0.104174, ndcg: 0.076146
+2026-03-12 23:48:21, Top_10, Test: recall: 0.105904, ndcg: 0.102639
+--------------------
+2026-03-12 23:48:21, Top_20, Val:  recall: 0.147898, ndcg: 0.090589
+2026-03-12 23:48:21, Top_20, Test: recall: 0.149365, ndcg: 0.120109
+--------------------
+2026-03-12 23:48:21, Top_40, Val:  recall: 0.201931, ndcg: 0.105195
+2026-03-12 23:48:21, Top_40, Test: recall: 0.202440, ndcg: 0.138741
+--------------------
+2026-03-12 23:48:21, Top_80, Val:  recall: 0.265872, ndcg: 0.119699
+2026-03-12 23:48:21, Top_80, Test: recall: 0.266226, ndcg: 0.157715
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 00:41:45
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.1
+bi_user_bundle_agg_beta: 0.1
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.1 --bi_user_bundle_agg_beta 0.1 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.1, 'bi_user_bundle_agg_beta': 0.1, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-12 23:55:25, Top_10, Val:  recall: 0.102648, ndcg: 0.074180
+2026-03-12 23:55:25, Top_10, Test: recall: 0.103882, ndcg: 0.100303
+--------------------
+2026-03-12 23:55:25, Top_20, Val:  recall: 0.146790, ndcg: 0.088726
+2026-03-12 23:55:25, Top_20, Test: recall: 0.148039, ndcg: 0.118123
+--------------------
+2026-03-12 23:55:25, Top_40, Val:  recall: 0.200470, ndcg: 0.103246
+2026-03-12 23:55:25, Top_40, Test: recall: 0.202377, ndcg: 0.137190
+--------------------
+2026-03-12 23:55:25, Top_80, Val:  recall: 0.265869, ndcg: 0.118101
+2026-03-12 23:55:25, Top_80, Test: recall: 0.266963, ndcg: 0.156443
+--------------------
+top20 as the final evaluation standard
+2026-03-12 23:55:25, Best in epoch 4, TOP 10: REC_V=0.10265, NDCG_V=0.07418
+2026-03-12 23:55:25, Best in epoch 4, TOP 10: REC_T=0.10388, NDCG_T=0.10030
+2026-03-12 23:55:25, Best in epoch 4, TOP 20: REC_V=0.14679, NDCG_V=0.08873
+2026-03-12 23:55:25, Best in epoch 4, TOP 20: REC_T=0.14804, NDCG_T=0.11812
+2026-03-12 23:55:25, Best in epoch 4, TOP 40: REC_V=0.20047, NDCG_V=0.10325
+2026-03-12 23:55:25, Best in epoch 4, TOP 40: REC_T=0.20238, NDCG_T=0.13719
+2026-03-12 23:55:25, Best in epoch 4, TOP 80: REC_V=0.26587, NDCG_V=0.11810
+2026-03-12 23:55:25, Best in epoch 4, TOP 80: REC_T=0.26696, NDCG_T=0.15644
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:02:00, Top_10, Val:  recall: 0.102618, ndcg: 0.073572
+2026-03-13 00:02:00, Top_10, Test: recall: 0.103838, ndcg: 0.099550
+--------------------
+2026-03-13 00:02:00, Top_20, Val:  recall: 0.146883, ndcg: 0.088204
+2026-03-13 00:02:00, Top_20, Test: recall: 0.148763, ndcg: 0.117664
+--------------------
+2026-03-13 00:02:00, Top_40, Val:  recall: 0.202327, ndcg: 0.103187
+2026-03-13 00:02:00, Top_40, Test: recall: 0.203373, ndcg: 0.136839
+--------------------
+2026-03-13 00:02:00, Top_80, Val:  recall: 0.266841, ndcg: 0.117839
+2026-03-13 00:02:00, Top_80, Test: recall: 0.268219, ndcg: 0.156133
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:08:35, Top_10, Val:  recall: 0.102803, ndcg: 0.073685
+2026-03-13 00:08:35, Top_10, Test: recall: 0.104094, ndcg: 0.099595
+--------------------
+2026-03-13 00:08:35, Top_20, Val:  recall: 0.147986, ndcg: 0.088593
+2026-03-13 00:08:35, Top_20, Test: recall: 0.149182, ndcg: 0.117774
+--------------------
+2026-03-13 00:08:35, Top_40, Val:  recall: 0.202579, ndcg: 0.103390
+2026-03-13 00:08:35, Top_40, Test: recall: 0.203756, ndcg: 0.136922
+--------------------
+2026-03-13 00:08:35, Top_80, Val:  recall: 0.267847, ndcg: 0.118210
+2026-03-13 00:08:35, Top_80, Test: recall: 0.268722, ndcg: 0.156248
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:15:10, Top_10, Val:  recall: 0.103654, ndcg: 0.074106
+2026-03-13 00:15:10, Top_10, Test: recall: 0.104064, ndcg: 0.100067
+--------------------
+2026-03-13 00:15:10, Top_20, Val:  recall: 0.148291, ndcg: 0.088824
+2026-03-13 00:15:10, Top_20, Test: recall: 0.149577, ndcg: 0.118430
+--------------------
+2026-03-13 00:15:10, Top_40, Val:  recall: 0.203053, ndcg: 0.103657
+2026-03-13 00:15:10, Top_40, Test: recall: 0.204140, ndcg: 0.137590
+--------------------
+2026-03-13 00:15:10, Top_80, Val:  recall: 0.267442, ndcg: 0.118278
+2026-03-13 00:15:10, Top_80, Test: recall: 0.269237, ndcg: 0.156951
+--------------------
+top20 as the final evaluation standard
+2026-03-13 00:15:10, Best in epoch 19, TOP 10: REC_V=0.10365, NDCG_V=0.07411
+2026-03-13 00:15:10, Best in epoch 19, TOP 10: REC_T=0.10406, NDCG_T=0.10007
+2026-03-13 00:15:10, Best in epoch 19, TOP 20: REC_V=0.14829, NDCG_V=0.08882
+2026-03-13 00:15:10, Best in epoch 19, TOP 20: REC_T=0.14958, NDCG_T=0.11843
+2026-03-13 00:15:10, Best in epoch 19, TOP 40: REC_V=0.20305, NDCG_V=0.10366
+2026-03-13 00:15:10, Best in epoch 19, TOP 40: REC_T=0.20414, NDCG_T=0.13759
+2026-03-13 00:15:10, Best in epoch 19, TOP 80: REC_V=0.26744, NDCG_V=0.11828
+2026-03-13 00:15:10, Best in epoch 19, TOP 80: REC_T=0.26924, NDCG_T=0.15695
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:21:44, Top_10, Val:  recall: 0.102718, ndcg: 0.073679
+2026-03-13 00:21:44, Top_10, Test: recall: 0.104179, ndcg: 0.099662
+--------------------
+2026-03-13 00:21:44, Top_20, Val:  recall: 0.148299, ndcg: 0.088719
+2026-03-13 00:21:44, Top_20, Test: recall: 0.149588, ndcg: 0.118056
+--------------------
+2026-03-13 00:21:44, Top_40, Val:  recall: 0.202943, ndcg: 0.103505
+2026-03-13 00:21:44, Top_40, Test: recall: 0.204788, ndcg: 0.137442
+--------------------
+2026-03-13 00:21:44, Top_80, Val:  recall: 0.268786, ndcg: 0.118443
+2026-03-13 00:21:44, Top_80, Test: recall: 0.268739, ndcg: 0.156487
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:28:24, Top_10, Val:  recall: 0.103191, ndcg: 0.073993
+2026-03-13 00:28:24, Top_10, Test: recall: 0.104500, ndcg: 0.100177
+--------------------
+2026-03-13 00:28:24, Top_20, Val:  recall: 0.148307, ndcg: 0.088905
+2026-03-13 00:28:24, Top_20, Test: recall: 0.149616, ndcg: 0.118371
+--------------------
+2026-03-13 00:28:24, Top_40, Val:  recall: 0.203358, ndcg: 0.103754
+2026-03-13 00:28:24, Top_40, Test: recall: 0.204962, ndcg: 0.137787
+--------------------
+2026-03-13 00:28:24, Top_80, Val:  recall: 0.267972, ndcg: 0.118417
+2026-03-13 00:28:24, Top_80, Test: recall: 0.269062, ndcg: 0.156865
+--------------------
+top20 as the final evaluation standard
+2026-03-13 00:28:24, Best in epoch 29, TOP 10: REC_V=0.10319, NDCG_V=0.07399
+2026-03-13 00:28:24, Best in epoch 29, TOP 10: REC_T=0.10450, NDCG_T=0.10018
+2026-03-13 00:28:24, Best in epoch 29, TOP 20: REC_V=0.14831, NDCG_V=0.08890
+2026-03-13 00:28:24, Best in epoch 29, TOP 20: REC_T=0.14962, NDCG_T=0.11837
+2026-03-13 00:28:24, Best in epoch 29, TOP 40: REC_V=0.20336, NDCG_V=0.10375
+2026-03-13 00:28:24, Best in epoch 29, TOP 40: REC_T=0.20496, NDCG_T=0.13779
+2026-03-13 00:28:24, Best in epoch 29, TOP 80: REC_V=0.26797, NDCG_V=0.11842
+2026-03-13 00:28:24, Best in epoch 29, TOP 80: REC_T=0.26906, NDCG_T=0.15686
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:35:01, Top_10, Val:  recall: 0.102519, ndcg: 0.074094
+2026-03-13 00:35:01, Top_10, Test: recall: 0.103994, ndcg: 0.099818
+--------------------
+2026-03-13 00:35:01, Top_20, Val:  recall: 0.147506, ndcg: 0.088910
+2026-03-13 00:35:01, Top_20, Test: recall: 0.149806, ndcg: 0.118321
+--------------------
+2026-03-13 00:35:01, Top_40, Val:  recall: 0.203080, ndcg: 0.103976
+2026-03-13 00:35:01, Top_40, Test: recall: 0.204365, ndcg: 0.137472
+--------------------
+2026-03-13 00:35:01, Top_80, Val:  recall: 0.268450, ndcg: 0.118829
+2026-03-13 00:35:01, Top_80, Test: recall: 0.269182, ndcg: 0.156762
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:41:43, Top_10, Val:  recall: 0.102949, ndcg: 0.074031
+2026-03-13 00:41:43, Top_10, Test: recall: 0.104154, ndcg: 0.099849
+--------------------
+2026-03-13 00:41:43, Top_20, Val:  recall: 0.146965, ndcg: 0.088587
+2026-03-13 00:41:43, Top_20, Test: recall: 0.148959, ndcg: 0.117935
+--------------------
+2026-03-13 00:41:43, Top_40, Val:  recall: 0.202735, ndcg: 0.103641
+2026-03-13 00:41:43, Top_40, Test: recall: 0.204438, ndcg: 0.137419
+--------------------
+2026-03-13 00:41:43, Top_80, Val:  recall: 0.268311, ndcg: 0.118549
+2026-03-13 00:41:43, Top_80, Test: recall: 0.269469, ndcg: 0.156770
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 01:36:20
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.1
+bi_user_bundle_agg_beta: 0.2
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.1 --bi_user_bundle_agg_beta 0.2 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.1, 'bi_user_bundle_agg_beta': 0.2, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:48:53, Top_10, Val:  recall: 0.101393, ndcg: 0.072411
+2026-03-13 00:48:53, Top_10, Test: recall: 0.101797, ndcg: 0.097568
+--------------------
+2026-03-13 00:48:53, Top_20, Val:  recall: 0.146106, ndcg: 0.087161
+2026-03-13 00:48:53, Top_20, Test: recall: 0.147154, ndcg: 0.115884
+--------------------
+2026-03-13 00:48:53, Top_40, Val:  recall: 0.200575, ndcg: 0.101927
+2026-03-13 00:48:53, Top_40, Test: recall: 0.203121, ndcg: 0.135560
+--------------------
+2026-03-13 00:48:53, Top_80, Val:  recall: 0.265191, ndcg: 0.116609
+2026-03-13 00:48:53, Top_80, Test: recall: 0.269241, ndcg: 0.155229
+--------------------
+top20 as the final evaluation standard
+2026-03-13 00:48:53, Best in epoch 4, TOP 10: REC_V=0.10139, NDCG_V=0.07241
+2026-03-13 00:48:53, Best in epoch 4, TOP 10: REC_T=0.10180, NDCG_T=0.09757
+2026-03-13 00:48:53, Best in epoch 4, TOP 20: REC_V=0.14611, NDCG_V=0.08716
+2026-03-13 00:48:53, Best in epoch 4, TOP 20: REC_T=0.14715, NDCG_T=0.11588
+2026-03-13 00:48:53, Best in epoch 4, TOP 40: REC_V=0.20058, NDCG_V=0.10193
+2026-03-13 00:48:53, Best in epoch 4, TOP 40: REC_T=0.20312, NDCG_T=0.13556
+2026-03-13 00:48:53, Best in epoch 4, TOP 80: REC_V=0.26519, NDCG_V=0.11661
+2026-03-13 00:48:53, Best in epoch 4, TOP 80: REC_T=0.26924, NDCG_T=0.15523
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 00:55:35, Top_10, Val:  recall: 0.100587, ndcg: 0.071324
+2026-03-13 00:55:35, Top_10, Test: recall: 0.101341, ndcg: 0.096537
+--------------------
+2026-03-13 00:55:35, Top_20, Val:  recall: 0.147301, ndcg: 0.086725
+2026-03-13 00:55:35, Top_20, Test: recall: 0.147691, ndcg: 0.115291
+--------------------
+2026-03-13 00:55:35, Top_40, Val:  recall: 0.203080, ndcg: 0.101806
+2026-03-13 00:55:35, Top_40, Test: recall: 0.204767, ndcg: 0.135321
+--------------------
+2026-03-13 00:55:35, Top_80, Val:  recall: 0.269025, ndcg: 0.116820
+2026-03-13 00:55:35, Top_80, Test: recall: 0.271026, ndcg: 0.155030
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:02:18, Top_10, Val:  recall: 0.099672, ndcg: 0.071028
+2026-03-13 01:02:18, Top_10, Test: recall: 0.101778, ndcg: 0.096634
+--------------------
+2026-03-13 01:02:18, Top_20, Val:  recall: 0.146473, ndcg: 0.086508
+2026-03-13 01:02:18, Top_20, Test: recall: 0.147537, ndcg: 0.115106
+--------------------
+2026-03-13 01:02:18, Top_40, Val:  recall: 0.202651, ndcg: 0.101698
+2026-03-13 01:02:18, Top_40, Test: recall: 0.204661, ndcg: 0.135186
+--------------------
+2026-03-13 01:02:18, Top_80, Val:  recall: 0.268914, ndcg: 0.116773
+2026-03-13 01:02:18, Top_80, Test: recall: 0.271265, ndcg: 0.155015
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:09:04, Top_10, Val:  recall: 0.100401, ndcg: 0.071133
+2026-03-13 01:09:04, Top_10, Test: recall: 0.101138, ndcg: 0.096341
+--------------------
+2026-03-13 01:09:04, Top_20, Val:  recall: 0.146135, ndcg: 0.086253
+2026-03-13 01:09:04, Top_20, Test: recall: 0.147926, ndcg: 0.115296
+--------------------
+2026-03-13 01:09:04, Top_40, Val:  recall: 0.202573, ndcg: 0.101544
+2026-03-13 01:09:04, Top_40, Test: recall: 0.204836, ndcg: 0.135278
+--------------------
+2026-03-13 01:09:04, Top_80, Val:  recall: 0.270022, ndcg: 0.116852
+2026-03-13 01:09:04, Top_80, Test: recall: 0.271240, ndcg: 0.155037
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:15:53, Top_10, Val:  recall: 0.101000, ndcg: 0.072067
+2026-03-13 01:15:53, Top_10, Test: recall: 0.102108, ndcg: 0.096778
+--------------------
+2026-03-13 01:15:53, Top_20, Val:  recall: 0.146675, ndcg: 0.087131
+2026-03-13 01:15:53, Top_20, Test: recall: 0.148622, ndcg: 0.115570
+--------------------
+2026-03-13 01:15:53, Top_40, Val:  recall: 0.203245, ndcg: 0.102470
+2026-03-13 01:15:53, Top_40, Test: recall: 0.204721, ndcg: 0.135283
+--------------------
+2026-03-13 01:15:53, Top_80, Val:  recall: 0.270098, ndcg: 0.117635
+2026-03-13 01:15:53, Top_80, Test: recall: 0.272125, ndcg: 0.155331
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:22:41, Top_10, Val:  recall: 0.100835, ndcg: 0.071749
+2026-03-13 01:22:41, Top_10, Test: recall: 0.102416, ndcg: 0.097072
+--------------------
+2026-03-13 01:22:41, Top_20, Val:  recall: 0.146361, ndcg: 0.086785
+2026-03-13 01:22:41, Top_20, Test: recall: 0.148146, ndcg: 0.115559
+--------------------
+2026-03-13 01:22:41, Top_40, Val:  recall: 0.203021, ndcg: 0.102112
+2026-03-13 01:22:41, Top_40, Test: recall: 0.204872, ndcg: 0.135469
+--------------------
+2026-03-13 01:22:41, Top_80, Val:  recall: 0.269990, ndcg: 0.117293
+2026-03-13 01:22:41, Top_80, Test: recall: 0.271036, ndcg: 0.155176
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:29:30, Top_10, Val:  recall: 0.100344, ndcg: 0.071427
+2026-03-13 01:29:30, Top_10, Test: recall: 0.102204, ndcg: 0.096785
+--------------------
+2026-03-13 01:29:30, Top_20, Val:  recall: 0.146033, ndcg: 0.086529
+2026-03-13 01:29:30, Top_20, Test: recall: 0.148451, ndcg: 0.115494
+--------------------
+2026-03-13 01:29:30, Top_40, Val:  recall: 0.202168, ndcg: 0.101743
+2026-03-13 01:29:30, Top_40, Test: recall: 0.204550, ndcg: 0.135177
+--------------------
+2026-03-13 01:29:30, Top_80, Val:  recall: 0.269424, ndcg: 0.116998
+2026-03-13 01:29:30, Top_80, Test: recall: 0.270828, ndcg: 0.154930
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:36:17, Top_10, Val:  recall: 0.101183, ndcg: 0.071721
+2026-03-13 01:36:17, Top_10, Test: recall: 0.102143, ndcg: 0.096992
+--------------------
+2026-03-13 01:36:17, Top_20, Val:  recall: 0.147509, ndcg: 0.087039
+2026-03-13 01:36:17, Top_20, Test: recall: 0.148086, ndcg: 0.115564
+--------------------
+2026-03-13 01:36:17, Top_40, Val:  recall: 0.203702, ndcg: 0.102276
+2026-03-13 01:36:17, Top_40, Test: recall: 0.205425, ndcg: 0.135685
+--------------------
+2026-03-13 01:36:17, Top_80, Val:  recall: 0.271089, ndcg: 0.117542
+2026-03-13 01:36:17, Top_80, Test: recall: 0.272377, ndcg: 0.155645
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 02:31:10
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.2
+bi_user_bundle_agg_beta: 0.0
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.2 --bi_user_bundle_agg_beta 0.0 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.2, 'bi_user_bundle_agg_beta': 0.0, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:43:35, Top_10, Val:  recall: 0.102473, ndcg: 0.075106
+2026-03-13 01:43:35, Top_10, Test: recall: 0.104662, ndcg: 0.102167
+--------------------
+2026-03-13 01:43:35, Top_20, Val:  recall: 0.145595, ndcg: 0.089299
+2026-03-13 01:43:35, Top_20, Test: recall: 0.147396, ndcg: 0.119367
+--------------------
+2026-03-13 01:43:35, Top_40, Val:  recall: 0.198501, ndcg: 0.103609
+2026-03-13 01:43:35, Top_40, Test: recall: 0.200093, ndcg: 0.137828
+--------------------
+2026-03-13 01:43:35, Top_80, Val:  recall: 0.261524, ndcg: 0.117906
+2026-03-13 01:43:35, Top_80, Test: recall: 0.263621, ndcg: 0.156715
+--------------------
+top20 as the final evaluation standard
+2026-03-13 01:43:35, Best in epoch 4, TOP 10: REC_V=0.10247, NDCG_V=0.07511
+2026-03-13 01:43:35, Best in epoch 4, TOP 10: REC_T=0.10466, NDCG_T=0.10217
+2026-03-13 01:43:35, Best in epoch 4, TOP 20: REC_V=0.14559, NDCG_V=0.08930
+2026-03-13 01:43:35, Best in epoch 4, TOP 20: REC_T=0.14740, NDCG_T=0.11937
+2026-03-13 01:43:35, Best in epoch 4, TOP 40: REC_V=0.19850, NDCG_V=0.10361
+2026-03-13 01:43:35, Best in epoch 4, TOP 40: REC_T=0.20009, NDCG_T=0.13783
+2026-03-13 01:43:35, Best in epoch 4, TOP 80: REC_V=0.26152, NDCG_V=0.11791
+2026-03-13 01:43:35, Best in epoch 4, TOP 80: REC_T=0.26362, NDCG_T=0.15671
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:50:23, Top_10, Val:  recall: 0.103778, ndcg: 0.075595
+2026-03-13 01:50:23, Top_10, Test: recall: 0.104667, ndcg: 0.101618
+--------------------
+2026-03-13 01:50:23, Top_20, Val:  recall: 0.146909, ndcg: 0.089856
+2026-03-13 01:50:23, Top_20, Test: recall: 0.148391, ndcg: 0.119280
+--------------------
+2026-03-13 01:50:23, Top_40, Val:  recall: 0.199967, ndcg: 0.104230
+2026-03-13 01:50:23, Top_40, Test: recall: 0.202279, ndcg: 0.138203
+--------------------
+2026-03-13 01:50:23, Top_80, Val:  recall: 0.263573, ndcg: 0.118674
+2026-03-13 01:50:23, Top_80, Test: recall: 0.265648, ndcg: 0.157038
+--------------------
+top20 as the final evaluation standard
+2026-03-13 01:50:23, Best in epoch 9, TOP 10: REC_V=0.10378, NDCG_V=0.07559
+2026-03-13 01:50:23, Best in epoch 9, TOP 10: REC_T=0.10467, NDCG_T=0.10162
+2026-03-13 01:50:23, Best in epoch 9, TOP 20: REC_V=0.14691, NDCG_V=0.08986
+2026-03-13 01:50:23, Best in epoch 9, TOP 20: REC_T=0.14839, NDCG_T=0.11928
+2026-03-13 01:50:23, Best in epoch 9, TOP 40: REC_V=0.19997, NDCG_V=0.10423
+2026-03-13 01:50:23, Best in epoch 9, TOP 40: REC_T=0.20228, NDCG_T=0.13820
+2026-03-13 01:50:23, Best in epoch 9, TOP 80: REC_V=0.26357, NDCG_V=0.11867
+2026-03-13 01:50:23, Best in epoch 9, TOP 80: REC_T=0.26565, NDCG_T=0.15704
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 01:57:10, Top_10, Val:  recall: 0.103284, ndcg: 0.075484
+2026-03-13 01:57:10, Top_10, Test: recall: 0.105548, ndcg: 0.102284
+--------------------
+2026-03-13 01:57:10, Top_20, Val:  recall: 0.147252, ndcg: 0.090019
+2026-03-13 01:57:10, Top_20, Test: recall: 0.148901, ndcg: 0.119745
+--------------------
+2026-03-13 01:57:10, Top_40, Val:  recall: 0.201872, ndcg: 0.104783
+2026-03-13 01:57:10, Top_40, Test: recall: 0.202360, ndcg: 0.138521
+--------------------
+2026-03-13 01:57:10, Top_80, Val:  recall: 0.266565, ndcg: 0.119494
+2026-03-13 01:57:10, Top_80, Test: recall: 0.265864, ndcg: 0.157423
+--------------------
+top20 as the final evaluation standard
+2026-03-13 01:57:10, Best in epoch 14, TOP 10: REC_V=0.10328, NDCG_V=0.07548
+2026-03-13 01:57:10, Best in epoch 14, TOP 10: REC_T=0.10555, NDCG_T=0.10228
+2026-03-13 01:57:10, Best in epoch 14, TOP 20: REC_V=0.14725, NDCG_V=0.09002
+2026-03-13 01:57:10, Best in epoch 14, TOP 20: REC_T=0.14890, NDCG_T=0.11975
+2026-03-13 01:57:10, Best in epoch 14, TOP 40: REC_V=0.20187, NDCG_V=0.10478
+2026-03-13 01:57:10, Best in epoch 14, TOP 40: REC_T=0.20236, NDCG_T=0.13852
+2026-03-13 01:57:10, Best in epoch 14, TOP 80: REC_V=0.26657, NDCG_V=0.11949
+2026-03-13 01:57:10, Best in epoch 14, TOP 80: REC_T=0.26586, NDCG_T=0.15742
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:03:54, Top_10, Val:  recall: 0.104538, ndcg: 0.076066
+2026-03-13 02:03:54, Top_10, Test: recall: 0.105433, ndcg: 0.102647
+--------------------
+2026-03-13 02:03:54, Top_20, Val:  recall: 0.147162, ndcg: 0.090144
+2026-03-13 02:03:54, Top_20, Test: recall: 0.148678, ndcg: 0.120073
+--------------------
+2026-03-13 02:03:54, Top_40, Val:  recall: 0.200660, ndcg: 0.104619
+2026-03-13 02:03:54, Top_40, Test: recall: 0.202448, ndcg: 0.138938
+--------------------
+2026-03-13 02:03:54, Top_80, Val:  recall: 0.264742, ndcg: 0.119162
+2026-03-13 02:03:54, Top_80, Test: recall: 0.264949, ndcg: 0.157535
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:10:38, Top_10, Val:  recall: 0.104357, ndcg: 0.076055
+2026-03-13 02:10:38, Top_10, Test: recall: 0.105471, ndcg: 0.102629
+--------------------
+2026-03-13 02:10:38, Top_20, Val:  recall: 0.146896, ndcg: 0.090115
+2026-03-13 02:10:38, Top_20, Test: recall: 0.148795, ndcg: 0.120042
+--------------------
+2026-03-13 02:10:38, Top_40, Val:  recall: 0.200410, ndcg: 0.104592
+2026-03-13 02:10:38, Top_40, Test: recall: 0.201983, ndcg: 0.138739
+--------------------
+2026-03-13 02:10:38, Top_80, Val:  recall: 0.264368, ndcg: 0.119117
+2026-03-13 02:10:38, Top_80, Test: recall: 0.264361, ndcg: 0.157317
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:17:30, Top_10, Val:  recall: 0.104144, ndcg: 0.076006
+2026-03-13 02:17:30, Top_10, Test: recall: 0.105703, ndcg: 0.102688
+--------------------
+2026-03-13 02:17:30, Top_20, Val:  recall: 0.147687, ndcg: 0.090384
+2026-03-13 02:17:30, Top_20, Test: recall: 0.149160, ndcg: 0.120171
+--------------------
+2026-03-13 02:17:30, Top_40, Val:  recall: 0.201576, ndcg: 0.104956
+2026-03-13 02:17:30, Top_40, Test: recall: 0.202428, ndcg: 0.138854
+--------------------
+2026-03-13 02:17:30, Top_80, Val:  recall: 0.265193, ndcg: 0.119390
+2026-03-13 02:17:30, Top_80, Test: recall: 0.265861, ndcg: 0.157769
+--------------------
+top20 as the final evaluation standard
+2026-03-13 02:17:30, Best in epoch 29, TOP 10: REC_V=0.10414, NDCG_V=0.07601
+2026-03-13 02:17:30, Best in epoch 29, TOP 10: REC_T=0.10570, NDCG_T=0.10269
+2026-03-13 02:17:30, Best in epoch 29, TOP 20: REC_V=0.14769, NDCG_V=0.09038
+2026-03-13 02:17:30, Best in epoch 29, TOP 20: REC_T=0.14916, NDCG_T=0.12017
+2026-03-13 02:17:30, Best in epoch 29, TOP 40: REC_V=0.20158, NDCG_V=0.10496
+2026-03-13 02:17:30, Best in epoch 29, TOP 40: REC_T=0.20243, NDCG_T=0.13885
+2026-03-13 02:17:30, Best in epoch 29, TOP 80: REC_V=0.26519, NDCG_V=0.11939
+2026-03-13 02:17:30, Best in epoch 29, TOP 80: REC_T=0.26586, NDCG_T=0.15777
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:24:18, Top_10, Val:  recall: 0.103835, ndcg: 0.075646
+2026-03-13 02:24:18, Top_10, Test: recall: 0.105615, ndcg: 0.102803
+--------------------
+2026-03-13 02:24:18, Top_20, Val:  recall: 0.147367, ndcg: 0.090013
+2026-03-13 02:24:18, Top_20, Test: recall: 0.148873, ndcg: 0.120229
+--------------------
+2026-03-13 02:24:18, Top_40, Val:  recall: 0.200963, ndcg: 0.104524
+2026-03-13 02:24:18, Top_40, Test: recall: 0.202219, ndcg: 0.138925
+--------------------
+2026-03-13 02:24:18, Top_80, Val:  recall: 0.263970, ndcg: 0.118820
+2026-03-13 02:24:18, Top_80, Test: recall: 0.265013, ndcg: 0.157627
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:31:07, Top_10, Val:  recall: 0.103972, ndcg: 0.075706
+2026-03-13 02:31:07, Top_10, Test: recall: 0.106084, ndcg: 0.103167
+--------------------
+2026-03-13 02:31:07, Top_20, Val:  recall: 0.147884, ndcg: 0.090181
+2026-03-13 02:31:07, Top_20, Test: recall: 0.148861, ndcg: 0.120346
+--------------------
+2026-03-13 02:31:07, Top_40, Val:  recall: 0.200567, ndcg: 0.104409
+2026-03-13 02:31:07, Top_40, Test: recall: 0.202013, ndcg: 0.138995
+--------------------
+2026-03-13 02:31:07, Top_80, Val:  recall: 0.264535, ndcg: 0.118948
+2026-03-13 02:31:07, Top_80, Test: recall: 0.265341, ndcg: 0.157850
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 03:25:34
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.2
+bi_user_bundle_agg_beta: 0.1
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.2 --bi_user_bundle_agg_beta 0.1 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.2, 'bi_user_bundle_agg_beta': 0.1, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:38:24, Top_10, Val:  recall: 0.102449, ndcg: 0.073993
+2026-03-13 02:38:24, Top_10, Test: recall: 0.103701, ndcg: 0.100136
+--------------------
+2026-03-13 02:38:24, Top_20, Val:  recall: 0.145980, ndcg: 0.088362
+2026-03-13 02:38:24, Top_20, Test: recall: 0.147414, ndcg: 0.117750
+--------------------
+2026-03-13 02:38:24, Top_40, Val:  recall: 0.200856, ndcg: 0.103198
+2026-03-13 02:38:24, Top_40, Test: recall: 0.201756, ndcg: 0.136815
+--------------------
+2026-03-13 02:38:24, Top_80, Val:  recall: 0.263976, ndcg: 0.117528
+2026-03-13 02:38:24, Top_80, Test: recall: 0.266160, ndcg: 0.155961
+--------------------
+top20 as the final evaluation standard
+2026-03-13 02:38:24, Best in epoch 4, TOP 10: REC_V=0.10245, NDCG_V=0.07399
+2026-03-13 02:38:24, Best in epoch 4, TOP 10: REC_T=0.10370, NDCG_T=0.10014
+2026-03-13 02:38:24, Best in epoch 4, TOP 20: REC_V=0.14598, NDCG_V=0.08836
+2026-03-13 02:38:24, Best in epoch 4, TOP 20: REC_T=0.14741, NDCG_T=0.11775
+2026-03-13 02:38:24, Best in epoch 4, TOP 40: REC_V=0.20086, NDCG_V=0.10320
+2026-03-13 02:38:24, Best in epoch 4, TOP 40: REC_T=0.20176, NDCG_T=0.13682
+2026-03-13 02:38:24, Best in epoch 4, TOP 80: REC_V=0.26398, NDCG_V=0.11753
+2026-03-13 02:38:24, Best in epoch 4, TOP 80: REC_T=0.26616, NDCG_T=0.15596
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:45:12, Top_10, Val:  recall: 0.101990, ndcg: 0.073378
+2026-03-13 02:45:12, Top_10, Test: recall: 0.103627, ndcg: 0.099546
+--------------------
+2026-03-13 02:45:12, Top_20, Val:  recall: 0.147190, ndcg: 0.088320
+2026-03-13 02:45:12, Top_20, Test: recall: 0.148492, ndcg: 0.117638
+--------------------
+2026-03-13 02:45:12, Top_40, Val:  recall: 0.201892, ndcg: 0.103106
+2026-03-13 02:45:12, Top_40, Test: recall: 0.203668, ndcg: 0.137032
+--------------------
+2026-03-13 02:45:12, Top_80, Val:  recall: 0.266193, ndcg: 0.117727
+2026-03-13 02:45:12, Top_80, Test: recall: 0.268451, ndcg: 0.156318
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:52:03, Top_10, Val:  recall: 0.101852, ndcg: 0.073235
+2026-03-13 02:52:03, Top_10, Test: recall: 0.103626, ndcg: 0.099663
+--------------------
+2026-03-13 02:52:03, Top_20, Val:  recall: 0.146005, ndcg: 0.087850
+2026-03-13 02:52:03, Top_20, Test: recall: 0.148995, ndcg: 0.118021
+--------------------
+2026-03-13 02:52:03, Top_40, Val:  recall: 0.201385, ndcg: 0.102826
+2026-03-13 02:52:03, Top_40, Test: recall: 0.204022, ndcg: 0.137355
+--------------------
+2026-03-13 02:52:03, Top_80, Val:  recall: 0.267445, ndcg: 0.117804
+2026-03-13 02:52:03, Top_80, Test: recall: 0.268427, ndcg: 0.156505
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 02:58:50, Top_10, Val:  recall: 0.102370, ndcg: 0.073836
+2026-03-13 02:58:50, Top_10, Test: recall: 0.104069, ndcg: 0.099818
+--------------------
+2026-03-13 02:58:50, Top_20, Val:  recall: 0.146759, ndcg: 0.088484
+2026-03-13 02:58:50, Top_20, Test: recall: 0.148919, ndcg: 0.117905
+--------------------
+2026-03-13 02:58:50, Top_40, Val:  recall: 0.201991, ndcg: 0.103402
+2026-03-13 02:58:50, Top_40, Test: recall: 0.203895, ndcg: 0.137232
+--------------------
+2026-03-13 02:58:50, Top_80, Val:  recall: 0.266066, ndcg: 0.117970
+2026-03-13 02:58:50, Top_80, Test: recall: 0.268567, ndcg: 0.156474
+--------------------
+top20 as the final evaluation standard
+2026-03-13 02:58:51, Best in epoch 19, TOP 10: REC_V=0.10237, NDCG_V=0.07384
+2026-03-13 02:58:51, Best in epoch 19, TOP 10: REC_T=0.10407, NDCG_T=0.09982
+2026-03-13 02:58:51, Best in epoch 19, TOP 20: REC_V=0.14676, NDCG_V=0.08848
+2026-03-13 02:58:51, Best in epoch 19, TOP 20: REC_T=0.14892, NDCG_T=0.11790
+2026-03-13 02:58:51, Best in epoch 19, TOP 40: REC_V=0.20199, NDCG_V=0.10340
+2026-03-13 02:58:51, Best in epoch 19, TOP 40: REC_T=0.20390, NDCG_T=0.13723
+2026-03-13 02:58:51, Best in epoch 19, TOP 80: REC_V=0.26607, NDCG_V=0.11797
+2026-03-13 02:58:51, Best in epoch 19, TOP 80: REC_T=0.26857, NDCG_T=0.15647
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:05:30, Top_10, Val:  recall: 0.103585, ndcg: 0.074607
+2026-03-13 03:05:30, Top_10, Test: recall: 0.104213, ndcg: 0.100196
+--------------------
+2026-03-13 03:05:30, Top_20, Val:  recall: 0.147708, ndcg: 0.089169
+2026-03-13 03:05:30, Top_20, Test: recall: 0.148975, ndcg: 0.118262
+--------------------
+2026-03-13 03:05:30, Top_40, Val:  recall: 0.202275, ndcg: 0.103936
+2026-03-13 03:05:30, Top_40, Test: recall: 0.204656, ndcg: 0.137823
+--------------------
+2026-03-13 03:05:30, Top_80, Val:  recall: 0.267795, ndcg: 0.118813
+2026-03-13 03:05:30, Top_80, Test: recall: 0.268762, ndcg: 0.156915
+--------------------
+top20 as the final evaluation standard
+2026-03-13 03:05:30, Best in epoch 24, TOP 10: REC_V=0.10358, NDCG_V=0.07461
+2026-03-13 03:05:30, Best in epoch 24, TOP 10: REC_T=0.10421, NDCG_T=0.10020
+2026-03-13 03:05:30, Best in epoch 24, TOP 20: REC_V=0.14771, NDCG_V=0.08917
+2026-03-13 03:05:30, Best in epoch 24, TOP 20: REC_T=0.14898, NDCG_T=0.11826
+2026-03-13 03:05:30, Best in epoch 24, TOP 40: REC_V=0.20228, NDCG_V=0.10394
+2026-03-13 03:05:30, Best in epoch 24, TOP 40: REC_T=0.20466, NDCG_T=0.13782
+2026-03-13 03:05:30, Best in epoch 24, TOP 80: REC_V=0.26780, NDCG_V=0.11881
+2026-03-13 03:05:30, Best in epoch 24, TOP 80: REC_T=0.26876, NDCG_T=0.15691
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:12:13, Top_10, Val:  recall: 0.102959, ndcg: 0.074344
+2026-03-13 03:12:13, Top_10, Test: recall: 0.104397, ndcg: 0.100149
+--------------------
+2026-03-13 03:12:13, Top_20, Val:  recall: 0.147595, ndcg: 0.089073
+2026-03-13 03:12:13, Top_20, Test: recall: 0.149288, ndcg: 0.118248
+--------------------
+2026-03-13 03:12:13, Top_40, Val:  recall: 0.202100, ndcg: 0.103833
+2026-03-13 03:12:13, Top_40, Test: recall: 0.204448, ndcg: 0.137608
+--------------------
+2026-03-13 03:12:13, Top_80, Val:  recall: 0.267582, ndcg: 0.118715
+2026-03-13 03:12:13, Top_80, Test: recall: 0.269153, ndcg: 0.156871
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:18:53, Top_10, Val:  recall: 0.102001, ndcg: 0.073624
+2026-03-13 03:18:53, Top_10, Test: recall: 0.104050, ndcg: 0.099985
+--------------------
+2026-03-13 03:18:53, Top_20, Val:  recall: 0.146296, ndcg: 0.088265
+2026-03-13 03:18:53, Top_20, Test: recall: 0.149059, ndcg: 0.118148
+--------------------
+2026-03-13 03:18:53, Top_40, Val:  recall: 0.203057, ndcg: 0.103644
+2026-03-13 03:18:53, Top_40, Test: recall: 0.203863, ndcg: 0.137392
+--------------------
+2026-03-13 03:18:53, Top_80, Val:  recall: 0.268187, ndcg: 0.118426
+2026-03-13 03:18:53, Top_80, Test: recall: 0.268493, ndcg: 0.156634
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:25:32, Top_10, Val:  recall: 0.102112, ndcg: 0.073492
+2026-03-13 03:25:32, Top_10, Test: recall: 0.104231, ndcg: 0.099935
+--------------------
+2026-03-13 03:25:32, Top_20, Val:  recall: 0.146806, ndcg: 0.088252
+2026-03-13 03:25:32, Top_20, Test: recall: 0.149398, ndcg: 0.118140
+--------------------
+2026-03-13 03:25:32, Top_40, Val:  recall: 0.202701, ndcg: 0.103379
+2026-03-13 03:25:32, Top_40, Test: recall: 0.204407, ndcg: 0.137446
+--------------------
+2026-03-13 03:25:32, Top_80, Val:  recall: 0.267825, ndcg: 0.118180
+2026-03-13 03:25:32, Top_80, Test: recall: 0.269023, ndcg: 0.156667
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 04:19:38
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.2
+bi_user_bundle_agg_beta: 0.2
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.2 --bi_user_bundle_agg_beta 0.2 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.2, 'bi_user_bundle_agg_beta': 0.2, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:32:39, Top_10, Val:  recall: 0.100746, ndcg: 0.072098
+2026-03-13 03:32:39, Top_10, Test: recall: 0.102214, ndcg: 0.097637
+--------------------
+2026-03-13 03:32:39, Top_20, Val:  recall: 0.145950, ndcg: 0.087018
+2026-03-13 03:32:39, Top_20, Test: recall: 0.147175, ndcg: 0.115800
+--------------------
+2026-03-13 03:32:39, Top_40, Val:  recall: 0.201438, ndcg: 0.102024
+2026-03-13 03:32:39, Top_40, Test: recall: 0.202724, ndcg: 0.135284
+--------------------
+2026-03-13 03:32:39, Top_80, Val:  recall: 0.267564, ndcg: 0.117033
+2026-03-13 03:32:39, Top_80, Test: recall: 0.268225, ndcg: 0.154804
+--------------------
+top20 as the final evaluation standard
+2026-03-13 03:32:39, Best in epoch 4, TOP 10: REC_V=0.10075, NDCG_V=0.07210
+2026-03-13 03:32:39, Best in epoch 4, TOP 10: REC_T=0.10221, NDCG_T=0.09764
+2026-03-13 03:32:39, Best in epoch 4, TOP 20: REC_V=0.14595, NDCG_V=0.08702
+2026-03-13 03:32:39, Best in epoch 4, TOP 20: REC_T=0.14717, NDCG_T=0.11580
+2026-03-13 03:32:39, Best in epoch 4, TOP 40: REC_V=0.20144, NDCG_V=0.10202
+2026-03-13 03:32:39, Best in epoch 4, TOP 40: REC_T=0.20272, NDCG_T=0.13528
+2026-03-13 03:32:39, Best in epoch 4, TOP 80: REC_V=0.26756, NDCG_V=0.11703
+2026-03-13 03:32:39, Best in epoch 4, TOP 80: REC_T=0.26823, NDCG_T=0.15480
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:39:19, Top_10, Val:  recall: 0.099817, ndcg: 0.071096
+2026-03-13 03:39:19, Top_10, Test: recall: 0.100921, ndcg: 0.095991
+--------------------
+2026-03-13 03:39:19, Top_20, Val:  recall: 0.145737, ndcg: 0.086257
+2026-03-13 03:39:19, Top_20, Test: recall: 0.147694, ndcg: 0.114918
+--------------------
+2026-03-13 03:39:19, Top_40, Val:  recall: 0.201227, ndcg: 0.101280
+2026-03-13 03:39:19, Top_40, Test: recall: 0.204535, ndcg: 0.134869
+--------------------
+2026-03-13 03:39:19, Top_80, Val:  recall: 0.268084, ndcg: 0.116459
+2026-03-13 03:39:19, Top_80, Test: recall: 0.270286, ndcg: 0.154441
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:45:59, Top_10, Val:  recall: 0.100725, ndcg: 0.071533
+2026-03-13 03:45:59, Top_10, Test: recall: 0.101768, ndcg: 0.096797
+--------------------
+2026-03-13 03:45:59, Top_20, Val:  recall: 0.146747, ndcg: 0.086749
+2026-03-13 03:45:59, Top_20, Test: recall: 0.147779, ndcg: 0.115368
+--------------------
+2026-03-13 03:45:59, Top_40, Val:  recall: 0.202219, ndcg: 0.101757
+2026-03-13 03:45:59, Top_40, Test: recall: 0.204317, ndcg: 0.135239
+--------------------
+2026-03-13 03:45:59, Top_80, Val:  recall: 0.269064, ndcg: 0.116917
+2026-03-13 03:45:59, Top_80, Test: recall: 0.270092, ndcg: 0.154816
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:52:39, Top_10, Val:  recall: 0.100731, ndcg: 0.071474
+2026-03-13 03:52:39, Top_10, Test: recall: 0.101450, ndcg: 0.096338
+--------------------
+2026-03-13 03:52:39, Top_20, Val:  recall: 0.146322, ndcg: 0.086546
+2026-03-13 03:52:39, Top_20, Test: recall: 0.148206, ndcg: 0.115257
+--------------------
+2026-03-13 03:52:39, Top_40, Val:  recall: 0.203079, ndcg: 0.101898
+2026-03-13 03:52:39, Top_40, Test: recall: 0.205710, ndcg: 0.135462
+--------------------
+2026-03-13 03:52:39, Top_80, Val:  recall: 0.270093, ndcg: 0.117135
+2026-03-13 03:52:39, Top_80, Test: recall: 0.272215, ndcg: 0.155256
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 03:59:24, Top_10, Val:  recall: 0.100654, ndcg: 0.071463
+2026-03-13 03:59:24, Top_10, Test: recall: 0.101546, ndcg: 0.096455
+--------------------
+2026-03-13 03:59:24, Top_20, Val:  recall: 0.146259, ndcg: 0.086539
+2026-03-13 03:59:24, Top_20, Test: recall: 0.147674, ndcg: 0.115102
+--------------------
+2026-03-13 03:59:24, Top_40, Val:  recall: 0.202717, ndcg: 0.101822
+2026-03-13 03:59:24, Top_40, Test: recall: 0.204482, ndcg: 0.135071
+--------------------
+2026-03-13 03:59:24, Top_80, Val:  recall: 0.269870, ndcg: 0.117031
+2026-03-13 03:59:24, Top_80, Test: recall: 0.271256, ndcg: 0.154939
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:06:10, Top_10, Val:  recall: 0.100721, ndcg: 0.071542
+2026-03-13 04:06:10, Top_10, Test: recall: 0.101741, ndcg: 0.096808
+--------------------
+2026-03-13 04:06:10, Top_20, Val:  recall: 0.146182, ndcg: 0.086558
+2026-03-13 04:06:10, Top_20, Test: recall: 0.147665, ndcg: 0.115360
+--------------------
+2026-03-13 04:06:10, Top_40, Val:  recall: 0.201868, ndcg: 0.101636
+2026-03-13 04:06:10, Top_40, Test: recall: 0.204116, ndcg: 0.135192
+--------------------
+2026-03-13 04:06:10, Top_80, Val:  recall: 0.269961, ndcg: 0.117088
+2026-03-13 04:06:10, Top_80, Test: recall: 0.270517, ndcg: 0.154965
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:12:53, Top_10, Val:  recall: 0.100523, ndcg: 0.071548
+2026-03-13 04:12:53, Top_10, Test: recall: 0.101732, ndcg: 0.096654
+--------------------
+2026-03-13 04:12:53, Top_20, Val:  recall: 0.146495, ndcg: 0.086757
+2026-03-13 04:12:53, Top_20, Test: recall: 0.147490, ndcg: 0.115151
+--------------------
+2026-03-13 04:12:53, Top_40, Val:  recall: 0.203019, ndcg: 0.102039
+2026-03-13 04:12:53, Top_40, Test: recall: 0.204819, ndcg: 0.135295
+--------------------
+2026-03-13 04:12:53, Top_80, Val:  recall: 0.270439, ndcg: 0.117379
+2026-03-13 04:12:53, Top_80, Test: recall: 0.272067, ndcg: 0.155314
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:19:36, Top_10, Val:  recall: 0.100606, ndcg: 0.071415
+2026-03-13 04:19:36, Top_10, Test: recall: 0.102148, ndcg: 0.096910
+--------------------
+2026-03-13 04:19:36, Top_20, Val:  recall: 0.146014, ndcg: 0.086420
+2026-03-13 04:19:36, Top_20, Test: recall: 0.148078, ndcg: 0.115464
+--------------------
+2026-03-13 04:19:36, Top_40, Val:  recall: 0.202720, ndcg: 0.101793
+2026-03-13 04:19:36, Top_40, Test: recall: 0.205039, ndcg: 0.135464
+--------------------
+2026-03-13 04:19:36, Top_80, Val:  recall: 0.270335, ndcg: 0.117166
+2026-03-13 04:19:36, Top_80, Test: recall: 0.271182, ndcg: 0.155140
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 05:14:19
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.3
+bi_user_bundle_agg_beta: 0.0
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.3 --bi_user_bundle_agg_beta 0.0 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.3, 'bi_user_bundle_agg_beta': 0.0, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:26:47, Top_10, Val:  recall: 0.102798, ndcg: 0.075471
+2026-03-13 04:26:47, Top_10, Test: recall: 0.104775, ndcg: 0.102307
+--------------------
+2026-03-13 04:26:47, Top_20, Val:  recall: 0.145893, ndcg: 0.089756
+2026-03-13 04:26:47, Top_20, Test: recall: 0.146861, ndcg: 0.119231
+--------------------
+2026-03-13 04:26:47, Top_40, Val:  recall: 0.199158, ndcg: 0.104140
+2026-03-13 04:26:47, Top_40, Test: recall: 0.199599, ndcg: 0.137766
+--------------------
+2026-03-13 04:26:47, Top_80, Val:  recall: 0.261823, ndcg: 0.118382
+2026-03-13 04:26:47, Top_80, Test: recall: 0.262544, ndcg: 0.156493
+--------------------
+top20 as the final evaluation standard
+2026-03-13 04:26:47, Best in epoch 4, TOP 10: REC_V=0.10280, NDCG_V=0.07547
+2026-03-13 04:26:47, Best in epoch 4, TOP 10: REC_T=0.10477, NDCG_T=0.10231
+2026-03-13 04:26:47, Best in epoch 4, TOP 20: REC_V=0.14589, NDCG_V=0.08976
+2026-03-13 04:26:47, Best in epoch 4, TOP 20: REC_T=0.14686, NDCG_T=0.11923
+2026-03-13 04:26:47, Best in epoch 4, TOP 40: REC_V=0.19916, NDCG_V=0.10414
+2026-03-13 04:26:47, Best in epoch 4, TOP 40: REC_T=0.19960, NDCG_T=0.13777
+2026-03-13 04:26:47, Best in epoch 4, TOP 80: REC_V=0.26182, NDCG_V=0.11838
+2026-03-13 04:26:47, Best in epoch 4, TOP 80: REC_T=0.26254, NDCG_T=0.15649
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:33:29, Top_10, Val:  recall: 0.103935, ndcg: 0.075626
+2026-03-13 04:33:29, Top_10, Test: recall: 0.105353, ndcg: 0.102259
+--------------------
+2026-03-13 04:33:29, Top_20, Val:  recall: 0.147047, ndcg: 0.089885
+2026-03-13 04:33:29, Top_20, Test: recall: 0.148645, ndcg: 0.119707
+--------------------
+2026-03-13 04:33:29, Top_40, Val:  recall: 0.200231, ndcg: 0.104260
+2026-03-13 04:33:29, Top_40, Test: recall: 0.201058, ndcg: 0.138115
+--------------------
+2026-03-13 04:33:29, Top_80, Val:  recall: 0.263959, ndcg: 0.118707
+2026-03-13 04:33:29, Top_80, Test: recall: 0.264305, ndcg: 0.156926
+--------------------
+top20 as the final evaluation standard
+2026-03-13 04:33:29, Best in epoch 9, TOP 10: REC_V=0.10393, NDCG_V=0.07563
+2026-03-13 04:33:29, Best in epoch 9, TOP 10: REC_T=0.10535, NDCG_T=0.10226
+2026-03-13 04:33:29, Best in epoch 9, TOP 20: REC_V=0.14705, NDCG_V=0.08989
+2026-03-13 04:33:29, Best in epoch 9, TOP 20: REC_T=0.14864, NDCG_T=0.11971
+2026-03-13 04:33:29, Best in epoch 9, TOP 40: REC_V=0.20023, NDCG_V=0.10426
+2026-03-13 04:33:29, Best in epoch 9, TOP 40: REC_T=0.20106, NDCG_T=0.13812
+2026-03-13 04:33:29, Best in epoch 9, TOP 80: REC_V=0.26396, NDCG_V=0.11871
+2026-03-13 04:33:29, Best in epoch 9, TOP 80: REC_T=0.26430, NDCG_T=0.15693
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:40:11, Top_10, Val:  recall: 0.103739, ndcg: 0.075065
+2026-03-13 04:40:11, Top_10, Test: recall: 0.105051, ndcg: 0.102099
+--------------------
+2026-03-13 04:40:11, Top_20, Val:  recall: 0.147266, ndcg: 0.089448
+2026-03-13 04:40:11, Top_20, Test: recall: 0.149422, ndcg: 0.119975
+--------------------
+2026-03-13 04:40:11, Top_40, Val:  recall: 0.200972, ndcg: 0.103946
+2026-03-13 04:40:11, Top_40, Test: recall: 0.202173, ndcg: 0.138507
+--------------------
+2026-03-13 04:40:11, Top_80, Val:  recall: 0.265541, ndcg: 0.118607
+2026-03-13 04:40:11, Top_80, Test: recall: 0.265752, ndcg: 0.157432
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:46:57, Top_10, Val:  recall: 0.104213, ndcg: 0.075510
+2026-03-13 04:46:57, Top_10, Test: recall: 0.105062, ndcg: 0.102389
+--------------------
+2026-03-13 04:46:57, Top_20, Val:  recall: 0.147057, ndcg: 0.089660
+2026-03-13 04:46:57, Top_20, Test: recall: 0.149154, ndcg: 0.120168
+--------------------
+2026-03-13 04:46:57, Top_40, Val:  recall: 0.199826, ndcg: 0.103900
+2026-03-13 04:46:57, Top_40, Test: recall: 0.201402, ndcg: 0.138498
+--------------------
+2026-03-13 04:46:57, Top_80, Val:  recall: 0.263859, ndcg: 0.118431
+2026-03-13 04:46:57, Top_80, Test: recall: 0.264656, ndcg: 0.157309
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 04:53:46, Top_10, Val:  recall: 0.102919, ndcg: 0.074834
+2026-03-13 04:53:46, Top_10, Test: recall: 0.104987, ndcg: 0.102433
+--------------------
+2026-03-13 04:53:46, Top_20, Val:  recall: 0.146515, ndcg: 0.089248
+2026-03-13 04:53:46, Top_20, Test: recall: 0.148458, ndcg: 0.119937
+--------------------
+2026-03-13 04:53:46, Top_40, Val:  recall: 0.199836, ndcg: 0.103642
+2026-03-13 04:53:46, Top_40, Test: recall: 0.201864, ndcg: 0.138685
+--------------------
+2026-03-13 04:53:46, Top_80, Val:  recall: 0.263853, ndcg: 0.118178
+2026-03-13 04:53:46, Top_80, Test: recall: 0.265590, ndcg: 0.157639
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:00:40, Top_10, Val:  recall: 0.104253, ndcg: 0.075350
+2026-03-13 05:00:40, Top_10, Test: recall: 0.104933, ndcg: 0.101906
+--------------------
+2026-03-13 05:00:40, Top_20, Val:  recall: 0.147428, ndcg: 0.089591
+2026-03-13 05:00:40, Top_20, Test: recall: 0.148351, ndcg: 0.119406
+--------------------
+2026-03-13 05:00:40, Top_40, Val:  recall: 0.200561, ndcg: 0.103953
+2026-03-13 05:00:40, Top_40, Test: recall: 0.201508, ndcg: 0.138059
+--------------------
+2026-03-13 05:00:40, Top_80, Val:  recall: 0.264643, ndcg: 0.118496
+2026-03-13 05:00:40, Top_80, Test: recall: 0.264652, ndcg: 0.156846
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:07:30, Top_10, Val:  recall: 0.104496, ndcg: 0.075745
+2026-03-13 05:07:30, Top_10, Test: recall: 0.105527, ndcg: 0.102498
+--------------------
+2026-03-13 05:07:30, Top_20, Val:  recall: 0.147775, ndcg: 0.090038
+2026-03-13 05:07:30, Top_20, Test: recall: 0.149197, ndcg: 0.120122
+--------------------
+2026-03-13 05:07:30, Top_40, Val:  recall: 0.201813, ndcg: 0.104637
+2026-03-13 05:07:30, Top_40, Test: recall: 0.203026, ndcg: 0.139005
+--------------------
+2026-03-13 05:07:30, Top_80, Val:  recall: 0.266228, ndcg: 0.119272
+2026-03-13 05:07:30, Top_80, Test: recall: 0.266913, ndcg: 0.158018
+--------------------
+top20 as the final evaluation standard
+2026-03-13 05:07:30, Best in epoch 34, TOP 10: REC_V=0.10450, NDCG_V=0.07575
+2026-03-13 05:07:30, Best in epoch 34, TOP 10: REC_T=0.10553, NDCG_T=0.10250
+2026-03-13 05:07:30, Best in epoch 34, TOP 20: REC_V=0.14777, NDCG_V=0.09004
+2026-03-13 05:07:30, Best in epoch 34, TOP 20: REC_T=0.14920, NDCG_T=0.12012
+2026-03-13 05:07:30, Best in epoch 34, TOP 40: REC_V=0.20181, NDCG_V=0.10464
+2026-03-13 05:07:30, Best in epoch 34, TOP 40: REC_T=0.20303, NDCG_T=0.13900
+2026-03-13 05:07:30, Best in epoch 34, TOP 80: REC_V=0.26623, NDCG_V=0.11927
+2026-03-13 05:07:30, Best in epoch 34, TOP 80: REC_T=0.26691, NDCG_T=0.15802
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:14:17, Top_10, Val:  recall: 0.103618, ndcg: 0.075632
+2026-03-13 05:14:17, Top_10, Test: recall: 0.105221, ndcg: 0.102239
+--------------------
+2026-03-13 05:14:17, Top_20, Val:  recall: 0.146744, ndcg: 0.089875
+2026-03-13 05:14:17, Top_20, Test: recall: 0.148745, ndcg: 0.119765
+--------------------
+2026-03-13 05:14:17, Top_40, Val:  recall: 0.200956, ndcg: 0.104541
+2026-03-13 05:14:17, Top_40, Test: recall: 0.201242, ndcg: 0.138214
+--------------------
+2026-03-13 05:14:17, Top_80, Val:  recall: 0.264545, ndcg: 0.118965
+2026-03-13 05:14:17, Top_80, Test: recall: 0.264531, ndcg: 0.157072
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+
+==================================================
+Timestamp: 2026-03-13 06:08:57
+dataset: iFashion
+ui_bundle_user_agg_beta: 0.3
+bi_user_bundle_agg_beta: 0.1
+epochs: 40
+status: SUCCESS
+command: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset iFashion --ui_bundle_user_agg_beta 0.3 --bi_user_bundle_agg_beta 0.1 --epochs 40
+--------------------------------------------------
+[STDOUT]
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.3, 'bi_user_bundle_agg_beta': 0.1, 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.15], 'fusion_weights': {'modal_weight': [0.1, 0.2, 0.7], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.2, 0.5], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 40, 'test_interval': 5, 'dataset': 'iFashion', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:21:29, Top_10, Val:  recall: 0.101904, ndcg: 0.073771
+2026-03-13 05:21:29, Top_10, Test: recall: 0.103768, ndcg: 0.100124
+--------------------
+2026-03-13 05:21:29, Top_20, Val:  recall: 0.145230, ndcg: 0.088092
+2026-03-13 05:21:29, Top_20, Test: recall: 0.147645, ndcg: 0.117820
+--------------------
+2026-03-13 05:21:29, Top_40, Val:  recall: 0.199957, ndcg: 0.102881
+2026-03-13 05:21:29, Top_40, Test: recall: 0.202172, ndcg: 0.136906
+--------------------
+2026-03-13 05:21:29, Top_80, Val:  recall: 0.264913, ndcg: 0.117630
+2026-03-13 05:21:29, Top_80, Test: recall: 0.265850, ndcg: 0.155875
+--------------------
+top20 as the final evaluation standard
+2026-03-13 05:21:29, Best in epoch 4, TOP 10: REC_V=0.10190, NDCG_V=0.07377
+2026-03-13 05:21:29, Best in epoch 4, TOP 10: REC_T=0.10377, NDCG_T=0.10012
+2026-03-13 05:21:29, Best in epoch 4, TOP 20: REC_V=0.14523, NDCG_V=0.08809
+2026-03-13 05:21:29, Best in epoch 4, TOP 20: REC_T=0.14765, NDCG_T=0.11782
+2026-03-13 05:21:29, Best in epoch 4, TOP 40: REC_V=0.19996, NDCG_V=0.10288
+2026-03-13 05:21:29, Best in epoch 4, TOP 40: REC_T=0.20217, NDCG_T=0.13691
+2026-03-13 05:21:29, Best in epoch 4, TOP 80: REC_V=0.26491, NDCG_V=0.11763
+2026-03-13 05:21:29, Best in epoch 4, TOP 80: REC_T=0.26585, NDCG_T=0.15588
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:28:14, Top_10, Val:  recall: 0.102366, ndcg: 0.073310
+2026-03-13 05:28:14, Top_10, Test: recall: 0.103446, ndcg: 0.099413
+--------------------
+2026-03-13 05:28:14, Top_20, Val:  recall: 0.147340, ndcg: 0.088156
+2026-03-13 05:28:14, Top_20, Test: recall: 0.148502, ndcg: 0.117602
+--------------------
+2026-03-13 05:28:14, Top_40, Val:  recall: 0.201830, ndcg: 0.102918
+2026-03-13 05:28:14, Top_40, Test: recall: 0.203524, ndcg: 0.136932
+--------------------
+2026-03-13 05:28:14, Top_80, Val:  recall: 0.268204, ndcg: 0.117962
+2026-03-13 05:28:14, Top_80, Test: recall: 0.267550, ndcg: 0.156017
+--------------------
+top20 as the final evaluation standard
+2026-03-13 05:28:14, Best in epoch 9, TOP 10: REC_V=0.10237, NDCG_V=0.07331
+2026-03-13 05:28:14, Best in epoch 9, TOP 10: REC_T=0.10345, NDCG_T=0.09941
+2026-03-13 05:28:14, Best in epoch 9, TOP 20: REC_V=0.14734, NDCG_V=0.08816
+2026-03-13 05:28:14, Best in epoch 9, TOP 20: REC_T=0.14850, NDCG_T=0.11760
+2026-03-13 05:28:14, Best in epoch 9, TOP 40: REC_V=0.20183, NDCG_V=0.10292
+2026-03-13 05:28:14, Best in epoch 9, TOP 40: REC_T=0.20352, NDCG_T=0.13693
+2026-03-13 05:28:14, Best in epoch 9, TOP 80: REC_V=0.26820, NDCG_V=0.11796
+2026-03-13 05:28:14, Best in epoch 9, TOP 80: REC_T=0.26755, NDCG_T=0.15602
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:34:58, Top_10, Val:  recall: 0.102738, ndcg: 0.073790
+2026-03-13 05:34:58, Top_10, Test: recall: 0.104099, ndcg: 0.100066
+--------------------
+2026-03-13 05:34:58, Top_20, Val:  recall: 0.146298, ndcg: 0.088199
+2026-03-13 05:34:58, Top_20, Test: recall: 0.149212, ndcg: 0.118272
+--------------------
+2026-03-13 05:34:58, Top_40, Val:  recall: 0.201226, ndcg: 0.103061
+2026-03-13 05:34:58, Top_40, Test: recall: 0.203263, ndcg: 0.137251
+--------------------
+2026-03-13 05:34:58, Top_80, Val:  recall: 0.267103, ndcg: 0.118024
+2026-03-13 05:34:58, Top_80, Test: recall: 0.267211, ndcg: 0.156273
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:41:47, Top_10, Val:  recall: 0.102562, ndcg: 0.073373
+2026-03-13 05:41:47, Top_10, Test: recall: 0.103826, ndcg: 0.099455
+--------------------
+2026-03-13 05:41:47, Top_20, Val:  recall: 0.147764, ndcg: 0.088329
+2026-03-13 05:41:47, Top_20, Test: recall: 0.148983, ndcg: 0.117693
+--------------------
+2026-03-13 05:41:47, Top_40, Val:  recall: 0.202232, ndcg: 0.103043
+2026-03-13 05:41:47, Top_40, Test: recall: 0.203570, ndcg: 0.136860
+--------------------
+2026-03-13 05:41:47, Top_80, Val:  recall: 0.267737, ndcg: 0.117916
+2026-03-13 05:41:47, Top_80, Test: recall: 0.268462, ndcg: 0.156163
+--------------------
+top20 as the final evaluation standard
+2026-03-13 05:41:47, Best in epoch 19, TOP 10: REC_V=0.10256, NDCG_V=0.07337
+2026-03-13 05:41:47, Best in epoch 19, TOP 10: REC_T=0.10383, NDCG_T=0.09945
+2026-03-13 05:41:47, Best in epoch 19, TOP 20: REC_V=0.14776, NDCG_V=0.08833
+2026-03-13 05:41:47, Best in epoch 19, TOP 20: REC_T=0.14898, NDCG_T=0.11769
+2026-03-13 05:41:47, Best in epoch 19, TOP 40: REC_V=0.20223, NDCG_V=0.10304
+2026-03-13 05:41:47, Best in epoch 19, TOP 40: REC_T=0.20357, NDCG_T=0.13686
+2026-03-13 05:41:47, Best in epoch 19, TOP 80: REC_V=0.26774, NDCG_V=0.11792
+2026-03-13 05:41:47, Best in epoch 19, TOP 80: REC_T=0.26846, NDCG_T=0.15616
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:48:35, Top_10, Val:  recall: 0.103023, ndcg: 0.073872
+2026-03-13 05:48:35, Top_10, Test: recall: 0.104180, ndcg: 0.099813
+--------------------
+2026-03-13 05:48:35, Top_20, Val:  recall: 0.147751, ndcg: 0.088628
+2026-03-13 05:48:35, Top_20, Test: recall: 0.149277, ndcg: 0.117983
+--------------------
+2026-03-13 05:48:35, Top_40, Val:  recall: 0.202236, ndcg: 0.103367
+2026-03-13 05:48:35, Top_40, Test: recall: 0.203953, ndcg: 0.137182
+--------------------
+2026-03-13 05:48:35, Top_80, Val:  recall: 0.268150, ndcg: 0.118331
+2026-03-13 05:48:35, Top_80, Test: recall: 0.269365, ndcg: 0.156638
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 05:55:23, Top_10, Val:  recall: 0.102406, ndcg: 0.073699
+2026-03-13 05:55:23, Top_10, Test: recall: 0.103613, ndcg: 0.099635
+--------------------
+2026-03-13 05:55:23, Top_20, Val:  recall: 0.147557, ndcg: 0.088638
+2026-03-13 05:55:23, Top_20, Test: recall: 0.148647, ndcg: 0.117788
+--------------------
+2026-03-13 05:55:23, Top_40, Val:  recall: 0.201668, ndcg: 0.103287
+2026-03-13 05:55:23, Top_40, Test: recall: 0.203717, ndcg: 0.137145
+--------------------
+2026-03-13 05:55:23, Top_80, Val:  recall: 0.267906, ndcg: 0.118324
+2026-03-13 05:55:23, Top_80, Test: recall: 0.267945, ndcg: 0.156269
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 06:02:10, Top_10, Val:  recall: 0.102853, ndcg: 0.073736
+2026-03-13 06:02:10, Top_10, Test: recall: 0.103945, ndcg: 0.099896
+--------------------
+2026-03-13 06:02:10, Top_20, Val:  recall: 0.147175, ndcg: 0.088389
+2026-03-13 06:02:10, Top_20, Test: recall: 0.148879, ndcg: 0.118034
+--------------------
+2026-03-13 06:02:10, Top_40, Val:  recall: 0.202215, ndcg: 0.103275
+2026-03-13 06:02:10, Top_40, Test: recall: 0.203602, ndcg: 0.137225
+--------------------
+2026-03-13 06:02:10, Top_80, Val:  recall: 0.268527, ndcg: 0.118306
+2026-03-13 06:02:10, Top_80, Test: recall: 0.268197, ndcg: 0.156466
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m2026-03-13 06:08:55, Top_10, Val:  recall: 0.102206, ndcg: 0.073593
+2026-03-13 06:08:55, Top_10, Test: recall: 0.105061, ndcg: 0.100803
+--------------------
+2026-03-13 06:08:55, Top_20, Val:  recall: 0.146643, ndcg: 0.088254
+2026-03-13 06:08:55, Top_20, Test: recall: 0.149286, ndcg: 0.118633
+--------------------
+2026-03-13 06:08:55, Top_40, Val:  recall: 0.203043, ndcg: 0.103478
+2026-03-13 06:08:55, Top_40, Test: recall: 0.203934, ndcg: 0.137811
+--------------------
+2026-03-13 06:08:55, Top_80, Val:  recall: 0.268093, ndcg: 0.118223
+2026-03-13 06:08:55, Top_80, Test: recall: 0.268795, ndcg: 0.157104
+--------------------
+top20 as the final evaluation standard
+[0m[0m[0m[0m[0m
+
+[STDERR]
+
+==================================================
+

@@ -4,13 +4,13 @@ import sys
 import datetime
 
 # --- 配置部分 ---
-DATASET = "NetEase"
+DATASET = "Youshu"
 # 网格参数定义：包含基线 (0.0, 0.0)
-UI_BETAS = [0.0, 0.05, 0.1, 0.2]
-BI_BETAS = [0.0, 0.05, 0.1, 0.2]
+UI_BETAS = [0.0]
+BI_BETAS = [0.0, 0.1, 0.2, 0.3]
 OUTPUT_FILE = "grid_search_results.txt"
 TAIL_LINES = None # 保存最后 N 行输出，设为 None 则保存全部
-EPOCHS = 38 # 在这里配置 epoch 数量
+EPOCHS = 100 # 在这里配置 epoch 数量
 
 def run_experiment(ui_beta, bi_beta):
     cmd = [
@@ -119,9 +119,9 @@ def main():
     
     for i, (ui_beta, bi_beta) in enumerate(combinations):
         # 跳过已运行的组合 (0.0, 0.0) 和 (0.1, 0.1)
-        if (ui_beta == 0.0 and bi_beta == 0.0) or (ui_beta == 0.1 and bi_beta == 0.1):
-            print(f"\n[{i+1}/{len(combinations)}] Skipping ui_beta={ui_beta}, bi_beta={bi_beta} (Already run)")
-            continue
+        # if (ui_beta == 0.0 and bi_beta == 0.0) or (ui_beta == 0.1 and bi_beta == 0.1):
+        #    print(f"\n[{i+1}/{len(combinations)}] Skipping ui_beta={ui_beta}, bi_beta={bi_beta} (Already run)")
+        #    continue
 
         print(f"\n[{i+1}/{len(combinations)}] Testing ui_beta={ui_beta}, bi_beta={bi_beta}")
         

@@ -19,6 +19,8 @@ NetEase:
   # bi_user_high_order_alpha: 0.8
 
   # New Simple Aggregation Supplement settings
+
+  # 最佳结果备选 0.2   0.25   0.3
   ui_bundle_user_agg_beta: 0.1
   bi_user_bundle_agg_beta: 0.1
 
@@ -66,6 +68,8 @@ iFashion:
   # bi_user_high_order_alpha: 0.8
 
   # New Simple Aggregation Supplement settings
+
+  # 参数搜索未获提升，待定
   ui_bundle_user_agg_beta: 0.1
   bi_user_bundle_agg_beta: 0.1
 

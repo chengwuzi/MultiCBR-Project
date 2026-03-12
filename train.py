@@ -67,8 +67,8 @@ def main(args=None):
     conf["device"] = device
     print(conf)
 
-    for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp in \
-            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"]):
+    for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp, ui_beta, bi_beta in \
+            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"], [conf["ui_bundle_user_agg_beta"]], [conf["bi_user_bundle_agg_beta"]]):
         log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
         run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
         checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
@@ -113,7 +113,9 @@ def main(args=None):
 
         conf["c_lambda"] = c_lambda
         conf["c_temp"] = c_temp
-        settings += [str(c_lambda), str(c_temp)]
+        conf["ui_bundle_user_agg_beta"] = ui_beta
+        conf["bi_user_bundle_agg_beta"] = bi_beta
+        settings += [str(c_lambda), str(c_temp), str(ui_beta), str(bi_beta)]
 
         setting = "_".join(settings)
 

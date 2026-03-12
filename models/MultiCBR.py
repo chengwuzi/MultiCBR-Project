@@ -172,6 +172,9 @@ class MultiCBR(nn.Module):
                 if isinstance(m, nn.Linear):
                     nn.init.xavier_normal_(m.weight)
                     nn.init.constant_(m.bias, 0)
+
+            # Initialize last layer to match modal_weight
+            self.init_gate_with_modal_weight(self.user_fusion_gate)
             self.user_fusion_gate.to(self.device)
 
         # Bundle side adaptive fusion gate
@@ -187,7 +190,31 @@ class MultiCBR(nn.Module):
                 if isinstance(m, nn.Linear):
                     nn.init.xavier_normal_(m.weight)
                     nn.init.constant_(m.bias, 0)
+
+            # Initialize last layer to match modal_weight
+            self.init_gate_with_modal_weight(self.bundle_fusion_gate)
             self.bundle_fusion_gate.to(self.device)
+
+
+    def init_gate_with_modal_weight(self, gate_net):
+        # Get modal weights from config
+        modal_weight = torch.FloatTensor(self.fusion_weights['modal_weight']).to(self.device)
+
+        # Calculate initial bias: log(weight + eps)
+        # Using epsilon to avoid log(0)
+        eps = 1e-12
+        bias_init = torch.log(modal_weight + eps)
+
+        # The last module in the sequential container is the output Linear layer
+        last_layer = gate_net[-1]
+
+        if isinstance(last_layer, nn.Linear):
+            # Initialize weights to 0
+            nn.init.zeros_(last_layer.weight)
+
+            # Initialize bias to log(modal_weight)
+            with torch.no_grad():
+                last_layer.bias.copy_(bias_init)
 
 
     def compute_adaptive_weights(self, features_list, gate_net):

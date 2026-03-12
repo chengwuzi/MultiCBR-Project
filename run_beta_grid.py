@@ -22,14 +22,50 @@ def run_experiment(ui_beta, bi_beta):
     print(f"Running: {' '.join(cmd)}")
     
     try:
-        # 使用 subprocess.run 捕获输出
-        result = subprocess.run(
+        # 使用 subprocess.Popen 实时捕获输出并显示
+        process = subprocess.Popen(
             cmd,
-            capture_output=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
             text=True,
-            check=False # 不让非零退出码抛出异常，以便记录错误日志
+            bufsize=1  # 行缓冲
         )
-        return result
+
+        stdout_lines = []
+        stderr_lines = []
+
+        # 实时读取 stdout 并打印
+        # 注意：这里会阻塞直到子进程结束，或者 stdout 关闭
+        # 为了更完美的实时显示，通常需要多线程或 select，但简单起见，我们优先处理 stdout
+        # 另一种简单方法是让 stdout 直接继承父进程，但那样我们就捕获不到内容用于写入文件了
+        # 下面采用一种折中方案：逐行读取并 print，同时保存到 list
+        
+        while True:
+            line = process.stdout.readline()
+            if not line and process.poll() is not None:
+                break
+            if line:
+                print(line, end='') # 实时打印到控制台
+                stdout_lines.append(line)
+        
+        # 读取剩余的 stderr
+        stderr_content = process.stderr.read()
+        if stderr_content:
+            print(stderr_content, end='', file=sys.stderr)
+            stderr_lines = stderr_content.splitlines(keepends=True)
+
+        returncode = process.poll()
+        
+        # 构造一个类似 subprocess.CompletedProcess 的对象返回
+        class CompletedProcess:
+            def __init__(self, args, returncode, stdout, stderr):
+                self.args = args
+                self.returncode = returncode
+                self.stdout = stdout
+                self.stderr = stderr
+        
+        return CompletedProcess(cmd, returncode, "".join(stdout_lines), "".join(stderr_lines))
+
     except Exception as e:
         print(f"Error running command: {e}")
         return None

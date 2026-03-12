@@ -155,6 +155,7 @@ def main(args=None):
         best_metrics, best_perform = init_best_metrics(conf)
         best_epoch = 0
         for epoch in range(conf['epochs']):
+            print(f"Epoch {epoch} Start: {model.get_fusion_weights_str()}")
             epoch_anchor = epoch * batch_cnt
             model.train(True)
             pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader))

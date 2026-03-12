@@ -70,6 +70,10 @@ class MultiCBR(nn.Module):
 
         self.fusion_weights = conf['fusion_weights']
 
+        # To store current weights for visualization
+        self.cur_user_weights = None
+        self.cur_bundle_weights = None
+
         self.init_emb()
         self.init_fusion_weights()
         self.init_adaptive_fusion()
@@ -301,7 +305,7 @@ class MultiCBR(nn.Module):
         return aggregated_feature
 
 
-    def fuse_users_bundles_feature(self, users_feature, bundles_feature):
+    def fuse_users_bundles_feature(self, users_feature, bundles_feature, test=False):
         user_mode = self.fusion_scheme.get("user_mode", "static")
         bundle_mode = self.fusion_scheme.get("bundle_mode", "static")
 
@@ -310,22 +314,48 @@ class MultiCBR(nn.Module):
             user_weights, user_stacked = self.compute_adaptive_weights(users_feature, self.user_fusion_gate)
             # Weighted sum: sum( [N, 3, emb] * [N, 3, 1], dim=1 ) -> [N, emb]
             users_rep = torch.sum(user_stacked * user_weights, dim=1)
+            # Store mean weights for visualization: [N, 3, 1] -> [3]
+            if not test:
+                self.cur_user_weights = user_weights.mean(dim=0).squeeze().detach().cpu().numpy()
         else:
             # Static fusion
             users_stacked = torch.stack(users_feature, dim=0) # [3, N, emb]
             # self.modal_coefs: [3, 1, 1]
             users_rep = torch.sum(users_stacked * self.modal_coefs, dim=0)
+            if not test:
+                self.cur_user_weights = self.modal_coefs.squeeze().detach().cpu().numpy()
 
         # --- Bundle Fusion ---
         if bundle_mode == "adaptive":
             bundle_weights, bundle_stacked = self.compute_adaptive_weights(bundles_feature, self.bundle_fusion_gate)
             bundles_rep = torch.sum(bundle_stacked * bundle_weights, dim=1)
+            if not test:
+                self.cur_bundle_weights = bundle_weights.mean(dim=0).squeeze().detach().cpu().numpy()
         else:
             # Static fusion
             bundles_stacked = torch.stack(bundles_feature, dim=0)
             bundles_rep = torch.sum(bundles_stacked * self.modal_coefs, dim=0)
+            if not test:
+                self.cur_bundle_weights = self.modal_coefs.squeeze().detach().cpu().numpy()
 
         return users_rep, bundles_rep
+
+
+    def get_fusion_weights_str(self):
+        # Format helper
+        def fmt(w):
+            if w is None:
+                # Fallback to initial static weights if not yet computed
+                w = np.array(self.conf['fusion_weights']['modal_weight'])
+            return f"[UB: {w[0]:.4f}, UI: {w[1]:.4f}, BI: {w[2]:.4f}]"
+
+        u_str = fmt(self.cur_user_weights)
+        b_str = fmt(self.cur_bundle_weights)
+        
+        user_mode = self.fusion_scheme.get("user_mode", "static")
+        bundle_mode = self.fusion_scheme.get("bundle_mode", "static")
+        
+        return f"Fusion Weights (User-{user_mode}: {u_str}, Bundle-{bundle_mode}: {b_str})"
 
 
     def get_multi_modal_representations(self, test=False):
@@ -354,7 +384,7 @@ class MultiCBR(nn.Module):
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]
 
-        users_rep, bundles_rep = self.fuse_users_bundles_feature(users_feature, bundles_feature)
+        users_rep, bundles_rep = self.fuse_users_bundles_feature(users_feature, bundles_feature, test=test)
 
         return users_rep, bundles_rep
 

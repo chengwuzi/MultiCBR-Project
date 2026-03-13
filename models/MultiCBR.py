@@ -133,15 +133,56 @@ class MultiCBR(nn.Module):
             "The number of layer fusion weights does not correspond to number of layers"
 
         modal_coefs = torch.FloatTensor(self.fusion_weights['modal_weight'])
-        UB_layer_coefs = torch.FloatTensor(self.fusion_weights['UB_layer'])
-        UI_layer_coefs = torch.FloatTensor(self.fusion_weights['UI_layer'])
-        BI_layer_coefs = torch.FloatTensor(self.fusion_weights['BI_layer'])
+        
+        # --- Start of Modification: Adaptive Residual Layer Aggregation ---
+        # 1. Base weights (not trainable, from config)
+        self.register_buffer('UB_layer_base', torch.FloatTensor(self.fusion_weights['UB_layer']))
+        self.register_buffer('UI_layer_base', torch.FloatTensor(self.fusion_weights['UI_layer']))
+        self.register_buffer('BI_layer_base', torch.FloatTensor(self.fusion_weights['BI_layer']))
 
+        # 2. Delta weights (trainable, init to 0)
+        self.UB_layer_delta = nn.Parameter(torch.zeros(self.num_layers + 1))
+        self.UI_layer_delta = nn.Parameter(torch.zeros(self.num_layers + 1))
+        self.BI_layer_delta = nn.Parameter(torch.zeros(self.num_layers + 1))
+        
+        # 3. Modal weights (keep as non-trainable per original logic)
         self.modal_coefs = modal_coefs.unsqueeze(-1).unsqueeze(-1).to(self.device)
+        # --- End of Modification ---
 
-        self.UB_layer_coefs = UB_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
-        self.UI_layer_coefs = UI_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
-        self.BI_layer_coefs = BI_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
+
+    def get_adaptive_layer_coefs(self, view_name):
+        # Adaptive Residual Layer Aggregation: 
+        # alpha_final = softmax(log(alpha_base + epsilon) + delta)
+        
+        if view_name == "UB":
+            base = self.UB_layer_base
+            delta = self.UB_layer_delta
+        elif view_name == "UI":
+            base = self.UI_layer_base
+            delta = self.UI_layer_delta
+        elif view_name == "BI":
+            base = self.BI_layer_base
+            delta = self.BI_layer_delta
+        else:
+            raise ValueError(f"Unknown view name: {view_name}")
+
+        # Get epsilon from config (default 1e-8 for safety)
+        adaptive_conf = self.conf.get("adaptive_layer_fusion", {})
+        if not adaptive_conf.get("enable", True): 
+             # Fallback to base weights (reshape to [1, num_layers+1, 1])
+             return base.unsqueeze(0).unsqueeze(-1)
+
+        epsilon = adaptive_conf.get("epsilon", 1e-8)
+        
+        # Calculate adaptive weights
+        # log(base) + delta
+        log_base = torch.log(base + epsilon)
+        logits = log_base + delta
+        
+        weights = torch.softmax(logits, dim=0)
+        
+        # Reshape to [1, num_layers+1, 1] for broadcasting in propagate
+        return weights.unsqueeze(0).unsqueeze(-1)
 
 
     def get_propagation_graph(self, bipartite_graph, modification_ratio=0):
@@ -221,26 +262,31 @@ class MultiCBR(nn.Module):
 
 
     def get_multi_modal_representations(self, test=False):
+        # Get adaptive layer coefficients for this forward pass
+        UB_layer_coefs = self.get_adaptive_layer_coefs("UB")
+        UI_layer_coefs = self.get_adaptive_layer_coefs("UI")
+        BI_layer_coefs = self.get_adaptive_layer_coefs("BI")
+
         #  =============================  UB graph propagation  =============================
         if test:
-            UB_users_feature, UB_bundles_feature = self.propagate(self.UB_propagation_graph_ori, self.users_feature, self.bundles_feature, "UB", self.UB_layer_coefs, test)
+            UB_users_feature, UB_bundles_feature = self.propagate(self.UB_propagation_graph_ori, self.users_feature, self.bundles_feature, "UB", UB_layer_coefs, test)
         else:
-            UB_users_feature, UB_bundles_feature = self.propagate(self.UB_propagation_graph, self.users_feature, self.bundles_feature, "UB", self.UB_layer_coefs, test)
+            UB_users_feature, UB_bundles_feature = self.propagate(self.UB_propagation_graph, self.users_feature, self.bundles_feature, "UB", UB_layer_coefs, test)
 
         #  =============================  UI graph propagation  =============================
         if test:
-            UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph_ori, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
+            UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph_ori, self.users_feature, self.items_feature, "UI", UI_layer_coefs, test)
             UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_ori, UI_items_feature, "BI", test)
         else:
-            UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
+            UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", UI_layer_coefs, test)
             UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
 
         #  =============================  BI graph propagation  =============================
         if test:
-            BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph_ori, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
+            BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph_ori, self.bundles_feature, self.items_feature, "BI", BI_layer_coefs, test)
             BI_users_feature = self.aggregate(self.UI_aggregation_graph_ori, BI_items_feature, "UI", test)
         else:
-            BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
+            BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph, self.bundles_feature, self.items_feature, "BI", BI_layer_coefs, test)
             BI_users_feature = self.aggregate(self.UI_aggregation_graph, BI_items_feature, "UI", test)
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]

@@ -16,6 +16,18 @@ from utility import Datasets
 from models.MultiCBR import MultiCBR
 
 
+def print_adaptive_layer_weights(model):
+    # Log adaptive layer weights if available
+    if hasattr(model, 'get_adaptive_layer_coefs'):
+        print("\n[Adaptive Layer Weights]")
+        with torch.no_grad():
+            for view in ["UB", "UI", "BI"]:
+                coefs = model.get_adaptive_layer_coefs(view).squeeze().cpu().numpy()
+                # Format to 4 decimal places
+                coefs_str = ", ".join([f"{x:.4f}" for x in coefs])
+                print(f"  {view}: [{coefs_str}]")
+
+
 def get_cmd():
     parser = argparse.ArgumentParser()
     # experimental settings
@@ -177,6 +189,10 @@ def main(args=None):
                     metrics = {}
                     metrics["val"] = test(model, dataset.val_loader, conf)
                     metrics["test"] = test(model, dataset.test_loader, conf)
+                    
+                    # Log current adaptive weights
+                    print_adaptive_layer_weights(model)
+                    
                     best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
 
 

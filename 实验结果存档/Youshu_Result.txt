@@ -1676,3 +1676,812 @@ top20 as the final evaluation standard
 All experiments finished. Results saved to grid_search_results.txt
 
 进程已结束，退出代码为 0
+
+
+
+
+
+
+
+
+——————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+
+C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -X pycache_prefix=C:\Users\admin\AppData\Local\JetBrains\PyCharmCE2024.2\cpython-cache "C:/Program Files/JetBrains/PyCharm Community Edition 2024.2.1/plugins/python-ce/helpers/pydev/pydevd.py" --multiprocess --qt-support=auto --client 127.0.0.1 --port 64652 --file C:\Users\admin\PycharmProjects\MultiCBR-Project\run_beta_grid.py
+已连接到 pydev 调试器(内部版本号 242.21829.153)Total combinations to run: 2
+
+[1/2] Testing ui_beta=0.0, bi_beta=0.15
+Running: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset Youshu --ui_bundle_user_agg_beta 0.0 --bi_user_bundle_agg_beta 0.15 --epochs 100
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 37.02934265136719
+Non-zero rows 1.0
+Non-zero columns 0.8566981995727799
+Matrix density 0.0011299769286862884
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 17.230377197265625
+Non-zero rows 0.9958950118173903
+Non-zero columns 0.641867561794324
+Matrix density 0.0005257972814327529
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 4.281129360198975
+Non-zero rows 0.3680806070406767
+Non-zero columns 0.8645986166422134
+Matrix density 0.0008973233061660289
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 0.6454783082008362
+Non-zero rows 0.3680806070406767
+Non-zero columns 0.34835464263257176
+Matrix density 0.00013529203381263145
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 1.2123398780822754
+Non-zero rows 0.3680806070406767
+Non-zero columns 0.5017815971494446
+Matrix density 0.0002541060245785134
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.0, 'bi_user_bundle_agg_beta': 0.15, 'UB_ratios': [0.2], 'UI_ratios': [0.1], 'BI_ratios': [0.1], 'fusion_weights': {'modal_weight': [0.35, 0.15, 0.5], 'UB_layer': [0.7, 0.2, 0.1], 'UI_layer': [0.6, 0.2, 0.2], 'BI_layer': [0.6, 0.1, 0.3]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.04], 'c_temps': [0.23], 'epochs': 100, 'test_interval': 5, 'dataset': 'Youshu', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 8039, 'num_bundles': 4771, 'num_items': 32770, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+2026-03-13 11:25:32, Top_10, Val:  recall: 0.071025, ndcg: 0.041479
+2026-03-13 11:25:32, Top_10, Test: recall: 0.064230, ndcg: 0.046823
+--------------------
+2026-03-13 11:25:32, Top_20, Val:  recall: 0.104377, ndcg: 0.050737
+2026-03-13 11:25:32, Top_20, Test: recall: 0.096443, ndcg: 0.056165
+--------------------
+2026-03-13 11:25:32, Top_40, Val:  recall: 0.150852, ndcg: 0.061448
+2026-03-13 11:25:32, Top_40, Test: recall: 0.141001, ndcg: 0.068407
+--------------------
+2026-03-13 11:25:32, Top_80, Val:  recall: 0.209458, ndcg: 0.072723
+2026-03-13 11:25:32, Top_80, Test: recall: 0.206960, ndcg: 0.083226
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:25:32, Best in epoch 4, TOP 10: REC_V=0.07102, NDCG_V=0.04148
+2026-03-13 11:25:32, Best in epoch 4, TOP 10: REC_T=0.06423, NDCG_T=0.04682
+2026-03-13 11:25:32, Best in epoch 4, TOP 20: REC_V=0.10438, NDCG_V=0.05074
+2026-03-13 11:25:32, Best in epoch 4, TOP 20: REC_T=0.09644, NDCG_T=0.05617
+2026-03-13 11:25:32, Best in epoch 4, TOP 40: REC_V=0.15085, NDCG_V=0.06145
+2026-03-13 11:25:32, Best in epoch 4, TOP 40: REC_T=0.14100, NDCG_T=0.06841
+2026-03-13 11:25:32, Best in epoch 4, TOP 80: REC_V=0.20946, NDCG_V=0.07272
+2026-03-13 11:25:32, Best in epoch 4, TOP 80: REC_T=0.20696, NDCG_T=0.08323
+2026-03-13 11:28:04, Top_10, Val:  recall: 0.112929, ndcg: 0.066744
+2026-03-13 11:28:04, Top_10, Test: recall: 0.100311, ndcg: 0.070542
+--------------------
+2026-03-13 11:28:04, Top_20, Val:  recall: 0.162504, ndcg: 0.080766
+2026-03-13 11:28:04, Top_20, Test: recall: 0.151797, ndcg: 0.085409
+--------------------
+2026-03-13 11:28:04, Top_40, Val:  recall: 0.216051, ndcg: 0.093211
+2026-03-13 11:28:04, Top_40, Test: recall: 0.213250, ndcg: 0.102107
+--------------------
+2026-03-13 11:28:04, Top_80, Val:  recall: 0.287600, ndcg: 0.106891
+2026-03-13 11:28:04, Top_80, Test: recall: 0.289062, ndcg: 0.119619
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:28:04, Best in epoch 9, TOP 10: REC_V=0.11293, NDCG_V=0.06674
+2026-03-13 11:28:04, Best in epoch 9, TOP 10: REC_T=0.10031, NDCG_T=0.07054
+2026-03-13 11:28:04, Best in epoch 9, TOP 20: REC_V=0.16250, NDCG_V=0.08077
+2026-03-13 11:28:04, Best in epoch 9, TOP 20: REC_T=0.15180, NDCG_T=0.08541
+2026-03-13 11:28:04, Best in epoch 9, TOP 40: REC_V=0.21605, NDCG_V=0.09321
+2026-03-13 11:28:04, Best in epoch 9, TOP 40: REC_T=0.21325, NDCG_T=0.10211
+2026-03-13 11:28:04, Best in epoch 9, TOP 80: REC_V=0.28760, NDCG_V=0.10689
+2026-03-13 11:28:04, Best in epoch 9, TOP 80: REC_T=0.28906, NDCG_T=0.11962
+2026-03-13 11:30:39, Top_10, Val:  recall: 0.142663, ndcg: 0.086316
+2026-03-13 11:30:39, Top_10, Test: recall: 0.138202, ndcg: 0.096778
+--------------------
+2026-03-13 11:30:39, Top_20, Val:  recall: 0.206986, ndcg: 0.104353
+2026-03-13 11:30:39, Top_20, Test: recall: 0.204662, ndcg: 0.115687
+--------------------
+2026-03-13 11:30:39, Top_40, Val:  recall: 0.286773, ndcg: 0.122681
+2026-03-13 11:30:39, Top_40, Test: recall: 0.291919, ndcg: 0.138983
+--------------------
+2026-03-13 11:30:39, Top_80, Val:  recall: 0.366807, ndcg: 0.138181
+2026-03-13 11:30:39, Top_80, Test: recall: 0.377262, ndcg: 0.158548
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:30:39, Best in epoch 14, TOP 10: REC_V=0.14266, NDCG_V=0.08632
+2026-03-13 11:30:39, Best in epoch 14, TOP 10: REC_T=0.13820, NDCG_T=0.09678
+2026-03-13 11:30:39, Best in epoch 14, TOP 20: REC_V=0.20699, NDCG_V=0.10435
+2026-03-13 11:30:39, Best in epoch 14, TOP 20: REC_T=0.20466, NDCG_T=0.11569
+2026-03-13 11:30:39, Best in epoch 14, TOP 40: REC_V=0.28677, NDCG_V=0.12268
+2026-03-13 11:30:39, Best in epoch 14, TOP 40: REC_T=0.29192, NDCG_T=0.13898
+2026-03-13 11:30:39, Best in epoch 14, TOP 80: REC_V=0.36681, NDCG_V=0.13818
+2026-03-13 11:30:39, Best in epoch 14, TOP 80: REC_T=0.37726, NDCG_T=0.15855
+2026-03-13 11:33:11, Top_10, Val:  recall: 0.163327, ndcg: 0.100062
+2026-03-13 11:33:11, Top_10, Test: recall: 0.167528, ndcg: 0.116022
+--------------------
+2026-03-13 11:33:11, Top_20, Val:  recall: 0.243016, ndcg: 0.122142
+2026-03-13 11:33:11, Top_20, Test: recall: 0.241380, ndcg: 0.137205
+--------------------
+2026-03-13 11:33:11, Top_40, Val:  recall: 0.337647, ndcg: 0.143883
+2026-03-13 11:33:11, Top_40, Test: recall: 0.339437, ndcg: 0.163340
+--------------------
+2026-03-13 11:33:11, Top_80, Val:  recall: 0.431052, ndcg: 0.162117
+2026-03-13 11:33:11, Top_80, Test: recall: 0.446275, ndcg: 0.187593
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:33:11, Best in epoch 19, TOP 10: REC_V=0.16333, NDCG_V=0.10006
+2026-03-13 11:33:11, Best in epoch 19, TOP 10: REC_T=0.16753, NDCG_T=0.11602
+2026-03-13 11:33:11, Best in epoch 19, TOP 20: REC_V=0.24302, NDCG_V=0.12214
+2026-03-13 11:33:11, Best in epoch 19, TOP 20: REC_T=0.24138, NDCG_T=0.13721
+2026-03-13 11:33:11, Best in epoch 19, TOP 40: REC_V=0.33765, NDCG_V=0.14388
+2026-03-13 11:33:11, Best in epoch 19, TOP 40: REC_T=0.33944, NDCG_T=0.16334
+2026-03-13 11:33:11, Best in epoch 19, TOP 80: REC_V=0.43105, NDCG_V=0.16212
+2026-03-13 11:33:11, Best in epoch 19, TOP 80: REC_T=0.44628, NDCG_T=0.18759
+2026-03-13 11:35:46, Top_10, Val:  recall: 0.180208, ndcg: 0.110223
+2026-03-13 11:35:46, Top_10, Test: recall: 0.183467, ndcg: 0.127953
+--------------------
+2026-03-13 11:35:46, Top_20, Val:  recall: 0.254814, ndcg: 0.131140
+2026-03-13 11:35:46, Top_20, Test: recall: 0.263571, ndcg: 0.150726
+--------------------
+2026-03-13 11:35:46, Top_40, Val:  recall: 0.364367, ndcg: 0.156254
+2026-03-13 11:35:46, Top_40, Test: recall: 0.364567, ndcg: 0.178222
+--------------------
+2026-03-13 11:35:46, Top_80, Val:  recall: 0.469942, ndcg: 0.176730
+2026-03-13 11:35:46, Top_80, Test: recall: 0.478861, ndcg: 0.204156
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:35:46, Best in epoch 24, TOP 10: REC_V=0.18021, NDCG_V=0.11022
+2026-03-13 11:35:46, Best in epoch 24, TOP 10: REC_T=0.18347, NDCG_T=0.12795
+2026-03-13 11:35:46, Best in epoch 24, TOP 20: REC_V=0.25481, NDCG_V=0.13114
+2026-03-13 11:35:46, Best in epoch 24, TOP 20: REC_T=0.26357, NDCG_T=0.15073
+2026-03-13 11:35:46, Best in epoch 24, TOP 40: REC_V=0.36437, NDCG_V=0.15625
+2026-03-13 11:35:46, Best in epoch 24, TOP 40: REC_T=0.36457, NDCG_T=0.17822
+2026-03-13 11:35:46, Best in epoch 24, TOP 80: REC_V=0.46994, NDCG_V=0.17673
+2026-03-13 11:35:46, Best in epoch 24, TOP 80: REC_T=0.47886, NDCG_T=0.20416
+2026-03-13 11:38:14, Top_10, Val:  recall: 0.184665, ndcg: 0.113354
+2026-03-13 11:38:14, Top_10, Test: recall: 0.194250, ndcg: 0.136751
+--------------------
+2026-03-13 11:38:14, Top_20, Val:  recall: 0.265137, ndcg: 0.135937
+2026-03-13 11:38:14, Top_20, Test: recall: 0.274553, ndcg: 0.159811
+--------------------
+2026-03-13 11:38:14, Top_40, Val:  recall: 0.374145, ndcg: 0.161042
+2026-03-13 11:38:14, Top_40, Test: recall: 0.374436, ndcg: 0.187057
+--------------------
+2026-03-13 11:38:14, Top_80, Val:  recall: 0.481792, ndcg: 0.182081
+2026-03-13 11:38:14, Top_80, Test: recall: 0.487874, ndcg: 0.213117
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:38:14, Best in epoch 29, TOP 10: REC_V=0.18466, NDCG_V=0.11335
+2026-03-13 11:38:14, Best in epoch 29, TOP 10: REC_T=0.19425, NDCG_T=0.13675
+2026-03-13 11:38:14, Best in epoch 29, TOP 20: REC_V=0.26514, NDCG_V=0.13594
+2026-03-13 11:38:14, Best in epoch 29, TOP 20: REC_T=0.27455, NDCG_T=0.15981
+2026-03-13 11:38:14, Best in epoch 29, TOP 40: REC_V=0.37414, NDCG_V=0.16104
+2026-03-13 11:38:14, Best in epoch 29, TOP 40: REC_T=0.37444, NDCG_T=0.18706
+2026-03-13 11:38:14, Best in epoch 29, TOP 80: REC_V=0.48179, NDCG_V=0.18208
+2026-03-13 11:38:14, Best in epoch 29, TOP 80: REC_T=0.48787, NDCG_T=0.21312
+2026-03-13 11:40:47, Top_10, Val:  recall: 0.193053, ndcg: 0.117527
+2026-03-13 11:40:47, Top_10, Test: recall: 0.194921, ndcg: 0.138727
+--------------------
+2026-03-13 11:40:47, Top_20, Val:  recall: 0.270228, ndcg: 0.139329
+2026-03-13 11:40:47, Top_20, Test: recall: 0.275511, ndcg: 0.161718
+--------------------
+2026-03-13 11:40:47, Top_40, Val:  recall: 0.385441, ndcg: 0.165730
+2026-03-13 11:40:47, Top_40, Test: recall: 0.376480, ndcg: 0.189349
+--------------------
+2026-03-13 11:40:47, Top_80, Val:  recall: 0.492246, ndcg: 0.186491
+2026-03-13 11:40:47, Top_80, Test: recall: 0.494080, ndcg: 0.216342
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:40:47, Best in epoch 34, TOP 10: REC_V=0.19305, NDCG_V=0.11753
+2026-03-13 11:40:47, Best in epoch 34, TOP 10: REC_T=0.19492, NDCG_T=0.13873
+2026-03-13 11:40:47, Best in epoch 34, TOP 20: REC_V=0.27023, NDCG_V=0.13933
+2026-03-13 11:40:47, Best in epoch 34, TOP 20: REC_T=0.27551, NDCG_T=0.16172
+2026-03-13 11:40:47, Best in epoch 34, TOP 40: REC_V=0.38544, NDCG_V=0.16573
+2026-03-13 11:40:47, Best in epoch 34, TOP 40: REC_T=0.37648, NDCG_T=0.18935
+2026-03-13 11:40:47, Best in epoch 34, TOP 80: REC_V=0.49225, NDCG_V=0.18649
+2026-03-13 11:40:47, Best in epoch 34, TOP 80: REC_T=0.49408, NDCG_T=0.21634
+2026-03-13 11:43:22, Top_10, Val:  recall: 0.196875, ndcg: 0.118512
+2026-03-13 11:43:22, Top_10, Test: recall: 0.195834, ndcg: 0.140680
+--------------------
+2026-03-13 11:43:22, Top_20, Val:  recall: 0.274925, ndcg: 0.140583
+2026-03-13 11:43:22, Top_20, Test: recall: 0.278887, ndcg: 0.164513
+--------------------
+2026-03-13 11:43:22, Top_40, Val:  recall: 0.388053, ndcg: 0.166550
+2026-03-13 11:43:22, Top_40, Test: recall: 0.382611, ndcg: 0.192552
+--------------------
+2026-03-13 11:43:22, Top_80, Val:  recall: 0.496236, ndcg: 0.187464
+2026-03-13 11:43:22, Top_80, Test: recall: 0.496166, ndcg: 0.218677
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:43:22, Best in epoch 39, TOP 10: REC_V=0.19688, NDCG_V=0.11851
+2026-03-13 11:43:22, Best in epoch 39, TOP 10: REC_T=0.19583, NDCG_T=0.14068
+2026-03-13 11:43:22, Best in epoch 39, TOP 20: REC_V=0.27492, NDCG_V=0.14058
+2026-03-13 11:43:22, Best in epoch 39, TOP 20: REC_T=0.27889, NDCG_T=0.16451
+2026-03-13 11:43:22, Best in epoch 39, TOP 40: REC_V=0.38805, NDCG_V=0.16655
+2026-03-13 11:43:22, Best in epoch 39, TOP 40: REC_T=0.38261, NDCG_T=0.19255
+2026-03-13 11:43:22, Best in epoch 39, TOP 80: REC_V=0.49624, NDCG_V=0.18746
+2026-03-13 11:43:22, Best in epoch 39, TOP 80: REC_T=0.49617, NDCG_T=0.21868
+2026-03-13 11:45:52, Top_10, Val:  recall: 0.198264, ndcg: 0.118882
+2026-03-13 11:45:52, Top_10, Test: recall: 0.198226, ndcg: 0.142276
+--------------------
+2026-03-13 11:45:52, Top_20, Val:  recall: 0.278310, ndcg: 0.141363
+2026-03-13 11:45:52, Top_20, Test: recall: 0.278722, ndcg: 0.165396
+--------------------
+2026-03-13 11:45:52, Top_40, Val:  recall: 0.389863, ndcg: 0.166895
+2026-03-13 11:45:52, Top_40, Test: recall: 0.383191, ndcg: 0.193664
+--------------------
+2026-03-13 11:45:52, Top_80, Val:  recall: 0.494658, ndcg: 0.187292
+2026-03-13 11:45:52, Top_80, Test: recall: 0.499932, ndcg: 0.220451
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:45:52, Best in epoch 44, TOP 10: REC_V=0.19826, NDCG_V=0.11888
+2026-03-13 11:45:52, Best in epoch 44, TOP 10: REC_T=0.19823, NDCG_T=0.14228
+2026-03-13 11:45:52, Best in epoch 44, TOP 20: REC_V=0.27831, NDCG_V=0.14136
+2026-03-13 11:45:52, Best in epoch 44, TOP 20: REC_T=0.27872, NDCG_T=0.16540
+2026-03-13 11:45:52, Best in epoch 44, TOP 40: REC_V=0.38986, NDCG_V=0.16689
+2026-03-13 11:45:52, Best in epoch 44, TOP 40: REC_T=0.38319, NDCG_T=0.19366
+2026-03-13 11:45:52, Best in epoch 44, TOP 80: REC_V=0.49466, NDCG_V=0.18729
+2026-03-13 11:45:52, Best in epoch 44, TOP 80: REC_T=0.49993, NDCG_T=0.22045
+2026-03-13 11:48:20, Top_10, Val:  recall: 0.197257, ndcg: 0.117783
+2026-03-13 11:48:20, Top_10, Test: recall: 0.198143, ndcg: 0.143892
+--------------------
+2026-03-13 11:48:20, Top_20, Val:  recall: 0.277637, ndcg: 0.140441
+2026-03-13 11:48:20, Top_20, Test: recall: 0.282540, ndcg: 0.168040
+--------------------
+2026-03-13 11:48:20, Top_40, Val:  recall: 0.390969, ndcg: 0.166337
+2026-03-13 11:48:20, Top_40, Test: recall: 0.380605, ndcg: 0.194770
+--------------------
+2026-03-13 11:48:20, Top_80, Val:  recall: 0.496393, ndcg: 0.186880
+2026-03-13 11:48:20, Top_80, Test: recall: 0.498570, ndcg: 0.222026
+--------------------
+top20 as the final evaluation standard
+2026-03-13 11:50:49, Top_10, Val:  recall: 0.198518, ndcg: 0.117967
+2026-03-13 11:50:49, Top_10, Test: recall: 0.198258, ndcg: 0.143924
+--------------------
+2026-03-13 11:50:49, Top_20, Val:  recall: 0.278625, ndcg: 0.140799
+2026-03-13 11:50:49, Top_20, Test: recall: 0.282219, ndcg: 0.167932
+--------------------
+2026-03-13 11:50:49, Top_40, Val:  recall: 0.390452, ndcg: 0.166295
+2026-03-13 11:50:49, Top_40, Test: recall: 0.382745, ndcg: 0.195290
+--------------------
+2026-03-13 11:50:49, Top_80, Val:  recall: 0.500248, ndcg: 0.187588
+2026-03-13 11:50:49, Top_80, Test: recall: 0.500429, ndcg: 0.222403
+--------------------
+top20 as the final evaluation standard
+2026-03-13 11:53:18, Top_10, Val:  recall: 0.200474, ndcg: 0.118006
+2026-03-13 11:53:18, Top_10, Test: recall: 0.197398, ndcg: 0.145410
+--------------------
+2026-03-13 11:53:18, Top_20, Val:  recall: 0.282575, ndcg: 0.141305
+2026-03-13 11:53:18, Top_20, Test: recall: 0.282406, ndcg: 0.169676
+--------------------
+2026-03-13 11:53:18, Top_40, Val:  recall: 0.388627, ndcg: 0.165662
+2026-03-13 11:53:18, Top_40, Test: recall: 0.385222, ndcg: 0.197531
+--------------------
+2026-03-13 11:53:18, Top_80, Val:  recall: 0.502412, ndcg: 0.187640
+2026-03-13 11:53:18, Top_80, Test: recall: 0.501760, ndcg: 0.224486
+--------------------
+top20 as the final evaluation standard
+2026-03-13 11:55:48, Top_10, Val:  recall: 0.200145, ndcg: 0.118188
+2026-03-13 11:55:48, Top_10, Test: recall: 0.200705, ndcg: 0.146146
+--------------------
+2026-03-13 11:55:48, Top_20, Val:  recall: 0.283540, ndcg: 0.141909
+2026-03-13 11:55:48, Top_20, Test: recall: 0.281597, ndcg: 0.169433
+--------------------
+2026-03-13 11:55:48, Top_40, Val:  recall: 0.390034, ndcg: 0.166293
+2026-03-13 11:55:48, Top_40, Test: recall: 0.387576, ndcg: 0.197983
+--------------------
+2026-03-13 11:55:48, Top_80, Val:  recall: 0.502802, ndcg: 0.188086
+2026-03-13 11:55:48, Top_80, Test: recall: 0.505449, ndcg: 0.225172
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:55:48, Best in epoch 64, TOP 10: REC_V=0.20014, NDCG_V=0.11819
+2026-03-13 11:55:48, Best in epoch 64, TOP 10: REC_T=0.20071, NDCG_T=0.14615
+2026-03-13 11:55:48, Best in epoch 64, TOP 20: REC_V=0.28354, NDCG_V=0.14191
+2026-03-13 11:55:48, Best in epoch 64, TOP 20: REC_T=0.28160, NDCG_T=0.16943
+2026-03-13 11:55:48, Best in epoch 64, TOP 40: REC_V=0.39003, NDCG_V=0.16629
+2026-03-13 11:55:48, Best in epoch 64, TOP 40: REC_T=0.38758, NDCG_T=0.19798
+2026-03-13 11:55:48, Best in epoch 64, TOP 80: REC_V=0.50280, NDCG_V=0.18809
+2026-03-13 11:55:48, Best in epoch 64, TOP 80: REC_T=0.50545, NDCG_T=0.22517
+2026-03-13 11:58:22, Top_10, Val:  recall: 0.202223, ndcg: 0.119424
+2026-03-13 11:58:22, Top_10, Test: recall: 0.201283, ndcg: 0.146376
+--------------------
+2026-03-13 11:58:22, Top_20, Val:  recall: 0.284923, ndcg: 0.142990
+2026-03-13 11:58:22, Top_20, Test: recall: 0.282900, ndcg: 0.169675
+--------------------
+2026-03-13 11:58:22, Top_40, Val:  recall: 0.389667, ndcg: 0.167034
+2026-03-13 11:58:22, Top_40, Test: recall: 0.386928, ndcg: 0.197951
+--------------------
+2026-03-13 11:58:22, Top_80, Val:  recall: 0.503435, ndcg: 0.189062
+2026-03-13 11:58:22, Top_80, Test: recall: 0.506667, ndcg: 0.225490
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 11:58:22, Best in epoch 69, TOP 10: REC_V=0.20222, NDCG_V=0.11942
+2026-03-13 11:58:22, Best in epoch 69, TOP 10: REC_T=0.20128, NDCG_T=0.14638
+2026-03-13 11:58:22, Best in epoch 69, TOP 20: REC_V=0.28492, NDCG_V=0.14299
+2026-03-13 11:58:22, Best in epoch 69, TOP 20: REC_T=0.28290, NDCG_T=0.16967
+2026-03-13 11:58:22, Best in epoch 69, TOP 40: REC_V=0.38967, NDCG_V=0.16703
+2026-03-13 11:58:22, Best in epoch 69, TOP 40: REC_T=0.38693, NDCG_T=0.19795
+2026-03-13 11:58:22, Best in epoch 69, TOP 80: REC_V=0.50343, NDCG_V=0.18906
+2026-03-13 11:58:22, Best in epoch 69, TOP 80: REC_T=0.50667, NDCG_T=0.22549
+2026-03-13 12:00:56, Top_10, Val:  recall: 0.201967, ndcg: 0.119518
+2026-03-13 12:00:56, Top_10, Test: recall: 0.202264, ndcg: 0.145990
+--------------------
+2026-03-13 12:00:56, Top_20, Val:  recall: 0.285904, ndcg: 0.143343
+2026-03-13 12:00:56, Top_20, Test: recall: 0.285034, ndcg: 0.169516
+--------------------
+2026-03-13 12:00:56, Top_40, Val:  recall: 0.389178, ndcg: 0.167117
+2026-03-13 12:00:56, Top_40, Test: recall: 0.387814, ndcg: 0.197509
+--------------------
+2026-03-13 12:00:56, Top_80, Val:  recall: 0.503299, ndcg: 0.189207
+2026-03-13 12:00:56, Top_80, Test: recall: 0.507334, ndcg: 0.225081
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:00:56, Best in epoch 74, TOP 10: REC_V=0.20197, NDCG_V=0.11952
+2026-03-13 12:00:56, Best in epoch 74, TOP 10: REC_T=0.20226, NDCG_T=0.14599
+2026-03-13 12:00:56, Best in epoch 74, TOP 20: REC_V=0.28590, NDCG_V=0.14334
+2026-03-13 12:00:56, Best in epoch 74, TOP 20: REC_T=0.28503, NDCG_T=0.16952
+2026-03-13 12:00:56, Best in epoch 74, TOP 40: REC_V=0.38918, NDCG_V=0.16712
+2026-03-13 12:00:56, Best in epoch 74, TOP 40: REC_T=0.38781, NDCG_T=0.19751
+2026-03-13 12:00:56, Best in epoch 74, TOP 80: REC_V=0.50330, NDCG_V=0.18921
+2026-03-13 12:00:56, Best in epoch 74, TOP 80: REC_T=0.50733, NDCG_T=0.22508
+2026-03-13 12:03:31, Top_10, Val:  recall: 0.202332, ndcg: 0.120029
+2026-03-13 12:03:31, Top_10, Test: recall: 0.199796, ndcg: 0.144873
+--------------------
+2026-03-13 12:03:31, Top_20, Val:  recall: 0.282208, ndcg: 0.142906
+2026-03-13 12:03:31, Top_20, Test: recall: 0.281966, ndcg: 0.168409
+--------------------
+2026-03-13 12:03:31, Top_40, Val:  recall: 0.391248, ndcg: 0.167920
+2026-03-13 12:03:31, Top_40, Test: recall: 0.386504, ndcg: 0.196995
+--------------------
+2026-03-13 12:03:31, Top_80, Val:  recall: 0.506259, ndcg: 0.190103
+2026-03-13 12:03:31, Top_80, Test: recall: 0.509767, ndcg: 0.225238
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:06:04, Top_10, Val:  recall: 0.201799, ndcg: 0.119298
+2026-03-13 12:06:04, Top_10, Test: recall: 0.201874, ndcg: 0.145566
+--------------------
+2026-03-13 12:06:04, Top_20, Val:  recall: 0.283805, ndcg: 0.142651
+2026-03-13 12:06:04, Top_20, Test: recall: 0.283144, ndcg: 0.168581
+--------------------
+2026-03-13 12:06:04, Top_40, Val:  recall: 0.391887, ndcg: 0.167494
+2026-03-13 12:06:04, Top_40, Test: recall: 0.385576, ndcg: 0.196811
+--------------------
+2026-03-13 12:06:04, Top_80, Val:  recall: 0.505377, ndcg: 0.189373
+2026-03-13 12:06:04, Top_80, Test: recall: 0.510795, ndcg: 0.225529
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:08:34, Top_10, Val:  recall: 0.200477, ndcg: 0.119510
+2026-03-13 12:08:34, Top_10, Test: recall: 0.202025, ndcg: 0.146220
+--------------------
+2026-03-13 12:08:34, Top_20, Val:  recall: 0.281692, ndcg: 0.142757
+2026-03-13 12:08:34, Top_20, Test: recall: 0.285991, ndcg: 0.170168
+--------------------
+2026-03-13 12:08:34, Top_40, Val:  recall: 0.391942, ndcg: 0.168127
+2026-03-13 12:08:34, Top_40, Test: recall: 0.388240, ndcg: 0.198202
+--------------------
+2026-03-13 12:08:34, Top_80, Val:  recall: 0.506724, ndcg: 0.190257
+2026-03-13 12:08:34, Top_80, Test: recall: 0.510736, ndcg: 0.226279
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:11:10, Top_10, Val:  recall: 0.200899, ndcg: 0.119546
+2026-03-13 12:11:10, Top_10, Test: recall: 0.202022, ndcg: 0.145802
+--------------------
+2026-03-13 12:11:10, Top_20, Val:  recall: 0.283375, ndcg: 0.142962
+2026-03-13 12:11:10, Top_20, Test: recall: 0.285923, ndcg: 0.169828
+--------------------
+2026-03-13 12:11:10, Top_40, Val:  recall: 0.389890, ndcg: 0.167635
+2026-03-13 12:11:10, Top_40, Test: recall: 0.387947, ndcg: 0.197706
+--------------------
+2026-03-13 12:11:10, Top_80, Val:  recall: 0.508518, ndcg: 0.190465
+2026-03-13 12:11:10, Top_80, Test: recall: 0.511854, ndcg: 0.226145
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:13:44, Top_10, Val:  recall: 0.203924, ndcg: 0.120170
+2026-03-13 12:13:44, Top_10, Test: recall: 0.202843, ndcg: 0.145999
+--------------------
+2026-03-13 12:13:44, Top_20, Val:  recall: 0.282786, ndcg: 0.142520
+2026-03-13 12:13:44, Top_20, Test: recall: 0.286014, ndcg: 0.169731
+--------------------
+2026-03-13 12:13:44, Top_40, Val:  recall: 0.391493, ndcg: 0.167640
+2026-03-13 12:13:44, Top_40, Test: recall: 0.390010, ndcg: 0.198192
+--------------------
+2026-03-13 12:13:44, Top_80, Val:  recall: 0.504223, ndcg: 0.189509
+2026-03-13 12:13:44, Top_80, Test: recall: 0.512849, ndcg: 0.226324
+--------------------
+top20 as the final evaluation standard
+
+[2/2] Testing ui_beta=0.0, bi_beta=0.05
+Running: C:\Users\admin\anaconda3\envs\torch2.4_cuda11.8\python.exe -u train.py --dataset Youshu --ui_bundle_user_agg_beta 0.0 --bi_user_bundle_agg_beta 0.05 --epochs 100
+load config file done!
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 37.02934265136719
+Non-zero rows 1.0
+Non-zero columns 0.8566981995727799
+Matrix density 0.0011299769286862884
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 17.230377197265625
+Non-zero rows 0.9958950118173903
+Non-zero columns 0.641867561794324
+Matrix density 0.0005257972814327529
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 4.281129360198975
+Non-zero rows 0.3680806070406767
+Non-zero columns 0.8645986166422134
+Matrix density 0.0008973233061660289
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 0.6454783082008362
+Non-zero rows 0.3680806070406767
+Non-zero columns 0.34835464263257176
+Matrix density 0.00013529203381263145
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 1.2123398780822754
+Non-zero rows 0.3680806070406767
+Non-zero columns 0.5017815971494446
+Matrix density 0.0002541060245785134
+{'data_path': './datasets', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'ui_bundle_user_agg_beta': 0.0, 'bi_user_bundle_agg_beta': 0.05, 'UB_ratios': [0.2], 'UI_ratios': [0.1], 'BI_ratios': [0.1], 'fusion_weights': {'modal_weight': [0.35, 0.15, 0.5], 'UB_layer': [0.7, 0.2, 0.1], 'UI_layer': [0.6, 0.2, 0.2], 'BI_layer': [0.6, 0.1, 0.3]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.04], 'c_temps': [0.23], 'epochs': 100, 'test_interval': 5, 'dataset': 'Youshu', 'model': 'MultiCBR', 'gpu': '0', 'info': '', 'num_users': 8039, 'num_bundles': 4771, 'num_items': 32770, 'device': device(type='cuda', index=0)}
+C:\Users\admin\PycharmProjects\MultiCBR-Project\models\MultiCBR.py:37: UserWarning: torch.sparse.SparseTensor(indices, values, shape, *, device=) is deprecated.  Please use torch.sparse_coo_tensor(indices, values, shape, dtype=, device=). (Triggered internally at C:\cb\pytorch_1000000000000\work\torch\csrc\utils\tensor_new.cpp:643.)
+  graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+2026-03-13 12:16:26, Top_10, Val:  recall: 0.071880, ndcg: 0.040170
+2026-03-13 12:16:26, Top_10, Test: recall: 0.064946, ndcg: 0.045148
+--------------------
+2026-03-13 12:16:26, Top_20, Val:  recall: 0.107428, ndcg: 0.050040
+2026-03-13 12:16:26, Top_20, Test: recall: 0.100653, ndcg: 0.055369
+--------------------
+2026-03-13 12:16:26, Top_40, Val:  recall: 0.156128, ndcg: 0.061146
+2026-03-13 12:16:26, Top_40, Test: recall: 0.144905, ndcg: 0.067400
+--------------------
+2026-03-13 12:16:26, Top_80, Val:  recall: 0.212325, ndcg: 0.072114
+2026-03-13 12:16:26, Top_80, Test: recall: 0.202192, ndcg: 0.080710
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:16:26, Best in epoch 4, TOP 10: REC_V=0.07188, NDCG_V=0.04017
+2026-03-13 12:16:26, Best in epoch 4, TOP 10: REC_T=0.06495, NDCG_T=0.04515
+2026-03-13 12:16:26, Best in epoch 4, TOP 20: REC_V=0.10743, NDCG_V=0.05004
+2026-03-13 12:16:26, Best in epoch 4, TOP 20: REC_T=0.10065, NDCG_T=0.05537
+2026-03-13 12:16:26, Best in epoch 4, TOP 40: REC_V=0.15613, NDCG_V=0.06115
+2026-03-13 12:16:26, Best in epoch 4, TOP 40: REC_T=0.14490, NDCG_T=0.06740
+2026-03-13 12:16:26, Best in epoch 4, TOP 80: REC_V=0.21233, NDCG_V=0.07211
+2026-03-13 12:16:26, Best in epoch 4, TOP 80: REC_T=0.20219, NDCG_T=0.08071
+2026-03-13 12:18:54, Top_10, Val:  recall: 0.109678, ndcg: 0.064104
+2026-03-13 12:18:54, Top_10, Test: recall: 0.104803, ndcg: 0.074476
+--------------------
+2026-03-13 12:18:54, Top_20, Val:  recall: 0.154746, ndcg: 0.077114
+2026-03-13 12:18:54, Top_20, Test: recall: 0.146288, ndcg: 0.086786
+--------------------
+2026-03-13 12:18:54, Top_40, Val:  recall: 0.209964, ndcg: 0.089894
+2026-03-13 12:18:54, Top_40, Test: recall: 0.204990, ndcg: 0.102658
+--------------------
+2026-03-13 12:18:54, Top_80, Val:  recall: 0.279534, ndcg: 0.103410
+2026-03-13 12:18:54, Top_80, Test: recall: 0.270970, ndcg: 0.117818
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:18:54, Best in epoch 9, TOP 10: REC_V=0.10968, NDCG_V=0.06410
+2026-03-13 12:18:54, Best in epoch 9, TOP 10: REC_T=0.10480, NDCG_T=0.07448
+2026-03-13 12:18:54, Best in epoch 9, TOP 20: REC_V=0.15475, NDCG_V=0.07711
+2026-03-13 12:18:54, Best in epoch 9, TOP 20: REC_T=0.14629, NDCG_T=0.08679
+2026-03-13 12:18:54, Best in epoch 9, TOP 40: REC_V=0.20996, NDCG_V=0.08989
+2026-03-13 12:18:54, Best in epoch 9, TOP 40: REC_T=0.20499, NDCG_T=0.10266
+2026-03-13 12:18:54, Best in epoch 9, TOP 80: REC_V=0.27953, NDCG_V=0.10341
+2026-03-13 12:18:54, Best in epoch 9, TOP 80: REC_T=0.27097, NDCG_T=0.11782
+2026-03-13 12:21:25, Top_10, Val:  recall: 0.142267, ndcg: 0.083913
+2026-03-13 12:21:25, Top_10, Test: recall: 0.138320, ndcg: 0.098752
+--------------------
+2026-03-13 12:21:25, Top_20, Val:  recall: 0.203112, ndcg: 0.100911
+2026-03-13 12:21:25, Top_20, Test: recall: 0.197795, ndcg: 0.115981
+--------------------
+2026-03-13 12:21:25, Top_40, Val:  recall: 0.274977, ndcg: 0.117655
+2026-03-13 12:21:25, Top_40, Test: recall: 0.273348, ndcg: 0.136204
+--------------------
+2026-03-13 12:21:25, Top_80, Val:  recall: 0.353792, ndcg: 0.133021
+2026-03-13 12:21:25, Top_80, Test: recall: 0.352184, ndcg: 0.154221
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:21:25, Best in epoch 14, TOP 10: REC_V=0.14227, NDCG_V=0.08391
+2026-03-13 12:21:25, Best in epoch 14, TOP 10: REC_T=0.13832, NDCG_T=0.09875
+2026-03-13 12:21:25, Best in epoch 14, TOP 20: REC_V=0.20311, NDCG_V=0.10091
+2026-03-13 12:21:25, Best in epoch 14, TOP 20: REC_T=0.19779, NDCG_T=0.11598
+2026-03-13 12:21:25, Best in epoch 14, TOP 40: REC_V=0.27498, NDCG_V=0.11766
+2026-03-13 12:21:25, Best in epoch 14, TOP 40: REC_T=0.27335, NDCG_T=0.13620
+2026-03-13 12:21:25, Best in epoch 14, TOP 80: REC_V=0.35379, NDCG_V=0.13302
+2026-03-13 12:21:25, Best in epoch 14, TOP 80: REC_T=0.35218, NDCG_T=0.15422
+2026-03-13 12:23:50, Top_10, Val:  recall: 0.164110, ndcg: 0.100078
+2026-03-13 12:23:50, Top_10, Test: recall: 0.161049, ndcg: 0.115004
+--------------------
+2026-03-13 12:23:50, Top_20, Val:  recall: 0.234065, ndcg: 0.119763
+2026-03-13 12:23:50, Top_20, Test: recall: 0.234928, ndcg: 0.136352
+--------------------
+2026-03-13 12:23:50, Top_40, Val:  recall: 0.330283, ndcg: 0.142268
+2026-03-13 12:23:50, Top_40, Test: recall: 0.323186, ndcg: 0.160217
+--------------------
+2026-03-13 12:23:50, Top_80, Val:  recall: 0.416723, ndcg: 0.159218
+2026-03-13 12:23:50, Top_80, Test: recall: 0.425962, ndcg: 0.183238
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:23:50, Best in epoch 19, TOP 10: REC_V=0.16411, NDCG_V=0.10008
+2026-03-13 12:23:50, Best in epoch 19, TOP 10: REC_T=0.16105, NDCG_T=0.11500
+2026-03-13 12:23:50, Best in epoch 19, TOP 20: REC_V=0.23407, NDCG_V=0.11976
+2026-03-13 12:23:50, Best in epoch 19, TOP 20: REC_T=0.23493, NDCG_T=0.13635
+2026-03-13 12:23:50, Best in epoch 19, TOP 40: REC_V=0.33028, NDCG_V=0.14227
+2026-03-13 12:23:50, Best in epoch 19, TOP 40: REC_T=0.32319, NDCG_T=0.16022
+2026-03-13 12:23:50, Best in epoch 19, TOP 80: REC_V=0.41672, NDCG_V=0.15922
+2026-03-13 12:23:50, Best in epoch 19, TOP 80: REC_T=0.42596, NDCG_T=0.18324
+2026-03-13 12:26:17, Top_10, Val:  recall: 0.175852, ndcg: 0.105553
+2026-03-13 12:26:17, Top_10, Test: recall: 0.177035, ndcg: 0.125924
+--------------------
+2026-03-13 12:26:17, Top_20, Val:  recall: 0.252455, ndcg: 0.127227
+2026-03-13 12:26:17, Top_20, Test: recall: 0.255227, ndcg: 0.148434
+--------------------
+2026-03-13 12:26:17, Top_40, Val:  recall: 0.361338, ndcg: 0.152271
+2026-03-13 12:26:17, Top_40, Test: recall: 0.353958, ndcg: 0.174965
+--------------------
+2026-03-13 12:26:17, Top_80, Val:  recall: 0.461164, ndcg: 0.171749
+2026-03-13 12:26:17, Top_80, Test: recall: 0.469388, ndcg: 0.201141
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:26:17, Best in epoch 24, TOP 10: REC_V=0.17585, NDCG_V=0.10555
+2026-03-13 12:26:17, Best in epoch 24, TOP 10: REC_T=0.17703, NDCG_T=0.12592
+2026-03-13 12:26:17, Best in epoch 24, TOP 20: REC_V=0.25246, NDCG_V=0.12723
+2026-03-13 12:26:17, Best in epoch 24, TOP 20: REC_T=0.25523, NDCG_T=0.14843
+2026-03-13 12:26:17, Best in epoch 24, TOP 40: REC_V=0.36134, NDCG_V=0.15227
+2026-03-13 12:26:17, Best in epoch 24, TOP 40: REC_T=0.35396, NDCG_T=0.17496
+2026-03-13 12:26:17, Best in epoch 24, TOP 80: REC_V=0.46116, NDCG_V=0.17175
+2026-03-13 12:26:17, Best in epoch 24, TOP 80: REC_T=0.46939, NDCG_T=0.20114
+2026-03-13 12:28:51, Top_10, Val:  recall: 0.184242, ndcg: 0.110396
+2026-03-13 12:28:51, Top_10, Test: recall: 0.186237, ndcg: 0.131720
+--------------------
+2026-03-13 12:28:51, Top_20, Val:  recall: 0.267936, ndcg: 0.133956
+2026-03-13 12:28:51, Top_20, Test: recall: 0.264243, ndcg: 0.153908
+--------------------
+2026-03-13 12:28:51, Top_40, Val:  recall: 0.372895, ndcg: 0.158088
+2026-03-13 12:28:51, Top_40, Test: recall: 0.368365, ndcg: 0.182022
+--------------------
+2026-03-13 12:28:51, Top_80, Val:  recall: 0.476371, ndcg: 0.178333
+2026-03-13 12:28:51, Top_80, Test: recall: 0.488022, ndcg: 0.209032
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:28:51, Best in epoch 29, TOP 10: REC_V=0.18424, NDCG_V=0.11040
+2026-03-13 12:28:51, Best in epoch 29, TOP 10: REC_T=0.18624, NDCG_T=0.13172
+2026-03-13 12:28:51, Best in epoch 29, TOP 20: REC_V=0.26794, NDCG_V=0.13396
+2026-03-13 12:28:51, Best in epoch 29, TOP 20: REC_T=0.26424, NDCG_T=0.15391
+2026-03-13 12:28:51, Best in epoch 29, TOP 40: REC_V=0.37289, NDCG_V=0.15809
+2026-03-13 12:28:51, Best in epoch 29, TOP 40: REC_T=0.36837, NDCG_T=0.18202
+2026-03-13 12:28:51, Best in epoch 29, TOP 80: REC_V=0.47637, NDCG_V=0.17833
+2026-03-13 12:28:51, Best in epoch 29, TOP 80: REC_T=0.48802, NDCG_T=0.20903
+2026-03-13 12:31:27, Top_10, Val:  recall: 0.189895, ndcg: 0.112483
+2026-03-13 12:31:27, Top_10, Test: recall: 0.192287, ndcg: 0.135235
+--------------------
+2026-03-13 12:31:27, Top_20, Val:  recall: 0.276122, ndcg: 0.136652
+2026-03-13 12:31:27, Top_20, Test: recall: 0.274468, ndcg: 0.158896
+--------------------
+2026-03-13 12:31:27, Top_40, Val:  recall: 0.379334, ndcg: 0.160471
+2026-03-13 12:31:27, Top_40, Test: recall: 0.377857, ndcg: 0.186465
+--------------------
+2026-03-13 12:31:27, Top_80, Val:  recall: 0.487870, ndcg: 0.181534
+2026-03-13 12:31:27, Top_80, Test: recall: 0.496703, ndcg: 0.213660
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:31:27, Best in epoch 34, TOP 10: REC_V=0.18989, NDCG_V=0.11248
+2026-03-13 12:31:27, Best in epoch 34, TOP 10: REC_T=0.19229, NDCG_T=0.13524
+2026-03-13 12:31:27, Best in epoch 34, TOP 20: REC_V=0.27612, NDCG_V=0.13665
+2026-03-13 12:31:27, Best in epoch 34, TOP 20: REC_T=0.27447, NDCG_T=0.15890
+2026-03-13 12:31:27, Best in epoch 34, TOP 40: REC_V=0.37933, NDCG_V=0.16047
+2026-03-13 12:31:27, Best in epoch 34, TOP 40: REC_T=0.37786, NDCG_T=0.18646
+2026-03-13 12:31:27, Best in epoch 34, TOP 80: REC_V=0.48787, NDCG_V=0.18153
+2026-03-13 12:31:27, Best in epoch 34, TOP 80: REC_T=0.49670, NDCG_T=0.21366
+2026-03-13 12:34:00, Top_10, Val:  recall: 0.193781, ndcg: 0.114923
+2026-03-13 12:34:00, Top_10, Test: recall: 0.195240, ndcg: 0.138221
+--------------------
+2026-03-13 12:34:00, Top_20, Val:  recall: 0.279514, ndcg: 0.139003
+2026-03-13 12:34:00, Top_20, Test: recall: 0.275132, ndcg: 0.161245
+--------------------
+2026-03-13 12:34:00, Top_40, Val:  recall: 0.377164, ndcg: 0.161817
+2026-03-13 12:34:00, Top_40, Test: recall: 0.380478, ndcg: 0.189228
+--------------------
+2026-03-13 12:34:00, Top_80, Val:  recall: 0.491069, ndcg: 0.183956
+2026-03-13 12:34:00, Top_80, Test: recall: 0.504346, ndcg: 0.217400
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:34:00, Best in epoch 39, TOP 10: REC_V=0.19378, NDCG_V=0.11492
+2026-03-13 12:34:00, Best in epoch 39, TOP 10: REC_T=0.19524, NDCG_T=0.13822
+2026-03-13 12:34:00, Best in epoch 39, TOP 20: REC_V=0.27951, NDCG_V=0.13900
+2026-03-13 12:34:00, Best in epoch 39, TOP 20: REC_T=0.27513, NDCG_T=0.16125
+2026-03-13 12:34:00, Best in epoch 39, TOP 40: REC_V=0.37716, NDCG_V=0.16182
+2026-03-13 12:34:00, Best in epoch 39, TOP 40: REC_T=0.38048, NDCG_T=0.18923
+2026-03-13 12:34:00, Best in epoch 39, TOP 80: REC_V=0.49107, NDCG_V=0.18396
+2026-03-13 12:34:00, Best in epoch 39, TOP 80: REC_T=0.50435, NDCG_T=0.21740
+2026-03-13 12:36:34, Top_10, Val:  recall: 0.193488, ndcg: 0.114580
+2026-03-13 12:36:34, Top_10, Test: recall: 0.196231, ndcg: 0.140447
+--------------------
+2026-03-13 12:36:34, Top_20, Val:  recall: 0.283854, ndcg: 0.139812
+2026-03-13 12:36:34, Top_20, Test: recall: 0.278451, ndcg: 0.164148
+--------------------
+2026-03-13 12:36:34, Top_40, Val:  recall: 0.380623, ndcg: 0.162441
+2026-03-13 12:36:34, Top_40, Test: recall: 0.381995, ndcg: 0.191870
+--------------------
+2026-03-13 12:36:34, Top_80, Val:  recall: 0.498456, ndcg: 0.185151
+2026-03-13 12:36:34, Top_80, Test: recall: 0.505915, ndcg: 0.219964
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:36:34, Best in epoch 44, TOP 10: REC_V=0.19349, NDCG_V=0.11458
+2026-03-13 12:36:34, Best in epoch 44, TOP 10: REC_T=0.19623, NDCG_T=0.14045
+2026-03-13 12:36:34, Best in epoch 44, TOP 20: REC_V=0.28385, NDCG_V=0.13981
+2026-03-13 12:36:34, Best in epoch 44, TOP 20: REC_T=0.27845, NDCG_T=0.16415
+2026-03-13 12:36:34, Best in epoch 44, TOP 40: REC_V=0.38062, NDCG_V=0.16244
+2026-03-13 12:36:34, Best in epoch 44, TOP 40: REC_T=0.38200, NDCG_T=0.19187
+2026-03-13 12:36:34, Best in epoch 44, TOP 80: REC_V=0.49846, NDCG_V=0.18515
+2026-03-13 12:36:34, Best in epoch 44, TOP 80: REC_T=0.50591, NDCG_T=0.21996
+2026-03-13 12:39:07, Top_10, Val:  recall: 0.194900, ndcg: 0.113552
+2026-03-13 12:39:07, Top_10, Test: recall: 0.198116, ndcg: 0.141017
+--------------------
+2026-03-13 12:39:07, Top_20, Val:  recall: 0.286139, ndcg: 0.139203
+2026-03-13 12:39:07, Top_20, Test: recall: 0.279767, ndcg: 0.164367
+--------------------
+2026-03-13 12:39:07, Top_40, Val:  recall: 0.383513, ndcg: 0.161920
+2026-03-13 12:39:07, Top_40, Test: recall: 0.385093, ndcg: 0.192585
+--------------------
+2026-03-13 12:39:07, Top_80, Val:  recall: 0.502182, ndcg: 0.184664
+2026-03-13 12:39:07, Top_80, Test: recall: 0.508235, ndcg: 0.220530
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:41:41, Top_10, Val:  recall: 0.194712, ndcg: 0.113933
+2026-03-13 12:41:41, Top_10, Test: recall: 0.198976, ndcg: 0.141663
+--------------------
+2026-03-13 12:41:41, Top_20, Val:  recall: 0.284733, ndcg: 0.139427
+2026-03-13 12:41:41, Top_20, Test: recall: 0.282766, ndcg: 0.165582
+--------------------
+2026-03-13 12:41:41, Top_40, Val:  recall: 0.385418, ndcg: 0.162805
+2026-03-13 12:41:41, Top_40, Test: recall: 0.387667, ndcg: 0.193767
+--------------------
+2026-03-13 12:41:41, Top_80, Val:  recall: 0.503448, ndcg: 0.185409
+2026-03-13 12:41:41, Top_80, Test: recall: 0.509357, ndcg: 0.221329
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:44:16, Top_10, Val:  recall: 0.194865, ndcg: 0.114266
+2026-03-13 12:44:16, Top_10, Test: recall: 0.201192, ndcg: 0.142690
+--------------------
+2026-03-13 12:44:16, Top_20, Val:  recall: 0.284972, ndcg: 0.139743
+2026-03-13 12:44:16, Top_20, Test: recall: 0.281831, ndcg: 0.165716
+--------------------
+2026-03-13 12:44:16, Top_40, Val:  recall: 0.384687, ndcg: 0.162952
+2026-03-13 12:44:16, Top_40, Test: recall: 0.388560, ndcg: 0.194370
+--------------------
+2026-03-13 12:44:16, Top_80, Val:  recall: 0.504139, ndcg: 0.185843
+2026-03-13 12:44:16, Top_80, Test: recall: 0.507772, ndcg: 0.221648
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:46:52, Top_10, Val:  recall: 0.197713, ndcg: 0.116145
+2026-03-13 12:46:52, Top_10, Test: recall: 0.200491, ndcg: 0.144122
+--------------------
+2026-03-13 12:46:52, Top_20, Val:  recall: 0.287698, ndcg: 0.141506
+2026-03-13 12:46:52, Top_20, Test: recall: 0.282114, ndcg: 0.167369
+--------------------
+2026-03-13 12:46:52, Top_40, Val:  recall: 0.388691, ndcg: 0.164877
+2026-03-13 12:46:52, Top_40, Test: recall: 0.387738, ndcg: 0.195862
+--------------------
+2026-03-13 12:46:52, Top_80, Val:  recall: 0.505297, ndcg: 0.187234
+2026-03-13 12:46:52, Top_80, Test: recall: 0.509469, ndcg: 0.223630
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:46:52, Best in epoch 64, TOP 10: REC_V=0.19771, NDCG_V=0.11615
+2026-03-13 12:46:52, Best in epoch 64, TOP 10: REC_T=0.20049, NDCG_T=0.14412
+2026-03-13 12:46:52, Best in epoch 64, TOP 20: REC_V=0.28770, NDCG_V=0.14151
+2026-03-13 12:46:52, Best in epoch 64, TOP 20: REC_T=0.28211, NDCG_T=0.16737
+2026-03-13 12:46:52, Best in epoch 64, TOP 40: REC_V=0.38869, NDCG_V=0.16488
+2026-03-13 12:46:52, Best in epoch 64, TOP 40: REC_T=0.38774, NDCG_T=0.19586
+2026-03-13 12:46:52, Best in epoch 64, TOP 80: REC_V=0.50530, NDCG_V=0.18723
+2026-03-13 12:46:52, Best in epoch 64, TOP 80: REC_T=0.50947, NDCG_T=0.22363
+2026-03-13 12:49:24, Top_10, Val:  recall: 0.198243, ndcg: 0.116261
+2026-03-13 12:49:24, Top_10, Test: recall: 0.200169, ndcg: 0.144308
+--------------------
+2026-03-13 12:49:24, Top_20, Val:  recall: 0.287574, ndcg: 0.141602
+2026-03-13 12:49:24, Top_20, Test: recall: 0.282676, ndcg: 0.167859
+--------------------
+2026-03-13 12:49:24, Top_40, Val:  recall: 0.387890, ndcg: 0.164868
+2026-03-13 12:49:24, Top_40, Test: recall: 0.388810, ndcg: 0.196414
+--------------------
+2026-03-13 12:49:24, Top_80, Val:  recall: 0.505666, ndcg: 0.187434
+2026-03-13 12:49:24, Top_80, Test: recall: 0.511987, ndcg: 0.224588
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:51:59, Top_10, Val:  recall: 0.199573, ndcg: 0.116588
+2026-03-13 12:51:59, Top_10, Test: recall: 0.200062, ndcg: 0.145414
+--------------------
+2026-03-13 12:51:59, Top_20, Val:  recall: 0.287665, ndcg: 0.141471
+2026-03-13 12:51:59, Top_20, Test: recall: 0.282636, ndcg: 0.169041
+--------------------
+2026-03-13 12:51:59, Top_40, Val:  recall: 0.389592, ndcg: 0.165123
+2026-03-13 12:51:59, Top_40, Test: recall: 0.389593, ndcg: 0.197855
+--------------------
+2026-03-13 12:51:59, Top_80, Val:  recall: 0.507855, ndcg: 0.187777
+2026-03-13 12:51:59, Top_80, Test: recall: 0.514462, ndcg: 0.226395
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:54:33, Top_10, Val:  recall: 0.200527, ndcg: 0.116886
+2026-03-13 12:54:33, Top_10, Test: recall: 0.200754, ndcg: 0.146001
+--------------------
+2026-03-13 12:54:33, Top_20, Val:  recall: 0.290860, ndcg: 0.142422
+2026-03-13 12:54:33, Top_20, Test: recall: 0.283499, ndcg: 0.169679
+--------------------
+2026-03-13 12:54:33, Top_40, Val:  recall: 0.391673, ndcg: 0.165761
+2026-03-13 12:54:33, Top_40, Test: recall: 0.388926, ndcg: 0.198153
+--------------------
+2026-03-13 12:54:33, Top_80, Val:  recall: 0.509597, ndcg: 0.188398
+2026-03-13 12:54:33, Top_80, Test: recall: 0.515143, ndcg: 0.226909
+--------------------
+top20 as the final evaluation standard
+当前网格参数: 0.0 + 0.1
+2026-03-13 12:54:33, Best in epoch 79, TOP 10: REC_V=0.20053, NDCG_V=0.11689
+2026-03-13 12:54:33, Best in epoch 79, TOP 10: REC_T=0.20075, NDCG_T=0.14600
+2026-03-13 12:54:33, Best in epoch 79, TOP 20: REC_V=0.29086, NDCG_V=0.14242
+2026-03-13 12:54:33, Best in epoch 79, TOP 20: REC_T=0.28350, NDCG_T=0.16968
+2026-03-13 12:54:33, Best in epoch 79, TOP 40: REC_V=0.39167, NDCG_V=0.16576
+2026-03-13 12:54:33, Best in epoch 79, TOP 40: REC_T=0.38893, NDCG_T=0.19815
+2026-03-13 12:54:33, Best in epoch 79, TOP 80: REC_V=0.50960, NDCG_V=0.18840
+2026-03-13 12:54:33, Best in epoch 79, TOP 80: REC_T=0.51514, NDCG_T=0.22691
+2026-03-13 12:57:07, Top_10, Val:  recall: 0.200342, ndcg: 0.116637
+2026-03-13 12:57:07, Top_10, Test: recall: 0.200315, ndcg: 0.145784
+--------------------
+2026-03-13 12:57:07, Top_20, Val:  recall: 0.288145, ndcg: 0.141641
+2026-03-13 12:57:07, Top_20, Test: recall: 0.282654, ndcg: 0.169417
+--------------------
+2026-03-13 12:57:07, Top_40, Val:  recall: 0.391544, ndcg: 0.165680
+2026-03-13 12:57:07, Top_40, Test: recall: 0.390689, ndcg: 0.198346
+--------------------
+2026-03-13 12:57:07, Top_80, Val:  recall: 0.512318, ndcg: 0.188712
+2026-03-13 12:57:07, Top_80, Test: recall: 0.516722, ndcg: 0.227085
+--------------------
+top20 as the final evaluation standard
+2026-03-13 12:59:42, Top_10, Val:  recall: 0.199940, ndcg: 0.116249
+2026-03-13 12:59:42, Top_10, Test: recall: 0.201852, ndcg: 0.146077
+--------------------
+2026-03-13 12:59:42, Top_20, Val:  recall: 0.287231, ndcg: 0.141110
+2026-03-13 12:59:42, Top_20, Test: recall: 0.282655, ndcg: 0.169167
+--------------------
+2026-03-13 12:59:42, Top_40, Val:  recall: 0.391965, ndcg: 0.165524
+2026-03-13 12:59:42, Top_40, Test: recall: 0.389898, ndcg: 0.198103
+--------------------
+2026-03-13 12:59:42, Top_80, Val:  recall: 0.510052, ndcg: 0.188118
+2026-03-13 12:59:42, Top_80, Test: recall: 0.515839, ndcg: 0.226793
+--------------------
+top20 as the final evaluation standard
+2026-03-13 13:02:18, Top_10, Val:  recall: 0.199258, ndcg: 0.116001
+2026-03-13 13:02:18, Top_10, Test: recall: 0.204145, ndcg: 0.147045
+--------------------
+2026-03-13 13:02:18, Top_20, Val:  recall: 0.289224, ndcg: 0.141544
+2026-03-13 13:02:18, Top_20, Test: recall: 0.282932, ndcg: 0.169440
+--------------------
+2026-03-13 13:02:18, Top_40, Val:  recall: 0.392670, ndcg: 0.165687
+2026-03-13 13:02:18, Top_40, Test: recall: 0.392828, ndcg: 0.198929
+--------------------
+2026-03-13 13:02:18, Top_80, Val:  recall: 0.509949, ndcg: 0.188065
+2026-03-13 13:02:18, Top_80, Test: recall: 0.515970, ndcg: 0.227100
+--------------------
+top20 as the final evaluation standard
+2026-03-13 13:04:50, Top_10, Val:  recall: 0.200064, ndcg: 0.116704
+2026-03-13 13:04:50, Top_10, Test: recall: 0.203628, ndcg: 0.146814
+--------------------
+2026-03-13 13:04:50, Top_20, Val:  recall: 0.290019, ndcg: 0.142231
+2026-03-13 13:04:50, Top_20, Test: recall: 0.285396, ndcg: 0.169954
+--------------------
+2026-03-13 13:04:50, Top_40, Val:  recall: 0.391093, ndcg: 0.165856
+2026-03-13 13:04:50, Top_40, Test: recall: 0.394660, ndcg: 0.199225
+--------------------
+2026-03-13 13:04:50, Top_80, Val:  recall: 0.510996, ndcg: 0.188860
+2026-03-13 13:04:50, Top_80, Test: recall: 0.516815, ndcg: 0.227188
+--------------------
+top20 as the final evaluation standard
+
+All experiments finished. Results saved to grid_search_results.txt
+
+进程已结束，退出代码为 0
+

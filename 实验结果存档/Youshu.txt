@@ -22,6 +22,19 @@ ui_beta=0.0, bi_beta=0.0
 2026-03-13 08:23:48, Best in epoch 94, TOP 80: REC_T=0.51187, NDCG_T=0.22469
 
 
+
+用来比较优化程度的base（参考多次复现后选取）:
+2026-03-13 08:23:48, Best in epoch 100, TOP 10: REC_T=0.20328, NDCG_T=0.14490
+
+2026-03-13 08:23:48, Best in epoch 100, TOP 20: REC_T=0.28416, NDCG_T=0.16743
+
+2026-03-13 08:23:48, Best in epoch 100, TOP 40: REC_T=0.39001, NDCG_T=0.19660
+
+2026-03-13 08:23:48, Best in epoch 100, TOP 80: REC_T=0.50874, NDCG_T=0.22469
+
+
+
+
 ui_beta=0.0, bi_beta=0.1
 2026-03-13 09:16:27, Top_10, Val:  recall: 0.200640, ndcg: 0.119040
 2026-03-13 09:16:27, Top_10, Test: recall: 0.200302, ndcg: 0.144204
@@ -96,11 +109,11 @@ ui_beta=0.0, bi_beta=0.07
 2026-03-13 16:17:28, Best in epoch 114, TOP 10: REC_V=0.20306, NDCG_V=0.12051
 2026-03-13 16:17:28, Best in epoch 114, TOP 10: REC_T=0.19777, NDCG_T=0.14474
 2026-03-13 16:17:28, Best in epoch 114, TOP 20: REC_V=0.29311, NDCG_V=0.14594
-2026-03-13 16:17:28, Best in epoch 114, TOP 20: REC_T=0.28958, NDCG_T=0.17078
+2026-03-13 16:17:28, Best in epoch 114, TOP 20: REC_T=0.28958, NDCG_T=0.17078   2.1%   2.4%
 2026-03-13 16:17:28, Best in epoch 114, TOP 40: REC_V=0.39334, NDCG_V=0.16926
-2026-03-13 16:17:28, Best in epoch 114, TOP 40: REC_T=0.39347, NDCG_T=0.19905
+2026-03-13 16:17:28, Best in epoch 114, TOP 40: REC_T=0.39347, NDCG_T=0.19905   0.8%   1.5%
 2026-03-13 16:17:28, Best in epoch 114, TOP 80: REC_V=0.50198, NDCG_V=0.19051
-2026-03-13 16:17:28, Best in epoch 114, TOP 80: REC_T=0.51348, NDCG_T=0.22655
+2026-03-13 16:17:28, Best in epoch 114, TOP 80: REC_T=0.51348, NDCG_T=0.22655   1.0%   1.3%
 
 
 ui_beta=0.0, bi_beta=0.04

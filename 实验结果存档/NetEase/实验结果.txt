@@ -1,0 +1,231 @@
+
+ui_bundle_user_agg_beta: 0.0
+bi_user_bundle_agg_beta: 0.25
+
+复现-001
+2026-03-14 18:01:16, Best in epoch 39, TOP 10: REC_V=0.05555, NDCG_V=0.03032
+2026-03-14 18:01:16, Best in epoch 39, TOP 10: REC_T=0.05832, NDCG_T=0.03884
+2026-03-14 18:01:16, Best in epoch 39, TOP 20: REC_V=0.09013, NDCG_V=0.03957
+2026-03-14 18:01:16, Best in epoch 39, TOP 20: REC_T=0.09202, NDCG_T=0.04934
+2026-03-14 18:01:16, Best in epoch 39, TOP 40: REC_V=0.13053, NDCG_V=0.04839
+2026-03-14 18:01:16, Best in epoch 39, TOP 40: REC_T=0.13739, NDCG_T=0.06133
+2026-03-14 18:01:16, Best in epoch 39, TOP 80: REC_V=0.18854, NDCG_V=0.05906
+2026-03-14 18:01:16, Best in epoch 39, TOP 80: REC_T=0.19730, NDCG_T=0.07471
+
+复现-002
+2026-03-14 18:14:34, Best in epoch 54, TOP 10: REC_V=0.05519, NDCG_V=0.02984
+2026-03-14 18:14:34, Best in epoch 54, TOP 10: REC_T=0.05819, NDCG_T=0.03888
+2026-03-14 18:14:34, Best in epoch 54, TOP 20: REC_V=0.08884, NDCG_V=0.03882
+2026-03-14 18:14:34, Best in epoch 54, TOP 20: REC_T=0.09221, NDCG_T=0.04947
+2026-03-14 18:14:34, Best in epoch 54, TOP 40: REC_V=0.13432, NDCG_V=0.04870
+2026-03-14 18:14:34, Best in epoch 54, TOP 40: REC_T=0.13836, NDCG_T=0.06165
+2026-03-14 18:14:34, Best in epoch 54, TOP 80: REC_V=0.19111, NDCG_V=0.05915
+2026-03-14 18:14:34, Best in epoch 54, TOP 80: REC_T=0.19634, NDCG_T=0.07465
+
+复现-003
+2026-03-14 18:24:08, Best in epoch 49, TOP 10: REC_V=0.05458, NDCG_V=0.02941
+2026-03-14 18:24:08, Best in epoch 49, TOP 10: REC_T=0.05925, NDCG_T=0.03903
+2026-03-14 18:24:08, Best in epoch 49, TOP 20: REC_V=0.08868, NDCG_V=0.03849
+2026-03-14 18:24:08, Best in epoch 49, TOP 20: REC_T=0.09116, NDCG_T=0.04893
+2026-03-14 18:24:08, Best in epoch 49, TOP 40: REC_V=0.13513, NDCG_V=0.04859
+2026-03-14 18:24:08, Best in epoch 49, TOP 40: REC_T=0.13666, NDCG_T=0.06100
+2026-03-14 18:24:08, Best in epoch 49, TOP 80: REC_V=0.19260, NDCG_V=0.05916
+2026-03-14 18:24:08, Best in epoch 49, TOP 80: REC_T=0.19698, NDCG_T=0.07454
+
+复现-004
+2026-03-14 18:33:43, Best in epoch 44, TOP 10: REC_V=0.05433, NDCG_V=0.02947
+2026-03-14 18:33:43, Best in epoch 44, TOP 10: REC_T=0.05820, NDCG_T=0.03868
+2026-03-14 18:33:43, Best in epoch 44, TOP 20: REC_V=0.08868, NDCG_V=0.03865
+2026-03-14 18:33:43, Best in epoch 44, TOP 20: REC_T=0.09271, NDCG_T=0.04940
+2026-03-14 18:33:43, Best in epoch 44, TOP 40: REC_V=0.13145, NDCG_V=0.04796
+2026-03-14 18:33:43, Best in epoch 44, TOP 40: REC_T=0.13904, NDCG_T=0.06168
+2026-03-14 18:33:43, Best in epoch 44, TOP 80: REC_V=0.18947, NDCG_V=0.05862
+2026-03-14 18:33:43, Best in epoch 44, TOP 80: REC_T=0.19656, NDCG_T=0.07461
+
+复现-005
+2026-03-14 21:34:56, Best in epoch 49, TOP 10: REC_V=0.05499, NDCG_V=0.02969
+2026-03-14 21:34:56, Best in epoch 49, TOP 10: REC_T=0.05821, NDCG_T=0.03851
+2026-03-14 21:34:56, Best in epoch 49, TOP 20: REC_V=0.08910, NDCG_V=0.03877
+2026-03-14 21:34:56, Best in epoch 49, TOP 20: REC_T=0.09301, NDCG_T=0.04936
+2026-03-14 21:34:56, Best in epoch 49, TOP 40: REC_V=0.13319, NDCG_V=0.04838
+2026-03-14 21:34:56, Best in epoch 49, TOP 40: REC_T=0.13881, NDCG_T=0.06141
+2026-03-14 21:34:56, Best in epoch 49, TOP 80: REC_V=0.18881, NDCG_V=0.05865
+2026-03-14 21:34:56, Best in epoch 49, TOP 80: REC_T=0.19803, NDCG_T=0.07474
+
+复现-006
+2026-03-14 21:45:29, Best in epoch 49, TOP 10: REC_V=0.05494, NDCG_V=0.02930
+2026-03-14 21:45:29, Best in epoch 49, TOP 10: REC_T=0.05854, NDCG_T=0.03851
+2026-03-14 21:45:29, Best in epoch 49, TOP 20: REC_V=0.08837, NDCG_V=0.03821
+2026-03-14 21:45:29, Best in epoch 49, TOP 20: REC_T=0.09226, NDCG_T=0.04902
+2026-03-14 21:45:29, Best in epoch 49, TOP 40: REC_V=0.13392, NDCG_V=0.04811
+2026-03-14 21:45:29, Best in epoch 49, TOP 40: REC_T=0.13890, NDCG_T=0.06131
+2026-03-14 21:45:29, Best in epoch 49, TOP 80: REC_V=0.19064, NDCG_V=0.05854
+2026-03-14 21:45:29, Best in epoch 49, TOP 80: REC_T=0.19694, NDCG_T=0.07441
+
+复现-007
+2026-03-14 21:55:10, Best in epoch 44, TOP 10: REC_V=0.05527, NDCG_V=0.02965
+2026-03-14 21:55:10, Best in epoch 44, TOP 10: REC_T=0.05784, NDCG_T=0.03835
+2026-03-14 21:55:10, Best in epoch 44, TOP 20: REC_V=0.09022, NDCG_V=0.03892
+2026-03-14 21:55:10, Best in epoch 44, TOP 20: REC_T=0.09296, NDCG_T=0.04920
+2026-03-14 21:55:10, Best in epoch 44, TOP 40: REC_V=0.13432, NDCG_V=0.04855
+2026-03-14 21:55:10, Best in epoch 44, TOP 40: REC_T=0.13761, NDCG_T=0.06100
+2026-03-14 21:55:10, Best in epoch 44, TOP 80: REC_V=0.19099, NDCG_V=0.05897
+2026-03-14 21:55:10, Best in epoch 44, TOP 80: REC_T=0.19649, NDCG_T=0.07425
+
+复现-008
+2026-03-14 22:07:39, Best in epoch 54, TOP 10: REC_V=0.05498, NDCG_V=0.02946
+2026-03-14 22:07:39, Best in epoch 54, TOP 10: REC_T=0.05786, NDCG_T=0.03856
+2026-03-14 22:07:39, Best in epoch 54, TOP 20: REC_V=0.08763, NDCG_V=0.03814
+2026-03-14 22:07:39, Best in epoch 54, TOP 20: REC_T=0.09023, NDCG_T=0.04871
+2026-03-14 22:07:39, Best in epoch 54, TOP 40: REC_V=0.13306, NDCG_V=0.04806
+2026-03-14 22:07:39, Best in epoch 54, TOP 40: REC_T=0.13796, NDCG_T=0.06129
+2026-03-14 22:07:39, Best in epoch 54, TOP 80: REC_V=0.19157, NDCG_V=0.05877
+2026-03-14 22:07:39, Best in epoch 54, TOP 80: REC_T=0.19740, NDCG_T=0.07467
+
+复现-009
+2026-03-14 22:16:22, Best in epoch 44, TOP 10: REC_V=0.05510, NDCG_V=0.02962
+2026-03-14 22:16:22, Best in epoch 44, TOP 10: REC_T=0.05945, NDCG_T=0.03890
+2026-03-14 22:16:22, Best in epoch 44, TOP 20: REC_V=0.08863, NDCG_V=0.03861
+2026-03-14 22:16:22, Best in epoch 44, TOP 20: REC_T=0.09250, NDCG_T=0.04919
+2026-03-14 22:16:22, Best in epoch 44, TOP 40: REC_V=0.13174, NDCG_V=0.04804
+2026-03-14 22:16:22, Best in epoch 44, TOP 40: REC_T=0.13693, NDCG_T=0.06095
+2026-03-14 22:16:22, Best in epoch 44, TOP 80: REC_V=0.19031, NDCG_V=0.05877
+2026-03-14 22:16:22, Best in epoch 44, TOP 80: REC_T=0.19543, NDCG_T=0.07416
+
+
+————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+ui_bundle_user_agg_beta: 0.0
+bi_user_bundle_agg_beta: 0.2
+
+复现-001
+2026-03-14 18:42:20, Best in epoch 34, TOP 10: REC_V=0.05632, NDCG_V=0.03000
+2026-03-14 18:42:20, Best in epoch 34, TOP 10: REC_T=0.05845, NDCG_T=0.03903
+2026-03-14 18:42:20, Best in epoch 34, TOP 20: REC_V=0.09005, NDCG_V=0.03899
+2026-03-14 18:42:20, Best in epoch 34, TOP 20: REC_T=0.09099, NDCG_T=0.04913
+2026-03-14 18:42:20, Best in epoch 34, TOP 40: REC_V=0.13237, NDCG_V=0.04822
+2026-03-14 18:42:20, Best in epoch 34, TOP 40: REC_T=0.13574, NDCG_T=0.06097
+2026-03-14 18:42:20, Best in epoch 34, TOP 80: REC_V=0.19036, NDCG_V=0.05888
+2026-03-14 18:42:20, Best in epoch 34, TOP 80: REC_T=0.19478, NDCG_T=0.07423
+
+复现-002
+2026-03-14 18:59:12, Best in epoch 44, TOP 10: REC_V=0.05472, NDCG_V=0.02943
+2026-03-14 18:59:12, Best in epoch 44, TOP 10: REC_T=0.05884, NDCG_T=0.03903
+2026-03-14 18:59:12, Best in epoch 44, TOP 20: REC_V=0.08816, NDCG_V=0.03837
+2026-03-14 18:59:12, Best in epoch 44, TOP 20: REC_T=0.09219, NDCG_T=0.04949
+2026-03-14 18:59:12, Best in epoch 44, TOP 40: REC_V=0.13382, NDCG_V=0.04831
+2026-03-14 18:59:12, Best in epoch 44, TOP 40: REC_T=0.13743, NDCG_T=0.06140
+2026-03-14 18:59:12, Best in epoch 44, TOP 80: REC_V=0.18994, NDCG_V=0.05861
+2026-03-14 18:59:12, Best in epoch 44, TOP 80: REC_T=0.19397, NDCG_T=0.07417
+
+复现-003
+2026-03-14 19:10:40, Best in epoch 49, TOP 10: REC_V=0.05477, NDCG_V=0.02979
+2026-03-14 19:10:40, Best in epoch 49, TOP 10: REC_T=0.05842, NDCG_T=0.03905
+2026-03-14 19:10:40, Best in epoch 49, TOP 20: REC_V=0.08869, NDCG_V=0.03880
+2026-03-14 19:10:40, Best in epoch 49, TOP 20: REC_T=0.09144, NDCG_T=0.04939
+2026-03-14 19:10:40, Best in epoch 49, TOP 40: REC_V=0.13362, NDCG_V=0.04856
+2026-03-14 19:10:40, Best in epoch 49, TOP 40: REC_T=0.13745, NDCG_T=0.06150
+2026-03-14 19:10:40, Best in epoch 49, TOP 80: REC_V=0.18959, NDCG_V=0.05890
+2026-03-14 19:10:40, Best in epoch 49, TOP 80: REC_T=0.19544, NDCG_T=0.07454
+
+
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+ui_bundle_user_agg_beta: 0.0
+bi_user_bundle_agg_beta: 0.3
+
+复现-001
+2026-03-14 19:16:29, Best in epoch 24, TOP 10: REC_V=0.05466, NDCG_V=0.03006
+2026-03-14 19:16:29, Best in epoch 24, TOP 10: REC_T=0.05786, NDCG_T=0.03861
+2026-03-14 19:16:29, Best in epoch 24, TOP 20: REC_V=0.08863, NDCG_V=0.03904
+2026-03-14 19:16:29, Best in epoch 24, TOP 20: REC_T=0.09102, NDCG_T=0.04888
+2026-03-14 19:16:29, Best in epoch 24, TOP 40: REC_V=0.13149, NDCG_V=0.04842
+2026-03-14 19:16:29, Best in epoch 24, TOP 40: REC_T=0.13471, NDCG_T=0.06051
+2026-03-14 19:16:29, Best in epoch 24, TOP 80: REC_V=0.18724, NDCG_V=0.05873
+2026-03-14 19:16:29, Best in epoch 24, TOP 80: REC_T=0.19367, NDCG_T=0.07377
+
+复现-002
+2026-03-14 19:32:36, Best in epoch 54, TOP 10: REC_V=0.05418, NDCG_V=0.02913
+2026-03-14 19:32:36, Best in epoch 54, TOP 10: REC_T=0.05789, NDCG_T=0.03837
+2026-03-14 19:32:36, Best in epoch 54, TOP 20: REC_V=0.08763, NDCG_V=0.03816
+2026-03-14 19:32:36, Best in epoch 54, TOP 20: REC_T=0.09105, NDCG_T=0.04873
+2026-03-14 19:32:36, Best in epoch 54, TOP 40: REC_V=0.13260, NDCG_V=0.04794
+2026-03-14 19:32:36, Best in epoch 54, TOP 40: REC_T=0.13855, NDCG_T=0.06127
+2026-03-14 19:32:36, Best in epoch 54, TOP 80: REC_V=0.19087, NDCG_V=0.05865
+2026-03-14 19:32:36, Best in epoch 54, TOP 80: REC_T=0.19688, NDCG_T=0.07445
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

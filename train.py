@@ -244,7 +244,15 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
 
     topk_ = 20
     print("top%d as the final evaluation standard" %(topk_))
-    if metrics["val"]["recall"][topk_] > best_metrics["val"]["recall"][topk_] and metrics["val"]["ndcg"][topk_] > best_metrics["val"]["ndcg"][topk_]:
+    
+    # Calculate sum of Recall@20, Recall@40, NDCG@20, NDCG@40
+    def get_score(m):
+        return m["recall"][20] + m["recall"][40] + m["ndcg"][20] + m["ndcg"][40]
+
+    curr_score = get_score(metrics["val"])
+    best_score = get_score(best_metrics["val"])
+
+    if curr_score > best_score:
         torch.save(model.state_dict(), checkpoint_model_path)
         dump_conf = dict(conf)
         del dump_conf["device"]

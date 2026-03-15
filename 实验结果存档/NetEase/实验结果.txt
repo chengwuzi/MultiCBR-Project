@@ -182,7 +182,17 @@ bi_user_bundle_agg_beta: 0.3
 
 ui_bundle_user_agg_beta: 0.0
 bi_user_bundle_agg_beta: 0.0
-(0+0对照实验)
+(0+0对照实验)(6组实验取平均值)
+
+TOP 10: REC_T=0.05839, NDCG_T=0.03928
+
+TOP 20: REC_T=0.09093, NDCG_T=0.04940
+
+TOP 40: REC_T=0.13565, NDCG_T=0.06115
+
+TOP 80: REC_T=0.19129, NDCG_T=0.07369
+
+
 
 当前网格参数: 0.00 + 0.00
 2026-03-15 13:27:00, Best in epoch 44, TOP 10: REC_V=0.05645, NDCG_V=0.03032

@@ -7,7 +7,7 @@ import datetime
 DATASET = "Youshu"
 # 网格参数定义：包含基线 (0.0, 0.0)
 UI_BETAS = [0.0]
-BI_BETAS = [0.00, 0.00, 0.00, 0.05, 0.05, 0.05]
+BI_BETAS = [0.00, 0.00, 0.00, 0.00, 0.05, 0.05, 0.05, 0.05]
 OUTPUT_FILE = "grid_search_results.txt"
 TAIL_LINES = None # 保存最后 N 行输出，设为 None 则保存全部
 EPOCHS = 120 # 在这里配置 epoch 数量

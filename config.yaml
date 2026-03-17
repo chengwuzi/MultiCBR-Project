@@ -23,6 +23,9 @@ NetEase:
   # 最佳结果参数列表 （0+0.25）  0+0.2  0+0.3
   ui_bundle_user_agg_beta: 0
   bi_user_bundle_agg_beta: 0.25
+  # 目标用户筛选范围 (train_connected_ratio)，仅对此范围内的用户启用 bi_user_bundle_agg_beta
+  # 默认 [0.0, 1.0] 表示全员启用
+  train_connected_ratio_range: [0.0, 1.0]
 
   # the following dropout rates are with respect to the "aug_type", i.e., if aug_type is ED, the following dropout rates are for ED.
   UB_ratios: [0.0] # the dropout ratio for UB graph
@@ -70,8 +73,9 @@ iFashion:
   # New Simple Aggregation Supplement settings
 
   # 参数搜索未获提升，待定 0.1+0
-  ui_bundle_user_agg_beta: 0.1
+  ui_bundle_user_agg_beta: 0
   bi_user_bundle_agg_beta: 0
+  train_connected_ratio_range: [0.0, 1.0]
 
   UB_ratios: [0.05]
   UI_ratios: [0.0]
@@ -116,6 +120,7 @@ Youshu:
   # 最佳结果参数列表 （0+0.05）  0+0.1  0+0.15
   ui_bundle_user_agg_beta: 0
   bi_user_bundle_agg_beta: 0.05
+  train_connected_ratio_range: [0.0, 1.0]
 
   UB_ratios: [0.2]
   UI_ratios: [0.1]

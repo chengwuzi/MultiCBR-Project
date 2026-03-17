@@ -10,6 +10,8 @@ import torch
 from torch.utils.data import Dataset, DataLoader
 
 
+import csv
+
 def print_statistics(X, string):
     print('>'*10 + string + '>'*10 )
     print('Average interactions', X.sum(1).mean(0).item())
@@ -92,6 +94,9 @@ class Datasets():
         u_b_pairs_val, u_b_graph_val = self.get_ub("tune")
         u_b_pairs_test, u_b_graph_test = self.get_ub("test")
 
+        # Load connectivity metrics and generate user_beta_mask
+        self.user_beta_mask = self.get_user_beta_mask(conf)
+
         u_b_for_neg_sample, b_b_for_neg_sample = None, None
 
         self.bundle_train_data = BundleTrainDataset(conf, u_b_pairs_train, u_b_graph_train, self.num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, conf["neg_num"])
@@ -159,3 +164,50 @@ class Datasets():
         print_statistics(u_b_graph, "U-B statistics in %s" %(task))
 
         return u_b_pairs, u_b_graph
+
+
+    def get_user_beta_mask(self, conf):
+        # Default range is [0.0, 1.0], which means all users are included
+        ratio_range = conf.get("train_connected_ratio_range", [0.0, 1.0])
+        min_ratio, max_ratio = ratio_range[0], ratio_range[1]
+        
+        print(f"Generating user_beta_mask with train_connected_ratio in [{min_ratio}, {max_ratio}]")
+
+        mask = torch.zeros(self.num_users, dtype=torch.float32)
+        
+        # Path to the metrics CSV file
+        # Assuming the structure is connectivity_analysis_outputs/<dataset>/user_connectivity_metrics.csv
+        # We need to handle the path carefully as 'self.path' is './datasets'
+        # But the output is in './connectivity_analysis_outputs'
+        
+        # Construct path relative to project root
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        csv_path = os.path.join(project_root, 'connectivity_analysis_outputs', self.name, 'user_connectivity_metrics.csv')
+        
+        if not os.path.exists(csv_path):
+            print(f"Warning: Connectivity metrics file not found at {csv_path}. Using all-ones mask.")
+            return torch.ones(self.num_users, dtype=torch.float32)
+            
+        try:
+            with open(csv_path, 'r') as f:
+                reader = csv.DictReader(f)
+                count = 0
+                for row in reader:
+                    user_id = int(row['user_id'])
+                    if user_id >= self.num_users:
+                        continue
+                        
+                    ratio = float(row['train_connected_ratio'])
+                    
+                    # Check if ratio is within range (inclusive)
+                    if min_ratio <= ratio <= max_ratio:
+                        mask[user_id] = 1.0
+                        count += 1
+                        
+            print(f"Mask generated: {count}/{self.num_users} users selected ({(count/self.num_users)*100:.2f}%)")
+            
+        except Exception as e:
+            print(f"Error reading connectivity metrics: {e}. Using all-ones mask.")
+            return torch.ones(self.num_users, dtype=torch.float32)
+            
+        return mask

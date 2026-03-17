@@ -171,7 +171,10 @@ class Datasets():
         ratio_range = conf.get("train_connected_ratio_range", [0.0, 1.0])
         min_ratio, max_ratio = ratio_range[0], ratio_range[1]
         
-        print(f"Generating user_beta_mask with train_connected_ratio in [{min_ratio}, {max_ratio}]")
+        # Min user_ub_train_deg filter
+        min_deg = conf.get("user_ub_train_deg_min", 0)
+        
+        print(f"Generating user_beta_mask with train_connected_ratio in [{min_ratio}, {max_ratio}] AND user_ub_train_deg >= {min_deg}")
 
         mask = torch.zeros(self.num_users, dtype=torch.float32)
         
@@ -198,9 +201,10 @@ class Datasets():
                         continue
                         
                     ratio = float(row['train_connected_ratio'])
+                    deg = int(row['user_ub_train_deg'])
                     
-                    # Check if ratio is within range (inclusive)
-                    if min_ratio <= ratio <= max_ratio:
+                    # Check if ratio is within range (inclusive) AND degree is above threshold
+                    if (min_ratio <= ratio <= max_ratio) and (deg >= min_deg):
                         mask[user_id] = 1.0
                         count += 1
                         

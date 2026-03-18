@@ -90,3 +90,165 @@ TOP 40: REC_T=0.39018, NDCG_T=0.19754
 TOP 80: REC_T=0.51227, NDCG_T=0.22550
 
 
+
+
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0.05
+train_connected_ratio_range: [0.5, 1]
+user_ub_train_deg_min: 0
+
+TOP 10: REC_T=0.20114, NDCG_T=0.14565
+
+TOP 20: REC_T=0.28472, NDCG_T=0.16944
+
+TOP 40: REC_T=0.39193, NDCG_T=0.19854
+
+TOP 80: REC_T=0.51456, NDCG_T=0.22657
+
+
+
+
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0.1
+train_connected_ratio_range: [0.5, 1]
+user_ub_train_deg_min: 0
+
+TOP 10: REC_T=0.20005, NDCG_T=0.14462
+
+TOP 20: REC_T=0.28345, NDCG_T=0.16851
+
+TOP 40: REC_T=0.39223, NDCG_T=0.19796
+
+TOP 80: REC_T=0.51213, NDCG_T=0.22549
+
+
+
+
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0.15
+train_connected_ratio_range: [0.5, 1]
+user_ub_train_deg_min: 0
+
+TOP 10: REC_T=0.20112, NDCG_T=0.14542
+
+TOP 20: REC_T=0.28568, NDCG_T=0.16975
+
+TOP 40: REC_T=0.39354, NDCG_T=0.19906
+
+TOP 80: REC_T=0.51374, NDCG_T=0.22650
+
+
+
+
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0.2
+train_connected_ratio_range: [0.5, 1]
+user_ub_train_deg_min: 0
+
+TOP 10: REC_T=0.20158, NDCG_T=0.14504
+
+TOP 20: REC_T=0.28659, NDCG_T=0.16952
+
+TOP 40: REC_T=0.39257, NDCG_T=0.19824
+
+TOP 80: REC_T=0.51215, NDCG_T=0.22564
+
+
+
+
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0.25
+train_connected_ratio_range: [0.5, 1]
+user_ub_train_deg_min: 0
+
+TOP 10: REC_T=0.19975, NDCG_T=0.14437
+
+TOP 20: REC_T=0.28280, NDCG_T=0.16812
+
+TOP 40: REC_T=0.39204, NDCG_T=0.19777
+
+TOP 80: REC_T=0.51501, NDCG_T=0.22581
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+——————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————————
+
+iFashion
+
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0.1
+train_connected_ratio_range: [0.6, 1]
+user_ub_train_deg_min: 0
+
+TOP 10: REC_T=0.10442, NDCG_T=0.10015
+
+TOP 20: REC_T=0.14947, NDCG_T=0.11834
+
+TOP 40: REC_T=0.20446, NDCG_T=0.13765
+
+TOP 80: REC_T=0.26929, NDCG_T=0.15693
+

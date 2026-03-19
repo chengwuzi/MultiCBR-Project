@@ -65,6 +65,7 @@ class MultiCBR(nn.Module):
         self.init_emb()
         self.init_fusion_weights()
 
+        self.use_bi_weighted_graph = self.conf.get("use_bi_weighted_graph", False)
         self.use_core_item_boost = self.conf.get("use_core_item_boost", False)
         self.core_item_topk = self.conf.get("core_item_topk", 2)
         self.core_item_boost = self.conf.get("core_item_boost", 2.0)
@@ -72,10 +73,15 @@ class MultiCBR(nn.Module):
         self.core_item_valid_item_threshold = self.conf.get("core_item_valid_item_threshold", 3)
 
         assert isinstance(raw_graph, list)
-        if len(raw_graph) == 4:
-            self.ub_graph, self.ui_graph, self.bi_graph, core_item_boost_graph = raw_graph
+        if len(raw_graph) >= 4:
+            self.ub_graph = raw_graph[0]
+            self.ui_graph = raw_graph[1]
+            self.bi_graph = raw_graph[2]
+            bi_weighted_raw_graph = raw_graph[3]
+            core_item_boost_graph = raw_graph[4] if len(raw_graph) > 4 else None
         else:
             self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
+            bi_weighted_raw_graph = None
             core_item_boost_graph = None
 
         if self.use_core_item_boost and core_item_boost_graph is not None:
@@ -89,8 +95,18 @@ class MultiCBR(nn.Module):
         self.UI_propagation_graph_ori = self.get_propagation_graph(self.ui_graph)
         self.UI_aggregation_graph_ori = self.get_aggregation_graph(self.ui_graph)
 
-        self.BI_propagation_graph_ori = self.get_propagation_graph(self.bi_graph)
-        self.BI_aggregation_graph_ori = self.get_aggregation_graph(self.bi_graph)
+        # Explicitly keep an original BI aggregation graph strictly for UI view when CIB is off
+        self.BI_aggregation_graph_for_ui_ori = self.get_aggregation_graph(self.bi_graph)
+
+        if self.use_bi_weighted_graph and bi_weighted_raw_graph is not None:
+            self.bi_weighted_raw_graph = bi_weighted_raw_graph
+            bi_graph_for_bi_view = bi_weighted_raw_graph
+        else:
+            self.bi_weighted_raw_graph = None
+            bi_graph_for_bi_view = self.bi_graph
+
+        self.BI_propagation_graph_ori = self.get_propagation_graph(bi_graph_for_bi_view)
+        self.BI_aggregation_graph_ori = self.get_aggregation_graph(bi_graph_for_bi_view)
 
         # generate the graph with the configured dropouts for training, if aug_type is OP or MD, the following graphs with be identical with the aboves
         self.UB_propagation_graph = self.get_propagation_graph(self.ub_graph, self.conf["UB_ratio"])
@@ -98,8 +114,11 @@ class MultiCBR(nn.Module):
         self.UI_propagation_graph = self.get_propagation_graph(self.ui_graph, self.conf["UI_ratio"])
         self.UI_aggregation_graph = self.get_aggregation_graph(self.ui_graph, self.conf["UI_ratio"])
 
-        self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph, self.conf["BI_ratio"])
-        self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
+        # Also apply dropout for the UI-specific BI aggregation graph if needed
+        self.BI_aggregation_graph_for_ui = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
+
+        self.BI_propagation_graph = self.get_propagation_graph(bi_graph_for_bi_view, self.conf["BI_ratio"])
+        self.BI_aggregation_graph = self.get_aggregation_graph(bi_graph_for_bi_view, self.conf["BI_ratio"])
 
         if self.conf['aug_type'] == 'MD':
             self.init_md_dropouts()
@@ -263,13 +282,13 @@ class MultiCBR(nn.Module):
             if self.use_core_item_boost and self.core_item_boost_graph_tensor is not None:
                 UI_bundles_feature = self.aggregate_with_core_item_boost(self.core_item_boost_graph_tensor, UI_items_feature, "BI", test)
             else:
-                UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_ori, UI_items_feature, "BI", test)
+                UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_for_ui_ori, UI_items_feature, "BI", test)
         else:
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
             if self.use_core_item_boost and self.core_item_boost_graph_tensor is not None:
                 UI_bundles_feature = self.aggregate_with_core_item_boost(self.core_item_boost_graph_tensor, UI_items_feature, "BI", test)
             else:
-                UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
+                UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_for_ui, UI_items_feature, "BI", test)
 
         #  =============================  BI graph propagation  =============================
         if test:
@@ -329,9 +348,14 @@ class MultiCBR(nn.Module):
 
             self.UI_propagation_graph = self.get_propagation_graph(self.ui_graph, self.conf["UI_ratio"])
             self.UI_aggregation_graph = self.get_aggregation_graph(self.ui_graph, self.conf["UI_ratio"])
+            
+            # Update the UI-specific BI aggregation graph as well
+            self.BI_aggregation_graph_for_ui = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
 
-            self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph, self.conf["BI_ratio"])
-            self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
+            bi_graph_for_bi_view = self.bi_weighted_raw_graph if (hasattr(self, 'use_bi_weighted_graph') and self.use_bi_weighted_graph and hasattr(self, 'bi_weighted_raw_graph') and self.bi_weighted_raw_graph is not None) else self.bi_graph
+            
+            self.BI_propagation_graph = self.get_propagation_graph(bi_graph_for_bi_view, self.conf["BI_ratio"])
+            self.BI_aggregation_graph = self.get_aggregation_graph(bi_graph_for_bi_view, self.conf["BI_ratio"])
 
         # users: [bs, 1]
         # bundles: [bs, 1+neg_num]

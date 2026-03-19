@@ -115,16 +115,22 @@ def main(args=None):
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
 
+        cib_prefix = ""
         if conf.get("use_core_item_boost", False):
-            cib_str = "CIB_{}_{}_{}_{}".format(
-                conf.get("core_item_user_threshold", 10),
-                conf.get("core_item_valid_item_threshold", 3),
-                conf.get("core_item_topk", 2),
-                conf.get("core_item_boost", 2.0)
-            )
-            settings += [cib_str]
+            cib_prefix = "CIB"
         else:
-            settings += ["NoCIB"]
+            cib_prefix = "NoCIB"
+            
+        biwg_prefix = ""
+        if conf.get("use_bi_weighted_graph", False):
+            biwg_prefix = "BIWG"
+        else:
+            biwg_prefix = "NoBIWG"
+            
+        if conf.get("use_core_item_boost", False) or conf.get("use_bi_weighted_graph", False):
+            settings += [f"{cib_prefix}_{biwg_prefix}_{conf.get('core_item_user_threshold', 10)}_{conf.get('core_item_valid_item_threshold', 3)}_{conf.get('core_item_topk', 2)}_{conf.get('core_item_boost', 2.0)}"]
+        else:
+            settings += [f"{cib_prefix}_{biwg_prefix}"]
 
         setting = "_".join(settings)
 

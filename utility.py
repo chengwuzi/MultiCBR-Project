@@ -98,7 +98,18 @@ class Datasets():
         self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
-        self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
+        self.graphs = [
+            u_b_graph_train, 
+            u_i_graph, 
+            b_i_graph
+        ]
+
+        if conf.get('use_bi_weighted_graph', False):
+            self.bi_weighted_raw_graph = self.build_bi_weighted_raw_graph(conf, b_i_graph, u_i_graph, u_b_graph_train)
+            self.graphs.append(self.bi_weighted_raw_graph)
+        else:
+            self.bi_weighted_raw_graph = None
+            self.graphs.append(None)
 
         if conf.get('use_core_item_boost', False):
             self.core_item_boost_matrix = self.build_core_item_boost_matrix(conf, b_i_graph, u_i_graph, u_b_graph_train)
@@ -162,6 +173,83 @@ class Datasets():
         print_statistics(u_b_graph, "U-B statistics in %s" %(task))
 
         return u_b_pairs, u_b_graph
+
+
+    def build_bi_weighted_raw_graph(self, conf, b_i_graph, u_i_graph, u_b_graph_train):
+        import time
+        print("Building BI weighted raw graph...")
+        start_time = time.time()
+        
+        num_users = self.num_users
+        num_bundles = self.num_bundles
+        num_items = self.num_items
+        
+        user_threshold = conf.get('core_item_user_threshold', 10)
+        valid_item_threshold = conf.get('core_item_valid_item_threshold', 3)
+        topk = conf.get('core_item_topk', 2)
+        boost = conf.get('core_item_boost', 2.0)
+
+        bundle_user_graph = u_b_graph_train.T.tocsr() 
+        item_df = np.array(u_i_graph.sum(axis=0)).flatten()
+        
+        row_indices = []
+        col_indices = []
+        values = []
+        
+        b_i_csr = b_i_graph.tocsr()
+        u_i_csr = u_i_graph.tocsr()
+        
+        boosted_bundle_cnt = 0
+        total_boosted_items = 0
+
+        for b in range(num_bundles):
+            b_start = b_i_csr.indptr[b]
+            b_end = b_i_csr.indptr[b+1]
+            b_items = b_i_csr.indices[b_start:b_end]
+            
+            if len(b_items) == 0:
+                continue
+            
+            b_weights = np.ones(len(b_items), dtype=np.float32)
+            
+            u_start = bundle_user_graph.indptr[b]
+            u_end = bundle_user_graph.indptr[b+1]
+            users_b = bundle_user_graph.indices[u_start:u_end]
+            
+            if len(users_b) >= user_threshold:
+                users_b_items_sum = np.array(u_i_csr[users_b].sum(axis=0)).flatten()
+                cnt_b_i = users_b_items_sum[b_items]
+                
+                valid_local_indices = np.where(cnt_b_i > 0)[0]
+                if len(valid_local_indices) >= valid_item_threshold:
+                    coverage = cnt_b_i[valid_local_indices] / len(users_b)
+                    valid_items = b_items[valid_local_indices]
+                    idf = np.log((num_users + 1.0) / (item_df[valid_items] + 1.0))
+                    valid_scores = coverage * idf
+                    
+                    actual_topk = min(topk, len(valid_local_indices))
+                    
+                    if actual_topk > 0:
+                        top_in_valid = np.argsort(-valid_scores)[:actual_topk]
+                        top_local_indices = valid_local_indices[top_in_valid]
+                        
+                        b_weights[top_local_indices] = float(boost)
+                        boosted_bundle_cnt += 1
+                        total_boosted_items += actual_topk
+            
+            row_indices.extend([b] * len(b_items))
+            col_indices.extend(b_items)
+            values.extend(b_weights)
+
+        weighted_raw_graph = sp.csr_matrix((values, (row_indices, col_indices)), shape=(num_bundles, num_items), dtype=np.float32)
+        
+        print(f"BI Weighted Raw Graph built in {time.time() - start_time:.2f}s")
+        print(f"Boosted bundles: {boosted_bundle_cnt} / {num_bundles} ({(boosted_bundle_cnt/num_bundles)*100:.2f}%)")
+        if boosted_bundle_cnt > 0:
+            print(f"Average boosted items per boosted bundle: {total_boosted_items / boosted_bundle_cnt:.2f}")
+        print(f"Graph nnz: {weighted_raw_graph.nnz}")
+        
+        return weighted_raw_graph
 
 
     def build_core_item_boost_matrix(self, conf, b_i_graph, u_i_graph, u_b_graph_train):

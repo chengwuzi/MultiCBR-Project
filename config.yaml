@@ -5,6 +5,7 @@ NetEase:
   topk: [10, 20, 40, 80] # the topks metrics for evaluation
   neg_num: 1 # number of negatives used for BPR loss. All the experiments use 1.
 
+  use_item_idf_reweight: true
   use_core_item_boost: false
   use_bi_weighted_graph: true
   core_item_user_threshold: 20
@@ -48,6 +49,7 @@ iFashion:
   topk: [10, 20, 40, 80]
   neg_num: 1
 
+  use_item_idf_reweight: true
   use_core_item_boost: false
   use_bi_weighted_graph: true
   core_item_user_threshold: 5
@@ -87,6 +89,7 @@ Youshu:
   topk: [10, 20, 40, 80]
   neg_num: 1
 
+  use_item_idf_reweight: true
   use_core_item_boost: false
   use_bi_weighted_graph: true
   core_item_user_threshold: 5

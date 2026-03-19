@@ -188,6 +188,7 @@ class Datasets():
         valid_item_threshold = conf.get('core_item_valid_item_threshold', 3)
         topk = conf.get('core_item_topk', 2)
         boost = conf.get('core_item_boost', 2.0)
+        use_item_idf_reweight = conf.get('use_item_idf_reweight', True)
 
         bundle_user_graph = u_b_graph_train.T.tocsr() 
         item_df = np.array(u_i_graph.sum(axis=0)).flatten()
@@ -223,9 +224,13 @@ class Datasets():
                 valid_local_indices = np.where(cnt_b_i > 0)[0]
                 if len(valid_local_indices) >= valid_item_threshold:
                     coverage = cnt_b_i[valid_local_indices] / len(users_b)
-                    valid_items = b_items[valid_local_indices]
-                    idf = np.log((num_users + 1.0) / (item_df[valid_items] + 1.0))
-                    valid_scores = coverage * idf
+                    
+                    if use_item_idf_reweight:
+                        valid_items = b_items[valid_local_indices]
+                        idf = np.log((num_users + 1.0) / (item_df[valid_items] + 1.0))
+                        valid_scores = coverage * idf
+                    else:
+                        valid_scores = coverage
                     
                     actual_topk = min(topk, len(valid_local_indices))
                     
@@ -265,6 +270,7 @@ class Datasets():
         valid_item_threshold = conf.get('core_item_valid_item_threshold', 3)
         topk = conf.get('core_item_topk', 2)
         boost = conf.get('core_item_boost', 2.0)
+        use_item_idf_reweight = conf.get('use_item_idf_reweight', True)
 
         bundle_user_graph = u_b_graph_train.T.tocsr() 
         item_df = np.array(u_i_graph.sum(axis=0)).flatten()
@@ -299,12 +305,15 @@ class Datasets():
                 
                 valid_local_indices = np.where(cnt_b_i > 0)[0]
                 if len(valid_local_indices) >= valid_item_threshold:
-                    coverage = cnt_b_i / len(users_b)
-                    idf = np.log((num_users + 1.0) / (item_df[b_items] + 1.0))
-                    score = coverage * idf
+                    coverage = cnt_b_i[valid_local_indices] / len(users_b)
                     
-                    # 仅在有效 item 子集上进行排序
-                    valid_scores = score[valid_local_indices]
+                    if use_item_idf_reweight:
+                        valid_items = b_items[valid_local_indices]
+                        idf = np.log((num_users + 1.0) / (item_df[valid_items] + 1.0))
+                        valid_scores = coverage * idf
+                    else:
+                        valid_scores = coverage
+                    
                     actual_topk = min(topk, len(valid_local_indices))
                     
                     if actual_topk > 0:

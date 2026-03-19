@@ -127,10 +127,12 @@ def main(args=None):
         else:
             biwg_prefix = "NoBIWG"
             
+        idf_prefix = "IDFOn" if conf.get("use_item_idf_reweight", True) else "IDFOff"
+            
         if conf.get("use_core_item_boost", False) or conf.get("use_bi_weighted_graph", False):
-            settings += [f"{cib_prefix}_{biwg_prefix}_{conf.get('core_item_user_threshold', 10)}_{conf.get('core_item_valid_item_threshold', 3)}_{conf.get('core_item_topk', 2)}_{conf.get('core_item_boost', 2.0)}"]
+            settings += [f"{cib_prefix}_{biwg_prefix}_{idf_prefix}_{conf.get('core_item_user_threshold', 10)}_{conf.get('core_item_valid_item_threshold', 3)}_{conf.get('core_item_topk', 2)}_{conf.get('core_item_boost', 2.0)}"]
         else:
-            settings += [f"{cib_prefix}_{biwg_prefix}"]
+            settings += [f"{cib_prefix}_{biwg_prefix}_{idf_prefix}"]
 
         setting = "_".join(settings)
 

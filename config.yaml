@@ -50,8 +50,8 @@ iFashion:
 
   use_core_item_boost: false
   use_bi_weighted_graph: true
-  core_item_user_threshold: 25
-  core_item_valid_item_threshold: 3
+  core_item_user_threshold: 5
+  core_item_valid_item_threshold: 2
   core_item_topk: 1
   core_item_boost: 2.0
 
@@ -89,10 +89,10 @@ Youshu:
 
   use_core_item_boost: false
   use_bi_weighted_graph: true
-  core_item_user_threshold: 8
-  core_item_valid_item_threshold: 3
+  core_item_user_threshold: 5
+  core_item_valid_item_threshold: 2
   core_item_topk: 1
-  core_item_boost: 3.0
+  core_item_boost: 2.0
 
   # the following are the best settings
   aug_type: "Noise"

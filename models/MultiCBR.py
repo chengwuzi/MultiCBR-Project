@@ -65,8 +65,23 @@ class MultiCBR(nn.Module):
         self.init_emb()
         self.init_fusion_weights()
 
+        self.use_core_item_boost = self.conf.get("use_core_item_boost", False)
+        self.core_item_topk = self.conf.get("core_item_topk", 2)
+        self.core_item_boost = self.conf.get("core_item_boost", 2.0)
+        self.core_item_user_threshold = self.conf.get("core_item_user_threshold", 10)
+        self.core_item_valid_item_threshold = self.conf.get("core_item_valid_item_threshold", 3)
+
         assert isinstance(raw_graph, list)
-        self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
+        if len(raw_graph) == 4:
+            self.ub_graph, self.ui_graph, self.bi_graph, core_item_boost_graph = raw_graph
+        else:
+            self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
+            core_item_boost_graph = None
+
+        if self.use_core_item_boost and core_item_boost_graph is not None:
+            self.core_item_boost_graph_tensor = to_tensor(core_item_boost_graph).to(self.device)
+        else:
+            self.core_item_boost_graph_tensor = None
 
         # generate the graph without any dropouts for testing
         self.UB_propagation_graph_ori = self.get_propagation_graph(self.ub_graph)
@@ -194,6 +209,21 @@ class MultiCBR(nn.Module):
         return A_feature, B_feature
 
 
+    def aggregate_with_core_item_boost(self, boost_graph, node_feature, graph_type, test):
+        aggregated_feature = torch.sparse.mm(boost_graph, node_feature)
+
+        # simple embedding dropout on bundle embeddings
+        if self.conf["aug_type"] == "MD" and not test:
+            mess_dropout = self.mess_dropout_dict[graph_type]
+            aggregated_feature = mess_dropout(aggregated_feature)
+        elif self.conf["aug_type"] == "Noise" and not test:
+            random_noise = torch.rand_like(aggregated_feature).to(self.device)
+            eps = self.eps_dict[graph_type]
+            aggregated_feature += torch.sign(aggregated_feature) * F.normalize(random_noise, dim=-1) * eps
+
+        return aggregated_feature
+
+
     def aggregate(self, agg_graph, node_feature, graph_type, test):
         aggregated_feature = torch.matmul(agg_graph, node_feature)
 
@@ -230,10 +260,16 @@ class MultiCBR(nn.Module):
         #  =============================  UI graph propagation  =============================
         if test:
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph_ori, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
-            UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_ori, UI_items_feature, "BI", test)
+            if self.use_core_item_boost and self.core_item_boost_graph_tensor is not None:
+                UI_bundles_feature = self.aggregate_with_core_item_boost(self.core_item_boost_graph_tensor, UI_items_feature, "BI", test)
+            else:
+                UI_bundles_feature = self.aggregate(self.BI_aggregation_graph_ori, UI_items_feature, "BI", test)
         else:
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
-            UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
+            if self.use_core_item_boost and self.core_item_boost_graph_tensor is not None:
+                UI_bundles_feature = self.aggregate_with_core_item_boost(self.core_item_boost_graph_tensor, UI_items_feature, "BI", test)
+            else:
+                UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
 
         #  =============================  BI graph propagation  =============================
         if test:

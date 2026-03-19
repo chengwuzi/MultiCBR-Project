@@ -5,6 +5,12 @@ NetEase:
   topk: [10, 20, 40, 80] # the topks metrics for evaluation
   neg_num: 1 # number of negatives used for BPR loss. All the experiments use 1.
 
+  use_core_item_boost: true
+  core_item_user_threshold: 10
+  core_item_valid_item_threshold: 3
+  core_item_topk: 2
+  core_item_boost: 2.0
+
   # the following are the best settings
   aug_type: "Noise" # options: ED, MD, OP, Noise
   ed_interval: 1 # by how many epochs to dropout edge, default is 1
@@ -41,6 +47,12 @@ iFashion:
   topk: [10, 20, 40, 80]
   neg_num: 1
 
+  use_core_item_boost: true
+  core_item_user_threshold: 10
+  core_item_valid_item_threshold: 3
+  core_item_topk: 2
+  core_item_boost: 2.0
+
   # the following are the best settings
   aug_type: "Noise"
   ed_interval: 1
@@ -72,6 +84,12 @@ Youshu:
   batch_size_test: 2048
   topk: [10, 20, 40, 80]
   neg_num: 1
+
+  use_core_item_boost: true
+  core_item_user_threshold: 10
+  core_item_valid_item_threshold: 3
+  core_item_topk: 2
+  core_item_boost: 2.0
 
   # the following are the best settings
   aug_type: "Noise"

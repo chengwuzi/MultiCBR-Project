@@ -115,6 +115,17 @@ def main(args=None):
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
 
+        if conf.get("use_core_item_boost", False):
+            cib_str = "CIB_{}_{}_{}_{}".format(
+                conf.get("core_item_user_threshold", 10),
+                conf.get("core_item_valid_item_threshold", 3),
+                conf.get("core_item_topk", 2),
+                conf.get("core_item_boost", 2.0)
+            )
+            settings += [cib_str]
+        else:
+            settings += ["NoCIB"]
+
         setting = "_".join(settings)
 
         # Windows path length limit fix: shorten setting string if too long

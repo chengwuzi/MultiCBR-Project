@@ -85,11 +85,13 @@ class MultiCBR(nn.Module):
         self.fusion_weights = conf['fusion_weights']
 
         self.init_emb()
-        
-        # User Interest Boundary layer
-        self.uib_boundary = nn.Linear(self.embedding_size, 1, bias=True)
-        nn.init.xavier_normal_(self.uib_boundary.weight)
-        nn.init.constant_(self.uib_boundary.bias, 0)
+
+        # User Interest Boundary layer (HED 原版逻辑，带 detach 截断梯度)
+        self.user_bound_vector = nn.Parameter(
+            torch.FloatTensor(self.embedding_size, 1).normal_(0, 0.5 / self.embedding_size)
+        )
+        # 注意：这里不能在 nn.Parameter 后直接 .detach()，否则它就不会被注册为模块的参数
+        # 截断梯度的操作我们放到 forward (cal_loss) 里去执行
         self.init_fusion_weights()
 
         assert isinstance(raw_graph, list)
@@ -296,14 +298,17 @@ class MultiCBR(nn.Module):
 
         return c_loss
 
-
     def cal_loss(self, users_feature, bundles_feature):
         # users_feature / bundles_feature: [bs, 1+neg_num, emb_size]
         pred = torch.sum(users_feature * bundles_feature, 2)
-        
-        # calculate user interest boundary
-        user_anchor = users_feature[:, 0, :] # [bs, emb_size]
-        boundary = self.uib_boundary(user_anchor).squeeze(-1) # [bs]
+
+        # calculate user interest boundary (带有 HED 灵魂级的 detach 操作)
+        # 1. 对用户当前的特征截断梯度，使其不能通过“降低及格线”来作弊
+        user_anchor = users_feature[:, 0, :].detach()  # [bs, emb_size]
+        # 2. 对我们初始化的那个投影向量也截断梯度，使其变成一个纯粹的固定约束
+        bound_vector = self.user_bound_vector.detach()  # [emb_size, 1]
+        # 3. 计算出每个用户的绝对边界（及格线）
+        boundary = torch.matmul(user_anchor, bound_vector).squeeze(-1)  # [bs]
 
         if self.loss_type == "UIB":
             rank_loss = cal_uib_loss(pred, boundary, alpha=self.uib_alpha)

@@ -6,14 +6,14 @@ def run():
     
     experiment_config = {
         "gpu": "0",
-        "dataset": "NetEase",
+        "dataset": "Youshu",
         "model": "MultiCBR",
         "info": "my_custom_run", # 实验备注信息
         
         # --- 下面可以覆盖 config.yaml 中的参数 ---
         
         # 修改 epoch 数
-        "epochs": 1,  # 测试用，设为 1 跑得快
+        "epochs": 120,  # 测试用，设为 1 跑得快
         
         # 修改学习率
         # "lrs": [1e-3],

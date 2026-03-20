@@ -67,8 +67,16 @@ def main(args=None):
     conf["device"] = device
     print(conf)
 
-    for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp in \
-            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"]):
+    # Prepare uib_alpha_list to support both grid search and single value override
+    if "uib_alphas" in conf and conf["uib_alphas"] is not None:
+        uib_alpha_list = conf["uib_alphas"]
+    elif "uib_alpha" in conf and conf["uib_alpha"] is not None:
+        uib_alpha_list = [conf["uib_alpha"]]
+    else:
+        uib_alpha_list = [1.0]
+
+    for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp, uib_alpha in \
+            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"], uib_alpha_list):
         log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
         run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
         checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
@@ -113,7 +121,8 @@ def main(args=None):
 
         conf["c_lambda"] = c_lambda
         conf["c_temp"] = c_temp
-        settings += [str(c_lambda), str(c_temp)]
+        conf["uib_alpha"] = uib_alpha
+        settings += [str(c_lambda), str(c_temp), str(uib_alpha)]
 
         setting = "_".join(settings)
 
@@ -159,19 +168,19 @@ def main(args=None):
                 ED_drop = False
                 if conf["aug_type"] == "ED" and (batch_anchor + 1) % ed_interval_bs == 0:
                     ED_drop = True
-                bpr_loss, c_loss = model(batch, ED_drop=ED_drop)
-                loss = bpr_loss + conf["c_lambda"] * c_loss
+                rank_loss, c_loss = model(batch, ED_drop=ED_drop)
+                loss = rank_loss + conf["c_lambda"] * c_loss
                 loss.backward()
                 optimizer.step()
 
                 loss_scalar = loss.detach()
-                bpr_loss_scalar = bpr_loss.detach()
+                rank_loss_scalar = rank_loss.detach()
                 c_loss_scalar = c_loss.detach()
-                run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
+                run.add_scalar("loss_rank", rank_loss_scalar, batch_anchor)
                 run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
 
-                pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar))
+                pbar.set_description("epoch: %d, loss: %.4f, rank_loss: %.4f, c_loss: %.4f" %(epoch, loss_scalar, rank_loss_scalar, c_loss_scalar))
 
                 if (batch_anchor + 1) % test_interval_bs == 0:
                     metrics = {}

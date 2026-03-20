@@ -7,6 +7,25 @@ import torch.nn.functional as F
 import scipy.sparse as sp 
 
 
+def cal_uib_loss(pred, boundary, alpha=1.0):
+    # pred: [bs, 1+neg_num]
+    # boundary: [bs]
+    pos = pred[:, 0] # [bs]
+    negs = pred[:, 1:] # [bs, neg_num]
+    
+    if negs.dim() == 1:
+        negs = negs.unsqueeze(1) # [bs, 1]
+    
+    # boundary broadcast to negs shape
+    b = boundary.unsqueeze(1) # [bs, 1]
+    
+    pos_loss = - torch.log(torch.sigmoid(pos - boundary) + 1e-8) # [bs]
+    neg_loss = - torch.log(torch.sigmoid(b - negs) + 1e-8) # [bs, neg_num]
+    
+    loss = torch.mean(pos_loss + alpha * torch.mean(neg_loss, dim=1))
+    return loss
+
+
 def cal_bpr_loss(pred):
     # pred: [bs, 1+neg_num]
     if pred.shape[1] > 2:
@@ -60,9 +79,17 @@ class MultiCBR(nn.Module):
         self.num_layers = self.conf["num_layers"]
         self.c_temp = self.conf["c_temp"]
 
+        self.loss_type = conf.get("loss_type", "UIB")
+        self.uib_alpha = conf.get("uib_alpha", 1.0)
+
         self.fusion_weights = conf['fusion_weights']
 
         self.init_emb()
+        
+        # User Interest Boundary layer
+        self.uib_boundary = nn.Linear(self.embedding_size, 1, bias=True)
+        nn.init.xavier_normal_(self.uib_boundary.weight)
+        nn.init.constant_(self.uib_boundary.bias, 0)
         self.init_fusion_weights()
 
         assert isinstance(raw_graph, list)
@@ -273,7 +300,15 @@ class MultiCBR(nn.Module):
     def cal_loss(self, users_feature, bundles_feature):
         # users_feature / bundles_feature: [bs, 1+neg_num, emb_size]
         pred = torch.sum(users_feature * bundles_feature, 2)
-        bpr_loss = cal_bpr_loss(pred)
+        
+        # calculate user interest boundary
+        user_anchor = users_feature[:, 0, :] # [bs, emb_size]
+        boundary = self.uib_boundary(user_anchor).squeeze(-1) # [bs]
+
+        if self.loss_type == "UIB":
+            rank_loss = cal_uib_loss(pred, boundary, alpha=self.uib_alpha)
+        else:
+            rank_loss = cal_bpr_loss(pred)
 
         # cl is abbr. of "contrastive loss"
         u_view_cl = self.cal_c_loss(users_feature, users_feature)
@@ -283,7 +318,7 @@ class MultiCBR(nn.Module):
 
         c_loss = sum(c_losses) / len(c_losses)
 
-        return bpr_loss, c_loss
+        return rank_loss, c_loss
 
 
     def forward(self, batch, ED_drop=False):
@@ -305,9 +340,9 @@ class MultiCBR(nn.Module):
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
         bundles_embedding = bundles_rep[bundles]
 
-        bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding)
+        rank_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding)
 
-        return bpr_loss, c_loss
+        return rank_loss, c_loss
 
 
     def evaluate(self, propagate_result, users):

@@ -76,6 +76,7 @@ class MultiCBR(nn.Module):
 
         self.BI_propagation_graph_ori = self.get_propagation_graph(self.bi_graph)
         self.BI_aggregation_graph_ori = self.get_aggregation_graph(self.bi_graph)
+        self.global_propagation_graph_ori = self.get_global_propagation_graph(self.ub_graph, self.ui_graph, self.bi_graph)
 
         # generate the graph with the configured dropouts for training, if aug_type is OP or MD, the following graphs with be identical with the aboves
         self.UB_propagation_graph = self.get_propagation_graph(self.ub_graph, self.conf["UB_ratio"])
@@ -85,6 +86,7 @@ class MultiCBR(nn.Module):
 
         self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph, self.conf["BI_ratio"])
         self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
+        self.global_propagation_graph = self.get_global_propagation_graph(self.ub_graph, self.ui_graph, self.bi_graph, self.conf["BI_ratio"])
 
         if self.conf['aug_type'] == 'MD':
             self.init_md_dropouts()
@@ -220,6 +222,85 @@ class MultiCBR(nn.Module):
         return users_rep, bundles_rep
 
 
+    def get_global_propagation_graph(self, ub_graph, ui_graph, bi_graph, modification_ratio=0):
+        device = self.device
+        zero_u = sp.csr_matrix((self.num_users, self.num_users))
+        zero_b = sp.csr_matrix((self.num_bundles, self.num_bundles))
+        zero_i = sp.csr_matrix((self.num_items, self.num_items))
+
+        global_graph = sp.bmat([
+            [zero_u, ub_graph, ui_graph],
+            [ub_graph.T, zero_b, bi_graph],
+            [ui_graph.T, bi_graph.T, zero_i]
+        ])
+
+        if modification_ratio != 0:
+            if self.conf["aug_type"] == "ED":
+                graph = global_graph.tocoo()
+                values = np_edge_dropout(graph.data, modification_ratio)
+                global_graph = sp.coo_matrix((values, (graph.row, graph.col)), shape=graph.shape).tocsr()
+
+        return to_tensor(laplace_transform(global_graph)).to(device)
+
+
+    def propagate_bi_view(self, global_graph, bi_graph, test):
+        # Layer 0
+        b_feat = self.bundles_feature
+        i_feat = self.items_feature
+        u_feat = self.users_feature
+
+        all_b_features = [b_feat]
+        all_i_features = [i_feat]
+
+        # Layer 1: Global Graph
+        features_0 = torch.cat((u_feat, b_feat, i_feat), 0)
+        features_1 = torch.spmm(global_graph, features_0)
+
+        if self.conf["aug_type"] == "MD" and not test:
+            mess_dropout = self.mess_dropout_dict["BI"]
+            features_1 = mess_dropout(features_1)
+        elif self.conf["aug_type"] == "Noise" and not test:
+            random_noise = torch.rand_like(features_1).to(self.device)
+            eps = self.eps_dict["BI"]
+            features_1 += torch.sign(features_1) * F.normalize(random_noise, dim=-1) * eps
+
+        features_1 = F.normalize(features_1, p=2, dim=1)
+
+        # Split features
+        _, b_feat_1, i_feat_1 = torch.split(features_1, [self.num_users, self.num_bundles, self.num_items], 0)
+
+        all_b_features.append(b_feat_1)
+        all_i_features.append(i_feat_1)
+
+        # Layer 2+: B-I Graph
+        bi_features_current = torch.cat((b_feat_1, i_feat_1), 0)
+
+        for i in range(1, self.num_layers):
+            bi_features_current = torch.spmm(bi_graph, bi_features_current)
+
+            if self.conf["aug_type"] == "MD" and not test:
+                mess_dropout = self.mess_dropout_dict["BI"]
+                bi_features_current = mess_dropout(bi_features_current)
+            elif self.conf["aug_type"] == "Noise" and not test:
+                random_noise = torch.rand_like(bi_features_current).to(self.device)
+                eps = self.eps_dict["BI"]
+                bi_features_current += torch.sign(bi_features_current) * F.normalize(random_noise, dim=-1) * eps
+
+            bi_features_current = F.normalize(bi_features_current, p=2, dim=1)
+
+            b_feat_cur, i_feat_cur = torch.split(bi_features_current, [self.num_bundles, self.num_items], 0)
+            all_b_features.append(b_feat_cur)
+            all_i_features.append(i_feat_cur)
+
+        all_b_features = torch.stack(all_b_features, 1) * self.BI_layer_coefs
+        all_b_features = torch.sum(all_b_features, dim=1)
+
+        all_i_features = torch.stack(all_i_features, 1) * self.BI_layer_coefs
+        all_i_features = torch.sum(all_i_features, dim=1)
+
+        return all_b_features, all_i_features
+
+
     def get_multi_modal_representations(self, test=False):
         #  =============================  UB graph propagation  =============================
         if test:
@@ -237,10 +318,10 @@ class MultiCBR(nn.Module):
 
         #  =============================  BI graph propagation  =============================
         if test:
-            BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph_ori, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
+            BI_bundles_feature, BI_items_feature = self.propagate_bi_view(self.global_propagation_graph_ori, self.BI_propagation_graph_ori, test)
             BI_users_feature = self.aggregate(self.UI_aggregation_graph_ori, BI_items_feature, "UI", test)
         else:
-            BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
+            BI_bundles_feature, BI_items_feature = self.propagate_bi_view(self.global_propagation_graph, self.BI_propagation_graph, test)
             BI_users_feature = self.aggregate(self.UI_aggregation_graph, BI_items_feature, "UI", test)
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
@@ -296,6 +377,7 @@ class MultiCBR(nn.Module):
 
             self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph, self.conf["BI_ratio"])
             self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
+            self.global_propagation_graph = self.get_global_propagation_graph(self.ub_graph, self.ui_graph, self.bi_graph, self.conf["BI_ratio"])
 
         # users: [bs, 1]
         # bundles: [bs, 1+neg_num]

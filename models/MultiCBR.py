@@ -220,6 +220,31 @@ class MultiCBR(nn.Module):
         return users_rep, bundles_rep
 
 
+    def refine_on_ub(self, users_feat, bundles_feat, test=False):
+        if test:
+            ub_graph = self.UB_propagation_graph_ori
+        else:
+            ub_graph = self.UB_propagation_graph
+
+        features = torch.cat((users_feat, bundles_feat), 0)
+        refined_features = torch.spmm(ub_graph, features)
+        
+        # Apply configured augmentations during training
+        if self.conf["aug_type"] == "MD" and not test:
+            mess_dropout = self.mess_dropout_dict["UB"]
+            refined_features = mess_dropout(refined_features)
+        elif self.conf["aug_type"] == "Noise" and not test:
+            random_noise = torch.rand_like(refined_features).to(self.device)
+            eps = self.eps_dict["UB"]
+            refined_features += torch.sign(refined_features) * F.normalize(random_noise, dim=-1) * eps
+
+        refined_features = F.normalize(refined_features, p=2, dim=1)
+
+        ref_u, ref_b = torch.split(refined_features, (users_feat.shape[0], bundles_feat.shape[0]), 0)
+
+        return ref_u, ref_b
+
+
     def get_multi_modal_representations(self, test=False):
         #  =============================  UB graph propagation  =============================
         if test:
@@ -235,6 +260,8 @@ class MultiCBR(nn.Module):
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
             UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
 
+        UI_users_feature, UI_bundles_feature = self.refine_on_ub(UI_users_feature, UI_bundles_feature, test)
+
         #  =============================  BI graph propagation  =============================
         if test:
             BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph_ori, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
@@ -242,6 +269,8 @@ class MultiCBR(nn.Module):
         else:
             BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
             BI_users_feature = self.aggregate(self.UI_aggregation_graph, BI_items_feature, "UI", test)
+
+        BI_users_feature, BI_bundles_feature = self.refine_on_ub(BI_users_feature, BI_bundles_feature, test)
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]

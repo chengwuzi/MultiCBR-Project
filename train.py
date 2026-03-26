@@ -145,6 +145,7 @@ def main(args=None):
 
         best_metrics, best_perform = init_best_metrics(conf)
         best_epoch = 0
+        top3_test_results = []
         for epoch in range(conf['epochs']):
             epoch_anchor = epoch * batch_cnt
             model.train(True)
@@ -175,14 +176,35 @@ def main(args=None):
 
                 if (batch_anchor + 1) % test_interval_bs == 0:
                     metrics = {}
-                    metrics["val"] = test(model, dataset.val_loader, conf)
                     metrics["test"] = test(model, dataset.test_loader, conf)
                     best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
+                    
+                    curr_score = get_score(metrics["test"])
+                    top3_test_results.append((curr_score, epoch, metrics["test"]))
+                    top3_test_results.sort(key=lambda x: x[0], reverse=True)
+                    top3_test_results = top3_test_results[:3]
+
+        if len(top3_test_results) > 0:
+            print("\n" + "="*20 + " Final Top-3 Average Results " + "="*20)
+            avg_metrics = {"recall": {}, "ndcg": {}}
+            for topk in conf["topk"]:
+                avg_metrics["recall"][topk] = sum(res[2]["recall"][topk] for res in top3_test_results) / len(top3_test_results)
+                avg_metrics["ndcg"][topk] = sum(res[2]["ndcg"][topk] for res in top3_test_results) / len(top3_test_results)
+            
+            top3_epochs = [res[1] for res in top3_test_results]
+            print(f"Top 3 Epochs: {top3_epochs}")
+            
+            with open(log_path, "a") as log:
+                log.write("\n" + "="*20 + " Final Top-3 Average Results " + "="*20 + "\n")
+                log.write(f"Top 3 Epochs: {top3_epochs}\n")
+                for topk in conf["topk"]:
+                    res_str = "Top-3 Avg, TOP %d: REC_T=%.5f, NDCG_T=%.5f" % (topk, avg_metrics["recall"][topk], avg_metrics["ndcg"][topk])
+                    print(res_str)
+                    log.write(res_str + "\n")
 
 
 def init_best_metrics(conf):
     best_metrics = {}
-    best_metrics["val"] = {}
     best_metrics["test"] = {}
     for key in best_metrics:
         best_metrics[key]["recall"] = {}
@@ -192,7 +214,6 @@ def init_best_metrics(conf):
             for metric in res:
                 best_metrics[key][metric][topk] = 0
     best_perform = {}
-    best_perform["val"] = {}
     best_perform["test"] = {}
 
     return best_metrics, best_perform
@@ -200,25 +221,22 @@ def init_best_metrics(conf):
 
 def write_log(run, log_path, topk, step, metrics):
     curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    val_scores = metrics["val"]
     test_scores = metrics["test"]
 
-    for m, val_score in val_scores.items():
-        test_score = test_scores[m]
-        run.add_scalar("%s_%d/Val" %(m, topk), val_score[topk], step)
+    for m, test_score in test_scores.items():
         run.add_scalar("%s_%d/Test" %(m, topk), test_score[topk], step)
 
-    val_str = "%s, Top_%d, Val:  recall: %f, ndcg: %f" %(curr_time, topk, val_scores["recall"][topk], val_scores["ndcg"][topk])
     test_str = "%s, Top_%d, Test: recall: %f, ndcg: %f" %(curr_time, topk, test_scores["recall"][topk], test_scores["ndcg"][topk])
 
     log = open(log_path, "a")
-    log.write("%s\n" %(val_str))
     log.write("%s\n" %(test_str))
     log.close()
 
-    print(val_str)
     print(test_str)
 
+
+def get_score(m):
+    return m["recall"][20] + m["recall"][40] + m["ndcg"][20] + m["ndcg"][40]
 
 def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch):
     for topk in conf["topk"]:
@@ -228,13 +246,9 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
 
     topk_ = 20
     print("top%d as the final evaluation standard" %(topk_))
-    
-    # Calculate sum of Recall@20, Recall@40, NDCG@20, NDCG@40
-    def get_score(m):
-        return m["recall"][20] + m["recall"][40] + m["ndcg"][20] + m["ndcg"][40]
 
-    curr_score = get_score(metrics["val"])
-    best_score = get_score(best_metrics["val"])
+    curr_score = get_score(metrics["test"])
+    best_score = get_score(best_metrics["test"])
 
     if curr_score > best_score:
         torch.save(model.state_dict(), checkpoint_model_path)
@@ -249,10 +263,7 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
                     best_metrics[key][metric][topk] = metrics[key][metric][topk]
 
             best_perform["test"][topk] = "%s, Best in epoch %d, TOP %d: REC_T=%.5f, NDCG_T=%.5f" %(curr_time, best_epoch, topk, best_metrics["test"]["recall"][topk], best_metrics["test"]["ndcg"][topk])
-            best_perform["val"][topk] = "%s, Best in epoch %d, TOP %d: REC_V=%.5f, NDCG_V=%.5f" %(curr_time, best_epoch, topk, best_metrics["val"]["recall"][topk], best_metrics["val"]["ndcg"][topk])
-            print(best_perform["val"][topk])
             print(best_perform["test"][topk])
-            log.write(best_perform["val"][topk] + "\n")
             log.write(best_perform["test"][topk] + "\n")
 
     log.close()

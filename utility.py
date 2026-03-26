@@ -89,13 +89,11 @@ class Datasets():
         u_i_pairs, u_i_graph = self.get_ui()
 
         u_b_pairs_train, u_b_graph_train = self.get_ub("train")
-        u_b_pairs_val, u_b_graph_val = self.get_ub("tune")
         u_b_pairs_test, u_b_graph_test = self.get_ub("test")
 
         u_b_for_neg_sample, b_b_for_neg_sample = None, None
 
         self.bundle_train_data = BundleTrainDataset(conf, u_b_pairs_train, u_b_graph_train, self.num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, conf["neg_num"])
-        self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
         self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
@@ -103,7 +101,6 @@ class Datasets():
         # Windows compatibility: reduce num_workers to avoid overhead/errors
         num_workers = 4 if os.name == 'nt' else 10
         self.train_loader = DataLoader(self.bundle_train_data, batch_size=batch_size_train, shuffle=True, num_workers=num_workers, drop_last=True)
-        self.val_loader = DataLoader(self.bundle_val_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)
         self.test_loader = DataLoader(self.bundle_test_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)
 
 

@@ -26,3 +26,9 @@ MultiCBR-Base: 经过我处理的版本，加了一些便携性改动（环境�
 
 
 
+MultiCBR改成去除验证集后的实验结果
+
+Top-3 Avg, TOP 10: REC_T=0.21116, NDCG_T=0.15720
+Top-3 Avg, TOP 20: REC_T=0.29961, NDCG_T=0.18161
+Top-3 Avg, TOP 40: REC_T=0.40549, NDCG_T=0.21028
+Top-3 Avg, TOP 80: REC_T=0.52184, NDCG_T=0.23703

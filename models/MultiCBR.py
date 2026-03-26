@@ -60,6 +60,13 @@ class MultiCBR(nn.Module):
         self.num_layers = self.conf["num_layers"]
         self.c_temp = self.conf["c_temp"]
 
+        # Bundle Intent Module Configurations
+        self.use_bundle_intent = self.conf.get("use_bundle_intent", False)
+        self.n_bundle_intents = self.conf.get("n_bundle_intents", 16)
+        self.intent_temp = self.conf.get("intent_temp", 0.5)
+        self.intent_alpha = self.conf.get("intent_alpha", 0.2)
+        self.intent_lambda = self.conf.get("intent_lambda", 5e-3)
+
         self.fusion_weights = conf['fusion_weights']
 
         self.init_emb()
@@ -122,6 +129,9 @@ class MultiCBR(nn.Module):
         self.items_feature = nn.Parameter(torch.FloatTensor(self.num_items, self.embedding_size))
         nn.init.xavier_normal_(self.items_feature)
 
+        if self.use_bundle_intent:
+            self.bundle_intent_proto = nn.Parameter(torch.FloatTensor(self.embedding_size, self.n_bundle_intents))
+            nn.init.xavier_normal_(self.bundle_intent_proto)
 
     def init_fusion_weights(self):
         assert (len(self.fusion_weights['modal_weight']) == 3), \
@@ -251,6 +261,29 @@ class MultiCBR(nn.Module):
         return users_rep, bundles_rep
 
 
+    def get_bundle_intent_rep(self, bundles_rep):
+        # bundles_rep: [num_bundles, emb_size]
+        # self.bundle_intent_proto: [emb_size, n_bundle_intents]
+        logits = torch.matmul(bundles_rep, self.bundle_intent_proto) / self.intent_temp
+        attn = torch.softmax(logits, dim=1) # [num_bundles, n_bundle_intents]
+        bundle_intent_rep = torch.matmul(attn, self.bundle_intent_proto.T) # [num_bundles, emb_size]
+        return bundle_intent_rep, attn
+
+    def refine_bundle_rep(self, bundles_rep):
+        if not self.use_bundle_intent:
+            return bundles_rep, None, None
+        
+        bundle_intent_rep, bundle_intent_attn = self.get_bundle_intent_rep(bundles_rep)
+        refined_bundles_rep = bundles_rep + self.intent_alpha * bundle_intent_rep
+        return refined_bundles_rep, bundle_intent_rep, bundle_intent_attn
+
+    def cal_intent_loss(self, origin_bundle_rep, intent_bundle_rep):
+        origin_bundle_rep = F.normalize(origin_bundle_rep, p=2, dim=-1)
+        intent_bundle_rep = F.normalize(intent_bundle_rep, p=2, dim=-1)
+        loss = 1 - torch.sum(origin_bundle_rep * intent_bundle_rep, dim=-1)
+        return loss.mean()
+
+
     def cal_c_loss(self, pos, aug):
         # pos: [batch_size, :, emb_size]
         # aug: [batch_size, :, emb_size]
@@ -302,15 +335,30 @@ class MultiCBR(nn.Module):
         users, bundles = batch
         users_rep, bundles_rep = self.get_multi_modal_representations()
 
+        if self.use_bundle_intent:
+            refined_bundles_rep, bundle_intent_rep, _ = self.refine_bundle_rep(bundles_rep)
+        else:
+            refined_bundles_rep = bundles_rep
+            bundle_intent_rep = None
+
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
-        bundles_embedding = bundles_rep[bundles]
+        bundles_embedding = refined_bundles_rep[bundles]
 
         bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding)
 
-        return bpr_loss, c_loss
+        if self.use_bundle_intent:
+            origin_pos_bundle_rep = bundles_rep[bundles[:, 0]]
+            intent_pos_bundle_rep = bundle_intent_rep[bundles[:, 0]]
+            intent_loss = self.cal_intent_loss(origin_pos_bundle_rep, intent_pos_bundle_rep)
+        else:
+            intent_loss = torch.tensor(0.0, device=self.device)
+
+        return bpr_loss, c_loss, intent_loss
 
 
     def evaluate(self, propagate_result, users):
         users_feature, bundles_feature = propagate_result
+        if self.use_bundle_intent:
+            bundles_feature, _, _ = self.refine_bundle_rep(bundles_feature)
         scores = torch.mm(users_feature[users], bundles_feature.t())
         return scores

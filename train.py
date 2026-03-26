@@ -23,6 +23,14 @@ def get_cmd():
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
+
+    # bundle intent arguments
+    parser.add_argument("--use_bundle_intent", default=None, type=lambda x: (str(x).lower() == 'true'), help="enable bundle intent module")
+    parser.add_argument("--n_bundle_intents", default=None, type=int, help="number of bundle intents")
+    parser.add_argument("--intent_temp", default=None, type=float, help="temperature for intent softmax")
+    parser.add_argument("--intent_alpha", default=None, type=float, help="residual weight for bundle intent")
+    parser.add_argument("--intent_lambda", default=None, type=float, help="weight for intent loss")
+
     args = parser.parse_args()
 
     return args
@@ -115,6 +123,9 @@ def main(args=None):
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
 
+        if conf.get("use_bundle_intent", False):
+            settings += [f"BIntent_n{conf.get('n_bundle_intents', 16)}_a{conf.get('intent_alpha', 0.2)}_t{conf.get('intent_temp', 0.5)}_l{conf.get('intent_lambda', 0.005)}"]
+
         setting = "_".join(settings)
 
         # Windows path length limit fix: shorten setting string if too long
@@ -159,19 +170,21 @@ def main(args=None):
                 ED_drop = False
                 if conf["aug_type"] == "ED" and (batch_anchor + 1) % ed_interval_bs == 0:
                     ED_drop = True
-                bpr_loss, c_loss = model(batch, ED_drop=ED_drop)
-                loss = bpr_loss + conf["c_lambda"] * c_loss
+                bpr_loss, c_loss, intent_loss = model(batch, ED_drop=ED_drop)
+                loss = bpr_loss + conf["c_lambda"] * c_loss + conf.get("intent_lambda", 0.0) * intent_loss
                 loss.backward()
                 optimizer.step()
 
                 loss_scalar = loss.detach()
                 bpr_loss_scalar = bpr_loss.detach()
                 c_loss_scalar = c_loss.detach()
+                intent_loss_scalar = intent_loss.detach()
                 run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
                 run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
+                run.add_scalar("loss_intent", intent_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
 
-                pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar))
+                pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f, intent_loss: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar, intent_loss_scalar))
 
                 if (batch_anchor + 1) % test_interval_bs == 0:
                     metrics = {}

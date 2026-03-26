@@ -6,14 +6,21 @@ def run():
     
     experiment_config = {
         "gpu": "0",
-        "dataset": "NetEase",
+        "dataset": "Youshu",
         "model": "MultiCBR",
         "info": "my_custom_run", # 实验备注信息
         
         # --- 下面可以覆盖 config.yaml 中的参数 ---
         
         # 修改 epoch 数
-        "epochs": 1,  # 测试用，设为 1 跑得快
+        "epochs": 110,  # 默认跑 50 轮
+        
+        # --- Bundle Intent 模块配置 ---
+        "use_bundle_intent": False,     # 是否启用 Bundle Intent 模块
+        "n_bundle_intents": 16,        # 意图原型数量
+        "intent_temp": 0.5,            # 意图 Softmax 温度
+        "intent_alpha": 0.2,           # 意图特征融合权重 (Residual)
+        "intent_lambda": 0.005,        # 意图对齐损失权重系数
         
         # 修改学习率
         # "lrs": [1e-3],

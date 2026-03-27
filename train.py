@@ -23,6 +23,7 @@ def get_cmd():
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
+    parser.add_argument("--use_cbdm_for_ifashion", type=int, default=1, help="Use CBDM for iFashion dataset (1: True, 0: False)")
     args = parser.parse_args()
 
     return args
@@ -65,6 +66,15 @@ def main(args=None):
     os.environ['CUDA_VISIBLE_DEVICES'] = conf["gpu"]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     conf["device"] = device
+
+    if conf["dataset"] == "iFashion" and conf.get("use_cbdm_for_ifashion", 1) == 1:
+        print("Applying CBDM for iFashion dataset U-B graph...")
+        from CBDM import CBDM
+        cbdm = CBDM({"device": str(device)})
+        cbdm_outputs = cbdm.fit_transform(dataset.graphs[0])
+        dataset.graphs[0] = cbdm_outputs["denoised_ub_mat"].tocsr()
+        print("CBDM denoising completed. dataset.graphs[0] replaced.")
+
     print(conf)
 
     for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp in \

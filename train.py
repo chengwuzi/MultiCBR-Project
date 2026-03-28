@@ -12,8 +12,212 @@ from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.optim as optim
+import scipy.sparse as sp
+import numpy as np
+from torch.utils.data import DataLoader, Dataset
 from utility import Datasets
 from models.MultiCBR import MultiCBR
+from bi_diffusion_topk import build_bi_diffusion_module_from_sparse, resolve_keep_k as bi_resolve_keep_k
+from ub_diffusion_topk import build_ub_diffusion_module_from_sparse, resolve_keep_k as ub_resolve_keep_k
+
+
+class UserOnlyDataset(Dataset):
+    def __init__(self, num_users: int):
+        self.num_users = int(num_users)
+
+    def __len__(self) -> int:
+        return self.num_users
+
+    def __getitem__(self, idx: int) -> torch.Tensor:
+        return torch.tensor(idx, dtype=torch.long)
+
+
+def graph_stats(graph: sp.csr_matrix) -> dict:
+    graph = graph.tocsr()
+    row_nnz = np.diff(graph.indptr)
+    col_nnz = np.asarray((graph > 0).sum(axis=0)).reshape(-1)
+    total_possible = graph.shape[0] * graph.shape[1]
+    return {
+        "num_rows": int(graph.shape[0]),
+        "num_cols": int(graph.shape[1]),
+        "nnz": int(graph.nnz),
+        "density": float(graph.nnz / max(total_possible, 1)),
+        "avg_degree_per_row": float(row_nnz.mean()) if len(row_nnz) > 0 else 0.0,
+        "median_degree_per_row": float(np.median(row_nnz)) if len(row_nnz) > 0 else 0.0,
+        "p90_degree_per_row": float(np.percentile(row_nnz, 90)) if len(row_nnz) > 0 else 0.0,
+        "max_degree_per_row": int(row_nnz.max()) if len(row_nnz) > 0 else 0,
+        "min_degree_per_row": int(row_nnz.min()) if len(row_nnz) > 0 else 0,
+    }
+
+
+def print_graph_stats(title: str, stats: dict):
+    print(f"--- {title} ---")
+    for k, v in stats.items():
+        print(f"  {k}: {v}")
+
+
+def build_popularity_topk_bi_graph(bi_graph: sp.csr_matrix, keep_ratio: float, min_keep: int) -> sp.csr_matrix:
+    num_bundles, num_items = bi_graph.shape
+    indptr = bi_graph.indptr
+    indices = bi_graph.indices
+    item_popularity = np.asarray((bi_graph > 0).sum(axis=0)).reshape(-1).astype(np.int64)
+
+    rows, cols = [], []
+    for b in range(num_bundles):
+        items = indices[indptr[b]:indptr[b + 1]].copy()
+        L = len(items)
+        if L == 0:
+            continue
+        k = bi_resolve_keep_k(L, keep_k=None, keep_ratio=keep_ratio, min_keep=min_keep)
+        if L <= k:
+            chosen = items
+        else:
+            pop = item_popularity[items]
+            order = np.argsort(-pop, kind="stable")[:k]
+            chosen = items[order]
+        rows.extend([b] * len(chosen))
+        cols.extend(chosen.tolist())
+    vals = np.ones(len(rows), dtype=np.float32)
+    return sp.coo_matrix((vals, (np.asarray(rows), np.asarray(cols))), shape=(num_bundles, num_items)).tocsr()
+
+
+def build_popularity_topk_ub_graph(ub_graph: sp.csr_matrix, keep_k, keep_ratio, min_keep: int) -> sp.csr_matrix:
+    num_users, num_bundles = ub_graph.shape
+    indptr = ub_graph.indptr
+    indices = ub_graph.indices
+    bundle_popularity = np.asarray((ub_graph > 0).sum(axis=0)).reshape(-1).astype(np.int64)
+
+    rows, cols = [], []
+    for u in range(num_users):
+        bundles = indices[indptr[u]:indptr[u + 1]].copy()
+        L = len(bundles)
+        if L == 0:
+            continue
+        k = ub_resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
+        if L <= k:
+            chosen = bundles
+        else:
+            pop = bundle_popularity[bundles]
+            order = np.argsort(-pop, kind="stable")[:k]
+            chosen = bundles[order]
+        rows.extend([u] * len(chosen))
+        cols.extend(chosen.tolist())
+    vals = np.ones(len(rows), dtype=np.float32)
+    return sp.coo_matrix((vals, (np.asarray(rows), np.asarray(cols))), shape=(num_users, num_bundles)).tocsr()
+
+
+def prepare_ub_graph_for_training(conf: dict, dataset: Datasets, device: torch.device):
+    """
+    Preprocess the UB graph if ub_purifier is enabled.
+    Returns:
+        new_ub_graph: the original or purified sp.csr_matrix
+        meta: a dictionary containing preprocessing logs/stats
+    """
+    ub_graph = dataset.graphs[0]
+    purifier_conf = conf.get("ub_purifier", {})
+    enabled = purifier_conf.get("enabled", False)
+
+    if not enabled:
+        print("Using original UB graph (ub_purifier.enabled=false)")
+        return ub_graph, {"mode": "original"}
+
+    mode = purifier_conf.get("mode", "diffusion")
+    keep_k = purifier_conf.get("keep_k", None)
+    keep_ratio = purifier_conf.get("keep_ratio", None)
+    min_keep = purifier_conf.get("min_keep", 1)
+    
+    print(f"Using {mode} UB purifier (keep_k={keep_k}, keep_ratio={keep_ratio}, min_keep={min_keep})")
+    
+    orig_stats = graph_stats(ub_graph)
+    print_graph_stats("Original UB Graph Stats", orig_stats)
+
+    cache_dir = purifier_conf.get("cache_dir", "./ub_purifier_cache")
+    os.makedirs(cache_dir, exist_ok=True)
+    
+    if mode == "popularity":
+        cache_name_suffix = f"k{keep_k}" if keep_ratio is None else f"ratio{keep_ratio}"
+        cache_name = f"{conf['dataset']}_ub_popularity_{cache_name_suffix}_min{min_keep}.npz"
+        cache_path = os.path.join(cache_dir, cache_name)
+        
+        if purifier_conf.get("reuse_cached_graph", True) and os.path.isfile(cache_path):
+            print(f"Loading popularity purified UB graph from cache: {cache_path}")
+            purified_graph = sp.load_npz(cache_path)
+        else:
+            print("Building popularity purified UB graph...")
+            purified_graph = build_popularity_topk_ub_graph(ub_graph, keep_k, keep_ratio, min_keep)
+            if purifier_conf.get("save_purified_npz", True):
+                sp.save_npz(cache_path, purified_graph)
+                print(f"Saved purified graph to cache: {cache_path}")
+                
+    elif mode == "diffusion":
+        cache_name_suffix = f"k{keep_k}" if keep_ratio is None else f"ratio{keep_ratio}"
+        cache_name = f"{conf['dataset']}_ub_diffusion_{cache_name_suffix}_min{min_keep}.npz"
+        cache_path = os.path.join(cache_dir, cache_name)
+        
+        if purifier_conf.get("reuse_cached_graph", True) and os.path.isfile(cache_path):
+            print(f"Loading diffusion purified UB graph from cache: {cache_path}")
+            purified_graph = sp.load_npz(cache_path)
+        else:
+            print("Training diffusion UB purifier on the fly...")
+            model = build_ub_diffusion_module_from_sparse(
+                ub_graph=ub_graph,
+                embedding_size=purifier_conf.get("embedding_size", 64),
+                hidden_size=purifier_conf.get("hidden_size", 128),
+                time_embed_size=purifier_conf.get("time_embed_size", 64),
+                diffusion_steps=purifier_conf.get("diffusion_steps", 20),
+                beta_start=purifier_conf.get("beta_start", 1e-4),
+                beta_end=purifier_conf.get("beta_end", 2e-2),
+                max_context_bundles=purifier_conf.get("max_context_bundles", 32),
+                num_negative=purifier_conf.get("num_negative", 8),
+                blcc_enabled=purifier_conf.get("blcc_enabled", False),
+                blcc_lambda=purifier_conf.get("blcc_lambda", 0.1),
+                dropout=purifier_conf.get("dropout", 0.1),
+                use_layernorm=purifier_conf.get("use_layernorm", False),
+                device=str(device)
+            ).to(device)
+            
+            ckpt_path = purifier_conf.get("checkpoint_path", "")
+            if ckpt_path and os.path.isfile(ckpt_path):
+                print(f"Loading diffusion purifier weights from {ckpt_path}")
+                payload = torch.load(ckpt_path, map_location=device)
+                model.load_state_dict(payload.get("model_state_dict", payload))
+            else:
+                user_dataset = UserOnlyDataset(dataset.num_users)
+                user_loader = DataLoader(user_dataset, batch_size=purifier_conf.get("batch_size", 256), shuffle=True)
+                optimizer = optim.Adam(model.parameters(), lr=purifier_conf.get("lr", 1e-3), weight_decay=purifier_conf.get("weight_decay", 1e-5))
+                
+                epochs = purifier_conf.get("epochs", 20)
+                model.train()
+                for epoch in range(1, epochs + 1):
+                    for batch_user_ids in user_loader:
+                        batch_user_ids = batch_user_ids.to(device)
+                        optimizer.zero_grad()
+                        out = model(batch_user_ids)
+                        out["total_loss"].backward()
+                        optimizer.step()
+                    print(f"UB Purifier Epoch {epoch}/{epochs} done.")
+            
+            print("Building purified UB graph with trained diffusion model...")
+            model.eval()
+            purified_graph = model.build_purified_ub_graph(keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep, keep_all_if_len_le_k=True)
+            
+            if purifier_conf.get("save_purified_npz", True):
+                sp.save_npz(cache_path, purified_graph)
+                print(f"Saved purified graph to cache: {cache_path}")
+    else:
+        raise ValueError(f"Unknown ub_purifier mode: {mode}")
+
+    purified_stats = graph_stats(purified_graph)
+    print_graph_stats(f"Purified UB Graph Stats ({mode})", purified_stats)
+    
+    return purified_graph, {
+        "mode": mode,
+        "keep_k": keep_k,
+        "keep_ratio": keep_ratio,
+        "min_keep": min_keep,
+        "orig_stats": orig_stats,
+        "purified_stats": purified_stats
+    }
 
 
 def get_cmd():
@@ -66,6 +270,10 @@ def main(args=None):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     conf["device"] = device
     print(conf)
+
+    # Preprocess UB graph
+    new_ub_graph, ub_meta = prepare_ub_graph_for_training(conf, dataset, device)
+    dataset.graphs[0] = new_ub_graph
 
     for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp in \
             product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"]):

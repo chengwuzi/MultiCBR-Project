@@ -55,7 +55,7 @@ import scipy.sparse as sp
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from bi_diffusion_topk import build_bi_diffusion_module_from_sparse
+from bi_diffusion_topk import build_bi_diffusion_module_from_sparse, resolve_keep_k
 
 
 # -----------------------------------------------------------------------------
@@ -247,14 +247,14 @@ def inspect_score_distribution(model, bundle_ids: List[int], max_print: int = 10
 # baselines and purified graph builders
 # -----------------------------------------------------------------------------
 
-def build_random_topk_graph(bundle_items: Sequence[np.ndarray], num_bundles: int, num_items: int, keep_k: int, seed: int) -> sp.csr_matrix:
+def build_random_topk_graph(bundle_items: Sequence[np.ndarray], num_bundles: int, num_items: int, keep_k: Optional[int], seed: int, keep_ratio: Optional[float] = None, min_keep: int = 5) -> sp.csr_matrix:
     rng = np.random.default_rng(seed)
     rows, cols = [], []
     for b, items in enumerate(bundle_items):
         L = len(items)
         if L == 0:
             continue
-        k = min(keep_k, L)
+        k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
         chosen = items if L <= k else rng.choice(items, size=k, replace=False)
         rows.extend([b] * len(chosen))
         cols.extend(chosen.tolist())
@@ -263,13 +263,13 @@ def build_random_topk_graph(bundle_items: Sequence[np.ndarray], num_bundles: int
 
 
 
-def build_popularity_topk_graph(bundle_items: Sequence[np.ndarray], item_popularity: np.ndarray, num_bundles: int, num_items: int, keep_k: int) -> sp.csr_matrix:
+def build_popularity_topk_graph(bundle_items: Sequence[np.ndarray], item_popularity: np.ndarray, num_bundles: int, num_items: int, keep_k: Optional[int], keep_ratio: Optional[float] = None, min_keep: int = 5) -> sp.csr_matrix:
     rows, cols = [], []
     for b, items in enumerate(bundle_items):
         L = len(items)
         if L == 0:
             continue
-        k = min(keep_k, L)
+        k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
         if L <= k:
             chosen = items
         else:
@@ -491,6 +491,8 @@ def parse_args() -> argparse.Namespace:
 
     # validation sweep
     p.add_argument("--k_values", type=int, nargs="+", default=[10, 12, 15, 18, 20])
+    p.add_argument("--ratio_values", type=float, nargs="*", default=None, help="E.g. 0.3 0.4 0.5")
+    p.add_argument("--min_keep", type=int, default=5, help="Minimum keep threshold for ratio sweep")
     p.add_argument("--random_baseline_seed", type=int, default=3407)
 
     # leave-one-out
@@ -616,40 +618,58 @@ def main() -> None:
     print("=" * 20 + " Leave-One-Out Metrics " + "=" * 20)
     print({"random": loo_random, "popularity": loo_pop, "diffusion": loo_diff})
 
-    # sweep ks and compare structural baselines
+    # sweep ks or ratios and compare structural baselines
     sweep_results: Dict[str, Dict[str, Dict[str, float]]] = {}
-    for k in args.k_values:
-        print(f"\n===== Sweeping keep_k={k} =====")
-        diffusion_graph = model.build_purified_bi_graph(keep_k=k, keep_all_if_len_le_k=True)
+    
+    use_ratio = args.ratio_values is not None and len(args.ratio_values) > 0
+    sweep_values = args.ratio_values if use_ratio else args.k_values
+
+    for val in sweep_values:
+        if use_ratio:
+            keep_ratio = val
+            keep_k = None
+            key_name = f"ratio={keep_ratio}|min_keep={args.min_keep}"
+            print(f"\n===== Sweeping ratio={keep_ratio}, min_keep={args.min_keep} =====")
+        else:
+            keep_ratio = None
+            keep_k = val
+            key_name = f"k={keep_k}"
+            print(f"\n===== Sweeping keep_k={keep_k} =====")
+
+        diffusion_graph = model.build_purified_bi_graph(keep_k=keep_k, keep_ratio=keep_ratio, min_keep=args.min_keep, keep_all_if_len_le_k=True)
         random_graph = build_random_topk_graph(
             bundle_items=data.bundle_items,
             num_bundles=data.num_bundles,
             num_items=data.num_items,
-            keep_k=k,
-            seed=args.random_baseline_seed + k,
+            keep_k=keep_k,
+            keep_ratio=keep_ratio,
+            min_keep=args.min_keep,
+            seed=args.random_baseline_seed + int(val * 100),
         )
         popularity_graph = build_popularity_topk_graph(
             bundle_items=data.bundle_items,
             item_popularity=data.item_popularity,
             num_bundles=data.num_bundles,
             num_items=data.num_items,
-            keep_k=k,
+            keep_k=keep_k,
+            keep_ratio=keep_ratio,
+            min_keep=args.min_keep,
         )
 
         diffusion_stats = graph_stats(diffusion_graph)
         random_stats = graph_stats(random_graph)
         popularity_stats = graph_stats(popularity_graph)
 
-        sweep_results[str(k)] = {
+        sweep_results[key_name] = {
             "full_bi": original_stats,
             "random_topk": random_stats,
             "popularity_topk": popularity_stats,
             "diffusion_topk": diffusion_stats,
         }
 
-        print_graph_stats(f"k={k} | diffusion_topk", diffusion_stats)
-        print_graph_stats(f"k={k} | popularity_topk", popularity_stats)
-        print_graph_stats(f"k={k} | random_topk", random_stats)
+        print_graph_stats(f"{key_name} | diffusion_topk", diffusion_stats)
+        print_graph_stats(f"{key_name} | popularity_topk", popularity_stats)
+        print_graph_stats(f"{key_name} | random_topk", random_stats)
 
     run_name = (
         f"{args.dataset}_validate_ep{args.epochs}_neg{args.num_negative}_"
@@ -670,7 +690,7 @@ def main() -> None:
             "popularity": loo_pop,
             "diffusion": loo_diff,
         },
-        "k_sweep_structural_stats": sweep_results,
+        "truncation_sweep_structural_stats": sweep_results,
         "num_eval_bundles": len(eval_bundles),
     }
     with open(os.path.join(run_dir, "summary.json"), "w", encoding="utf-8") as f:
@@ -679,19 +699,27 @@ def main() -> None:
     with open(os.path.join(run_dir, "leave_one_out_details.json"), "w", encoding="utf-8") as f:
         json.dump(summary["leave_one_out"], f, indent=2, ensure_ascii=False)
 
-    # optionally save per-k diffusion outputs for later MultiCBR integration
+    # optionally save per-val diffusion outputs for later MultiCBR integration
     if args.save_pairs or args.save_npz:
-        per_k_dir = os.path.join(run_dir, "per_k_outputs")
-        os.makedirs(per_k_dir, exist_ok=True)
-        for k in args.k_values:
-            diffusion_graph = model.build_purified_bi_graph(keep_k=k, keep_all_if_len_le_k=True)
-            k_dir = os.path.join(per_k_dir, f"k_{k}")
-            os.makedirs(k_dir, exist_ok=True)
+        per_val_dir = os.path.join(run_dir, "per_val_outputs")
+        os.makedirs(per_val_dir, exist_ok=True)
+        for val in sweep_values:
+            if use_ratio:
+                keep_ratio = val
+                keep_k = None
+                val_dir = os.path.join(per_val_dir, f"ratio_{keep_ratio}_min_{args.min_keep}")
+            else:
+                keep_ratio = None
+                keep_k = val
+                val_dir = os.path.join(per_val_dir, f"k_{keep_k}")
+
+            diffusion_graph = model.build_purified_bi_graph(keep_k=keep_k, keep_ratio=keep_ratio, min_keep=args.min_keep, keep_all_if_len_le_k=True)
+            os.makedirs(val_dir, exist_ok=True)
             if args.save_npz:
-                sp.save_npz(os.path.join(k_dir, "purified_bi_graph.npz"), diffusion_graph)
+                sp.save_npz(os.path.join(val_dir, "purified_bi_graph.npz"), diffusion_graph)
             if args.save_pairs:
                 coo = diffusion_graph.tocoo()
-                with open(os.path.join(k_dir, "purified_bundle_item.txt"), "w", encoding="utf-8") as f:
+                with open(os.path.join(val_dir, "purified_bundle_item.txt"), "w", encoding="utf-8") as f:
                     for b, i in zip(coo.row.tolist(), coo.col.tolist()):
                         f.write(f"{b}\t{i}\n")
 

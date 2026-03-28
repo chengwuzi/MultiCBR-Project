@@ -60,7 +60,7 @@ import scipy.sparse as sp
 import torch
 from torch.utils.data import DataLoader, Dataset
 
-from bi_diffusion_topk import build_bi_diffusion_module_from_sparse
+from bi_diffusion_topk import build_bi_diffusion_module_from_sparse, resolve_keep_k
 
 
 # -----------------------------------------------------------------------------
@@ -222,7 +222,7 @@ def maybe_train_or_load_model(args, bi_graph: sp.csr_matrix, num_bundles: int, d
 # top-k builders
 # -----------------------------------------------------------------------------
 
-def build_random_topk_selection(bundle_items: Sequence[np.ndarray], keep_k: int, seed: int) -> List[np.ndarray]:
+def build_random_topk_selection(bundle_items: Sequence[np.ndarray], keep_k: Optional[int], seed: int, keep_ratio: Optional[float] = None, min_keep: int = 5) -> List[np.ndarray]:
     rng = np.random.default_rng(seed)
     selected: List[np.ndarray] = []
     for items in bundle_items:
@@ -230,20 +230,20 @@ def build_random_topk_selection(bundle_items: Sequence[np.ndarray], keep_k: int,
         if L == 0:
             selected.append(np.empty(0, dtype=np.int64))
             continue
-        k = min(keep_k, L)
+        k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
         chosen = items if L <= k else rng.choice(items, size=k, replace=False)
         selected.append(np.sort(chosen.astype(np.int64)))
     return selected
 
 
-def build_popularity_topk_selection(bundle_items: Sequence[np.ndarray], item_popularity: np.ndarray, keep_k: int) -> List[np.ndarray]:
+def build_popularity_topk_selection(bundle_items: Sequence[np.ndarray], item_popularity: np.ndarray, keep_k: Optional[int], keep_ratio: Optional[float] = None, min_keep: int = 5) -> List[np.ndarray]:
     selected: List[np.ndarray] = []
     for items in bundle_items:
         L = len(items)
         if L == 0:
             selected.append(np.empty(0, dtype=np.int64))
             continue
-        k = min(keep_k, L)
+        k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
         if L <= k:
             chosen = items
         else:
@@ -255,7 +255,7 @@ def build_popularity_topk_selection(bundle_items: Sequence[np.ndarray], item_pop
 
 
 @torch.no_grad()
-def build_diffusion_topk_selection(model, num_bundles: int, keep_k: int) -> List[np.ndarray]:
+def build_diffusion_topk_selection(model, num_bundles: int, keep_k: Optional[int], keep_ratio: Optional[float] = None, min_keep: int = 5) -> List[np.ndarray]:
     selected: List[np.ndarray] = []
     model.eval()
     for b in range(num_bundles):
@@ -264,7 +264,7 @@ def build_diffusion_topk_selection(model, num_bundles: int, keep_k: int) -> List
         if L == 0:
             selected.append(np.empty(0, dtype=np.int64))
             continue
-        k = min(keep_k, L)
+        k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
         if L <= k:
             selected.append(np.sort(item_ids.astype(np.int64)))
             continue
@@ -367,7 +367,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--blcc_enabled", action="store_true")
     parser.add_argument("--blcc_lambda", type=float, default=0.1)
 
-    parser.add_argument("--keep_k", type=int, required=True)
+    parser.add_argument("--keep_k", type=int, default=None, help="Keep fixed top-k")
+    parser.add_argument("--keep_ratio", type=float, default=None, help="Keep a ratio of items")
+    parser.add_argument("--min_keep", type=int, default=5, help="Minimum keep threshold for ratio")
     parser.add_argument("--random_seed", type=int, default=3407)
     parser.add_argument("--save_topk_lists", action="store_true")
     parser.add_argument("--output_dir", type=str, default="./bi_overlap_outputs")
@@ -380,6 +382,10 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+
+    if args.keep_k is None and args.keep_ratio is None:
+        raise ValueError("Either --keep_k or --keep_ratio must be provided.")
+
     set_seed(args.seed)
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -391,10 +397,14 @@ def main() -> None:
     model, train_history = maybe_train_or_load_model(args, data.bi_graph, data.num_bundles, device)
     train_time_sec = time.time() - t0
 
-    print(f"Building top-k selections with keep_k={args.keep_k} ...")
-    diffusion_sel = build_diffusion_topk_selection(model, data.num_bundles, args.keep_k)
-    popularity_sel = build_popularity_topk_selection(data.bundle_items, data.item_popularity, args.keep_k)
-    random_sel = build_random_topk_selection(data.bundle_items, args.keep_k, seed=args.random_seed)
+    if args.keep_ratio is not None:
+        print(f"Building top-k selections with keep_ratio={args.keep_ratio}, min_keep={args.min_keep} ...")
+    else:
+        print(f"Building top-k selections with keep_k={args.keep_k} ...")
+        
+    diffusion_sel = build_diffusion_topk_selection(model, data.num_bundles, keep_k=args.keep_k, keep_ratio=args.keep_ratio, min_keep=args.min_keep)
+    popularity_sel = build_popularity_topk_selection(data.bundle_items, data.item_popularity, keep_k=args.keep_k, keep_ratio=args.keep_ratio, min_keep=args.min_keep)
+    random_sel = build_random_topk_selection(data.bundle_items, keep_k=args.keep_k, keep_ratio=args.keep_ratio, min_keep=args.min_keep, seed=args.random_seed)
 
     metrics_dp = aggregate_pairwise("diffusion", "popularity", diffusion_sel, popularity_sel)
     metrics_dr = aggregate_pairwise("diffusion", "random", diffusion_sel, random_sel)
@@ -414,6 +424,10 @@ def main() -> None:
 
     result = {
         "args": vars(args),
+        "truncation_mode": "ratio" if args.keep_ratio is not None else "fixed_k",
+        "keep_ratio": args.keep_ratio,
+        "keep_k": args.keep_k,
+        "min_keep": args.min_keep,
         "train_history": train_history,
         "train_time_sec": train_time_sec,
         "overlap_summary": {
@@ -433,7 +447,11 @@ def main() -> None:
             "random": pack(random_sel),
         }
 
-    out_name = f"{args.dataset}_overlap_k{args.keep_k}_seed{args.seed}.json"
+    if args.keep_ratio is not None:
+        out_name = f"{args.dataset}_overlap_ratio{args.keep_ratio}_min{args.min_keep}_seed{args.seed}.json"
+    else:
+        out_name = f"{args.dataset}_overlap_k{args.keep_k}_seed{args.seed}.json"
+        
     out_path = os.path.join(args.output_dir, out_name)
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(result, f, ensure_ascii=False, indent=2)

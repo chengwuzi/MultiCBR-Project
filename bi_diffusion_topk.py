@@ -56,6 +56,22 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+def resolve_keep_k(bundle_len: int, keep_k: Optional[int] = None, keep_ratio: Optional[float] = None, min_keep: int = 5) -> int:
+    """
+    Resolve the number of items to keep for a given bundle based on truncation mode.
+    If keep_ratio is provided, it uses ratio truncation: min(bundle_len, max(min_keep, ceil(keep_ratio * bundle_len)))
+    Otherwise, it uses fixed top-k: min(bundle_len, keep_k)
+    """
+    if keep_ratio is not None:
+        k_b = max(min_keep, math.ceil(keep_ratio * bundle_len))
+        return min(k_b, bundle_len)
+    elif keep_k is not None:
+        return min(keep_k, bundle_len)
+    else:
+        raise ValueError("Either keep_k or keep_ratio must be provided.")
+
+
+
 @dataclass
 class BIDiffusionConfig:
     # model size
@@ -337,20 +353,24 @@ class BIDiffusionTopK(nn.Module):
     @torch.no_grad()
     def build_purified_bi_graph(
         self,
-        keep_k: int,
+        keep_k: Optional[int] = None,
         bundle_embeddings: Optional[torch.Tensor] = None,
         item_embeddings: Optional[torch.Tensor] = None,
         keep_all_if_len_le_k: Optional[bool] = None,
         batch_size: int = 1024,
+        keep_ratio: Optional[float] = None,
+        min_keep: int = 5,
     ) -> sp.csr_matrix:
         """
-        Score original items in each bundle and keep top-k.
+        Score original items in each bundle and keep top-k or top-ratio.
 
         Returns
         -------
         scipy.sparse.csr_matrix of shape [num_bundles, num_items]
         """
-        if keep_k <= 0:
+        if keep_k is None and keep_ratio is None:
+            raise ValueError("Either keep_k or keep_ratio must be provided.")
+        if keep_k is not None and keep_k <= 0:
             raise ValueError("keep_k must be >= 1")
 
         keep_all = self.cfg.keep_all_if_len_le_k if keep_all_if_len_le_k is None else keep_all_if_len_le_k
@@ -366,7 +386,10 @@ class BIDiffusionTopK(nn.Module):
                 L = len(item_ids)
                 if L == 0:
                     continue
-                if keep_all and L <= keep_k:
+                
+                k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
+
+                if keep_all and L <= k:
                     rows.extend([b] * L)
                     cols.extend(item_ids.tolist())
                     continue
@@ -376,7 +399,6 @@ class BIDiffusionTopK(nn.Module):
                     bundle_embeddings=bundle_emb_table,
                     item_embeddings=item_emb_table,
                 )
-                k = min(keep_k, L)
                 top_idx = torch.topk(scores, k=k, dim=0).indices.cpu().numpy()
                 kept_items = item_ids[top_idx]
                 rows.extend([b] * len(kept_items))
@@ -393,16 +415,20 @@ class BIDiffusionTopK(nn.Module):
     @torch.no_grad()
     def export_topk_pairs(
         self,
-        keep_k: int,
+        keep_k: Optional[int] = None,
         bundle_embeddings: Optional[torch.Tensor] = None,
         item_embeddings: Optional[torch.Tensor] = None,
         keep_all_if_len_le_k: Optional[bool] = None,
+        keep_ratio: Optional[float] = None,
+        min_keep: int = 5,
     ) -> List[Tuple[int, int]]:
         purified = self.build_purified_bi_graph(
             keep_k=keep_k,
             bundle_embeddings=bundle_embeddings,
             item_embeddings=item_embeddings,
             keep_all_if_len_le_k=keep_all_if_len_le_k,
+            keep_ratio=keep_ratio,
+            min_keep=min_keep,
         )
         coo = purified.tocoo()
         return list(zip(coo.row.tolist(), coo.col.tolist()))

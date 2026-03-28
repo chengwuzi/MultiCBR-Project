@@ -228,7 +228,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--use_layernorm", action="store_true")
 
     # top-k purification
-    parser.add_argument("--keep_k", type=int, required=True, help="Keep top-k original items per bundle")
+    parser.add_argument("--keep_k", type=int, default=None, help="Keep top-k original items per bundle")
+    parser.add_argument("--keep_ratio", type=float, default=None, help="Keep a ratio of original items per bundle")
+    parser.add_argument("--min_keep", type=int, default=5, help="Minimum number of items to keep when using keep_ratio")
     parser.add_argument("--keep_all_if_len_le_k", action="store_true")
 
     # optional BLCC
@@ -246,6 +248,15 @@ def parse_args() -> argparse.Namespace:
 
 def main() -> None:
     args = parse_args()
+    
+    if args.keep_k is None and args.keep_ratio is None:
+        raise ValueError("Either --keep_k or --keep_ratio must be provided.")
+    
+    if args.keep_ratio is not None:
+        print(f"Using ratio truncation: keep_ratio={args.keep_ratio}, min_keep={args.min_keep}")
+    else:
+        print(f"Using fixed keep_k={args.keep_k}")
+
     set_seed(args.seed)
 
     device = torch.device(args.device if torch.cuda.is_available() or args.device == "cpu" else "cpu")
@@ -301,10 +312,12 @@ def main() -> None:
     train_time = time.time() - train_start
     print(f"Training finished in {train_time:.2f}s")
 
-    print(f"Building purified BI graph with keep_k={args.keep_k} ...")
+    print(f"Building purified BI graph...")
     model.eval()
     purified_graph = model.build_purified_bi_graph(
         keep_k=args.keep_k,
+        keep_ratio=args.keep_ratio,
+        min_keep=args.min_keep,
         keep_all_if_len_le_k=args.keep_all_if_len_le_k,
     )
     purified_stats = graph_stats(purified_graph)
@@ -313,7 +326,10 @@ def main() -> None:
     density_ratio = purified_stats["density"] / max(original_stats["density"], 1e-12)
     nnz_ratio = purified_stats["nnz"] / max(original_stats["nnz"], 1)
     print("=" * 20 + " Purification Summary " + "=" * 20)
-    print(f"keep_k: {args.keep_k}")
+    if args.keep_ratio is not None:
+        print(f"keep_ratio: {args.keep_ratio}, min_keep: {args.min_keep}")
+    else:
+        print(f"keep_k: {args.keep_k}")
     print(f"nnz ratio purified/original: {nnz_ratio:.6f}")
     print(f"density ratio purified/original: {density_ratio:.6f}")
 
@@ -323,10 +339,16 @@ def main() -> None:
     for row in score_summary:
         print(row)
 
-    run_name = (
-        f"{args.dataset}_k{args.keep_k}_ep{args.epochs}_neg{args.num_negative}_"
-        f"ds{args.diffusion_steps}_hs{args.hidden_size}"
-    )
+    if args.keep_ratio is not None:
+        run_name = (
+            f"{args.dataset}_ratio{args.keep_ratio}_min{args.min_keep}_ep{args.epochs}_neg{args.num_negative}_"
+            f"ds{args.diffusion_steps}_hs{args.hidden_size}"
+        )
+    else:
+        run_name = (
+            f"{args.dataset}_k{args.keep_k}_ep{args.epochs}_neg{args.num_negative}_"
+            f"ds{args.diffusion_steps}_hs{args.hidden_size}"
+        )
     run_dir = os.path.join(args.output_dir, run_name)
     os.makedirs(run_dir, exist_ok=True)
 
@@ -346,6 +368,8 @@ def main() -> None:
     if args.save_pairs:
         pairs = model.export_topk_pairs(
             keep_k=args.keep_k,
+            keep_ratio=args.keep_ratio,
+            min_keep=args.min_keep,
             keep_all_if_len_le_k=args.keep_all_if_len_le_k,
         )
         save_pairs_txt(pairs, os.path.join(run_dir, "purified_bundle_item.txt"))

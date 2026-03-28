@@ -68,6 +68,17 @@ class MultiCBR(nn.Module):
         assert isinstance(raw_graph, list)
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
 
+        self.uh_enabled = self.conf.get("uh_enabled", False)
+        self.uh_threshold = self.conf.get("uh_threshold", 10)
+        self.uh_split_num = self.conf.get("uh_split_num", 16)
+        
+        if self.uh_enabled:
+            print("Building Unified Hypergraph (UH) view...")
+            H = self.build_unified_hypergraph(self.ui_graph, self.bi_graph, self.ub_graph, self.uh_threshold)
+            H_normalized = self.normalize_hypergraph(H)
+            self.atom_graph = self.get_unified_hypergraph_tensor(H_normalized, self.uh_split_num)
+            print(f"Unified Hypergraph built. Enabled: {self.uh_enabled}, Shape: {H_normalized.shape}, Threshold: {self.uh_threshold}")
+
         # generate the graph without any dropouts for testing
         self.UB_propagation_graph_ori = self.get_propagation_graph(self.ub_graph)
 
@@ -124,15 +135,21 @@ class MultiCBR(nn.Module):
 
 
     def init_fusion_weights(self):
-        assert (len(self.fusion_weights['modal_weight']) == 3), \
-            "The number of modal fusion weights does not correspond to the number of graphs"
+        if getattr(self, "uh_enabled", False) or self.conf.get("uh_enabled", False):
+            assert (len(self.fusion_weights['modal_weight']) == 4), \
+                "The number of modal fusion weights must be 4 when uh_enabled is True"
+            mw = self.fusion_weights['modal_weight']
+        else:
+            assert (len(self.fusion_weights['modal_weight']) in [3, 4]), \
+                "The number of modal fusion weights must be 3 or 4"
+            mw = self.fusion_weights['modal_weight'][:3]
 
         assert (len(self.fusion_weights['UB_layer']) == self.num_layers + 1) and\
                (len(self.fusion_weights['UI_layer']) == self.num_layers + 1) and \
                (len(self.fusion_weights['BI_layer']) == self.num_layers + 1),\
             "The number of layer fusion weights does not correspond to number of layers"
 
-        modal_coefs = torch.FloatTensor(self.fusion_weights['modal_weight'])
+        modal_coefs = torch.FloatTensor(mw)
         UB_layer_coefs = torch.FloatTensor(self.fusion_weights['UB_layer'])
         UI_layer_coefs = torch.FloatTensor(self.fusion_weights['UI_layer'])
         BI_layer_coefs = torch.FloatTensor(self.fusion_weights['BI_layer'])
@@ -220,6 +237,90 @@ class MultiCBR(nn.Module):
         return users_rep, bundles_rep
 
 
+    def build_unified_hypergraph(self, ui_graph, bi_graph, ub_graph, threshold):
+        """
+        Build unified hypergraph incidence matrix.
+        hyperedges include:
+        - item-induced indirect associations (ui, bi)
+        - user-user higher-order relations (uu_graph)
+        - bundle-bundle higher-order relations (bb_graph)
+        - direct UB relations (ub_graph)
+        """
+        # Vectorized binarization to avoid slow python loops
+        uu_graph = ub_graph @ ub_graph.T
+        uu_graph.data = np.where(uu_graph.data > threshold, 1.0, 0.0).astype(np.float32)
+        uu_graph.eliminate_zeros()
+
+        bb_graph = ub_graph.T @ ub_graph
+        bb_graph.data = np.where(bb_graph.data > threshold, 1.0, 0.0).astype(np.float32)
+        bb_graph.eliminate_zeros()
+
+        H = sp.vstack((ui_graph, bi_graph))
+        non_atom_graph = sp.vstack((ub_graph, bb_graph))
+        non_atom_graph = sp.hstack((non_atom_graph, sp.vstack((uu_graph, ub_graph.T))))
+        H = sp.hstack((H, non_atom_graph))
+        return H
+
+
+    def normalize_hypergraph(self, H):
+        """
+        \hat H = D_v^{-1/2} H D_e^{-1/2} H^T D_v^{-1/2}
+        """
+        D_v = sp.diags(1 / (np.sqrt(H.sum(axis=1).A.ravel()) + 1e-8))
+        D_e = sp.diags(1 / (np.sqrt(H.sum(axis=0).A.ravel()) + 1e-8))
+        H_normalized = D_v @ H @ D_e @ H.T @ D_v
+        return H_normalized
+
+
+    def get_unified_hypergraph_tensor(self, H, split_num=16):
+        """
+        Split hypergraph to device. 
+        To avoid torch_sparse dependency, we split into scipy blocks and convert to torch.sparse.FloatTensor
+        """
+        if split_num <= 1:
+            return [to_tensor(H).to(self.device)]
+        
+        H_list = []
+        length = H.shape[0] // split_num
+        for i in range(split_num):
+            if i == split_num - 1:
+                H_list.append(H[length * i : H.shape[0]])
+            else:
+                H_list.append(H[length * i : length * (i + 1)])
+        
+        H_split = [to_tensor(H_i).to(self.device) for H_i in H_list]
+        return H_split
+
+
+    def propagate_hypergraph(self):
+        """
+        Lightweight hypergraph propagation.
+        embed_0 = concat(users_feature, bundles_feature)
+        embed_1 = hypergraph_propagation(embed_0)
+        all_embeds = embed_0 / 2.0 + embed_1 / 3.0
+        """
+        embed_0 = torch.cat([self.users_feature, self.bundles_feature], dim=0)
+        
+        embed_1_blocks = []
+        for G in self.atom_graph:
+            embed_1_blocks.append(torch.spmm(G, embed_0))
+        embed_1 = torch.cat(embed_1_blocks, dim=0)
+        
+        # First version: no dropout/noise augmentation for UH view
+        all_embeds = embed_0 / 2.0 + embed_1 / 3.0
+        
+        UH_users_feature, UH_bundles_feature = torch.split(
+            all_embeds, [self.num_users, self.num_bundles], dim=0
+        )
+        return UH_users_feature, UH_bundles_feature
+
+
+    def get_uh_view_representations(self, test=False):
+        # Deterministic encoder in V1 (no augmentation)
+        # "第一阶段仅验证 UH 作为额外视图是否有价值，因此不对其单独施加 augmentation，以减少变量。"
+        return self.propagate_hypergraph()
+
+
     def get_multi_modal_representations(self, test=False):
         #  =============================  UB graph propagation  =============================
         if test:
@@ -245,6 +346,11 @@ class MultiCBR(nn.Module):
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]
+
+        if self.uh_enabled:
+            UH_users_feature, UH_bundles_feature = self.get_uh_view_representations(test=test)
+            users_feature.append(UH_users_feature)
+            bundles_feature.append(UH_bundles_feature)
 
         users_rep, bundles_rep = self.fuse_users_bundles_feature(users_feature, bundles_feature)
 

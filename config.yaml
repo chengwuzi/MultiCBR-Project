@@ -16,10 +16,14 @@ NetEase:
   UI_ratios: [0.0] # the dropout ratio for UI graph
   BI_ratios: [0.2] # the dropout ratio for BI graph
 
+  uh_enabled: true
+  uh_threshold: 10
+  uh_split_num: 16
+
   fusion_weights:
     # fusion weight for representations of different graphs
-    # From the first element to the third element are weight for UB, UI, BI graphs correspondingly.
-    modal_weight: [0.5, 0.2, 0.3]
+    # From the first element to the fourth element are weight for UB, UI, BI, UH graphs correspondingly.
+    modal_weight: [0.5, 0.2, 0.3, 0.0]
     # layer aggregation weights, the i-th element in the list represents the weight of the (i-1)-th propagation layer.
     UB_layer: [0.35, 0.15, 0.5] # layer aggregation coefficients in UB graph
     UI_layer: [0.25, 0.65, 0.1] # layer aggregation coefficients in UI graph
@@ -51,8 +55,12 @@ iFashion:
   UI_ratios: [0.0]
   BI_ratios: [0.15]
 
+  uh_enabled: true
+  uh_threshold: 10
+  uh_split_num: 16
+
   fusion_weights:
-    modal_weight: [0.1, 0.2, 0.7]
+    modal_weight: [0.1, 0.2, 0.7, 0.0]
     UB_layer: [0.5, 0.5, 0.0]
     UI_layer: [0.3, 0.2, 0.5]
     BI_layer: [0.5, 0.5, 0.0]
@@ -83,8 +91,12 @@ Youshu:
   UI_ratios: [0.1]
   BI_ratios: [0.1]
 
+  uh_enabled: true
+  uh_threshold: 10
+  uh_split_num: 16
+
   fusion_weights:
-    modal_weight: [0.35, 0.15, 0.5]
+    modal_weight: [0.35, 0.15, 0.5, 0.0]
     UB_layer: [0.7, 0.2, 0.1]
     UI_layer: [0.6, 0.2, 0.2]
     BI_layer: [0.6, 0.1, 0.3]

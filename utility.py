@@ -98,6 +98,7 @@ class Datasets():
         self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
+        # graphs order for MultiCBR: [UB, UI, BI]
         self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
 
         # Windows compatibility: reduce num_workers to avoid overhead/errors

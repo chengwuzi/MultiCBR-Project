@@ -111,6 +111,11 @@ def main(args=None):
         settings += ["_".join([fmt_list(conf['fusion_weights']["modal_weight"]), fmt_list(conf['fusion_weights']["UB_layer"]),
                                fmt_list(conf['fusion_weights']["UI_layer"]), fmt_list(conf['fusion_weights']["BI_layer"])])]
 
+        if conf.get("uh_enabled", False):
+            settings += ["UH_on_T" + str(conf.get("uh_threshold", 10))]
+        else:
+            settings += ["UH_off"]
+
         conf["c_lambda"] = c_lambda
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]

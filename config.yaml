@@ -17,7 +17,7 @@ NetEase:
   BI_ratios: [0.2] # the dropout ratio for BI graph
 
   uh_enabled: true
-  uh_threshold: 10
+  uh_threshold: 2
   uh_split_num: 16
 
   fusion_weights:
@@ -56,7 +56,7 @@ iFashion:
   BI_ratios: [0.15]
 
   uh_enabled: true
-  uh_threshold: 10
+  uh_threshold: 3
   uh_split_num: 16
 
   fusion_weights:
@@ -92,7 +92,7 @@ Youshu:
   BI_ratios: [0.1]
 
   uh_enabled: true
-  uh_threshold: 10
+  uh_threshold: 5
   uh_split_num: 16
 
   fusion_weights:

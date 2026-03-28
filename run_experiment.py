@@ -6,7 +6,7 @@ def run():
     
     experiment_config = {
         "gpu": "0",
-        "dataset": "Youshu",  # 切换到 Youshu 数据集
+        "dataset": "NetEase",  # 切换到 NetEase 数据集
         "model": "MultiCBR",
         "info": "diff_ratio05", # 实验备注信息，建议根据模式修改，例如 original, pop_ratio05, diff_ratio05
         

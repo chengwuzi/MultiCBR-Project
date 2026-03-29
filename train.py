@@ -66,6 +66,16 @@ def main(args=None):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     conf["device"] = device
     print(conf)
+    
+    # 打印新增的 anchor_cl 配置
+    anchor_cl_conf = conf.get("anchor_cl", {})
+    if anchor_cl_conf.get("enabled", False):
+        print("="*20 + " Pre-fusion Anchor CL Enabled " + "="*20)
+        print(f"lambda: {anchor_cl_conf.get('anchor_cl_lambda')}, temp: {anchor_cl_conf.get('temp')}")
+        print(f"user_cl: {anchor_cl_conf.get('user_cl')}, bundle_cl: {anchor_cl_conf.get('bundle_cl')}")
+        print(f"Weights -> u_ub_ui: {anchor_cl_conf.get('ub_ui_user_weight')}, u_ub_bi: {anchor_cl_conf.get('ub_bi_user_weight')}")
+        print(f"Weights -> b_ub_ui: {anchor_cl_conf.get('ub_ui_bundle_weight')}, b_ub_bi: {anchor_cl_conf.get('ub_bi_bundle_weight')}")
+        print("="*70)
 
     for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp in \
             product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"]):
@@ -159,19 +169,29 @@ def main(args=None):
                 ED_drop = False
                 if conf["aug_type"] == "ED" and (batch_anchor + 1) % ed_interval_bs == 0:
                     ED_drop = True
-                bpr_loss, c_loss = model(batch, ED_drop=ED_drop)
-                loss = bpr_loss + conf["c_lambda"] * c_loss
+                bpr_loss, c_loss, anchor_cl_loss, anchor_cl_dict = model(batch, ED_drop=ED_drop)
+                
+                anchor_cl_lambda = conf.get("anchor_cl", {}).get("anchor_cl_lambda", 0.0)
+                loss = bpr_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
+                
                 loss.backward()
                 optimizer.step()
 
                 loss_scalar = loss.detach()
                 bpr_loss_scalar = bpr_loss.detach()
                 c_loss_scalar = c_loss.detach()
+                anchor_cl_loss_scalar = anchor_cl_loss.detach() if isinstance(anchor_cl_loss, torch.Tensor) else anchor_cl_loss
+                
                 run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
                 run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
+                run.add_scalar("loss_anchor_cl", anchor_cl_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
+                
+                if conf.get("anchor_cl", {}).get("enabled", False):
+                    for k, v in anchor_cl_dict.items():
+                        run.add_scalar(f"loss_anchor_cl/{k}", v, batch_anchor)
 
-                pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar))
+                pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f, anchor_cl: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar, anchor_cl_loss_scalar))
 
                 if (batch_anchor + 1) % test_interval_bs == 0:
                     metrics = {}

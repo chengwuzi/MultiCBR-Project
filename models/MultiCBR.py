@@ -248,7 +248,8 @@ class MultiCBR(nn.Module):
 
         users_rep, bundles_rep = self.fuse_users_bundles_feature(users_feature, bundles_feature)
 
-        return users_rep, bundles_rep
+        # 显式返回融合前(pre-fusion)的三视图表示，用于 anchor_cl 计算
+        return users_rep, bundles_rep, users_feature, bundles_feature
 
 
     def cal_c_loss(self, pos, aug):
@@ -268,6 +269,68 @@ class MultiCBR(nn.Module):
         c_loss = - torch.mean(torch.log(pos_score / ttl_score))
 
         return c_loss
+
+
+    def cal_pre_fusion_anchor_cl_loss(self, pre_fusion_users, pre_fusion_bundles, users, pos_bundles):
+        # 取出配置
+        anchor_cl_conf = self.conf.get("anchor_cl", {})
+        temp = anchor_cl_conf.get("temp", 0.2)
+        
+        UB_u, UI_u, BI_u = pre_fusion_users
+        UB_b, UI_b, BI_b = pre_fusion_bundles
+        
+        # 对当前 batch 内的节点表示进行严格去重 (unique)，避免同 ID 样本在 InfoNCE 中被当作负样本 (false negatives)
+        u_idx = torch.unique(users.squeeze(-1)) # [unique_u_num]
+        b_idx = torch.unique(pos_bundles.squeeze(-1)) # [unique_b_num] 仅使用 batch 内的 unique positive bundle 做对比
+        
+        loss = torch.tensor(0.0, device=self.device)
+        loss_dict = {}
+        
+        # 辅助函数：计算标准 batch 内 InfoNCE (使用 F.cross_entropy 实现)
+        def info_nce(anchor, positive):
+            # 如果去重后只剩 1 个（或 0 个）节点，无法形成有效的 batch 内负样本，直接返回 0
+            if anchor.size(0) <= 1:
+                return torch.tensor(0.0, device=self.device)
+            # [bs, bs] 相似度矩阵，对角线为正样本，其余为负样本
+            sim_matrix = torch.matmul(anchor, positive.T) / temp
+            labels = torch.arange(anchor.size(0)).to(self.device)
+            return F.cross_entropy(sim_matrix, labels)
+            
+        # User 侧的 UB-UI 和 UB-BI 跨视图对比
+        if anchor_cl_conf.get("user_cl", True) and u_idx.size(0) > 1:
+            # 以 UB 为 anchor，提取 unique user 的三视图 pre-fusion 表示并做 L2 正则化
+            batch_u_ub = F.normalize(UB_u[u_idx], p=2, dim=1)
+            batch_u_ui = F.normalize(UI_u[u_idx], p=2, dim=1)
+            batch_u_bi = F.normalize(BI_u[u_idx], p=2, dim=1)
+            
+            l_u_ub_ui = info_nce(batch_u_ub, batch_u_ui)
+            l_u_ub_bi = info_nce(batch_u_ub, batch_u_bi)
+            
+            w_ui = anchor_cl_conf.get("ub_ui_user_weight", 1.0)
+            w_bi = anchor_cl_conf.get("ub_bi_user_weight", 1.0)
+            
+            loss += w_ui * l_u_ub_ui + w_bi * l_u_ub_bi
+            loss_dict["u_ub_ui"] = l_u_ub_ui.item()
+            loss_dict["u_ub_bi"] = l_u_ub_bi.item()
+            
+        # Bundle 侧的 UB-UI 和 UB-BI 跨视图对比
+        if anchor_cl_conf.get("bundle_cl", True) and b_idx.size(0) > 1:
+            # 以 UB 为 anchor，提取 unique positive bundle 的三视图 pre-fusion 表示并做 L2 正则化
+            batch_b_ub = F.normalize(UB_b[b_idx], p=2, dim=1)
+            batch_b_ui = F.normalize(UI_b[b_idx], p=2, dim=1)
+            batch_b_bi = F.normalize(BI_b[b_idx], p=2, dim=1)
+            
+            l_b_ub_ui = info_nce(batch_b_ub, batch_b_ui)
+            l_b_ub_bi = info_nce(batch_b_ub, batch_b_bi)
+            
+            w_ui = anchor_cl_conf.get("ub_ui_bundle_weight", 1.0)
+            w_bi = anchor_cl_conf.get("ub_bi_bundle_weight", 1.0)
+            
+            loss += w_ui * l_b_ub_ui + w_bi * l_b_ub_bi
+            loss_dict["b_ub_ui"] = l_b_ub_ui.item()
+            loss_dict["b_ub_bi"] = l_b_ub_bi.item()
+            
+        return loss, loss_dict
 
 
     def cal_loss(self, users_feature, bundles_feature):
@@ -300,17 +363,26 @@ class MultiCBR(nn.Module):
         # users: [bs, 1]
         # bundles: [bs, 1+neg_num]
         users, bundles = batch
-        users_rep, bundles_rep = self.get_multi_modal_representations()
+        users_rep, bundles_rep, pre_fusion_users, pre_fusion_bundles = self.get_multi_modal_representations()
 
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
         bundles_embedding = bundles_rep[bundles]
 
         bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding)
+        
+        # 计算新增的 UB-anchored pre-fusion cross-view contrastive loss
+        anchor_cl_loss = torch.tensor(0.0, device=self.device)
+        anchor_cl_dict = {}
+        if self.conf.get("anchor_cl", {}).get("enabled", False):
+            pos_bundles = bundles[:, 0:1] # 仅使用 positive bundles 进行对比 [bs, 1]
+            anchor_cl_loss, anchor_cl_dict = self.cal_pre_fusion_anchor_cl_loss(
+                pre_fusion_users, pre_fusion_bundles, users, pos_bundles
+            )
 
-        return bpr_loss, c_loss
+        return bpr_loss, c_loss, anchor_cl_loss, anchor_cl_dict
 
 
     def evaluate(self, propagate_result, users):
-        users_feature, bundles_feature = propagate_result
+        users_feature, bundles_feature, _, _ = propagate_result
         scores = torch.mm(users_feature[users], bundles_feature.t())
         return scores

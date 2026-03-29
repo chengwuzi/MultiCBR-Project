@@ -33,6 +33,18 @@ NetEase:
   epochs: 50 # number of epochs to train
   test_interval: 5 # by how many epochs to run the validation and testing.
 
+  # pre-fusion cross-view contrastive learning (UB-anchored)
+  anchor_cl:
+    enabled: false
+    anchor_cl_lambda: 0.0
+    temp: 0.2
+    user_cl: true
+    bundle_cl: true
+    ub_ui_user_weight: 1.0
+    ub_bi_user_weight: 1.0
+    ub_ui_bundle_weight: 1.0
+    ub_bi_bundle_weight: 1.0
+
 
 iFashion:
   data_path: './datasets'
@@ -65,6 +77,18 @@ iFashion:
   epochs: 50
   test_interval: 5 
 
+  # pre-fusion cross-view contrastive learning (UB-anchored)
+  anchor_cl:
+    enabled: false
+    anchor_cl_lambda: 0.0
+    temp: 0.2
+    user_cl: true
+    bundle_cl: true
+    ub_ui_user_weight: 1.0
+    ub_bi_user_weight: 1.0
+    ub_ui_bundle_weight: 1.0
+    ub_bi_bundle_weight: 1.0
+
 
 Youshu:
   data_path: './datasets'
@@ -96,3 +120,15 @@ Youshu:
 
   epochs: 100
   test_interval: 5
+
+  # pre-fusion cross-view contrastive learning (UB-anchored)
+  anchor_cl:
+    enabled: false
+    anchor_cl_lambda: 0.0
+    temp: 0.23
+    user_cl: true
+    bundle_cl: true
+    ub_ui_user_weight: 1.0
+    ub_bi_user_weight: 1.0
+    ub_ui_bundle_weight: 1.0
+    ub_bi_bundle_weight: 1.0

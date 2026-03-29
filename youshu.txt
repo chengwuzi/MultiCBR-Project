@@ -19,17 +19,10 @@ ub_bi_bundle_weight: 1.0
 
 top 3 results averaged :
 
-Recall@10:0.2057
-Recall@20:0.2934
-Recall@40:0.3972
-Recall@80:0.5222
-
-NDCG@10:0.1491
-NDCG@20:0.1720
-NDCG@40:0.2009
-NDCG@80:0.2288
-
-
+TOP 10: REC_T=0.20570, NDCG_T=0.14910         3.10%     3.80%
+TOP 20: REC_T=0.29340, NDCG_T=0.17200         3.04%     2.38%
+TOP 40: REC_T=0.39720, NDCG_T=0.20090         1.62%     2.18%
+TOP 80: REC_T=0.52220, NDCG_T=0.22880         2.35%     2.15%
 
 
 

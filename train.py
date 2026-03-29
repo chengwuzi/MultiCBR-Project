@@ -101,8 +101,9 @@ def prepare_bi_graph_for_training(conf: dict, dataset: Datasets, device: torch.d
     mode = purifier_conf.get("mode", "diffusion")
     keep_ratio = purifier_conf.get("keep_ratio", 0.5)
     min_keep = purifier_conf.get("min_keep", 5)
+    allow_generate_new_edges = purifier_conf.get("allow_generate_new_edges", False)
     
-    print(f"Using {mode} BI purifier (keep_ratio={keep_ratio}, min_keep={min_keep})")
+    print(f"Using {mode} BI purifier (keep_ratio={keep_ratio}, min_keep={min_keep}, allow_generate_new_edges={allow_generate_new_edges})")
     
     orig_stats = graph_stats(bi_graph)
     print_graph_stats("Original BI Graph Stats", orig_stats)
@@ -125,7 +126,7 @@ def prepare_bi_graph_for_training(conf: dict, dataset: Datasets, device: torch.d
                 print(f"Saved purified graph to cache: {cache_path}")
                 
     elif mode == "diffusion":
-        cache_name = f"{conf['dataset']}_diffusion_ratio{keep_ratio}_min{min_keep}.npz"
+        cache_name = f"{conf['dataset']}_diffusion_ratio{keep_ratio}_min{min_keep}_gen{allow_generate_new_edges}.npz"
         cache_path = os.path.join(cache_dir, cache_name)
         
         if purifier_conf.get("reuse_cached_graph", True) and os.path.isfile(cache_path):
@@ -173,7 +174,12 @@ def prepare_bi_graph_for_training(conf: dict, dataset: Datasets, device: torch.d
             
             print("Building purified BI graph with trained diffusion model...")
             model.eval()
-            purified_graph = model.build_purified_bi_graph(keep_ratio=keep_ratio, min_keep=min_keep, keep_all_if_len_le_k=True)
+            purified_graph = model.build_purified_bi_graph(
+                keep_ratio=keep_ratio, 
+                min_keep=min_keep, 
+                keep_all_if_len_le_k=True,
+                allow_generate_new_edges=allow_generate_new_edges
+            )
             
             if purifier_conf.get("save_purified_npz", True):
                 sp.save_npz(cache_path, purified_graph)

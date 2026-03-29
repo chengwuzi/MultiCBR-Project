@@ -6,7 +6,7 @@ def run():
     
     experiment_config = {
         "gpu": "0",
-        "dataset": "NetEase",  # 切换到 NetEase 数据集
+        "dataset": "Youshu",  # 切换到 Youshu 数据集
         "model": "MultiCBR",
         "info": "diff_ratio05", # 实验备注信息，建议根据模式修改，例如 original, pop_ratio05, diff_ratio05
         
@@ -34,6 +34,7 @@ def run():
             "mode": "diffusion",
             "keep_ratio": 0.5,
             "min_keep": 5,
+            "allow_generate_new_edges": False, # 如果为 True，扩散模块可能给原本不存在的 b-i 边打高分并保留
             "epochs": 20,              # purifier 训练轮数
             "batch_size": 256,
             "cache_dir": "./bi_purifier_cache",

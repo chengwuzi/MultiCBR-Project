@@ -360,6 +360,7 @@ class BIDiffusionTopK(nn.Module):
         batch_size: int = 1024,
         keep_ratio: Optional[float] = None,
         min_keep: int = 5,
+        allow_generate_new_edges: bool = False,
     ) -> sp.csr_matrix:
         """
         Score original items in each bundle and keep top-k or top-ratio.
@@ -389,18 +390,30 @@ class BIDiffusionTopK(nn.Module):
                 
                 k = resolve_keep_k(L, keep_k=keep_k, keep_ratio=keep_ratio, min_keep=min_keep)
 
-                if keep_all and L <= k:
+                if keep_all and L <= k and not allow_generate_new_edges:
                     rows.extend([b] * L)
                     cols.extend(item_ids.tolist())
                     continue
 
-                scores = self.score_original_bundle_items(
-                    bundle_id=b,
-                    bundle_embeddings=bundle_emb_table,
-                    item_embeddings=item_emb_table,
-                )
-                top_idx = torch.topk(scores, k=k, dim=0).indices.cpu().numpy()
-                kept_items = item_ids[top_idx]
+                if allow_generate_new_edges:
+                    # Score ALL items to allow generating new edges
+                    scores = self.score_all_items_for_bundle(
+                        bundle_id=b,
+                        bundle_embeddings=bundle_emb_table,
+                        item_embeddings=item_emb_table,
+                    )
+                    top_idx = torch.topk(scores, k=k, dim=0).indices.cpu().numpy()
+                    kept_items = top_idx
+                else:
+                    # Score only ORIGINAL items
+                    scores = self.score_original_bundle_items(
+                        bundle_id=b,
+                        bundle_embeddings=bundle_emb_table,
+                        item_embeddings=item_emb_table,
+                    )
+                    top_idx = torch.topk(scores, k=k, dim=0).indices.cpu().numpy()
+                    kept_items = item_ids[top_idx]
+                
                 rows.extend([b] * len(kept_items))
                 cols.extend(kept_items.tolist())
 
@@ -463,6 +476,53 @@ class BIDiffusionTopK(nn.Module):
         score_input = torch.cat([cand_item_emb, context_expand, bundle_emb, time_expand], dim=-1)
         scores = self.scorer(score_input).squeeze(-1)
         return scores
+
+    @torch.no_grad()
+    def score_all_items_for_bundle(
+        self,
+        bundle_id: int,
+        bundle_embeddings: Optional[torch.Tensor] = None,
+        item_embeddings: Optional[torch.Tensor] = None,
+    ) -> torch.Tensor:
+        """
+        Returns scores for ALL items in the dataset for a given bundle, shape [num_items].
+        Higher means more important / more trustworthy edge.
+        """
+        bundle_emb_table, item_emb_table = self._resolve_embeddings(bundle_embeddings, item_embeddings)
+        item_ids = self.bundle_items[bundle_id]
+        if len(item_ids) == 0:
+            return torch.zeros(self.num_items, device=self.alpha_bars.device)
+
+        # inference uses the full raw bundle context with t=0 and x=1
+        context_repr, time_repr = self._build_context_for_inference(
+            bundle_id=bundle_id,
+            item_ids=item_ids,
+            bundle_emb_table=bundle_emb_table,
+            item_emb_table=item_emb_table,
+        )
+        
+        # Use ALL items as candidates
+        cand_item_emb = item_emb_table # [num_items, D]
+        bundle_emb = bundle_emb_table[bundle_id].unsqueeze(0).expand(cand_item_emb.size(0), -1)
+        context_expand = context_repr.unsqueeze(0).expand(cand_item_emb.size(0), -1)
+        time_expand = time_repr.unsqueeze(0).expand(cand_item_emb.size(0), -1)
+        
+        # To avoid OOM, process in chunks if num_items is very large
+        # But for typical item counts (~10k-50k), a single pass is usually fine
+        chunk_size = 20000
+        scores = []
+        for i in range(0, cand_item_emb.size(0), chunk_size):
+            end_idx = min(i + chunk_size, cand_item_emb.size(0))
+            score_input = torch.cat([
+                cand_item_emb[i:end_idx], 
+                context_expand[i:end_idx], 
+                bundle_emb[i:end_idx], 
+                time_expand[i:end_idx]
+            ], dim=-1)
+            chunk_scores = self.scorer(score_input).squeeze(-1)
+            scores.append(chunk_scores)
+            
+        return torch.cat(scores, dim=0)
 
     # ---------------------------------------------------------------------
     # internals

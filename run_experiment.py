@@ -9,6 +9,7 @@ def run():
         "dataset": "NetEase",
         "model": "MultiCBR",
         "info": "my_custom_run", # 实验备注信息
+        "config": "./config_intent.yaml", # 指定使用的配置文件
         
         # --- 下面可以覆盖 config.yaml 中的参数 ---
         

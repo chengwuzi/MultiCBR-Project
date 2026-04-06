@@ -23,19 +23,22 @@ def get_cmd():
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
+    parser.add_argument("-c", "--config", default="./config.yaml", type=str, help="config file path")
     args = parser.parse_args()
 
     return args
 
 
 def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml"))
-    print("load config file done!")
-
     if args is None:
         paras = get_cmd().__dict__
     else:
         paras = args
+        if "config" not in paras:
+            paras["config"] = "./config.yaml"
+
+    conf = yaml.safe_load(open(paras["config"]))
+    print(f"load config file {paras['config']} done!")
 
     dataset_name = paras["dataset"]
 
@@ -54,7 +57,7 @@ def main(args=None):
 
     # Override config with any additional parameters passed in args
     for key, value in paras.items():
-        if key not in ["dataset", "model", "gpu", "info"] and value is not None:
+        if key not in ["dataset", "model", "gpu", "info", "config"] and value is not None:
              # Only override if the key exists in the specific dataset config or create new one
              conf[key] = value
 
@@ -66,6 +69,24 @@ def main(args=None):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     conf["device"] = device
     print(conf)
+
+    if "intent_module" in conf:
+        int_conf = conf["intent_module"]
+        print("====== Intent Enhancement Module Config ======")
+        print(f"Enabled: {int_conf.get('enabled', False)}")
+        
+        ub_en = int_conf.get('per_view', {}).get('UB', False)
+        ui_en = int_conf.get('per_view', {}).get('UI', False)
+        bi_en = int_conf.get('per_view', {}).get('BI', False)
+        print(f"Per View - UB: {ub_en}, UI: {ui_en}, BI: {bi_en}")
+        
+        if int_conf.get('enabled', False) and not (ub_en or ui_en or bi_en):
+            print("\n[WARNING] intent_module is enabled, but ALL per_view switches (UB, UI, BI) are false.")
+            print("[WARNING] This configuration is functionally equivalent to the baseline model (No intent enhancement will be applied).\n")
+            
+        print(f"n_intents: {int_conf.get('n_intents', 32)}, temp: {int_conf.get('temp', 0.2)}, residual_alpha: {int_conf.get('residual_alpha', 0.2)}")
+        print(f"enhance_mode: {int_conf.get('enhance_mode', 'residual')}")
+        print("==============================================")
 
     for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp in \
             product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"]):
@@ -114,6 +135,14 @@ def main(args=None):
         conf["c_lambda"] = c_lambda
         conf["c_temp"] = c_temp
         settings += [str(c_lambda), str(c_temp)]
+
+        if "intent_module" in conf and conf["intent_module"].get("enabled", False):
+            int_conf = conf["intent_module"]
+            ub_en = 1 if int_conf.get("per_view", {}).get("UB", False) else 0
+            ui_en = 1 if int_conf.get("per_view", {}).get("UI", False) else 0
+            bi_en = 1 if int_conf.get("per_view", {}).get("BI", False) else 0
+            int_str = f"Intent_UB{ub_en}_UI{ui_en}_BI{bi_en}_N{int_conf.get('n_intents', 32)}_A{int_conf.get('residual_alpha', 0.2)}_T{int_conf.get('temp', 0.2)}"
+            settings.append(int_str)
 
         setting = "_".join(settings)
 

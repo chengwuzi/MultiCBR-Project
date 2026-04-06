@@ -64,6 +64,7 @@ class MultiCBR(nn.Module):
 
         self.init_emb()
         self.init_fusion_weights()
+        self.init_intent_modules()
 
         assert isinstance(raw_graph, list)
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
@@ -142,6 +143,114 @@ class MultiCBR(nn.Module):
         self.UB_layer_coefs = UB_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
         self.UI_layer_coefs = UI_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
         self.BI_layer_coefs = BI_layer_coefs.unsqueeze(0).unsqueeze(-1).to(self.device)
+
+
+    def init_intent_modules(self):
+        self.intent_conf = self.conf.get("intent_module", {})
+        self.intent_total_enabled = self.intent_conf.get("enabled", False)
+        
+        self.intent_n = self.intent_conf.get("n_intents", 32)
+        self.intent_temp = self.intent_conf.get("temp", 0.2)
+        self.intent_residual_alpha = self.intent_conf.get("residual_alpha", 0.2)
+        self.intent_normalize_before = self.intent_conf.get("normalize_before_intent", True)
+        self.intent_enhance_mode = self.intent_conf.get("enhance_mode", "residual")
+        self.intent_enable_reparam = self.intent_conf.get("enable_reparam", False)
+        self.intent_noise_scale = self.intent_conf.get("noise_scale", 0.1)
+        self.share_intent_across_views = self.intent_conf.get("share_intent_across_views", False)
+
+        if self.share_intent_across_views:
+            raise ValueError("share_intent_across_views=True is not supported in the current implementation.")
+
+        self.per_view = self.intent_conf.get("per_view", {"UB": False, "UI": False, "BI": False})
+
+        if not self.intent_total_enabled:
+            return
+
+        # Initialize view-specific intent prototypes [embedding_size, n_intents]
+        if self.per_view.get("UB", False):
+            self.UB_user_intent = nn.Parameter(torch.FloatTensor(self.embedding_size, self.intent_n))
+            self.UB_bundle_intent = nn.Parameter(torch.FloatTensor(self.embedding_size, self.intent_n))
+            nn.init.xavier_normal_(self.UB_user_intent)
+            nn.init.xavier_normal_(self.UB_bundle_intent)
+
+        if self.per_view.get("UI", False):
+            self.UI_user_intent = nn.Parameter(torch.FloatTensor(self.embedding_size, self.intent_n))
+            self.UI_bundle_intent = nn.Parameter(torch.FloatTensor(self.embedding_size, self.intent_n))
+            nn.init.xavier_normal_(self.UI_user_intent)
+            nn.init.xavier_normal_(self.UI_bundle_intent)
+
+        if self.per_view.get("BI", False):
+            self.BI_user_intent = nn.Parameter(torch.FloatTensor(self.embedding_size, self.intent_n))
+            self.BI_bundle_intent = nn.Parameter(torch.FloatTensor(self.embedding_size, self.intent_n))
+            nn.init.xavier_normal_(self.BI_user_intent)
+            nn.init.xavier_normal_(self.BI_bundle_intent)
+
+
+    def get_view_intent_prototypes(self, view_name):
+        if view_name == "UB":
+            return self.UB_user_intent, self.UB_bundle_intent
+        elif view_name == "UI":
+            return self.UI_user_intent, self.UI_bundle_intent
+        elif view_name == "BI":
+            return self.BI_user_intent, self.BI_bundle_intent
+        else:
+            raise ValueError(f"Unknown view_name: {view_name}")
+
+
+    def apply_intent_enhancement(self, view_name, user_feat, bundle_feat, test=False):
+        """
+        BIGCF-style Intent Enhancement Mechanism.
+        Applies intent-aware enhancement to user and bundle representations.
+        """
+        if not self.intent_total_enabled or not self.per_view.get(view_name, False):
+            return user_feat, bundle_feat
+
+        user_intent_proto, bundle_intent_proto = self.get_view_intent_prototypes(view_name)
+
+        # Step 1: Structural Representations
+        u_struct = user_feat
+        b_struct = bundle_feat
+
+        # Step 2: Optional Normalization
+        if self.intent_normalize_before:
+            u_struct_norm = F.normalize(u_struct, p=2, dim=1)
+            b_struct_norm = F.normalize(b_struct, p=2, dim=1)
+        else:
+            u_struct_norm = u_struct
+            b_struct_norm = b_struct
+
+        # Step 3: Intent Scoring
+        # u_score: [num_users, n_intents]
+        u_score = torch.softmax(torch.matmul(u_struct_norm, user_intent_proto) / self.intent_temp, dim=1)
+        # b_score: [num_bundles, n_intents]
+        b_score = torch.softmax(torch.matmul(b_struct_norm, bundle_intent_proto) / self.intent_temp, dim=1)
+
+        # Step 4: Individual Intent Representation
+        # u_intent: [num_users, embedding_size]
+        u_intent = torch.matmul(u_score, user_intent_proto.T)
+        # b_intent: [num_bundles, embedding_size]
+        b_intent = torch.matmul(b_score, bundle_intent_proto.T)
+
+        # Step 5: Enhancement
+        if self.intent_enhance_mode == "residual":
+            u_enh = u_struct + self.intent_residual_alpha * u_intent
+            b_enh = b_struct + self.intent_residual_alpha * b_intent
+        elif self.intent_enhance_mode == "reparam":
+            # For pure reparam mode, base features remain structural.
+            # (Reparameterization noise injection is handled below if enabled)
+            u_enh = u_struct
+            b_enh = b_struct
+        else:
+            raise ValueError(f"Unsupported intent enhance_mode: {self.intent_enhance_mode}. Supported modes are: 'residual', 'reparam'.")
+
+        # Optional reparameterization
+        if self.intent_enable_reparam and not test:
+            u_noise = torch.randn_like(u_enh).to(self.device)
+            b_noise = torch.randn_like(b_enh).to(self.device)
+            u_enh = u_enh + u_intent * u_noise * self.intent_noise_scale
+            b_enh = b_enh + b_intent * b_noise * self.intent_noise_scale
+
+        return u_enh, b_enh
 
 
     def get_propagation_graph(self, bipartite_graph, modification_ratio=0):
@@ -227,6 +336,9 @@ class MultiCBR(nn.Module):
         else:
             UB_users_feature, UB_bundles_feature = self.propagate(self.UB_propagation_graph, self.users_feature, self.bundles_feature, "UB", self.UB_layer_coefs, test)
 
+        # BIGCF Intent Enhancement for UB
+        UB_users_feature, UB_bundles_feature = self.apply_intent_enhancement("UB", UB_users_feature, UB_bundles_feature, test)
+
         #  =============================  UI graph propagation  =============================
         if test:
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph_ori, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
@@ -235,6 +347,9 @@ class MultiCBR(nn.Module):
             UI_users_feature, UI_items_feature = self.propagate(self.UI_propagation_graph, self.users_feature, self.items_feature, "UI", self.UI_layer_coefs, test)
             UI_bundles_feature = self.aggregate(self.BI_aggregation_graph, UI_items_feature, "BI", test)
 
+        # BIGCF Intent Enhancement for UI
+        UI_users_feature, UI_bundles_feature = self.apply_intent_enhancement("UI", UI_users_feature, UI_bundles_feature, test)
+
         #  =============================  BI graph propagation  =============================
         if test:
             BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph_ori, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
@@ -242,6 +357,9 @@ class MultiCBR(nn.Module):
         else:
             BI_bundles_feature, BI_items_feature = self.propagate(self.BI_propagation_graph, self.bundles_feature, self.items_feature, "BI", self.BI_layer_coefs, test)
             BI_users_feature = self.aggregate(self.UI_aggregation_graph, BI_items_feature, "UI", test)
+
+        # BIGCF Intent Enhancement for BI
+        BI_users_feature, BI_bundles_feature = self.apply_intent_enhancement("BI", BI_users_feature, BI_bundles_feature, test)
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]

@@ -109,8 +109,8 @@ class Datasets():
         
         self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
 
-        # Unified num_workers setting to avoid overhead/errors
-        num_workers = 4
+        # Windows compatibility: reduce num_workers to avoid overhead/errors
+        num_workers = 4 if os.name == 'nt' else 10
         self.train_loader = DataLoader(self.bundle_train_data, batch_size=batch_size_train, shuffle=True, num_workers=num_workers, drop_last=True)
         self.val_loader = DataLoader(self.bundle_val_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)
         self.test_loader = DataLoader(self.bundle_test_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)

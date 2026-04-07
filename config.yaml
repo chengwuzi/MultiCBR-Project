@@ -147,9 +147,9 @@ Youshu:
   # New Simple Aggregation Supplement settings
   # 最佳结果参数列表 （0+0.05）  0+0.1  0+0.15
   ui_bundle_user_agg_beta: 0
-  bi_user_bundle_agg_beta: 0.05
-  train_connected_ratio_range: [0.0, 1.0]
-  user_ub_train_deg_min: 0
+  bi_user_bundle_agg_beta: 0
+  train_connected_ratio_range: [0.0, 0.0]
+  user_ub_train_deg_min: 100
 
   UB_ratios: [0.2]
   UI_ratios: [0.1]
@@ -166,7 +166,7 @@ Youshu:
   c_lambdas: [0.04]
   c_temps: [0.23]
 
-  epochs: 100
+  epochs: 120
   test_interval: 5
 
   # pre-fusion cross-view contrastive learning (UB-anchored)

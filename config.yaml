@@ -130,9 +130,9 @@ Youshu:
   intent_module:
     enabled: true
     per_view:
-      UB: false
-      UI: true
-      BI: true
+      UB: true
+      UI: false
+      BI: false
     n_intents: 32
     temp: 0.2
     enhance_mode: "residual"

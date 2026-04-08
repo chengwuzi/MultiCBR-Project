@@ -12,6 +12,8 @@ from datetime import datetime
 from torch.utils.tensorboard import SummaryWriter
 import torch
 import torch.optim as optim
+import random
+import numpy as np
 from utility import Datasets
 from models.MultiCBR import MultiCBR
 
@@ -26,9 +28,23 @@ def get_cmd():
     parser.add_argument("--ui_bundle_user_agg_beta", default=None, type=float, help="coefficient for user-side aggregation in UI view")
     parser.add_argument("--bi_user_bundle_agg_beta", default=None, type=float, help="coefficient for bundle-side aggregation in BI view")
     parser.add_argument("-e", "--epochs", default=None, type=int, help="number of epochs to train")
+    parser.add_argument("--seed", default=None, type=int, help="random seed for reproducibility")
     args = parser.parse_args()
 
     return args
+
+def set_seed(seed):
+    if seed is not None:
+        random.seed(seed)
+        np.random.seed(seed)
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        print(f"Global random seed set to: {seed}")
+    else:
+        print("Random seed not set, running with random initialization.")
 
 
 def main(args=None):
@@ -68,6 +84,11 @@ def main(args=None):
         conf["bi_user_bundle_agg_beta"] = paras["bi_user_bundle_agg_beta"]
     if "epochs" in paras and paras["epochs"] is not None:
         conf["epochs"] = paras["epochs"]
+    if "seed" in paras and paras["seed"] is not None:
+        conf["seed"] = paras["seed"]
+
+    # Set random seed if provided
+    set_seed(conf.get("seed", None))
 
     conf["num_users"] = dataset.num_users
     conf["num_bundles"] = dataset.num_bundles

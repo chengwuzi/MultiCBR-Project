@@ -11,6 +11,9 @@ def run():
         "info": "my_custom_run", # 实验备注信息
         
         # --- 下面可以覆盖 config.yaml 中的参数 ---
+
+        # 固定随机种子
+        "seed": None,  # <---- 只需要加上这一行，比如填 42 或者 2024
         
         # 修改 epoch 数
         "epochs": 1,  # 测试用，设为 1 跑得快

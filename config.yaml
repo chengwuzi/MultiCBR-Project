@@ -23,11 +23,8 @@ NetEase:
   # 最佳结果参数列表 （0+0.25）  0+0.2  0+0.3
   ui_bundle_user_agg_beta: 0
   bi_user_bundle_agg_beta: 0.35
-  # 目标用户筛选范围 (train_connected_ratio)，仅对此范围内的用户启用 bi_user_bundle_agg_beta
-  # 默认 [0.0, 1.0] 表示全员启用
-  train_connected_ratio_range: [0.4, 1.0]
-  # 用户筛选：仅对 user_ub_train_deg >= 此值的用户启用 bi_user_bundle_agg_beta
-  # 默认 0 表示全员启用（不过滤低频用户）
+  # User connection filtering configuration
+  train_connected_ratio_range: [0.0, 1.0]
   user_ub_train_deg_min: 0
 
   # the following dropout rates are with respect to the "aug_type", i.e., if aug_type is ED, the following dropout rates are for ED.
@@ -148,8 +145,8 @@ Youshu:
   # 最佳结果参数列表 （0+0.05）  0+0.1  0+0.15
   ui_bundle_user_agg_beta: 0
   bi_user_bundle_agg_beta: 0
-  train_connected_ratio_range: [0.0, 0.0]
-  user_ub_train_deg_min: 100
+  train_connected_ratio_range: [0.0, 1.0]
+  user_ub_train_deg_min: 0
 
   UB_ratios: [0.2]
   UI_ratios: [0.1]

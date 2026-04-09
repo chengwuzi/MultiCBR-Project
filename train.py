@@ -177,7 +177,7 @@ def main(args=None):
 
         # model
         if conf['model'] == 'MultiCBR':
-            model = MultiCBR(conf, dataset.graphs).to(device)
+            model = MultiCBR(conf, dataset.graphs, dataset.user_beta_mask).to(device)
         else:
             raise ValueError("Unimplemented model %s" % (conf["model"]))
 

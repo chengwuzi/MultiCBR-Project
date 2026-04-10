@@ -23,7 +23,7 @@ NetEase:
 
   # 最佳结果参数列表 （0+0.25）  0+0.2  0+0.3
   ui_bundle_user_agg_beta: 0
-  bi_user_bundle_agg_beta: 0.2
+  bi_user_bundle_agg_beta: 0.35
   # User connection filtering configuration
   train_connected_ratio_range: [0.0, 1.0]
   user_ub_train_deg_min: 0

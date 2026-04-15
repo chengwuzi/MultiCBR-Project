@@ -104,7 +104,7 @@ iFashion:
 
   lrs: [1.0e-3]
   l2_regs: [1.0e-5]
-  c_lambdas: [0.1]
+  c_lambdas: [0.0]
   c_temps: [0.2]
 
   epochs: 30
@@ -112,8 +112,8 @@ iFashion:
 
   # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
-    enabled: false
-    anchor_cl_lambda: 0.0
+    enabled: true
+    anchor_cl_lambda: 0.003
     temp: 0.2
     user_cl: true
     bundle_cl: true

@@ -325,6 +325,8 @@ class MultiCBR(nn.Module):
         b_idx = torch.unique(pos_bundles.squeeze(-1)) # [unique_b_num] 仅使用 batch 内的 unique positive bundle 做对比
         
         loss = torch.tensor(0.0, device=self.device)
+        # Keep the return shape unchanged for the training loop, but skip
+        # per-batch detailed logging to avoid unnecessary host synchronization.
         loss_dict = {}
         
         # 辅助函数：计算标准 batch 内 InfoNCE (使用 F.cross_entropy 实现)
@@ -351,8 +353,6 @@ class MultiCBR(nn.Module):
             w_bi = anchor_cl_conf.get("ub_bi_user_weight", 1.0)
             
             loss += w_ui * l_u_ub_ui + w_bi * l_u_ub_bi
-            loss_dict["u_ub_ui"] = l_u_ub_ui.item()
-            loss_dict["u_ub_bi"] = l_u_ub_bi.item()
             
         # Bundle 侧的 UB-UI 和 UB-BI 跨视图对比
         if anchor_cl_conf.get("bundle_cl", True) and b_idx.size(0) > 1:
@@ -368,8 +368,6 @@ class MultiCBR(nn.Module):
             w_bi = anchor_cl_conf.get("ub_bi_bundle_weight", 1.0)
             
             loss += w_ui * l_b_ub_ui + w_bi * l_b_ub_bi
-            loss_dict["b_ub_ui"] = l_b_ub_ui.item()
-            loss_dict["b_ub_bi"] = l_b_ub_bi.item()
             
         return loss, loss_dict
 

@@ -4,7 +4,7 @@ NetEase:
   batch_size_test: 2048 # the batch size for testing
   topk: [10, 20, 40, 80] # the topks metrics for evaluation
   neg_num: 1 # number of negatives used for BPR loss. All the experiments use 1.
-  seed: 3407 # Set an integer (e.g. 42) to fix random seed, or null for random
+  seed: 4096 # Set an integer (e.g. 42) to fix random seed, or null for random
 
   # the following are the best settings
   aug_type: "Noise" # options: ED, MD, OP, Noise

@@ -27,6 +27,10 @@ NetEase:
   # User connection filtering configuration
   train_connected_ratio_range: [0.0, 1.0]
   user_ub_train_deg_min: 0
+  ub_graph_topk_filter:
+    enabled: false
+    weight_path: null
+    topk: 10
 
   # the following dropout rates are with respect to the "aug_type", i.e., if aug_type is ED, the following dropout rates are for ED.
   UB_ratios: [0.0] # the dropout ratio for UB graph
@@ -91,6 +95,10 @@ iFashion:
   bi_user_bundle_agg_beta: 0
   train_connected_ratio_range: [0.0, 1.0]
   user_ub_train_deg_min: 0
+  ub_graph_topk_filter:
+    enabled: false
+    weight_path: './weightMatrix/iFashion_UB.txt'
+    topk: 10
 
   UB_ratios: [0.05]
   UI_ratios: [0.0]
@@ -150,6 +158,10 @@ Youshu:
   bi_user_bundle_agg_beta: 0
   train_connected_ratio_range: [0.0, 1.0]
   user_ub_train_deg_min: 0
+  ub_graph_topk_filter:
+    enabled: false
+    weight_path: null
+    topk: 10
 
   UB_ratios: [0.2]
   UI_ratios: [0.1]

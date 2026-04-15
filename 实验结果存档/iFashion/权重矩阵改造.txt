@@ -63,7 +63,24 @@ anchor_cl_lambda: 0.05
 2026-04-15 17:25:32, Best in epoch 9, TOP 80: REC_T=0.25981, NDCG_T=0.15052
 
 anchor_cl_lambda: 0.07
+2026-04-15 18:20:36, Best in epoch 19, TOP 10: REC_V=0.09774, NDCG_V=0.07125
+2026-04-15 18:20:36, Best in epoch 19, TOP 10: REC_T=0.09976, NDCG_T=0.09623
+2026-04-15 18:20:36, Best in epoch 19, TOP 20: REC_V=0.13962, NDCG_V=0.08504
+2026-04-15 18:20:36, Best in epoch 19, TOP 20: REC_T=0.14242, NDCG_T=0.11345
+2026-04-15 18:20:36, Best in epoch 19, TOP 40: REC_V=0.19188, NDCG_V=0.09922
+2026-04-15 18:20:36, Best in epoch 19, TOP 40: REC_T=0.19406, NDCG_T=0.13160
+2026-04-15 18:20:36, Best in epoch 19, TOP 80: REC_V=0.25331, NDCG_V=0.11319
+2026-04-15 18:20:36, Best in epoch 19, TOP 80: REC_T=0.25518, NDCG_T=0.14980
 
+anchor_cl_lambda: 0.09
+2026-04-15 18:33:36, Best in epoch 19, TOP 10: REC_V=0.09707, NDCG_V=0.07115
+2026-04-15 18:33:36, Best in epoch 19, TOP 10: REC_T=0.09932, NDCG_T=0.09623
+2026-04-15 18:33:36, Best in epoch 19, TOP 20: REC_V=0.13904, NDCG_V=0.08500
+2026-04-15 18:33:36, Best in epoch 19, TOP 20: REC_T=0.14166, NDCG_T=0.11332
+2026-04-15 18:33:36, Best in epoch 19, TOP 40: REC_V=0.18934, NDCG_V=0.09861
+2026-04-15 18:33:36, Best in epoch 19, TOP 40: REC_T=0.19216, NDCG_T=0.13107
+2026-04-15 18:33:36, Best in epoch 19, TOP 80: REC_V=0.24883, NDCG_V=0.11212
+2026-04-15 18:33:36, Best in epoch 19, TOP 80: REC_T=0.25082, NDCG_T=0.14857
 
 
 ________________________________________________________________________________________________________________________

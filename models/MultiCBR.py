@@ -374,18 +374,20 @@ class MultiCBR(nn.Module):
         return loss, loss_dict
 
 
-    def cal_loss(self, users_feature, bundles_feature):
+    def cal_loss(self, users_feature, bundles_feature, compute_c_loss=True):
         # users_feature / bundles_feature: [bs, 1+neg_num, emb_size]
         pred = torch.sum(users_feature * bundles_feature, 2)
         bpr_loss = cal_bpr_loss(pred)
 
-        # cl is abbr. of "contrastive loss"
-        u_view_cl = self.cal_c_loss(users_feature, users_feature)
-        b_view_cl = self.cal_c_loss(bundles_feature, bundles_feature)
+        if compute_c_loss:
+            # cl is abbr. of "contrastive loss"
+            u_view_cl = self.cal_c_loss(users_feature, users_feature)
+            b_view_cl = self.cal_c_loss(bundles_feature, bundles_feature)
 
-        c_losses = [u_view_cl, b_view_cl]
-
-        c_loss = sum(c_losses) / len(c_losses)
+            c_losses = [u_view_cl, b_view_cl]
+            c_loss = sum(c_losses) / len(c_losses)
+        else:
+            c_loss = torch.tensor(0.0, device=self.device)
 
         return bpr_loss, c_loss
 
@@ -412,7 +414,8 @@ class MultiCBR(nn.Module):
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
         bundles_embedding = bundles_rep[bundles]
 
-        bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding)
+        compute_c_loss = self.conf.get("c_lambda", 0.0) != 0
+        bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding, compute_c_loss=compute_c_loss)
 
         # 计算新增的 UB-anchored pre-fusion cross-view contrastive loss
         anchor_cl_loss = torch.tensor(0.0, device=self.device)

@@ -6,7 +6,7 @@ def run():
     
     experiment_config = {
         "gpu": "0",
-        "dataset": "NetEase",
+        "dataset": "iFashion",
         "model": "MultiCBR",
         "info": "my_custom_run", # 实验备注信息
         
@@ -16,7 +16,7 @@ def run():
         # "seed": None,  # <---- 只需要加上这一行，比如填 42 或者 2024
         
         # 修改 epoch 数
-        "epochs": 60,  # 测试用，设为 1 跑得快
+        "epochs": 30,  # 测试用，设为 1 跑得快
         
         # 修改学习率
         # "lrs": [1e-3],

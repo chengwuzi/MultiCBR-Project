@@ -69,7 +69,7 @@ iFashion:
   batch_size_test: 2048
   topk: [10, 20, 40, 80]
   neg_num: 1
-  seed: null # Set an integer (e.g. 42) to fix random seed, or null for random
+  seed: 3407 # Set an integer (e.g. 42) to fix random seed, or null for random
 
   # the following are the best settings
   aug_type: "Noise"
@@ -107,7 +107,7 @@ iFashion:
   c_lambdas: [0.1]
   c_temps: [0.2]
 
-  epochs: 50
+  epochs: 30
   test_interval: 5 
 
   # pre-fusion cross-view contrastive learning (UB-anchored)

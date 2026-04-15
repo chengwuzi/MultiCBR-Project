@@ -33,12 +33,6 @@ anchor_cl_lambda: 0.003
 2026-04-15 16:33:16, Best in epoch 4, TOP 80: REC_V=0.09442, NDCG_V=0.03331
 2026-04-15 16:33:16, Best in epoch 4, TOP 80: REC_T=0.09632, NDCG_T=0.04484
 
-anchor_cl_lambda: 0.007
-
-
-anchor_cl_lambda: 0.015
-
-
 anchor_cl_lambda: 0.03
 2026-04-15 16:54:19, Best in epoch 4, TOP 10: REC_V=0.09502, NDCG_V=0.06759
 2026-04-15 16:54:19, Best in epoch 4, TOP 10: REC_T=0.09635, NDCG_T=0.09162
@@ -48,6 +42,9 @@ anchor_cl_lambda: 0.03
 2026-04-15 16:54:19, Best in epoch 4, TOP 40: REC_T=0.19659, NDCG_T=0.12924
 2026-04-15 16:54:19, Best in epoch 4, TOP 80: REC_V=0.26160, NDCG_V=0.11237
 2026-04-15 16:54:19, Best in epoch 4, TOP 80: REC_T=0.26407, NDCG_T=0.14933
+
+anchor_cl_lambda: 0.05
+
 
 
 ________________________________________________________________________________________________________________________

@@ -113,7 +113,7 @@ iFashion:
   # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
     enabled: true
-    anchor_cl_lambda: 0.003
+    anchor_cl_lambda: 0.05
     temp: 0.2
     user_cl: true
     bundle_cl: true

@@ -23,3 +23,11 @@ runs/*
 log
 log*
 log/*
+/.idea/.gitignore
+/.idea/copilot.data.migration.ask2agent.xml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/MultiCBR-Project.iml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/inspectionProfiles/Project_Default.xml
+/.idea/vcs.xml

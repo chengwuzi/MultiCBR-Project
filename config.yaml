@@ -133,6 +133,11 @@ iFashion:
     weight_path: './weightMatrix/iFashion_UB.txt'
     topk: 10
 
+  bpr_weight_matrix:
+    enabled: false
+    weight_path: './weightMatrix/iFashion_UB.txt'
+    gamma: 1.0
+
 
 Youshu:
   data_path: './datasets'

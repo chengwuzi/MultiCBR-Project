@@ -7,7 +7,7 @@ import torch.nn.functional as F
 import scipy.sparse as sp 
 
 
-def cal_bpr_loss(pred):
+def cal_bpr_loss(pred, pos_bpr_modulation=None):
     # pred: [bs, 1+neg_num]
     if pred.shape[1] > 2:
         negs = pred[:, 1:]
@@ -15,6 +15,9 @@ def cal_bpr_loss(pred):
     else:
         negs = pred[:, 1].unsqueeze(1)
         pos = pred[:, 0].unsqueeze(1)
+
+    if pos_bpr_modulation is not None:
+        pos = pos * pos_bpr_modulation.view(-1, 1)
 
     loss = - torch.log(torch.sigmoid(pos - negs)) # [bs]
     loss = torch.mean(loss)
@@ -372,10 +375,10 @@ class MultiCBR(nn.Module):
         return loss, loss_dict
 
 
-    def cal_loss(self, users_feature, bundles_feature, compute_c_loss=True):
+    def cal_loss(self, users_feature, bundles_feature, pos_bpr_modulation=None, compute_c_loss=True):
         # users_feature / bundles_feature: [bs, 1+neg_num, emb_size]
         pred = torch.sum(users_feature * bundles_feature, 2)
-        bpr_loss = cal_bpr_loss(pred)
+        bpr_loss = cal_bpr_loss(pred, pos_bpr_modulation=pos_bpr_modulation)
 
         if compute_c_loss:
             # cl is abbr. of "contrastive loss"
@@ -406,14 +409,24 @@ class MultiCBR(nn.Module):
 
         # users: [bs, 1]
         # bundles: [bs, 1+neg_num]
-        users, bundles = batch
+        pos_bpr_modulation = None
+        if len(batch) == 3:
+            users, bundles, pos_bpr_modulation = batch
+        else:
+            users, bundles = batch
+
         users_rep, bundles_rep, pre_fusion_users, pre_fusion_bundles = self.get_multi_modal_representations()
 
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
         bundles_embedding = bundles_rep[bundles]
 
         compute_c_loss = self.conf.get("c_lambda", 0.0) != 0
-        bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding, compute_c_loss=compute_c_loss)
+        bpr_loss, c_loss = self.cal_loss(
+            users_embedding,
+            bundles_embedding,
+            pos_bpr_modulation=pos_bpr_modulation,
+            compute_c_loss=compute_c_loss,
+        )
 
         # 计算新增的 UB-anchored pre-fusion cross-view contrastive loss
         anchor_cl_loss = torch.tensor(0.0, device=self.device)

@@ -159,6 +159,12 @@ def main(args=None):
         conf["bi_user_bundle_agg_beta"] = bi_beta
         settings += [str(c_lambda), str(c_temp), str(ui_beta), str(bi_beta)]
 
+        bpr_weight_conf = conf.get("bpr_weight_matrix", {})
+        if bpr_weight_conf.get("enabled", False):
+            settings += [f"BPRW_On_G{bpr_weight_conf.get('gamma', 0.0)}"]
+        else:
+            settings += ["BPRW_Off"]
+
         setting = "_".join(settings)
 
         # Windows path length limit fix: shorten setting string if too long

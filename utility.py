@@ -237,8 +237,9 @@ class Datasets():
         for entries in user_entries.values():
             if topk == 0:
                 continue
-            # Sort by weight descending, then keep original train-file order for ties.
-            entries.sort(key=lambda x: (-x[0], x[1]))
+            # Smaller weights are treated as more important; keep the lowest-weight
+            # edges for each user and preserve original train-file order for ties.
+            entries.sort(key=lambda x: (x[0], x[1]))
             for _, idx in entries[:topk]:
                 keep_mask[idx] = True
                 kept_edges += 1

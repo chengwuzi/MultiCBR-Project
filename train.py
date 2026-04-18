@@ -162,8 +162,6 @@ def main(args=None):
         bpr_weight_conf = conf.get("bpr_weight_matrix", {})
         if bpr_weight_conf.get("enabled", False):
             settings += [f"BPRW_On_G{bpr_weight_conf.get('gamma', 0.0)}"]
-        else:
-            settings += ["BPRW_Off"]
 
         setting = "_".join(settings)
 

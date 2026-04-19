@@ -133,6 +133,16 @@ iFashion:
     weight_path: './weightMatrix/iFashion_UB.txt'
     topk: 10
 
+  alignment_uniformity:
+    enabled: true
+    alignment_weight: 1.0
+    uniformity_weight: 0.1
+    uniformity_temperature: 2.0
+    weighted_alignment:
+      enabled: false
+      weight_path: './weightMatrix/iFashion_UB.txt'
+      gamma: 1.0
+
 
 Youshu:
   data_path: './datasets'

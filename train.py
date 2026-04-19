@@ -109,8 +109,25 @@ def main(args=None):
         print(f"Weights -> b_ub_ui: {anchor_cl_conf.get('ub_ui_bundle_weight')}, b_ub_bi: {anchor_cl_conf.get('ub_bi_bundle_weight')}")
         print("="*70)
 
+    ali_uni_conf = conf.get("alignment_uniformity", {})
+    ali_uni_enabled = ali_uni_conf.get("enabled", False)
+    if ali_uni_enabled:
+        weighted_alignment_conf = ali_uni_conf.get("weighted_alignment", {})
+        print("="*20 + " Alignment + Uniformity Enabled " + "="*20)
+        print(f"alignment_weight: {ali_uni_conf.get('alignment_weight')}")
+        print(f"uniformity_weight: {ali_uni_conf.get('uniformity_weight')}")
+        print(f"uniformity_temperature: {ali_uni_conf.get('uniformity_temperature')}")
+        print(f"weighted_alignment: {weighted_alignment_conf.get('enabled', False)}")
+        if weighted_alignment_conf.get("enabled", False):
+            print(f"weight_path: {weighted_alignment_conf.get('weight_path')}")
+            print(f"gamma: {weighted_alignment_conf.get('gamma')}")
+        print("="*70)
+
+    active_c_lambdas = [0.0] if ali_uni_enabled else conf["c_lambdas"]
+    active_c_temps = [0.0] if ali_uni_enabled else conf["c_temps"]
+
     for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp, ui_beta, bi_beta in \
-            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"], [conf["ui_bundle_user_agg_beta"]], [conf["bi_user_bundle_agg_beta"]]):
+            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], active_c_lambdas, active_c_temps, [conf["ui_bundle_user_agg_beta"]], [conf["bi_user_bundle_agg_beta"]]):
         log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
         run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
         checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
@@ -157,7 +174,25 @@ def main(args=None):
         conf["c_temp"] = c_temp
         conf["ui_bundle_user_agg_beta"] = ui_beta
         conf["bi_user_bundle_agg_beta"] = bi_beta
-        settings += [str(c_lambda), str(c_temp), str(ui_beta), str(bi_beta)]
+
+        if ali_uni_enabled:
+            weighted_alignment_conf = ali_uni_conf.get("weighted_alignment", {})
+            settings += [str(ui_beta), str(bi_beta)]
+            settings += [
+                "AliUni",
+                f"AliW_{ali_uni_conf.get('alignment_weight', 1.0)}",
+                f"UniW_{ali_uni_conf.get('uniformity_weight', 0.0)}",
+                f"UniT_{ali_uni_conf.get('uniformity_temperature', 2.0)}",
+            ]
+            if weighted_alignment_conf.get("enabled", False):
+                settings += [
+                    "WAli_On",
+                    f"G_{weighted_alignment_conf.get('gamma', 0.0)}",
+                ]
+            else:
+                settings += ["WAli_Off"]
+        else:
+            settings += [str(c_lambda), str(c_temp), str(ui_beta), str(bi_beta)]
 
         setting = "_".join(settings)
 
@@ -205,10 +240,13 @@ def main(args=None):
                 if conf["aug_type"] == "ED" and (batch_anchor + 1) % ed_interval_bs == 0:
                     ED_drop = True
                 bpr_loss, c_loss, anchor_cl_loss, anchor_cl_dict = model(batch, ED_drop=ED_drop)
-                
-                anchor_cl_lambda = conf.get("anchor_cl", {}).get("anchor_cl_lambda", 0.0)
-                loss = bpr_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
-                
+
+                if ali_uni_enabled:
+                    loss = bpr_loss + c_loss
+                else:
+                    anchor_cl_lambda = conf.get("anchor_cl", {}).get("anchor_cl_lambda", 0.0)
+                    loss = bpr_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
+
                 loss.backward()
                 optimizer.step()
 
@@ -221,8 +259,11 @@ def main(args=None):
                 run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
                 run.add_scalar("loss_anchor_cl", anchor_cl_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
-                
-                if conf.get("anchor_cl", {}).get("enabled", False):
+
+                if ali_uni_enabled:
+                    for k, v in anchor_cl_dict.items():
+                        run.add_scalar(f"loss_ali_uni/{k}", v, batch_anchor)
+                elif conf.get("anchor_cl", {}).get("enabled", False):
                     for k, v in anchor_cl_dict.items():
                         run.add_scalar(f"loss_anchor_cl/{k}", v, batch_anchor)
 

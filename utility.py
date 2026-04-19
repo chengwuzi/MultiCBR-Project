@@ -25,12 +25,13 @@ def print_statistics(X, string):
 
 
 class BundleTrainDataset(Dataset):
-    def __init__(self, conf, u_b_pairs, u_b_graph, num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, neg_sample=1):
+    def __init__(self, conf, u_b_pairs, u_b_graph, num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, neg_sample=1, alignment_modulation=None):
         self.conf = conf
         self.u_b_pairs = u_b_pairs
         self.u_b_graph = u_b_graph
         self.num_bundles = num_bundles
         self.neg_sample = neg_sample
+        self.alignment_modulation = alignment_modulation
 
         self.u_b_for_neg_sample = u_b_for_neg_sample
         self.b_b_for_neg_sample = b_b_for_neg_sample
@@ -48,7 +49,11 @@ class BundleTrainDataset(Dataset):
                 if len(all_bundles) == self.neg_sample+1:                                                                               
                     break                                                                                                               
 
-        return torch.LongTensor([user_b]), torch.LongTensor(all_bundles)
+        if self.alignment_modulation is None:
+            return torch.LongTensor([user_b]), torch.LongTensor(all_bundles)
+
+        alignment_modulation = torch.tensor(self.alignment_modulation[index], dtype=torch.float32)
+        return torch.LongTensor([user_b]), torch.LongTensor(all_bundles), alignment_modulation
 
 
     def __len__(self):
@@ -98,10 +103,20 @@ class Datasets():
 
         # Load connectivity metrics and generate user_beta_mask
         self.user_beta_mask = self.get_user_beta_mask(conf)
+        self.train_alignment_modulation = self.get_alignment_modulation(conf, u_b_pairs_train)
 
         u_b_for_neg_sample, b_b_for_neg_sample = None, None
 
-        self.bundle_train_data = BundleTrainDataset(conf, u_b_pairs_train, u_b_graph_train, self.num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, conf["neg_num"])
+        self.bundle_train_data = BundleTrainDataset(
+            conf,
+            u_b_pairs_train,
+            u_b_graph_train,
+            self.num_bundles,
+            u_b_for_neg_sample,
+            b_b_for_neg_sample,
+            conf["neg_num"],
+            alignment_modulation=self.train_alignment_modulation,
+        )
         self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
         self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
 
@@ -113,11 +128,29 @@ class Datasets():
         # while allowing the UB view graph itself to use a filtered version.
         self.graphs = [u_b_graph_train_for_ub_view, u_i_graph, b_i_graph]
 
-        # Windows compatibility: reduce num_workers to avoid overhead/errors
-        num_workers = 4 if os.name == 'nt' else 10
+        # Allow explicit override while keeping the original platform-specific defaults.
+        num_workers = conf.get("num_workers")
+        if num_workers is None:
+            num_workers = 4 if os.name == 'nt' else 10
         self.train_loader = DataLoader(self.bundle_train_data, batch_size=batch_size_train, shuffle=True, num_workers=num_workers, drop_last=True)
         self.val_loader = DataLoader(self.bundle_val_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)
         self.test_loader = DataLoader(self.bundle_test_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)
+
+
+    def resolve_project_path(self, path_value, config_name):
+        if not path_value:
+            raise ValueError(f"{config_name} is enabled, but weight_path is not configured.")
+
+        if os.path.isabs(path_value):
+            resolved_path = path_value
+        else:
+            project_root = os.path.dirname(os.path.abspath(__file__))
+            resolved_path = os.path.join(project_root, path_value)
+
+        if not os.path.exists(resolved_path):
+            raise FileNotFoundError(f"Weight file not found for {config_name}: {resolved_path}")
+
+        return resolved_path
 
 
     def get_data_size(self):
@@ -185,18 +218,10 @@ class Datasets():
         if topk < 0:
             raise ValueError("ub_graph_topk_filter.topk must be >= 0.")
 
-        weight_path = graph_filter_conf.get("weight_path")
-        if not weight_path:
-            raise ValueError("ub_graph_topk_filter.enabled is true, but weight_path is not configured.")
-
-        if os.path.isabs(weight_path):
-            resolved_weight_path = weight_path
-        else:
-            project_root = os.path.dirname(os.path.abspath(__file__))
-            resolved_weight_path = os.path.join(project_root, weight_path)
-
-        if not os.path.exists(resolved_weight_path):
-            raise FileNotFoundError(f"UB top-k weight file not found: {resolved_weight_path}")
+        resolved_weight_path = self.resolve_project_path(
+            graph_filter_conf.get("weight_path"),
+            "ub_graph_topk_filter",
+        )
 
         print(f"Applying UB graph top-k filter for {self.name}: topk={topk}, weight_path={resolved_weight_path}")
 
@@ -263,6 +288,80 @@ class Datasets():
         print_statistics(filtered_graph, f"U-B statistics in train (UB-view topk={topk})")
 
         return filtered_graph
+
+
+    def get_alignment_modulation(self, conf, u_b_pairs_train):
+        ali_uni_conf = conf.get("alignment_uniformity", {})
+        weighted_alignment_conf = ali_uni_conf.get("weighted_alignment", {})
+        if not ali_uni_conf.get("enabled", False) or not weighted_alignment_conf.get("enabled", False):
+            return None
+
+        gamma = float(weighted_alignment_conf.get("gamma", 0.0))
+        resolved_weight_path = self.resolve_project_path(
+            weighted_alignment_conf.get("weight_path"),
+            "alignment_uniformity.weighted_alignment",
+        )
+
+        expected_lines = len(u_b_pairs_train)
+        raw_weights = np.empty(expected_lines, dtype=np.float32)
+        user_ids = np.empty(expected_lines, dtype=np.int64)
+        user_weight_sums = np.zeros(self.num_users, dtype=np.float64)
+        user_weight_counts = np.zeros(self.num_users, dtype=np.int64)
+
+        print(
+            f"Loading alignment weight matrix for {self.name}: "
+            f"weight_path={resolved_weight_path}, gamma={gamma}"
+        )
+
+        with open(resolved_weight_path, "r", encoding="utf-8") as f:
+            for idx, pair in enumerate(u_b_pairs_train):
+                line = f.readline()
+                if not line:
+                    raise ValueError(
+                        f"Alignment weight file ended early at line {idx + 1}; expected {expected_lines} lines."
+                    )
+
+                parts = line.strip().split()
+                if len(parts) != 3:
+                    raise ValueError(f"Invalid alignment weight file format at line {idx + 1}: {line.strip()}")
+
+                user_id = int(parts[0])
+                bundle_id = int(parts[1])
+                raw_weight = float(parts[2])
+
+                if pair[0] != user_id or pair[1] != bundle_id:
+                    raise ValueError(
+                        "Alignment weight file is not aligned with user_bundle_train.txt at line "
+                        f"{idx + 1}: train_pair={pair}, weight_pair=({user_id}, {bundle_id})"
+                    )
+
+                raw_weights[idx] = raw_weight
+                user_ids[idx] = user_id
+                user_weight_sums[user_id] += raw_weight
+                user_weight_counts[user_id] += 1
+
+            extra_line = f.readline()
+            if extra_line:
+                raise ValueError("Alignment weight file has more lines than user_bundle_train.txt.")
+
+        user_weight_means = np.zeros(self.num_users, dtype=np.float32)
+        nonzero_mask = user_weight_counts > 0
+        user_weight_means[nonzero_mask] = (
+            user_weight_sums[nonzero_mask] / user_weight_counts[nonzero_mask]
+        ).astype(np.float32)
+
+        transformed_weights = 1.0 + gamma * (raw_weights - user_weight_means[user_ids])
+        transformed_weights = transformed_weights.astype(np.float32)
+
+        print(
+            "Alignment weight matrix transformed with "
+            "g(w)=1+gamma*(w-user_mean), "
+            f"min={transformed_weights.min():.6f}, "
+            f"max={transformed_weights.max():.6f}, "
+            f"mean={transformed_weights.mean():.6f}"
+        )
+
+        return transformed_weights
 
 
     def get_user_beta_mask(self, conf):

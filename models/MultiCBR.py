@@ -312,6 +312,60 @@ class MultiCBR(nn.Module):
         return c_loss
 
 
+    def cal_alignment_loss(self, user_rep, bundle_rep, alignment_modulation=None):
+        user_rep = F.normalize(user_rep, p=2, dim=1)
+        bundle_rep = F.normalize(bundle_rep, p=2, dim=1)
+        pair_distance = torch.sum((user_rep - bundle_rep) ** 2, dim=1)
+
+        if alignment_modulation is not None:
+            modulation_sum = torch.sum(alignment_modulation) + 1e-8
+            return torch.sum(alignment_modulation * pair_distance) / modulation_sum
+
+        return torch.mean(pair_distance)
+
+
+    def cal_uniformity_loss(self, rep, temperature):
+        if rep.size(0) <= 1:
+            return torch.tensor(0.0, device=self.device)
+
+        rep = F.normalize(rep, p=2, dim=1)
+        pairwise_sq_dist = torch.pdist(rep, p=2).pow(2)
+        if pairwise_sq_dist.numel() == 0:
+            return torch.tensor(0.0, device=self.device)
+
+        return torch.log(torch.mean(torch.exp(-temperature * pairwise_sq_dist)) + 1e-8)
+
+
+    def cal_alignment_uniformity_loss(self, users_rep, bundles_rep, users, pos_bundles, alignment_modulation=None):
+        ali_uni_conf = self.conf.get("alignment_uniformity", {})
+        alignment_weight = float(ali_uni_conf.get("alignment_weight", 1.0))
+        uniformity_weight = float(ali_uni_conf.get("uniformity_weight", 0.0))
+        uniformity_temperature = float(ali_uni_conf.get("uniformity_temperature", 2.0))
+
+        user_indices = users.squeeze(-1)
+        pos_bundle_indices = pos_bundles.squeeze(-1)
+
+        user_rep_batch = users_rep[user_indices]
+        bundle_rep_batch = bundles_rep[pos_bundle_indices]
+        alignment_loss = self.cal_alignment_loss(user_rep_batch, bundle_rep_batch, alignment_modulation)
+
+        unique_users = torch.unique(user_indices)
+        unique_pos_bundles = torch.unique(pos_bundle_indices)
+        user_uniformity_loss = self.cal_uniformity_loss(users_rep[unique_users], uniformity_temperature)
+        bundle_uniformity_loss = self.cal_uniformity_loss(bundles_rep[unique_pos_bundles], uniformity_temperature)
+        uniformity_loss = (user_uniformity_loss + bundle_uniformity_loss) / 2
+
+        total_loss = alignment_weight * alignment_loss + uniformity_weight * uniformity_loss
+        loss_dict = {
+            "alignment": alignment_loss.detach(),
+            "uniformity": uniformity_loss.detach(),
+            "user_uniformity": user_uniformity_loss.detach(),
+            "bundle_uniformity": bundle_uniformity_loss.detach(),
+        }
+
+        return total_loss, loss_dict
+
+
     def cal_pre_fusion_anchor_cl_loss(self, pre_fusion_users, pre_fusion_bundles, users, pos_bundles):
         # 取出配置
         anchor_cl_conf = self.conf.get("anchor_cl", {})
@@ -406,14 +460,27 @@ class MultiCBR(nn.Module):
 
         # users: [bs, 1]
         # bundles: [bs, 1+neg_num]
-        users, bundles = batch
+        alignment_modulation = None
+        if len(batch) == 3:
+            users, bundles, alignment_modulation = batch
+        else:
+            users, bundles = batch
         users_rep, bundles_rep, pre_fusion_users, pre_fusion_bundles = self.get_multi_modal_representations()
 
         users_embedding = users_rep[users].expand(-1, bundles.shape[1], -1)
         bundles_embedding = bundles_rep[bundles]
 
-        compute_c_loss = self.conf.get("c_lambda", 0.0) != 0
+        ali_uni_enabled = self.conf.get("alignment_uniformity", {}).get("enabled", False)
+        compute_c_loss = (self.conf.get("c_lambda", 0.0) != 0) and not ali_uni_enabled
         bpr_loss, c_loss = self.cal_loss(users_embedding, bundles_embedding, compute_c_loss=compute_c_loss)
+
+        if ali_uni_enabled:
+            pos_bundles = bundles[:, 0:1]
+            c_loss, ali_uni_dict = self.cal_alignment_uniformity_loss(
+                users_rep, bundles_rep, users, pos_bundles, alignment_modulation=alignment_modulation
+            )
+            anchor_cl_loss = torch.tensor(0.0, device=self.device)
+            return bpr_loss, c_loss, anchor_cl_loss, ali_uni_dict
 
         # 计算新增的 UB-anchored pre-fusion cross-view contrastive loss
         anchor_cl_loss = torch.tensor(0.0, device=self.device)

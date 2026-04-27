@@ -74,7 +74,7 @@ iFashion:
   batch_size_test: 2048
   topk: [10, 20, 40, 80]
   neg_num: 1
-  seed: 3407 # Set an integer (e.g. 42) to fix random seed, or null for random
+  seed: 2026 # Align with the DWT reference training setup for iFashion
 
   # the following are the best settings
   aug_type: "Noise"

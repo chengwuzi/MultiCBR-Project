@@ -20,7 +20,7 @@ from tqdm import tqdm
 from models.DWT import DWT
 from models.LatentDiffusionRebuilder import LatentDiffusionRebuilder
 from models.MultiCBR import MultiCBR
-from utility import Datasets, load_external_embedding_tensor
+from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 
 def get_cmd():

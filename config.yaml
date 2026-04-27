@@ -130,6 +130,7 @@ iFashion:
     latent_diffusion_infer_batch_size: 256
     latent_diffusion_reset_after_epoch: -1
     latent_diffusion_reset_optimizer: false
+
     upsilon_UB: 0.05
     upsilon_UI: 0.0
     upsilon_BI: 0.2
@@ -155,8 +156,7 @@ iFashion:
     ub_ui_bundle_weight: 1.0
     ub_bi_bundle_weight: 1.0
 
-  # UB权重矩阵筛选TOP-K - 融合前对比学习子视图向UB看齐 ： 改造失败，在改成纯融合前对比基础上加上topk筛选后效果大降，放弃该路线
-  # 二次改造 - 保留倒数topk - 仍然效果大降，放弃该路线
+
 Youshu:
   data_path: './datasets'
   batch_size_train: 2048

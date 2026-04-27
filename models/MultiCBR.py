@@ -34,7 +34,11 @@ def to_tensor(graph):
     graph = graph.tocoo()
     values = graph.data
     indices = np.vstack((graph.row, graph.col))
-    graph = torch.sparse.FloatTensor(torch.LongTensor(indices), torch.FloatTensor(values), torch.Size(graph.shape))
+    graph = torch.sparse_coo_tensor(
+        torch.LongTensor(indices),
+        torch.FloatTensor(values),
+        torch.Size(graph.shape),
+    )
 
     return graph
 

@@ -5,7 +5,6 @@ import os
 import random
 import numpy as np
 import scipy.sparse as sp 
-from collections import defaultdict
 
 import torch
 from torch.utils.data import Dataset, DataLoader
@@ -28,7 +27,7 @@ def load_external_embedding_tensor(path, num_expected, entity_name):
     if not path:
         raise ValueError(f"{entity_name} embedding path is required")
 
-    payload = torch.load(path, map_location="cpu")
+    payload = torch.load(path, map_location="cpu", weights_only=False)
     if torch.is_tensor(payload):
         embedding = payload.detach().float()
     elif isinstance(payload, np.ndarray):
@@ -135,7 +134,6 @@ class Datasets():
         u_b_pairs_train, u_b_graph_train = self.get_ub("train")
         u_b_pairs_val, u_b_graph_val = self.get_ub("tune")
         u_b_pairs_test, u_b_graph_test = self.get_ub("test")
-        u_b_graph_train_for_ub_view = self.get_ub_graph_for_ub_view(conf, u_b_pairs_train, u_b_graph_train)
 
         # Load connectivity metrics and generate user_beta_mask
         self.user_beta_mask = self.get_user_beta_mask(conf)
@@ -149,10 +147,8 @@ class Datasets():
         # High-order substitution pre-computation (Legacy - Disabled)
         # if conf.get('enable_high_order_replace', False):
         #    ... (Logic removed)
-        
-        # Keep the full train graph for BPR sampling and evaluation masking,
-        # while allowing the UB view graph itself to use a filtered version.
-        self.graphs = [u_b_graph_train_for_ub_view, u_i_graph, b_i_graph]
+
+        self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
         self.user_observed_bundles = self.build_user_observed_bundles(u_b_graph_train)
 
         # Windows compatibility: reduce num_workers to avoid overhead/errors
@@ -210,101 +206,6 @@ class Datasets():
         print_statistics(u_b_graph, "U-B statistics in %s" %(task))
 
         return u_b_pairs, u_b_graph
-
-
-    def get_ub_graph_for_ub_view(self, conf, u_b_pairs_train, u_b_graph_train):
-        graph_filter_conf = conf.get("ub_graph_topk_filter", {})
-        if not graph_filter_conf.get("enabled", False):
-            return u_b_graph_train
-
-        return self.build_topk_filtered_ub_graph(u_b_pairs_train, graph_filter_conf)
-
-
-    def build_topk_filtered_ub_graph(self, u_b_pairs_train, graph_filter_conf):
-        topk = graph_filter_conf.get("topk")
-        if topk is None:
-            raise ValueError("ub_graph_topk_filter.enabled is true, but topk is not configured.")
-        if topk < 0:
-            raise ValueError("ub_graph_topk_filter.topk must be >= 0.")
-
-        weight_path = graph_filter_conf.get("weight_path")
-        if not weight_path:
-            raise ValueError("ub_graph_topk_filter.enabled is true, but weight_path is not configured.")
-
-        if os.path.isabs(weight_path):
-            resolved_weight_path = weight_path
-        else:
-            project_root = os.path.dirname(os.path.abspath(__file__))
-            resolved_weight_path = os.path.join(project_root, weight_path)
-
-        if not os.path.exists(resolved_weight_path):
-            raise FileNotFoundError(f"UB top-k weight file not found: {resolved_weight_path}")
-
-        print(f"Applying UB graph top-k filter for {self.name}: topk={topk}, weight_path={resolved_weight_path}")
-
-        user_entries = defaultdict(list)
-        expected_lines = len(u_b_pairs_train)
-
-        with open(resolved_weight_path, "r", encoding="utf-8") as f:
-            for idx, pair in enumerate(u_b_pairs_train):
-                line = f.readline()
-                if not line:
-                    raise ValueError(
-                        f"Weight file ended early at line {idx + 1}; expected {expected_lines} lines."
-                    )
-
-                parts = line.strip().split()
-                if len(parts) != 3:
-                    raise ValueError(f"Invalid weight file format at line {idx + 1}: {line.strip()}")
-
-                user_id = int(parts[0])
-                bundle_id = int(parts[1])
-                weight = float(parts[2])
-
-                if pair[0] != user_id or pair[1] != bundle_id:
-                    raise ValueError(
-                        "Weight file is not aligned with user_bundle_train.txt at line "
-                        f"{idx + 1}: train_pair={pair}, weight_pair=({user_id}, {bundle_id})"
-                    )
-
-                user_entries[user_id].append((weight, idx))
-
-            extra_line = f.readline()
-            if extra_line:
-                raise ValueError("Weight file has more lines than user_bundle_train.txt.")
-
-        keep_mask = np.zeros(expected_lines, dtype=np.bool_)
-        kept_edges = 0
-
-        for entries in user_entries.values():
-            if topk == 0:
-                continue
-            # Smaller weights are treated as more important; keep the lowest-weight
-            # edges for each user and preserve original train-file order for ties.
-            entries.sort(key=lambda x: (x[0], x[1]))
-            for _, idx in entries[:topk]:
-                keep_mask[idx] = True
-                kept_edges += 1
-
-        kept_pairs = [u_b_pairs_train[idx] for idx, keep in enumerate(keep_mask) if keep]
-        if kept_pairs:
-            indice = np.array(kept_pairs, dtype=np.int32)
-            values = np.ones(len(kept_pairs), dtype=np.float32)
-            filtered_graph = sp.coo_matrix(
-                (values, (indice[:, 0], indice[:, 1])),
-                shape=(self.num_users, self.num_bundles),
-            ).tocsr()
-        else:
-            filtered_graph = sp.csr_matrix((self.num_users, self.num_bundles), dtype=np.float32)
-
-        pruned_edges = expected_lines - kept_edges
-        print(
-            f"UB top-k filter kept {kept_edges}/{expected_lines} train edges "
-            f"({(kept_edges / expected_lines) * 100:.2f}%), pruned {pruned_edges}."
-        )
-        print_statistics(filtered_graph, f"U-B statistics in train (UB-view topk={topk})")
-
-        return filtered_graph
 
 
     def get_user_beta_mask(self, conf):

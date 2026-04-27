@@ -6,21 +6,24 @@ import yaml
 import json
 import argparse
 import hashlib
-from tqdm import tqdm
-from itertools import product
+import random
 from datetime import datetime
-from torch.utils.tensorboard import SummaryWriter
+from itertools import product
+
+import numpy as np
+import scipy.sparse as sp
 import torch
 import torch.optim as optim
-import random
-import numpy as np
-from utility import Datasets
+from torch.utils.tensorboard import SummaryWriter
+from tqdm import tqdm
+
+from models.DWT import DWT
 from models.MultiCBR import MultiCBR
+from utility import Datasets
 
 
 def get_cmd():
     parser = argparse.ArgumentParser()
-    # experimental settings
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
@@ -29,9 +32,8 @@ def get_cmd():
     parser.add_argument("--bi_user_bundle_agg_beta", default=None, type=float, help="coefficient for bundle-side aggregation in BI view")
     parser.add_argument("-e", "--epochs", default=None, type=int, help="number of epochs to train")
     parser.add_argument("--seed", default=None, type=int, help="random seed for reproducibility")
-    args = parser.parse_args()
+    return parser.parse_args()
 
-    return args
 
 def set_seed(seed):
     if seed is not None:
@@ -47,125 +49,117 @@ def set_seed(seed):
         print("Random seed not set, running with random initialization.")
 
 
-def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml", encoding='utf-8'))
-    print("load config file done!")
+def resolve_train_style(conf):
+    return conf.get("train_style", "cbr").strip().lower()
 
-    if args is None:
-        paras = get_cmd().__dict__
-    else:
-        paras = args
 
-    dataset_name = paras["dataset"]
+def ensure_dir(path):
+    if not os.path.isdir(path):
+        os.makedirs(path)
 
-    assert paras["model"] in ["MultiCBR"], "Pls select models from: MultiCBR"
 
-    if "_" in dataset_name:
-        conf = conf[dataset_name.split("_")[0]]
-    else:
-        conf = conf[dataset_name]
-    conf["dataset"] = dataset_name
-    conf["model"] = paras["model"]
-    dataset = Datasets(conf)
+def fmt_list(values):
+    return str(values).replace(" ", "").replace("[", "").replace("]", "").replace(",", "-")
 
-    conf["gpu"] = paras["gpu"]
-    conf["info"] = paras["info"]
 
-    # Override config with any additional parameters passed in args
-    for key, value in paras.items():
-        if key not in ["dataset", "model", "gpu", "info"] and value is not None:
-             # Only override if the key exists in the specific dataset config or create new one
-             conf[key] = value
+def build_dwt_training_ub_graph(ub_graph, conf, device):
+    adjacency_matrix = sp.bmat([
+        [sp.csr_matrix((conf["num_users"], conf["num_users"])), ub_graph],
+        [ub_graph.T, sp.csr_matrix((conf["num_bundles"], conf["num_bundles"]))],
+    ])
+    adjacency_matrix = adjacency_matrix + sp.eye(adjacency_matrix.shape[0])
+    row_sum = np.array(adjacency_matrix.sum(axis=1))
+    d_inv = np.power(row_sum, -0.5).flatten()
+    d_inv[np.isinf(d_inv)] = 0.0
+    degree_matrix = sp.diags(d_inv)
+    norm_adjacency = degree_matrix.dot(adjacency_matrix).dot(degree_matrix).tocoo()
+    values = norm_adjacency.data
+    indices = np.vstack((norm_adjacency.row, norm_adjacency.col))
+    return torch.sparse_coo_tensor(
+        torch.LongTensor(indices),
+        torch.FloatTensor(values),
+        torch.Size(norm_adjacency.shape),
+    ).to(device)
 
-    # Ensure beta parameters are set if passed via command line
-    if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
-        conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
-    if "bi_user_bundle_agg_beta" in paras and paras["bi_user_bundle_agg_beta"] is not None:
-        conf["bi_user_bundle_agg_beta"] = paras["bi_user_bundle_agg_beta"]
-    if "epochs" in paras and paras["epochs"] is not None:
-        conf["epochs"] = paras["epochs"]
-    if "seed" in paras and paras["seed"] is not None:
-        conf["seed"] = paras["seed"]
 
-    # Set random seed if provided
-    set_seed(conf.get("seed", None))
-
-    conf["num_users"] = dataset.num_users
-    conf["num_bundles"] = dataset.num_bundles
-    conf["num_items"] = dataset.num_items
-
-    os.environ['CUDA_VISIBLE_DEVICES'] = conf["gpu"]
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    conf["device"] = device
-    print(conf)
-
-    # 打印新增的 anchor_cl 配置
+def run_cbr_training(conf, dataset, device):
     anchor_cl_conf = conf.get("anchor_cl", {})
     if anchor_cl_conf.get("enabled", False):
-        print("="*20 + " Pre-fusion Anchor CL Enabled " + "="*20)
+        print("=" * 20 + " Pre-fusion Anchor CL Enabled " + "=" * 20)
         print(f"lambda: {anchor_cl_conf.get('anchor_cl_lambda')}, temp: {anchor_cl_conf.get('temp')}")
         print(f"user_cl: {anchor_cl_conf.get('user_cl')}, bundle_cl: {anchor_cl_conf.get('bundle_cl')}")
         print(f"Weights -> u_ub_ui: {anchor_cl_conf.get('ub_ui_user_weight')}, u_ub_bi: {anchor_cl_conf.get('ub_bi_user_weight')}")
         print(f"Weights -> b_ub_ui: {anchor_cl_conf.get('ub_ui_bundle_weight')}, b_ub_bi: {anchor_cl_conf.get('ub_bi_bundle_weight')}")
-        print("="*70)
+        print("=" * 70)
 
-    for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp, ui_beta, bi_beta in \
-            product(conf['lrs'], conf['l2_regs'], conf['UB_ratios'], conf['UI_ratios'], conf['BI_ratios'], conf["embedding_sizes"], conf["num_layerss"], conf["c_lambdas"], conf["c_temps"], [conf["ui_bundle_user_agg_beta"]], [conf["bi_user_bundle_agg_beta"]]):
+    for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp, ui_beta, bi_beta in product(
+        conf["lrs"],
+        conf["l2_regs"],
+        conf["UB_ratios"],
+        conf["UI_ratios"],
+        conf["BI_ratios"],
+        conf["embedding_sizes"],
+        conf["num_layerss"],
+        conf["c_lambdas"],
+        conf["c_temps"],
+        [conf["ui_bundle_user_agg_beta"]],
+        [conf["bi_user_bundle_agg_beta"]],
+    ):
         log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
         run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
         checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
         checkpoint_conf_path = "./checkpoints/%s/%s/conf" % (conf["dataset"], conf["model"])
-        if not os.path.isdir(run_path):
-            os.makedirs(run_path)
-        if not os.path.isdir(log_path):
-            os.makedirs(log_path)
-        if not os.path.isdir(checkpoint_model_path):
-            os.makedirs(checkpoint_model_path)
-        if not os.path.isdir(checkpoint_conf_path):
-            os.makedirs(checkpoint_conf_path)
+        ensure_dir(run_path)
+        ensure_dir(log_path)
+        ensure_dir(checkpoint_model_path)
+        ensure_dir(checkpoint_conf_path)
 
         conf["l2_reg"] = l2_reg
         conf["embedding_size"] = embedding_size
+        conf["UB_ratio"] = UB_ratio
+        conf["UI_ratio"] = UI_ratio
+        conf["BI_ratio"] = BI_ratio
+        conf["num_layers"] = num_layers
+        conf["c_lambda"] = c_lambda
+        conf["c_temp"] = c_temp
+        conf["ui_bundle_user_agg_beta"] = ui_beta
+        conf["bi_user_bundle_agg_beta"] = bi_beta
 
         settings = []
         if conf["info"] != "":
             settings += [conf["info"]]
-
         settings += [conf["aug_type"]]
         if conf["aug_type"] == "ED":
             settings += [str(conf["ed_interval"])]
         if conf["aug_type"] == "OP":
             assert UB_ratio == 0 and UI_ratio == 0 and BI_ratio == 0
 
-        settings += ["Neg_%d" % (conf["neg_num"]), str(conf["batch_size_train"]), str(lr), str(l2_reg),
-                     str(embedding_size)]
-
-        conf["UB_ratio"] = UB_ratio
-        conf["UI_ratio"] = UI_ratio
-        conf["BI_ratio"] = BI_ratio
-        conf["num_layers"] = num_layers
-        settings += [str(UB_ratio), str(UI_ratio), str(BI_ratio), str(num_layers)]
-
-        # Helper to format list to string without spaces and brackets
-        def fmt_list(l):
-            return str(l).replace(" ", "").replace("[", "").replace("]", "").replace(",", "-")
-
-        settings += ["_".join([fmt_list(conf['fusion_weights']["modal_weight"]), fmt_list(conf['fusion_weights']["UB_layer"]),
-                               fmt_list(conf['fusion_weights']["UI_layer"]), fmt_list(conf['fusion_weights']["BI_layer"])])]
-
-        conf["c_lambda"] = c_lambda
-        conf["c_temp"] = c_temp
-        conf["ui_bundle_user_agg_beta"] = ui_beta
-        conf["bi_user_bundle_agg_beta"] = bi_beta
+        settings += [
+            "Neg_%d" % conf["neg_num"],
+            str(conf["batch_size_train"]),
+            str(lr),
+            str(l2_reg),
+            str(embedding_size),
+            str(UB_ratio),
+            str(UI_ratio),
+            str(BI_ratio),
+            str(num_layers),
+        ]
+        settings += [
+            "_".join(
+                [
+                    fmt_list(conf["fusion_weights"]["modal_weight"]),
+                    fmt_list(conf["fusion_weights"]["UB_layer"]),
+                    fmt_list(conf["fusion_weights"]["UI_layer"]),
+                    fmt_list(conf["fusion_weights"]["BI_layer"]),
+                ]
+            )
+        ]
         settings += [str(c_lambda), str(c_temp), str(ui_beta), str(bi_beta)]
 
         setting = "_".join(settings)
-
-        # Windows path length limit fix: shorten setting string if too long
         if len(setting) > 100:
-            hash_object = hashlib.md5(setting.encode())
-            setting_hash = hash_object.hexdigest()[:8]
-            # Truncate to keep it short and append hash for uniqueness
+            setting_hash = hashlib.md5(setting.encode()).hexdigest()[:8]
             setting = setting[:100] + "_" + setting_hash
 
         log_path = log_path + "/" + setting
@@ -174,13 +168,7 @@ def main(args=None):
         checkpoint_conf_path = checkpoint_conf_path + "/" + setting
 
         run = SummaryWriter(run_path)
-
-        # model
-        if conf['model'] == 'MultiCBR':
-            model = MultiCBR(conf, dataset.graphs, dataset.user_beta_mask).to(device)
-        else:
-            raise ValueError("Unimplemented model %s" % (conf["model"]))
-
+        model = MultiCBR(conf, dataset.graphs, dataset.user_beta_mask).to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=conf["l2_reg"])
 
         batch_cnt = len(dataset.train_loader)
@@ -189,10 +177,9 @@ def main(args=None):
 
         best_metrics, best_perform = init_best_metrics(conf)
         best_epoch = 0
-        for epoch in range(conf['epochs']):
+        for epoch in range(conf["epochs"]):
             epoch_anchor = epoch * batch_cnt
             model.train(True)
-            # 禁用 tqdm 进度条，只保留每轮结束后的关键日志打印
             pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)
 
             for batch_i, batch in pbar:
@@ -204,11 +191,11 @@ def main(args=None):
                 ED_drop = False
                 if conf["aug_type"] == "ED" and (batch_anchor + 1) % ed_interval_bs == 0:
                     ED_drop = True
+
                 bpr_loss, c_loss, anchor_cl_loss, anchor_cl_dict = model(batch, ED_drop=ED_drop)
-                
                 anchor_cl_lambda = conf.get("anchor_cl", {}).get("anchor_cl_lambda", 0.0)
                 loss = bpr_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
-                
+
                 loss.backward()
                 optimizer.step()
 
@@ -216,23 +203,220 @@ def main(args=None):
                 bpr_loss_scalar = bpr_loss.detach()
                 c_loss_scalar = c_loss.detach()
                 anchor_cl_loss_scalar = anchor_cl_loss.detach() if isinstance(anchor_cl_loss, torch.Tensor) else anchor_cl_loss
-                
+
                 run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
                 run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
                 run.add_scalar("loss_anchor_cl", anchor_cl_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
-                
-                if conf.get("anchor_cl", {}).get("enabled", False):
-                    for k, v in anchor_cl_dict.items():
-                        run.add_scalar(f"loss_anchor_cl/{k}", v, batch_anchor)
 
-                pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f, anchor_cl: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar, anchor_cl_loss_scalar))
+                if conf.get("anchor_cl", {}).get("enabled", False):
+                    for key, value in anchor_cl_dict.items():
+                        run.add_scalar(f"loss_anchor_cl/{key}", value, batch_anchor)
+
+                pbar.set_description(
+                    "epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f, anchor_cl: %.4f"
+                    % (epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar, anchor_cl_loss_scalar)
+                )
 
                 if (batch_anchor + 1) % test_interval_bs == 0:
-                    metrics = {}
-                    metrics["val"] = test(model, dataset.val_loader, conf)
-                    metrics["test"] = test(model, dataset.test_loader, conf)
-                    best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
+                    metrics = {
+                        "val": test(model, dataset.val_loader, conf),
+                        "test": test(model, dataset.test_loader, conf),
+                    }
+                    best_metrics, best_perform, best_epoch = log_metrics(
+                        conf,
+                        model,
+                        metrics,
+                        run,
+                        log_path,
+                        checkpoint_model_path,
+                        checkpoint_conf_path,
+                        epoch,
+                        batch_anchor,
+                        best_metrics,
+                        best_perform,
+                        best_epoch,
+                    )
+
+
+def run_dwt_training(conf, dataset, device):
+    dwt_conf = conf.get("dwt", {})
+    if not dwt_conf:
+        raise ValueError("train_style=dwt requires a dwt config block.")
+
+    for lr, embedding_size, num_layers in product(
+        conf["lrs"],
+        conf["embedding_sizes"],
+        conf["num_layerss"],
+    ):
+        log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
+        run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
+        checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
+        checkpoint_conf_path = "./checkpoints/%s/%s/conf" % (conf["dataset"], conf["model"])
+        ensure_dir(run_path)
+        ensure_dir(log_path)
+        ensure_dir(checkpoint_model_path)
+        ensure_dir(checkpoint_conf_path)
+
+        conf["embedding_size"] = embedding_size
+        conf["num_layers"] = num_layers
+        conf["lr"] = lr
+        conf["l2_reg"] = 0.0
+        conf["c_lambda"] = 0.0
+        conf["c_temp"] = dwt_conf["tau"]
+        conf["ui_bundle_user_agg_beta"] = 0.0
+        conf["bi_user_bundle_agg_beta"] = 0.0
+
+        settings = []
+        if conf["info"] != "":
+            settings += [conf["info"]]
+        settings += [
+            "DWT",
+            "Noise",
+            "Neg_%d" % conf["neg_num"],
+            str(conf["batch_size_train"]),
+            str(lr),
+            str(embedding_size),
+            str(num_layers),
+            fmt_list([dwt_conf["upsilon_UB"], dwt_conf["upsilon_UI"], dwt_conf["upsilon_BI"]]),
+            fmt_list(dwt_conf["xi_UB"]),
+            fmt_list(dwt_conf["xi_UI"]),
+            fmt_list(dwt_conf["xi_BI"]),
+            str(dwt_conf["omega"]),
+            str(dwt_conf["gamma_1"]),
+            str(dwt_conf["gamma_2"]),
+            str(dwt_conf["tau"]),
+            str(dwt_conf["lambda_1"]),
+            str(dwt_conf["lambda_2"]),
+        ]
+
+        setting = "_".join(settings)
+        if len(setting) > 100:
+            setting_hash = hashlib.md5(setting.encode()).hexdigest()[:8]
+            setting = setting[:100] + "_" + setting_hash
+
+        log_path = log_path + "/" + setting
+        run_path = run_path + "/" + setting
+        checkpoint_model_path = checkpoint_model_path + "/" + setting
+        checkpoint_conf_path = checkpoint_conf_path + "/" + setting
+
+        run = SummaryWriter(run_path)
+        model = DWT(conf, dataset.graphs).to(device)
+        model.set_training_ub_graph(build_dwt_training_ub_graph(dataset.graphs[0], conf, device))
+        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=0.0)
+
+        batch_cnt = len(dataset.train_loader)
+        test_interval_bs = int(batch_cnt * conf["test_interval"])
+
+        best_metrics, best_perform = init_best_metrics(conf)
+        best_epoch = 0
+        for epoch in range(conf["epochs"]):
+            epoch_anchor = epoch * batch_cnt
+            model.train(True)
+            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)
+
+            for batch_i, batch in pbar:
+                model.train(True)
+                optimizer.zero_grad()
+                batch = [x.to(device) for x in batch]
+                batch_anchor = epoch_anchor + batch_i
+
+                bpr_loss, dwt_cl_loss = model(batch)
+                loss = bpr_loss + dwt_cl_loss
+
+                loss.backward()
+                optimizer.step()
+
+                loss_scalar = loss.detach()
+                bpr_loss_scalar = bpr_loss.detach()
+                dwt_cl_loss_scalar = dwt_cl_loss.detach()
+
+                run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
+                run.add_scalar("loss_dwt_cl", dwt_cl_loss_scalar, batch_anchor)
+                run.add_scalar("loss", loss_scalar, batch_anchor)
+
+                pbar.set_description(
+                    "epoch: %d, loss: %.4f, bpr_loss: %.4f, dwt_cl: %.4f"
+                    % (epoch, loss_scalar, bpr_loss_scalar, dwt_cl_loss_scalar)
+                )
+
+                if (batch_anchor + 1) % test_interval_bs == 0:
+                    metrics = {
+                        "val": test(model, dataset.val_loader, conf),
+                        "test": test(model, dataset.test_loader, conf),
+                    }
+                    best_metrics, best_perform, best_epoch = log_metrics(
+                        conf,
+                        model,
+                        metrics,
+                        run,
+                        log_path,
+                        checkpoint_model_path,
+                        checkpoint_conf_path,
+                        epoch,
+                        batch_anchor,
+                        best_metrics,
+                        best_perform,
+                        best_epoch,
+                    )
+
+
+def main(args=None):
+    conf = yaml.safe_load(open("./config.yaml", encoding="utf-8"))
+    print("load config file done!")
+
+    if args is None:
+        paras = get_cmd().__dict__
+    else:
+        paras = args
+
+    dataset_name = paras["dataset"]
+    assert paras["model"] in ["MultiCBR"], "Pls select models from: MultiCBR"
+
+    if "_" in dataset_name:
+        conf = conf[dataset_name.split("_")[0]]
+    else:
+        conf = conf[dataset_name]
+
+    conf["dataset"] = dataset_name
+    conf["model"] = paras["model"]
+    conf["gpu"] = paras["gpu"]
+    conf["info"] = paras["info"]
+
+    for key, value in paras.items():
+        if key not in ["dataset", "model", "gpu", "info"] and value is not None:
+            conf[key] = value
+
+    if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
+        conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
+    if "bi_user_bundle_agg_beta" in paras and paras["bi_user_bundle_agg_beta"] is not None:
+        conf["bi_user_bundle_agg_beta"] = paras["bi_user_bundle_agg_beta"]
+    if "epochs" in paras and paras["epochs"] is not None:
+        conf["epochs"] = paras["epochs"]
+    if "seed" in paras and paras["seed"] is not None:
+        conf["seed"] = paras["seed"]
+
+    dataset = Datasets(conf)
+    set_seed(conf.get("seed", None))
+
+    conf["num_users"] = dataset.num_users
+    conf["num_bundles"] = dataset.num_bundles
+    conf["num_items"] = dataset.num_items
+
+    os.environ["CUDA_VISIBLE_DEVICES"] = conf["gpu"]
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    conf["device"] = device
+    print(conf)
+
+    train_style = resolve_train_style(conf)
+    print(f"train_style: {train_style}")
+
+    if train_style == "cbr":
+        run_cbr_training(conf, dataset, device)
+    elif train_style == "dwt":
+        run_dwt_training(conf, dataset, device)
+    else:
+        raise ValueError(f"Unsupported train_style: {train_style}")
 
 
 def init_best_metrics(conf):
@@ -242,7 +426,7 @@ def init_best_metrics(conf):
     for key in best_metrics:
         best_metrics[key]["recall"] = {}
         best_metrics[key]["ndcg"] = {}
-    for topk in conf['topk']:
+    for topk in conf["topk"]:
         for key, res in best_metrics.items():
             for metric in res:
                 best_metrics[key][metric][topk] = 0
@@ -258,23 +442,22 @@ def write_log(run, log_path, topk, step, metrics):
     val_scores = metrics["val"]
     test_scores = metrics["test"]
 
-    for m, val_score in val_scores.items():
-        test_score = test_scores[m]
-        run.add_scalar("%s_%d/Val" %(m, topk), val_score[topk], step)
-        run.add_scalar("%s_%d/Test" %(m, topk), test_score[topk], step)
+    for metric_name, val_score in val_scores.items():
+        test_score = test_scores[metric_name]
+        run.add_scalar("%s_%d/Val" % (metric_name, topk), val_score[topk], step)
+        run.add_scalar("%s_%d/Test" % (metric_name, topk), test_score[topk], step)
 
-    val_str = "%s, Top_%d, Val:  recall: %f, ndcg: %f" %(curr_time, topk, val_scores["recall"][topk], val_scores["ndcg"][topk])
-    test_str = "%s, Top_%d, Test: recall: %f, ndcg: %f" %(curr_time, topk, test_scores["recall"][topk], test_scores["ndcg"][topk])
+    val_str = "%s, Top_%d, Val:  recall: %f, ndcg: %f" % (curr_time, topk, val_scores["recall"][topk], val_scores["ndcg"][topk])
+    test_str = "%s, Top_%d, Test: recall: %f, ndcg: %f" % (curr_time, topk, test_scores["recall"][topk], test_scores["ndcg"][topk])
 
     log = open(log_path, "a")
-    log.write("%s\n" %(val_str))
-    log.write("%s\n" %(test_str))
+    log.write("%s\n" % val_str)
+    log.write("%s\n" % test_str)
     log.close()
 
     print(val_str)
     print(test_str)
-    # 增加一个空行，让不同组的指标打印之间有间隔
-    print("-" * 20) 
+    print("-" * 20)
 
 
 def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch):
@@ -284,11 +467,10 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
     log = open(log_path, "a")
 
     topk_ = 20
-    print("top%d as the final evaluation standard" %(topk_))
-    
-    # Calculate sum of Recall@20, Recall@40, NDCG@20, NDCG@40
-    def get_score(m):
-        return m["recall"][20] + m["recall"][40] + m["ndcg"][20] + m["ndcg"][40]
+    print("top%d as the final evaluation standard" % topk_)
+
+    def get_score(metric_dict):
+        return metric_dict["recall"][20] + metric_dict["recall"][40] + metric_dict["ndcg"][20] + metric_dict["ndcg"][40]
 
     curr_score = get_score(metrics["val"])
     best_score = get_score(best_metrics["val"])
@@ -300,21 +482,35 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
         json.dump(dump_conf, open(checkpoint_conf_path, "w"))
         best_epoch = epoch
         curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # 获取当前运行的 beta 参数，如果不存在则默认为 0.0
+
         ui_beta = conf.get("ui_bundle_user_agg_beta", 0.0)
         bi_beta = conf.get("bi_user_bundle_agg_beta", 0.0)
-        param_info = "当前网格参数: %.2f + %.2f" % (ui_beta if ui_beta is not None else 0.0, bi_beta if bi_beta is not None else 0.0)
+        param_info = "褰撳墠缃戞牸鍙傛暟: %.2f + %.2f" % (
+            ui_beta if ui_beta is not None else 0.0,
+            bi_beta if bi_beta is not None else 0.0,
+        )
         print(param_info)
         log.write(param_info + "\n")
 
-        for topk in conf['topk']:
+        for topk in conf["topk"]:
             for key, res in best_metrics.items():
                 for metric in res:
                     best_metrics[key][metric][topk] = metrics[key][metric][topk]
 
-            best_perform["test"][topk] = "%s, Best in epoch %d, TOP %d: REC_T=%.5f, NDCG_T=%.5f" %(curr_time, best_epoch, topk, best_metrics["test"]["recall"][topk], best_metrics["test"]["ndcg"][topk])
-            best_perform["val"][topk] = "%s, Best in epoch %d, TOP %d: REC_V=%.5f, NDCG_V=%.5f" %(curr_time, best_epoch, topk, best_metrics["val"]["recall"][topk], best_metrics["val"]["ndcg"][topk])
+            best_perform["test"][topk] = "%s, Best in epoch %d, TOP %d: REC_T=%.5f, NDCG_T=%.5f" % (
+                curr_time,
+                best_epoch,
+                topk,
+                best_metrics["test"]["recall"][topk],
+                best_metrics["test"]["ndcg"][topk],
+            )
+            best_perform["val"][topk] = "%s, Best in epoch %d, TOP %d: REC_V=%.5f, NDCG_V=%.5f" % (
+                curr_time,
+                best_epoch,
+                topk,
+                best_metrics["val"]["recall"][topk],
+                best_metrics["val"]["ndcg"][topk],
+            )
             print(best_perform["val"][topk])
             print(best_perform["test"][topk])
             log.write(best_perform["val"][topk] + "\n")
@@ -327,10 +523,10 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
 
 def test(model, dataloader, conf):
     tmp_metrics = {}
-    for m in ["recall", "ndcg"]:
-        tmp_metrics[m] = {}
+    for metric_name in ["recall", "ndcg"]:
+        tmp_metrics[metric_name] = {}
         for topk in conf["topk"]:
-            tmp_metrics[m][topk] = [0, 0]
+            tmp_metrics[metric_name][topk] = [0, 0]
 
     device = conf["device"]
     model.eval()
@@ -341,10 +537,10 @@ def test(model, dataloader, conf):
         tmp_metrics = get_metrics(tmp_metrics, ground_truth_u_b, pred_b, conf["topk"])
 
     metrics = {}
-    for m, topk_res in tmp_metrics.items():
-        metrics[m] = {}
+    for metric_name, topk_res in tmp_metrics.items():
+        metrics[metric_name] = {}
         for topk, res in topk_res.items():
-            metrics[m][topk] = res[0] / res[1]
+            metrics[metric_name][topk] = res[0] / res[1]
 
     return metrics
 
@@ -359,10 +555,10 @@ def get_metrics(metrics, grd, pred, topks):
         tmp["recall"][topk] = get_recall(pred, grd, is_hit, topk)
         tmp["ndcg"][topk] = get_ndcg(pred, grd, is_hit, topk)
 
-    for m, topk_res in tmp.items():
+    for metric_name, topk_res in tmp.items():
         for topk, res in topk_res.items():
-            for i, x in enumerate(res):
-                metrics[m][topk][i] += x
+            for idx, value in enumerate(res):
+                metrics[metric_name][topk][idx] += value
 
     return metrics
 
@@ -372,7 +568,6 @@ def get_recall(pred, grd, is_hit, topk):
     hit_cnt = is_hit.sum(dim=1)
     num_pos = grd.sum(dim=1)
 
-    # remove those test cases who don't have any positive items
     denorm = pred.shape[0] - (num_pos == 0).sum().item()
     nomina = (hit_cnt / (num_pos + epsilon)).sum().item()
 
@@ -391,9 +586,9 @@ def get_ndcg(pred, grd, is_hit, topk):
 
     device = grd.device
     IDCGs = torch.empty(1 + topk, dtype=torch.float)
-    IDCGs[0] = 1  # avoid 0/0
-    for i in range(1, topk + 1):
-        IDCGs[i] = IDCG(i, topk, device)
+    IDCGs[0] = 1
+    for idx in range(1, topk + 1):
+        IDCGs[idx] = IDCG(idx, topk, device)
 
     num_pos = grd.sum(dim=1).clamp(0, topk).to(torch.long)
     dcg = DCG(is_hit, topk, device)

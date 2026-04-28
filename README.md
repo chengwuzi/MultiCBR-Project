@@ -20,7 +20,11 @@ ssh -p 1771 ssh_user@210.45.212.126
 
 cd ~/code/25-chenglong/MultiCBR
 
+tmux new -s multicbr
+
 conda activate recbole
+
+python ......
 
 
 

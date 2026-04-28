@@ -95,12 +95,12 @@ iFashion:
 
   UB_ratios: [0.05]
   UI_ratios: [0.0]
-  BI_ratios: [0.15]
+  BI_ratios: [0.2]
 
   fusion_weights:
-    modal_weight: [0.1, 0.2, 0.7]
+    modal_weight: [0.0, 0.5, 0.5]
     UB_layer: [0.5, 0.5, 0.0]
-    UI_layer: [0.3, 0.2, 0.5]
+    UI_layer: [0.3, 0.4, 0.3]
     BI_layer: [0.5, 0.5, 0.0]
 
   lrs: [1.0e-3]
@@ -131,13 +131,6 @@ iFashion:
     latent_diffusion_reset_after_epoch: -1
     latent_diffusion_reset_optimizer: false
 
-    upsilon_UB: 0.05
-    upsilon_UI: 0.0
-    upsilon_BI: 0.2
-    xi_UB: [0.5, 0.5, 0.0]
-    xi_UI: [0.3, 0.4, 0.3]
-    xi_BI: [0.5, 0.5, 0.0]
-    omega: 0.5
     gamma_1: 0.3
     gamma_2: 0.2
     tau: 0.08

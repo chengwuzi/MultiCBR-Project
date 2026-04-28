@@ -30,6 +30,12 @@ class DWT(nn.Module):
         self.tau = dwt_conf["tau"]
         self.lambda_1 = dwt_conf["lambda_1"]
         self.lambda_2 = dwt_conf["lambda_2"]
+        self.noise_eps_dict = {
+            "UB": conf["UB_ratio"],
+            "UI": conf["UI_ratio"],
+            "BI": conf["BI_ratio"],
+        }
+        fusion_weights = conf["fusion_weights"]
 
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
         self.ub_training_graph = None
@@ -38,18 +44,18 @@ class DWT(nn.Module):
         self.UI_aggregation_graph = self.get_aggregation_graph(self.ui_graph)
         self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph)
         self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph)
+        modal_weight = fusion_weights["modal_weight"]
+        if len(modal_weight) != 3:
+            raise ValueError("DWT expects fusion_weights.modal_weight to have three entries for UB/UI/BI.")
+        if abs(float(modal_weight[0])) > 1.0e-8:
+            raise ValueError("DWT requires fusion_weights.modal_weight[0] to be 0 because UB is not fused into final scores.")
 
-        self.upsilon_dict = {
-            "UB": dwt_conf["upsilon_UB"],
-            "UI": dwt_conf["upsilon_UI"],
-            "BI": dwt_conf["upsilon_BI"],
-        }
         self.modal_coefs = torch.FloatTensor(
-            [dwt_conf["omega"], 1 - dwt_conf["omega"]]
+            [modal_weight[1], modal_weight[2]]
         ).unsqueeze(-1).unsqueeze(-1).to(self.device)
-        self.UB_layer_coefs = torch.FloatTensor(dwt_conf["xi_UB"]).unsqueeze(0).unsqueeze(-1).to(self.device)
-        self.UI_layer_coefs = torch.FloatTensor(dwt_conf["xi_UI"]).unsqueeze(0).unsqueeze(-1).to(self.device)
-        self.BI_layer_coefs = torch.FloatTensor(dwt_conf["xi_BI"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+        self.UB_layer_coefs = torch.FloatTensor(fusion_weights["UB_layer"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+        self.UI_layer_coefs = torch.FloatTensor(fusion_weights["UI_layer"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+        self.BI_layer_coefs = torch.FloatTensor(fusion_weights["BI_layer"]).unsqueeze(0).unsqueeze(-1).to(self.device)
 
         self.users_feature = nn.Parameter(torch.FloatTensor(self.num_users, self.embedding_size))
         nn.init.xavier_normal_(self.users_feature)
@@ -99,7 +105,7 @@ class DWT(nn.Module):
             features = torch.spmm(graph, features)
             if not test:
                 random_noise = torch.rand_like(features).to(self.device)
-                features += torch.sign(features) * F.normalize(random_noise, dim=-1) * self.upsilon_dict[graph_type]
+                features += torch.sign(features) * F.normalize(random_noise, dim=-1) * self.noise_eps_dict[graph_type]
             all_features.append(F.normalize(features, p=2, dim=1))
         all_features = torch.stack(all_features, dim=1) * layer_coef
         all_features = torch.sum(all_features, dim=1)
@@ -109,7 +115,7 @@ class DWT(nn.Module):
         aggregated_feature = torch.matmul(agg_graph, node_feature)
         if not test:
             random_noise = torch.rand_like(aggregated_feature).to(self.device)
-            aggregated_feature += torch.sign(aggregated_feature) * F.normalize(random_noise, dim=-1) * self.upsilon_dict[graph_type]
+            aggregated_feature += torch.sign(aggregated_feature) * F.normalize(random_noise, dim=-1) * self.noise_eps_dict[graph_type]
         return aggregated_feature
 
     def get_multi_modal_representations(self, test=False):

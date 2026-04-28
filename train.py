@@ -366,8 +366,11 @@ def run_dwt_training(conf, dataset, device):
         raise ValueError("train_style=dwt requires a dwt config block.")
     use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
 
-    for lr, embedding_size, num_layers in product(
+    for lr, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers in product(
         conf["lrs"],
+        conf["UB_ratios"],
+        conf["UI_ratios"],
+        conf["BI_ratios"],
         conf["embedding_sizes"],
         conf["num_layerss"],
     ):
@@ -383,6 +386,9 @@ def run_dwt_training(conf, dataset, device):
         conf["embedding_size"] = embedding_size
         conf["num_layers"] = num_layers
         conf["lr"] = lr
+        conf["UB_ratio"] = UB_ratio
+        conf["UI_ratio"] = UI_ratio
+        conf["BI_ratio"] = BI_ratio
         conf["l2_reg"] = 0.0
         conf["c_lambda"] = 0.0
         conf["c_temp"] = dwt_conf["tau"]
@@ -400,11 +406,15 @@ def run_dwt_training(conf, dataset, device):
             str(lr),
             str(embedding_size),
             str(num_layers),
-            fmt_list([dwt_conf["upsilon_UB"], dwt_conf["upsilon_UI"], dwt_conf["upsilon_BI"]]),
-            fmt_list(dwt_conf["xi_UB"]),
-            fmt_list(dwt_conf["xi_UI"]),
-            fmt_list(dwt_conf["xi_BI"]),
-            str(dwt_conf["omega"]),
+            fmt_list([UB_ratio, UI_ratio, BI_ratio]),
+            "_".join(
+                [
+                    fmt_list(conf["fusion_weights"]["modal_weight"]),
+                    fmt_list(conf["fusion_weights"]["UB_layer"]),
+                    fmt_list(conf["fusion_weights"]["UI_layer"]),
+                    fmt_list(conf["fusion_weights"]["BI_layer"]),
+                ]
+            ),
             str(dwt_conf["gamma_1"]),
             str(dwt_conf["gamma_2"]),
             str(dwt_conf["tau"]),

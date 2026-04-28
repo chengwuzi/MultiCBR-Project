@@ -17,7 +17,7 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models.DWT import DWT
+from models.DWT import DWT, resolve_dwt_graph_config
 from models.LatentDiffusionRebuilder import LatentDiffusionRebuilder
 from models.MultiCBR import MultiCBR
 from utility import Datasets, load_external_embedding_tensor, print_statistics
@@ -365,6 +365,7 @@ def run_dwt_training(conf, dataset, device):
     if not dwt_conf:
         raise ValueError("train_style=dwt requires a dwt config block.")
     use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
+    dwt_graph_conf = resolve_dwt_graph_config(conf)
 
     for lr, embedding_size, num_layers in product(
         conf["lrs"],
@@ -400,11 +401,11 @@ def run_dwt_training(conf, dataset, device):
             str(lr),
             str(embedding_size),
             str(num_layers),
-            fmt_list([dwt_conf["upsilon_UB"], dwt_conf["upsilon_UI"], dwt_conf["upsilon_BI"]]),
-            fmt_list(dwt_conf["xi_UB"]),
-            fmt_list(dwt_conf["xi_UI"]),
-            fmt_list(dwt_conf["xi_BI"]),
-            str(dwt_conf["omega"]),
+            fmt_list([dwt_graph_conf["upsilon"]["UB"], dwt_graph_conf["upsilon"]["UI"], dwt_graph_conf["upsilon"]["BI"]]),
+            fmt_list(dwt_graph_conf["layer_coefs"]["UB"]),
+            fmt_list(dwt_graph_conf["layer_coefs"]["UI"]),
+            fmt_list(dwt_graph_conf["layer_coefs"]["BI"]),
+            str(dwt_graph_conf["omega"]),
             str(dwt_conf["gamma_1"]),
             str(dwt_conf["gamma_2"]),
             str(dwt_conf["tau"]),

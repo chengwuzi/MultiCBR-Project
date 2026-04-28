@@ -9,6 +9,48 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
+def _read_singleton_ratio(conf, key):
+    values = conf.get(key)
+    if not isinstance(values, (list, tuple)) or len(values) != 1:
+        raise ValueError(f"DWT expects {key} to be a single-value list, got {values!r}")
+    return float(values[0])
+
+
+def resolve_dwt_graph_config(conf):
+    fusion_weights = conf.get("fusion_weights", {})
+    modal_weight = fusion_weights.get("modal_weight")
+    if not isinstance(modal_weight, (list, tuple)) or len(modal_weight) != 3:
+        raise ValueError(
+            "DWT expects fusion_weights.modal_weight to contain exactly three values "
+            "for [UB, UI, BI]"
+        )
+
+    ub_modal, ui_modal, bi_modal = [float(x) for x in modal_weight]
+    if abs(ub_modal) > 1.0e-8:
+        raise ValueError(
+            "DWT expects fusion_weights.modal_weight[0] to be 0.0 because UB is not "
+            "part of the final DWT fusion"
+        )
+    if abs((ui_modal + bi_modal) - 1.0) > 1.0e-8:
+        raise ValueError(
+            "DWT expects fusion_weights.modal_weight[1] + fusion_weights.modal_weight[2] == 1.0"
+        )
+
+    return {
+        "upsilon": {
+            "UB": _read_singleton_ratio(conf, "UB_ratios"),
+            "UI": _read_singleton_ratio(conf, "UI_ratios"),
+            "BI": _read_singleton_ratio(conf, "BI_ratios"),
+        },
+        "layer_coefs": {
+            "UB": list(fusion_weights["UB_layer"]),
+            "UI": list(fusion_weights["UI_layer"]),
+            "BI": list(fusion_weights["BI_layer"]),
+        },
+        "omega": ui_modal,
+    }
+
+
 class DWT(nn.Module):
     def __init__(self, conf, raw_graph):
         super().__init__()
@@ -39,17 +81,26 @@ class DWT(nn.Module):
         self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph)
         self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph)
 
+        graph_conf = resolve_dwt_graph_config(conf)
         self.upsilon_dict = {
-            "UB": dwt_conf["upsilon_UB"],
-            "UI": dwt_conf["upsilon_UI"],
-            "BI": dwt_conf["upsilon_BI"],
+            "UB": graph_conf["upsilon"]["UB"],
+            "UI": graph_conf["upsilon"]["UI"],
+            "BI": graph_conf["upsilon"]["BI"],
         }
         self.modal_coefs = torch.FloatTensor(
-            [dwt_conf["omega"], 1 - dwt_conf["omega"]]
+            [graph_conf["omega"], 1 - graph_conf["omega"]]
         ).unsqueeze(-1).unsqueeze(-1).to(self.device)
-        self.UB_layer_coefs = torch.FloatTensor(dwt_conf["xi_UB"]).unsqueeze(0).unsqueeze(-1).to(self.device)
-        self.UI_layer_coefs = torch.FloatTensor(dwt_conf["xi_UI"]).unsqueeze(0).unsqueeze(-1).to(self.device)
-        self.BI_layer_coefs = torch.FloatTensor(dwt_conf["xi_BI"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+        self.UB_layer_coefs = torch.FloatTensor(graph_conf["layer_coefs"]["UB"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+        self.UI_layer_coefs = torch.FloatTensor(graph_conf["layer_coefs"]["UI"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+        self.BI_layer_coefs = torch.FloatTensor(graph_conf["layer_coefs"]["BI"]).unsqueeze(0).unsqueeze(-1).to(self.device)
+
+        expected_layer_coef_len = self.num_layers + 1
+        if self.UB_layer_coefs.shape[1] != expected_layer_coef_len:
+            raise ValueError(f"DWT expects fusion_weights.UB_layer to have {expected_layer_coef_len} values")
+        if self.UI_layer_coefs.shape[1] != expected_layer_coef_len:
+            raise ValueError(f"DWT expects fusion_weights.UI_layer to have {expected_layer_coef_len} values")
+        if self.BI_layer_coefs.shape[1] != expected_layer_coef_len:
+            raise ValueError(f"DWT expects fusion_weights.BI_layer to have {expected_layer_coef_len} values")
 
         self.users_feature = nn.Parameter(torch.FloatTensor(self.num_users, self.embedding_size))
         nn.init.xavier_normal_(self.users_feature)

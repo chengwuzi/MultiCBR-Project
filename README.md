@@ -31,6 +31,9 @@ python -u train.py -d iFashion 2>&1 | tee logs_run.txt
 
 
 
+tmux attach -t multicbr
+
+
 
 
 

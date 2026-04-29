@@ -64,6 +64,44 @@ def fmt_list(values):
     return str(values).replace(" ", "").replace("[", "").replace("]", "").replace(",", "-")
 
 
+def summarize_sparse_graph(graph):
+    nnz = int(graph.nnz)
+    num_rows, num_cols = graph.shape
+    avg_interactions = float(nnz / max(num_rows, 1))
+    row_coverage = float((graph.getnnz(axis=1) > 0).sum() / max(num_rows, 1))
+    col_coverage = float((graph.getnnz(axis=0) > 0).sum() / max(num_cols, 1))
+    density = float(nnz / max(num_rows * num_cols, 1))
+    return {
+        "nnz": nnz,
+        "avg_interactions": avg_interactions,
+        "row_coverage": row_coverage,
+        "col_coverage": col_coverage,
+        "density": density,
+    }
+
+
+def report_latent_rebuild_epoch(run, log_path, epoch, latent_diffusion_loss, rebuilt_ub_graph, dataset_name, prefix):
+    graph_stats = summarize_sparse_graph(rebuilt_ub_graph)
+    message = (
+        f"[{prefix}] epoch={epoch + 1} dataset={dataset_name} "
+        f"loss={latent_diffusion_loss:.6f} rebuilt_edges={graph_stats['nnz']} "
+        f"avg_user_edges={graph_stats['avg_interactions']:.6f} "
+        f"user_coverage={graph_stats['row_coverage']:.6f} "
+        f"bundle_coverage={graph_stats['col_coverage']:.6f} "
+        f"density={graph_stats['density']:.10f}"
+    )
+    print(message)
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
+
+    run.add_scalar(f"{prefix}/loss_epoch", latent_diffusion_loss, epoch)
+    run.add_scalar(f"{prefix}/rebuilt_edges", graph_stats["nnz"], epoch)
+    run.add_scalar(f"{prefix}/avg_user_edges", graph_stats["avg_interactions"], epoch)
+    run.add_scalar(f"{prefix}/user_coverage", graph_stats["row_coverage"], epoch)
+    run.add_scalar(f"{prefix}/bundle_coverage", graph_stats["col_coverage"], epoch)
+    run.add_scalar(f"{prefix}/density", graph_stats["density"], epoch)
+
+
 def build_dwt_training_ub_graph(ub_graph, conf, device):
     adjacency_matrix = sp.bmat([
         [sp.csr_matrix((conf["num_users"], conf["num_users"])), ub_graph],
@@ -375,7 +413,6 @@ def run_cbr_training(conf, dataset, device):
                     latent_rebuild_conf,
                     device,
                 )
-                run.add_scalar("latent_diffusion/loss_epoch", latent_diffusion_loss, epoch)
                 rebuilt_ub_graph = rebuild_ub_graph_with_latent_diffusion(
                     latent_diffusion_model,
                     dataset,
@@ -384,6 +421,15 @@ def run_cbr_training(conf, dataset, device):
                 )
                 if epoch == 0:
                     print_statistics(rebuilt_ub_graph, "U-B statistics from Latent diffusion rebuild")
+                report_latent_rebuild_epoch(
+                    run,
+                    log_path,
+                    epoch,
+                    latent_diffusion_loss,
+                    rebuilt_ub_graph,
+                    conf["dataset"],
+                    "latent_rebuild",
+                )
                 model.set_ub_graph(rebuilt_ub_graph)
 
             epoch_anchor = epoch * batch_cnt
@@ -570,7 +616,6 @@ def run_dwt_training(conf, dataset, device):
                     dwt_conf,
                     device,
                 )
-                run.add_scalar("latent_diffusion/loss_epoch", latent_diffusion_loss, epoch)
                 rebuilt_ub_graph = rebuild_ub_graph_with_latent_diffusion(
                     latent_diffusion_model,
                     dataset,
@@ -579,6 +624,15 @@ def run_dwt_training(conf, dataset, device):
                 )
                 if epoch == 0:
                     print_statistics(rebuilt_ub_graph, "U-B statistics from Latent diffusion rebuild")
+                report_latent_rebuild_epoch(
+                    run,
+                    log_path,
+                    epoch,
+                    latent_diffusion_loss,
+                    rebuilt_ub_graph,
+                    conf["dataset"],
+                    "latent_diffusion",
+                )
                 model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
 
             epoch_anchor = epoch * batch_cnt

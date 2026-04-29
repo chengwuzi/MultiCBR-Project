@@ -164,13 +164,6 @@ Youshu:
   embedding_sizes: [64]
   num_layerss: [2]
 
-  # High-order substitution settings (Legacy - Disabled)
-  # bui_topk: 20
-  # ubi_topk: 20
-  # enable_high_order_replace: true
-  # ui_bundle_high_order_alpha: 0.8
-  # bi_user_high_order_alpha: 0.8
-
   # New Simple Aggregation Supplement settings
   # 最佳结果参数列表 （0+0.05）  0+0.1  0+0.15
   ui_bundle_user_agg_beta: 0
@@ -198,7 +191,7 @@ Youshu:
 
   # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
-    enabled: true
+    enabled: false
     anchor_cl_lambda: 0.004
     temp: 0.23
     user_cl: true

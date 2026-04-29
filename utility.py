@@ -23,7 +23,13 @@ def print_statistics(X, string):
     print('Matrix density', len(nonzero_row_indice)/(X.shape[0]*X.shape[1]))
 
 
-def load_external_embedding_tensor(path, num_expected, entity_name):
+def load_external_embedding_tensor(
+    path,
+    num_expected,
+    entity_name,
+    required_ids=None,
+    fill_missing_with_zeros=False,
+):
     if not path:
         raise ValueError(f"{entity_name} embedding path is required")
 
@@ -33,20 +39,45 @@ def load_external_embedding_tensor(path, num_expected, entity_name):
     elif isinstance(payload, np.ndarray):
         embedding = torch.from_numpy(payload).float()
     elif isinstance(payload, dict):
-        rows = []
-        for idx in range(num_expected):
-            if idx in payload:
-                value = payload[idx]
-            elif str(idx) in payload:
-                value = payload[str(idx)]
-            else:
-                raise KeyError(
-                    f"{entity_name} embedding file {path} is missing id {idx}; "
-                    "expected a full mapping aligned with current dataset ids"
+        if not payload:
+            raise ValueError(f"{entity_name} embedding file {path} is empty")
+
+        normalized_payload = {}
+        for key, value in payload.items():
+            normalized_payload[int(key)] = torch.as_tensor(value).detach().float().view(-1)
+
+        sample_key = next(iter(normalized_payload))
+        embedding_dim = normalized_payload[sample_key].shape[0]
+        embedding = torch.zeros((num_expected, embedding_dim), dtype=torch.float32)
+
+        for idx, value in normalized_payload.items():
+            if idx < 0 or idx >= num_expected:
+                continue
+            if value.shape[0] != embedding_dim:
+                raise ValueError(
+                    f"{entity_name} embedding file {path} has inconsistent dimensions: "
+                    f"id {idx} has dim {value.shape[0]}, expected {embedding_dim}"
                 )
-            value = torch.as_tensor(value).detach().float().view(-1)
-            rows.append(value)
-        embedding = torch.stack(rows, dim=0)
+            embedding[idx] = value
+
+        if required_ids is None:
+            required_ids = set()
+        else:
+            required_ids = {int(idx) for idx in required_ids}
+        missing_required_ids = sorted(idx for idx in required_ids if idx not in normalized_payload)
+        if missing_required_ids:
+            preview = missing_required_ids[:10]
+            raise KeyError(
+                f"{entity_name} embedding file {path} is missing required ids {preview}"
+                f"{'...' if len(missing_required_ids) > 10 else ''}"
+            )
+
+        if not fill_missing_with_zeros and len(normalized_payload) != num_expected:
+            missing_id = next(idx for idx in range(num_expected) if idx not in normalized_payload)
+            raise KeyError(
+                f"{entity_name} embedding file {path} is missing id {missing_id}; "
+                "expected a full mapping aligned with current dataset ids"
+            )
     else:
         raise TypeError(
             f"Unsupported payload type {type(payload)} in {path}; "
@@ -150,9 +181,15 @@ class Datasets():
 
         self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
         self.user_observed_bundles = self.build_user_observed_bundles(u_b_graph_train)
+        self.train_active_user_indices = np.array(
+            [user_id for user_id, observed in enumerate(self.user_observed_bundles) if observed],
+            dtype=np.int64,
+        )
+        self.train_bundle_indices = np.unique(u_b_graph_train.indices).astype(np.int64)
 
-        # Windows compatibility: reduce num_workers to avoid overhead/errors
-        num_workers = 4 if os.name == 'nt' else 10
+        # Windows multiprocessing dataloaders are fragile in some local/sandboxed
+        # environments, so default to single-process loading for robustness.
+        num_workers = 0 if os.name == 'nt' else 10
         self.train_loader = DataLoader(self.bundle_train_data, batch_size=batch_size_train, shuffle=True, num_workers=num_workers, drop_last=True)
         self.val_loader = DataLoader(self.bundle_val_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)
         self.test_loader = DataLoader(self.bundle_test_data, batch_size=batch_size_test, shuffle=False, num_workers=num_workers)

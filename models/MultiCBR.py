@@ -115,6 +115,19 @@ class MultiCBR(nn.Module):
         elif self.conf['aug_type'] == "Noise":
             self.init_noise_eps()
 
+    def set_ub_graph(self, ub_graph):
+        self.ub_graph = ub_graph
+
+        # Evaluation-time graphs should follow the same rebuilt UB structure so
+        # inference uses the same message-passing graph as training.
+        self.UB_propagation_graph_ori = self.get_propagation_graph(self.ub_graph)
+        self.BU_aggregation_graph_ori = self.get_aggregation_graph(self.ub_graph.T)
+        self.UB_aggregation_graph_ori = self.get_aggregation_graph(self.ub_graph)
+
+        self.UB_propagation_graph = self.get_propagation_graph(self.ub_graph, self.conf["UB_ratio"])
+        self.BU_aggregation_graph = self.get_aggregation_graph(self.ub_graph.T, self.conf["UB_ratio"])
+        self.UB_aggregation_graph = self.get_aggregation_graph(self.ub_graph, self.conf["UB_ratio"])
+
 
     def init_md_dropouts(self):
         self.UB_dropout = nn.Dropout(self.conf["UB_ratio"], True)

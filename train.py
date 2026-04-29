@@ -87,6 +87,8 @@ def build_dwt_training_ub_graph(ub_graph, conf, device):
 def build_observed_bundle_batch(dataset, user_indices, device):
     batch_users = np.asarray(user_indices, dtype=np.int64)
     batch_observed = [dataset.user_observed_bundles[int(user_id)] for user_id in batch_users]
+    if len(batch_observed) == 0:
+        raise ValueError("build_observed_bundle_batch received an empty user batch")
     max_len = max(len(observed) for observed in batch_observed)
 
     observed_indices = torch.full(
@@ -113,10 +115,14 @@ def build_observed_bundle_batch(dataset, user_indices, device):
     }
 
 
-def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimizer, dataset, dwt_conf, device):
-    user_order = np.random.permutation(dataset.num_users)
-    batch_size = dwt_conf["latent_diffusion_batch_size"]
-    step_num = (dataset.num_users + batch_size - 1) // batch_size
+def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimizer, dataset, rebuild_conf, device):
+    active_users = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
+    if active_users.size == 0:
+        return 0.0
+
+    user_order = np.random.permutation(active_users)
+    batch_size = rebuild_conf["latent_diffusion_batch_size"]
+    step_num = (user_order.shape[0] + batch_size - 1) // batch_size
     pbar = tqdm(range(step_num), total=step_num, disable=True)
     total_loss = 0.0
     effective_steps = 0
@@ -138,18 +144,24 @@ def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimi
     return total_loss / max(effective_steps, 1)
 
 
-def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, dwt_conf, device):
-    batch_size = dwt_conf["latent_diffusion_infer_batch_size"]
-    rebuild_k = dwt_conf["rebuild_k"]
-    user_indices = np.arange(dataset.num_users)
+def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebuild_conf, device):
+    batch_size = rebuild_conf["latent_diffusion_infer_batch_size"]
+    rebuild_k = rebuild_conf["rebuild_k"]
+    user_indices = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
     u_list = []
     b_list = []
     edge_list = []
 
+    if user_indices.size == 0:
+        return sp.coo_matrix(
+            (dataset.num_users, dataset.num_bundles),
+            dtype=np.float32,
+        ).tocsr()
+
     latent_diffusion_model.eval()
     with torch.no_grad():
-        for start in tqdm(range(0, dataset.num_users, batch_size), desc="LatentDiffusion Rebuild", disable=True):
-            end = min(start + batch_size, dataset.num_users)
+        for start in tqdm(range(0, user_indices.shape[0], batch_size), desc="LatentDiffusion Rebuild", disable=True):
+            end = min(start + batch_size, user_indices.shape[0])
             batch = build_observed_bundle_batch(dataset, user_indices[start:end], device)
             selected_bundles, selected_valid = latent_diffusion_model.rebuild_topk(
                 batch["user_indices"],
@@ -200,6 +212,37 @@ def reset_latent_diffusion_rebuilder(dwt_conf, latent_diffusion_model, latent_di
             lr=dwt_conf["latent_diffusion_lr"],
             weight_decay=dwt_conf["latent_diffusion_weight_decay"],
         )
+    return latent_diffusion_model, latent_diffusion_optimizer
+
+
+def create_cbr_latent_rebuild_components(conf, dataset, device):
+    rebuild_conf = conf.get("latent_rebuild", {})
+    if not rebuild_conf.get("enabled", False):
+        return None, None
+
+    user_embedding_tensor = load_external_embedding_tensor(
+        rebuild_conf["latent_diffusion_user_embedding_path"],
+        dataset.num_users,
+        "user",
+        required_ids=dataset.train_active_user_indices,
+        fill_missing_with_zeros=True,
+    )
+    bundle_embedding_tensor = load_external_embedding_tensor(
+        rebuild_conf["latent_diffusion_bundle_embedding_path"],
+        dataset.num_bundles,
+        "bundle",
+        required_ids=dataset.train_bundle_indices,
+        fill_missing_with_zeros=True,
+    )
+    if user_embedding_tensor.shape[1] != bundle_embedding_tensor.shape[1]:
+        raise ValueError("Latent diffusion user and bundle embeddings must share the same dimension")
+
+    latent_diffusion_model, latent_diffusion_optimizer = create_latent_diffusion_rebuilder(
+        rebuild_conf,
+        user_embedding_tensor,
+        bundle_embedding_tensor,
+        device,
+    )
     return latent_diffusion_model, latent_diffusion_optimizer
 
 
@@ -277,6 +320,15 @@ def run_cbr_training(conf, dataset, device):
             )
         ]
         settings += [str(c_lambda), str(c_temp), str(ui_beta), str(bi_beta)]
+        latent_rebuild_conf = conf.get("latent_rebuild", {})
+        if latent_rebuild_conf.get("enabled", False):
+            settings += [
+                "LatentRebuild",
+                f"k{latent_rebuild_conf['rebuild_k']}",
+                f"step{latent_rebuild_conf['latent_diffusion_num_steps']}",
+                f"ldlr{latent_rebuild_conf['latent_diffusion_lr']}",
+                f"ldw{latent_rebuild_conf['latent_diffusion_set_loss_weight']}",
+            ]
 
         setting = "_".join(settings)
         if len(setting) > 100:
@@ -291,6 +343,11 @@ def run_cbr_training(conf, dataset, device):
         run = SummaryWriter(run_path)
         model = MultiCBR(conf, dataset.graphs, dataset.user_beta_mask).to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=conf["l2_reg"])
+        latent_diffusion_model, latent_diffusion_optimizer = create_cbr_latent_rebuild_components(
+            conf,
+            dataset,
+            device,
+        )
 
         batch_cnt = len(dataset.train_loader)
         test_interval_bs = int(batch_cnt * conf["test_interval"])
@@ -299,6 +356,36 @@ def run_cbr_training(conf, dataset, device):
         best_metrics, best_perform = init_best_metrics(conf)
         best_epoch = 0
         for epoch in range(conf["epochs"]):
+            latent_rebuild_conf = conf.get("latent_rebuild", {})
+            if latent_rebuild_conf.get("enabled", False):
+                if (
+                    latent_rebuild_conf.get("latent_diffusion_reset_after_epoch", -1) >= 0
+                    and epoch == latent_rebuild_conf["latent_diffusion_reset_after_epoch"] + 1
+                ):
+                    latent_diffusion_model, latent_diffusion_optimizer = reset_latent_diffusion_rebuilder(
+                        latent_rebuild_conf,
+                        latent_diffusion_model,
+                        latent_diffusion_optimizer,
+                    )
+
+                latent_diffusion_loss = train_latent_diffusion_epoch(
+                    latent_diffusion_model,
+                    latent_diffusion_optimizer,
+                    dataset,
+                    latent_rebuild_conf,
+                    device,
+                )
+                run.add_scalar("latent_diffusion/loss_epoch", latent_diffusion_loss, epoch)
+                rebuilt_ub_graph = rebuild_ub_graph_with_latent_diffusion(
+                    latent_diffusion_model,
+                    dataset,
+                    latent_rebuild_conf,
+                    device,
+                )
+                if epoch == 0:
+                    print_statistics(rebuilt_ub_graph, "U-B statistics from Latent diffusion rebuild")
+                model.set_ub_graph(rebuilt_ub_graph)
+
             epoch_anchor = epoch * batch_cnt
             model.train(True)
             pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)

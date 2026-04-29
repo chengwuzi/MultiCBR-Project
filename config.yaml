@@ -12,18 +12,9 @@ NetEase:
   embedding_sizes: [64] # the embedding size for user, bundle, and item
   num_layerss: [2] # number of layers for the information propagation over all graphs
 
-  # High-order substitution settings (Legacy - Disabled)
-  # bui_topk: 20
-  # ubi_topk: 20
-  # enable_high_order_replace: true
-  # ui_bundle_high_order_alpha: 0.8
-  # bi_user_high_order_alpha: 0.8
-
-  # New Simple Aggregation Supplement settings
-
   # 最佳结果参数列表 （0+0.25）  0+0.2  0+0.3
   ui_bundle_user_agg_beta: 0
-  bi_user_bundle_agg_beta: 0.35
+  bi_user_bundle_agg_beta: 0
   # User connection filtering configuration
   train_connected_ratio_range: [0.0, 1.0]
   user_ub_train_deg_min: 0
@@ -52,7 +43,7 @@ NetEase:
 
   # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
-    enabled: true
+    enabled: false
     anchor_cl_lambda: 0.005
     temp: 0.2
     user_cl: true

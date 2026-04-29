@@ -1,0 +1,420 @@
+MultiCBR 项目工作记录
+
+一、当前改造背景
+
+本轮工作的目标是：
+1. 保持 NetEase 和 Youshu 继续使用 MultiCBR 主训练逻辑。
+2. 不切换到 iFashion 的 DWT 主分支。
+3. 仅将 iFashion 中“扩散模块 + UB 图重建”的思想迁移到 NetEase 和 Youshu。
+4. 扩散模块的作用是：
+   - 读取外部预训练 UB 用户/礼包表示。
+   - 对每个用户的训练期历史 bundle 集合做 latent diffusion 去噪。
+   - 在该用户原始训练 bundle 集合内重新打分。
+   - 取 top-k，构造一张重建后的 UB 图。
+   - 用这张重建后的 UB 图替换 MultiCBR 训练与评估时使用的 UB message passing 图。
+
+重要语义确认：
+1. top-k 以外的原始训练正交互，没有被当成显式负样本。
+2. 扩散模块只改变图传播结构，不改变监督标签定义。
+3. 验证集和测试集不参与建图，不泄漏信息。
+4. 验证/测试时，模型做表示传播所用的 UB 图，也是当前 epoch 的重建 UB 图；但 val/test ground truth 仍然来自原始划分文件。
+
+
+二、代码改造概览
+
+1. train.py
+新增/修改：
+- build_observed_bundle_batch()
+- train_latent_diffusion_epoch()
+- rebuild_ub_graph_with_latent_diffusion()
+- create_cbr_latent_rebuild_components()
+- run_cbr_training() 中接入 latent_rebuild 流程
+- 新增扩散模块 epoch 级日志打印与 TensorBoard 标量记录
+
+当前 CBR 训练流程：
+1. 读取数据、初始化 MultiCBR。
+2. 若 latent_rebuild.enabled=true，则创建扩散重建器。
+3. 每个 epoch 开始前：
+   - 先训练一轮扩散重建器；
+   - 用扩散器重建 UB 图；
+   - 将新 UB 图注入 MultiCBR。
+4. 再执行原始 MultiCBR 的 BPR + c_loss 训练。
+5. val/test 时继续按原评估逻辑计算 recall / ndcg。
+
+2. models/MultiCBR.py
+新增：
+- set_ub_graph(ub_graph)
+
+作用：
+- 更新 self.ub_graph
+- 刷新训练态和评估态依赖 UB 的传播图、聚合图
+
+3. utility.py
+新增/修改：
+- load_external_embedding_tensor() 支持：
+  - required_ids
+  - fill_missing_with_zeros
+- Datasets 中新增：
+  - train_active_user_indices
+  - train_bundle_indices
+
+含义：
+- train_active_user_indices：训练集中至少有 1 条 UB 交互的用户 id
+- train_bundle_indices：训练集中至少出现过 1 次的 bundle id
+
+4. config.yaml
+新增：
+- NetEase.latent_rebuild
+- Youshu.latent_rebuild
+
+当前默认已开启：
+- NetEase.latent_rebuild.enabled = true
+- Youshu.latent_rebuild.enabled = true
+
+
+三、运行语义的关键结论
+
+1. 扩散模块只对 train-active users 生效
+- 训练扩散器时，只遍历 train_active_user_indices
+- 重建 UB 图时，也只为这批用户重建边
+
+2. 外部 UB 表示的缺失处理
+- NetEase / Youshu 的外部表示文件不是全量覆盖所有用户和 bundle
+- 但训练实际会用到的 active users / train bundles 必须存在
+- 其他缺失 id 允许补零向量
+
+3. Windows dataloader 稳健性修复
+- Windows 下 num_workers 改为 0
+- 目的仅为提高本地环境可运行性
+- 不改变训练方法定义
+- 可能带来正常随机性量级的轻微数值波动，但不改变实验逻辑
+
+
+四、三套数据集训练集统计
+
+1. 基础规模
+
+iFashion
+- num_users = 53897
+- train_edges = 1213676
+- active_users = 53897
+- inactive_users = 0
+- avg_ub_deg_all_users = 22.5184
+- avg_ub_deg_active_users = 22.5184
+- median_active = 19
+- p10 / p25 / p75 / p90 = 14 / 16 / 24 / 34
+
+NetEase
+- num_users = 18528
+- train_edges = 217864
+- active_users = 18514
+- inactive_users = 14
+- avg_ub_deg_all_users = 11.7586
+- avg_ub_deg_active_users = 11.7675
+- median_active = 8
+- p10 / p25 / p75 / p90 = 5 / 7 / 12 / 19
+
+Youshu
+- num_users = 8039
+- train_edges = 34416
+- active_users = 2959
+- inactive_users = 5080
+- avg_ub_deg_all_users = 4.2811
+- avg_ub_deg_active_users = 11.6310
+- median_active = 7
+- p10 / p25 / p75 / p90 = 1 / 3 / 14 / 30
+
+注意：
+- 对当前扩散重建模块来说，判断 k 大小应该看 active users 的 UB 训练度分布，不应该看全体用户平均值。
+- 尤其是 Youshu，如果看全体用户平均值 4.28 会严重低估 active user 的真实 bundle 历史规模。
+
+
+2. 训练集 UB=0/1/2/3 用户数
+
+iFashion
+- UB=0: 0
+- UB=1: 0
+- UB=2: 0
+- UB=3: 0
+
+NetEase
+- UB=0: 14
+- UB=1: 39
+- UB=2: 175
+- UB=3: 626
+
+Youshu
+- UB=0: 5080
+- UB=1: 386
+- UB=2: 335
+- UB=3: 253
+
+
+五、Youshu 的关键发现
+
+1. Youshu 中大量用户训练集 UB=0
+- UB_train=0 用户数 = 5080
+- 占总用户约 63.19%
+
+2. 但这些 UB_train=0 用户在 UI 上大多是活跃的
+针对 Youshu 的 UB_train=0 用户：
+- 用户数 = 5080
+- UI=0 的只有 33
+- UI>0 的有 5047，占 99.35%
+- avg_ui_deg_all = 13.6780
+- avg_ui_deg_nonzero = 13.7674
+- median_ui_deg = 7
+- p10 / p25 / p75 / p90 = 1 / 2 / 27 / 37
+
+结论：
+- 这批用户不是“完全没行为”
+- 只是训练集中没有 UB 交互
+- 对这些用户来说，UI / BI 子视图仍然有信息
+
+3. 最重要发现：Youshu 中 UB_train=0 用户不进入 val/test 评估
+针对 Youshu 的 UB_train=0 用户：
+- test_users_with_pos = 0
+- test_pos_total = 0
+- tune_users_with_pos = 0
+- tune_pos_total = 0
+
+对应全局：
+- total_test_pos = 9746
+- total_tune_pos = 5189
+- test_pos_share_from_zero_ub_users = 0
+- tune_pos_share_from_zero_ub_users = 0
+
+这意味着：
+1. 虽然 Youshu 全体用户中有大量 UB_train=0 用户，但他们不进入最终 val/test 指标计算。
+2. Youshu 实际被评估的用户集合，就是那 2959 个 UB_train>0 的 active users。
+3. 因此，在 Youshu 上优化 UB 图结构，对“全部会被评估的用户”都是有意义的。
+
+这点非常重要，后续调参必须围绕 active/evaluated users 来理解，不要被全体 8039 用户的平均值误导。
+
+
+六、k 的相对大小判断
+
+当前扩散模块的 k 含义：
+- 对每个用户，仅在其原始训练 bundle 集合内取 top-k
+- 因此如果用户历史边数小于 k，则实际只能保留原有条数
+
+1. iFashion
+k=3
+- expected_rebuilt_edges = 161691
+- edge_retention_vs_train = 0.1332
+- avg_retained_per_active_user = 3.0000
+
+结论：
+- 对 iFashion，k=3 非常小，筛边非常激进
+
+2. NetEase
+k=3
+- expected_rebuilt_edges = 55289
+- edge_retention_vs_train = 0.2538
+- avg_retained_per_active_user = 2.9863
+
+NetEase 其他参考：
+- k=5 -> retention = 0.4123
+- k=10 -> retention = 0.6748
+- k=15 -> retention = 0.7775
+
+结论：
+- 对 NetEase，k=3 偏小
+- k=5~10 更像中等区间
+
+3. Youshu
+k=3
+- expected_rebuilt_edges = 7770
+- edge_retention_vs_train = 0.2258
+- avg_retained_per_active_user = 2.6259
+
+Youshu 其他参考：
+- k=5 -> retention = 0.3353
+- k=10 -> retention = 0.5308
+- k=15 -> retention = 0.6520
+
+结论：
+- 对 Youshu，k=3 也偏小
+- 但由于低度 active user 较多，它比 NetEase 更容易出现“很多用户根本取不满 k 条”的情况
+
+
+七、当前日志已经支持的扩散模块监控
+
+现在每个 epoch 已打印并写入文本日志 / TensorBoard：
+- loss
+- rebuilt_edges
+- avg_user_edges
+- user_coverage
+- bundle_coverage
+- density
+
+这些指标后续调参时很重要：
+- loss：扩散训练是否稳定
+- rebuilt_edges：图被筛得有多狠
+- avg_user_edges：人均保留边数
+- user_coverage：有边用户覆盖率
+- bundle_coverage：保留下来的 bundle 覆盖率
+- density：重建图整体稀疏度
+
+
+八、调参总原则
+
+总体判断：
+1. 对 NetEase 和 Youshu，最优先调的不是扩散网络结构，而是 rebuild_k。
+2. 因为当前扩散模块最终通过“筛 UB 图边”起作用，k 直接决定图稀疏化强度，影响最大。
+3. iFashion 的最佳经验不能直接平移到另外两个数据集，因为 active user 的 UB 训练度分布不同。
+
+后续调参顺序建议：
+第一阶段：先只调 rebuild_k
+第二阶段：固定较优 k，再调 latent_diffusion_set_loss_weight
+第三阶段：再看 latent_diffusion_num_steps 和 latent_diffusion_lr
+最后阶段：如仍有必要，再考虑 hidden_dim / denoiser_layers / dropout 等扩散结构参数
+
+
+九、NetEase 调参研究建议
+
+1. 数据特性
+- active users 覆盖几乎全部用户
+- UB active 平均度约 11.77
+- 中位数为 8
+- UB 在最终模态融合中的权重较高：modal_weight = [0.5, 0.2, 0.3]
+
+含义：
+- UB 图筛边会直接影响最终推荐表示
+- k 太小会明显伤害协同结构
+- k 太大又会退化回原图，扩散模块意义减弱
+
+2. 对 k 的主观区间判断
+- 小：1~3
+- 中：5~10
+- 大：12~20
+
+3. 第一阶段 k 搜索建议
+首轮可跑：
+- 2, 3, 5, 8, 10, 15
+
+如果实验预算有限，先跑：
+- 3, 5, 10
+
+当前主观预判：
+- NetEase 最可能的甜点区间是 5~10
+
+4. 第二阶段建议
+固定较优 k 后，调：
+- latent_diffusion_set_loss_weight
+
+建议搜索：
+- 0.01
+- 0.03
+- 0.05
+- 0.08
+- 0.10
+
+5. 第三阶段建议
+再调：
+- latent_diffusion_num_steps：6 / 12 / 20
+- latent_diffusion_lr：5e-4 / 1e-3 / 2e-3
+
+NetEase 的优先级：
+1. k
+2. set_loss_weight
+3. num_steps
+4. lr
+
+
+十、Youshu 调参研究建议
+
+1. 数据特性
+- 全体用户很多 UB_train=0，但不进入 val/test
+- 实际评估对象就是 2959 个 active users
+- active 平均度约 11.63
+- active 中位数为 7
+- active users 中低度用户更多
+- UB 模态权重为 0.35，低于 NetEase
+
+含义：
+- Youshu 的 UB 优化依然重要，因为评估用户全部是 active users
+- 但 k 过大时，更容易失去“筛边去噪”的意义
+- 因为低度 active users 多，过大的 k 容易变成“把绝大部分历史都保留”
+
+2. 对 k 的主观区间判断
+- 小：1~3
+- 中：5~10
+- 大：12~20
+
+但与 NetEase 相比，Youshu 应更偏向小到中等的 k。
+
+3. 第一阶段 k 搜索建议
+首轮可跑：
+- 2, 3, 5, 8, 10
+
+如果预算有限，先跑：
+- 3, 5, 8
+
+当前主观预判：
+- Youshu 最可能的甜点区间是 3~8
+
+4. 第二阶段建议
+固定较优 k 后，调：
+- latent_diffusion_set_loss_weight
+
+建议搜索：
+- 0.03
+- 0.05
+- 0.08
+
+5. 第三阶段建议
+再调：
+- latent_diffusion_lr：5e-4 / 1e-3 / 2e-3
+- latent_diffusion_num_steps：6 / 12 / 20
+
+Youshu 的优先级：
+1. k
+2. set_loss_weight
+3. lr
+4. num_steps
+
+
+十一、现阶段不建议优先调的参数
+
+先不要急着动：
+- latent_diffusion_hidden_dim
+- latent_diffusion_time_dim
+- latent_diffusion_denoiser_layers
+- latent_diffusion_dropout
+- latent_diffusion_beta_start
+- latent_diffusion_beta_end
+
+原因：
+1. 当前首先要验证的是“扩散筛边思想在 NetEase / Youshu 上是否有明确增益”。
+2. k 和图重建强度的影响最大。
+3. 在 k 和 set_loss_weight 没摸清之前，过早动扩散器结构容易让搜索空间膨胀。
+
+
+十二、后续新对话接手时建议优先做的事
+
+1. 先查看当前已跑实验结果：
+- 原始 baseline
+- 开启 latent_rebuild 后的结果
+
+2. 对 NetEase / Youshu 分别判断：
+- 当前默认 k=3 是提升、持平还是下降
+- 扩散 loss 是否稳定
+- 重建图边数和覆盖率是否异常
+
+3. 按本记录建议启动第一阶段 k 调参：
+- NetEase：3 / 5 / 10 或更细的 2 / 3 / 5 / 8 / 10 / 15
+- Youshu：3 / 5 / 8 或更细的 2 / 3 / 5 / 8 / 10
+
+4. 选出较优 k 后，再调 set_loss_weight
+
+5. 如果需要进一步提升，再看 num_steps 和 lr
+
+
+十三、给后续接手者的简短结论
+
+1. 这轮改造的核心不是换主模型，而是把扩散模块作为 UB 图重建器接入 MultiCBR。
+2. 评估语义是正确的：不改标签、不泄漏 test、不把被筛掉正边当负样本。
+3. NetEase / Youshu 的第一优先调参项都是 rebuild_k。
+4. Youshu 虽然全体用户里 UB=0 很多，但这批用户不进入 val/test，真正该围绕的对象是 2959 个 active/evaluated users。
+5. 后续调参时，必须用 active user 的 UB 度分布来理解 k 的大小，不要用全体用户平均值。

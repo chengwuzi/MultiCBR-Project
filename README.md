@@ -2,9 +2,6 @@
 
 
 
-
-
-
 清空目录   &&   上传本地文件     密码：ssh2025
 
 ssh -p 1771 ssh_user@210.45.212.126 "rm -rf /home/ssh_user/code/25-chenglong/MultiCBR/*"
@@ -24,9 +21,11 @@ tmux new -s multicbr
 
 conda activate recbole
 
-python ......
-
 python -u train.py -d iFashion 2>&1 | tee logs_run.txt
+
+python -u train.py -d Youshu 2>&1 | tee logs_run.txt
+
+python -u train.py -d NetEase 2>&1 | tee logs_run.txt
 
 
 

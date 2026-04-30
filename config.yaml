@@ -202,7 +202,7 @@ Youshu:
 
   latent_rebuild:
     enabled: true
-    rebuild_k: 3
+    rebuild_k: 7
     latent_diffusion_user_embedding_path: './datasets/Youshu_UB_emb/Youshu-user-04261806.pt'
     latent_diffusion_bundle_embedding_path: './datasets/Youshu_UB_emb/Youshu-bundle-04261806.pt'
     latent_diffusion_hidden_dim: 128

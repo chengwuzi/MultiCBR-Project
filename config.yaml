@@ -212,7 +212,7 @@ Youshu:
     latent_diffusion_num_steps: 12
     latent_diffusion_beta_start: 1.0e-4
     latent_diffusion_beta_end: 0.02
-    latent_diffusion_set_loss_weight: 0.05
+    latent_diffusion_set_loss_weight: 0.04
     latent_diffusion_lr: 1.0e-3
     latent_diffusion_weight_decay: 1.0e-5
     latent_diffusion_batch_size: 1024

@@ -445,3 +445,5 @@ bundle BI 度：
    - latent_diffusion_num_steps = 12
    - latent_diffusion_lr = 1.0e-3
 4. 后续工作的重点应当转移到 NetEase 上，优先把 rebuild_k 搜清楚，再继续后续阶段。
+
+5. NetEase搜参顺序 ： rebuild_k   latent_diffusion_set_loss_weight   latent_diffusion_num_steps   latent_diffusion_batch_size   latent_diffusion_lr

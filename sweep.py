@@ -30,15 +30,7 @@ SWEEP_CONFIG = {
     "param_groups": [
         {
             "name": "latent_rebuild.rebuild_k",
-            "values": [6, 9, 12],
-        },
-        {
-            "name": "latent_rebuild.latent_diffusion_set_loss_weight",
-            "values": [0.03, 0.04, 0.06, 0.07],
-        },
-        {
-            "name": "latent_rebuild.latent_diffusion_num_steps",
-            "values": [8, 10, 14, 16],
+            "values": [10, 11, 13, 14, 15, 16, 17],
         },
     ],
 }

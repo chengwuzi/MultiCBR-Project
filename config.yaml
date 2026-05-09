@@ -43,7 +43,7 @@ NetEase:
 
   latent_rebuild:
     enabled: true
-    rebuild_k: 9
+    rebuild_k: 13
     latent_diffusion_user_embedding_path: './datasets/NetEase_UB_emb/NetEase-user-04261815.pt'
     latent_diffusion_bundle_embedding_path: './datasets/NetEase_UB_emb/NetEase-bundle-04261815.pt'
     latent_diffusion_hidden_dim: 128

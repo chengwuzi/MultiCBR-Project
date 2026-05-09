@@ -447,3 +447,79 @@ bundle BI 度：
 4. 后续工作的重点应当转移到 NetEase 上，优先把 rebuild_k 搜清楚，再继续后续阶段。
 
 5. NetEase搜参顺序 ： rebuild_k   latent_diffusion_set_loss_weight   latent_diffusion_num_steps   latent_diffusion_batch_size   latent_diffusion_lr
+
+
+六、NetEase 调参工作完成后的更新结论
+
+以下内容用于覆盖上文中“NetEase 即将开始主要搜参”的旧状态说明。
+
+1. NetEase 已完成的调参工作
+
+NetEase 这条线已经完成两轮以 latent_rebuild 为核心的搜参：
+1. 第一轮三阶段搜索：
+   - rebuild_k = [6, 9, 12]
+   - latent_diffusion_set_loss_weight = [0.03, 0.04, 0.06, 0.07]
+   - latent_diffusion_num_steps = [8, 10, 14, 16]
+2. 第二轮针对 rebuild_k 的继续搜索：
+   - rebuild_k = [10, 11, 13, 14, 15, 16, 17]
+
+当前对 NetEase 的评估口径已经明确收缩为：
+1. Top10 Recall
+2. Top10 NDCG
+3. Top20 Recall
+4. Top20 NDCG
+
+
+2. NetEase 已完成的阶段性结论
+
+当前已经可以确认：
+1. rebuild_k 是 NetEase 当前最主要、最敏感的调参项。
+2. latent_diffusion_set_loss_weight 和 latent_diffusion_num_steps 在当前搜索区间内影响较小，明显弱于 rebuild_k。
+3. 因此后两者暂时不再继续深挖，优先固定默认值即可。
+
+对于另外两个参数，当前采用的固定值为：
+- latent_diffusion_set_loss_weight = 0.05
+- latent_diffusion_num_steps = 12
+- latent_diffusion_lr = 1.0e-3
+
+
+3. NetEase 当前最终采用的 rebuild_k
+
+如果只看当前重点关注的 Top10 / Top20 指标，则 NetEase 当前最合适的 rebuild_k 取值为：
+- rebuild_k = 13
+
+原因：
+1. k=13 在当前已完成搜索结果中给出了最强的 Top10 表现。
+2. 同时它的 Top20 表现也处于最优档，不是只偏科于 Top10。
+3. 虽然 k=17 在 Top20 上略强，但它的 Top10 不如 k=13。
+4. 由于当前主要目标明确是 Top10 / Top20 的综合表现，因此优先保留 k=13。
+
+
+4. NetEase 当前最终采用配置
+
+NetEase 当前阶段性最终配置定为：
+- rebuild_k = 13
+- latent_diffusion_set_loss_weight = 0.05
+- latent_diffusion_num_steps = 12
+- latent_diffusion_lr = 1.0e-3
+
+
+5. NetEase 当前最终结果（按 Top10 / Top20 口径）
+
+k=13 对应测试集结果为：
+- TOP10: REC_T=0.05947, NDCG_T=0.03953
+- TOP20: REC_T=0.09052, NDCG_T=0.04926
+
+补充说明：
+1. k=17 的 TOP20 略高：
+   - TOP20: REC_T=0.09086, NDCG_T=0.04930
+2. 但 k=13 的 TOP10 更强，因此综合口径下仍然优先选择 k=13。
+
+
+6. NetEase 调参工作的最终结论
+
+NetEase 当前结论：
+1. 调参工作可以视为阶段性完成。
+2. 当前最关键参数 rebuild_k 已经基本搜清楚，最佳点暂定为 13。
+3. latent_diffusion_set_loss_weight 和 latent_diffusion_num_steps 暂不继续深挖。
+4. 后续如无新的实验目标变化，可直接以当前配置作为 NetEase 的正式使用配置。

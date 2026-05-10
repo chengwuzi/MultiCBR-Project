@@ -1,45 +1,34 @@
 NetEase:
   data_path: './datasets'
-  batch_size_train: 2048 # the batch size for training
-  batch_size_test: 2048 # the batch size for testing
-  topk: [10, 20, 40, 80] # the topks metrics for evaluation
-  neg_num: 1 # number of negatives used for BPR loss. All the experiments use 1.
-  seed: 4096 # Set an integer (e.g. 42) to fix random seed, or null for random
+  batch_size_train: 2048
+  batch_size_test: 2048
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  seed: 4096
 
-  # the following are the best settings
-  aug_type: "Noise" # options: ED, MD, OP, Noise
-  ed_interval: 1 # by how many epochs to dropout edge, default is 1
-  embedding_sizes: [64] # the embedding size for user, bundle, and item
-  num_layerss: [2] # number of layers for the information propagation over all graphs
+  aug_type: "Noise"
+  ed_interval: 1
+  embedding_sizes: [64]
+  num_layerss: [2]
 
-  # 最佳结果参数列表 （0+0.25）  0+0.2  0+0.3
-  ui_bundle_user_agg_beta: 0
-  bi_user_bundle_agg_beta: 0
-  # User connection filtering configuration
-  train_connected_ratio_range: [0.0, 1.0]
-  user_ub_train_deg_min: 0
 
-  # the following dropout rates are with respect to the "aug_type", i.e., if aug_type is ED, the following dropout rates are for ED.
-  UB_ratios: [0.0] # the dropout ratio for UB graph
-  UI_ratios: [0.0] # the dropout ratio for UI graph
-  BI_ratios: [0.2] # the dropout ratio for BI graph
+  UB_ratios: [0.0]
+  UI_ratios: [0.0]
+  BI_ratios: [0.2]
 
   fusion_weights:
-    # fusion weight for representations of different graphs
-    # From the first element to the third element are weight for UB, UI, BI graphs correspondingly.
     modal_weight: [0.5, 0.2, 0.3]
-    # layer aggregation weights, the i-th element in the list represents the weight of the (i-1)-th propagation layer.
-    UB_layer: [0.35, 0.15, 0.5] # layer aggregation coefficients in UB graph
-    UI_layer: [0.25, 0.65, 0.1] # layer aggregation coefficients in UI graph
-    BI_layer: [0.4, 0.4, 0.2] # layer aggregation coefficients in BI graph
+    UB_layer: [0.35, 0.15, 0.5]
+    UI_layer: [0.25, 0.65, 0.1]
+    BI_layer: [0.4, 0.4, 0.2]
 
-  lrs: [1.0e-3] # learning rate
-  l2_regs: [1.0e-5] # the l2 regularization weight: lambda_2
-  c_lambdas: [0.05] # the contrastive loss weight: lambda_1
-  c_temps: [0.2] # the temperature in the contrastive loss: tau
+  lrs: [1.0e-3]
+  l2_regs: [1.0e-5]
+  c_lambdas: [0.05]
+  c_temps: [0.2]
 
-  epochs: 50 # number of epochs to train
-  test_interval: 5 # by how many epochs to run the validation and testing.
+  epochs: 50
+  test_interval: 5
 
   latent_rebuild:
     enabled: true
@@ -61,7 +50,6 @@ NetEase:
     latent_diffusion_reset_after_epoch: -1
     latent_diffusion_reset_optimizer: false
 
-  # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
     enabled: false
     anchor_cl_lambda: 0.005
@@ -72,6 +60,13 @@ NetEase:
     ub_bi_user_weight: 1.0
     ub_ui_bundle_weight: 1.0
     ub_bi_bundle_weight: 1.0
+
+  # 子视图增强
+  # 最佳结果参数列表 （0+0.35   range=0-1   min=0）
+  ui_bundle_user_agg_beta: 0
+  bi_user_bundle_agg_beta: 0
+  train_connected_ratio_range: [ 0.0, 1.0 ]
+  user_ub_train_deg_min: 0
 
 
 iFashion:
@@ -89,20 +84,6 @@ iFashion:
   embedding_sizes: [64]
   num_layerss: [2]
 
-  # High-order substitution settings (Legacy - Disabled)
-  # bui_topk: 20
-  # ubi_topk: 20
-  # enable_high_order_replace: true
-  # ui_bundle_high_order_alpha: 0.8
-  # bi_user_high_order_alpha: 0.8
-
-  # New Simple Aggregation Supplement settings
-
-  # 参数搜索未获提升，待定 0.1+0
-  ui_bundle_user_agg_beta: 0
-  bi_user_bundle_agg_beta: 0
-  train_connected_ratio_range: [0.0, 1.0]
-  user_ub_train_deg_min: 0
 
   UB_ratios: [0.05]
   UI_ratios: [0.0]
@@ -160,6 +141,12 @@ iFashion:
     ub_ui_bundle_weight: 1.0
     ub_bi_bundle_weight: 1.0
 
+  # 子视图增强
+  ui_bundle_user_agg_beta: 0
+  bi_user_bundle_agg_beta: 0
+  train_connected_ratio_range: [ 0.0, 1.0 ]
+  user_ub_train_deg_min: 0
+
 
 Youshu:
   data_path: './datasets'
@@ -174,13 +161,6 @@ Youshu:
   ed_interval: 1
   embedding_sizes: [64]
   num_layerss: [2]
-
-  # New Simple Aggregation Supplement settings
-  # 最佳结果参数列表 （0+0.05）  0+0.1  0+0.15
-  ui_bundle_user_agg_beta: 0
-  bi_user_bundle_agg_beta: 0
-  train_connected_ratio_range: [0.0, 1.0]
-  user_ub_train_deg_min: 0
 
   UB_ratios: [0.2]
   UI_ratios: [0.1]
@@ -231,3 +211,9 @@ Youshu:
     ub_bi_user_weight: 1.0
     ub_ui_bundle_weight: 1.0
     ub_bi_bundle_weight: 1.0
+
+  # 子视图增强
+  ui_bundle_user_agg_beta: 0
+  bi_user_bundle_agg_beta: 0
+  train_connected_ratio_range: [ 0.0, 1.0 ]
+  user_ub_train_deg_min: 0

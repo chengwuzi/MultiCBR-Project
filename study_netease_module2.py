@@ -76,15 +76,22 @@ def ensure_output_dirs():
 
 def load_manifest():
     if MANIFEST_PATH.exists():
-        with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
-            return json.load(f)
+        try:
+            with open(MANIFEST_PATH, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except json.JSONDecodeError:
+            backup_path = MANIFEST_PATH.with_suffix(f".corrupt_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json")
+            MANIFEST_PATH.rename(backup_path)
+            print(f"[{now()}] Warning: manifest was corrupted and has been moved to {backup_path}")
     return {"experiments": {}}
 
 
 def save_manifest(manifest):
     ensure_output_dirs()
-    with open(MANIFEST_PATH, "w", encoding="utf-8") as f:
+    tmp_path = MANIFEST_PATH.with_suffix(".tmp")
+    with open(tmp_path, "w", encoding="utf-8") as f:
         json.dump(manifest, f, indent=2, ensure_ascii=False)
+    os.replace(tmp_path, MANIFEST_PATH)
 
 
 def json_ready_metrics(metrics):
@@ -406,9 +413,10 @@ def run_experiments(experiments, max_retries, force):
                 "config": minimal_conf_for_report(conf),
             }
         else:
-            success_record["attempts"] = attempts
-            success_record["config"] = minimal_conf_for_report(conf)
-            manifest["experiments"][name] = success_record
+            manifest_record = copy.deepcopy(success_record)
+            manifest_record["attempts"] = copy.deepcopy(attempts)
+            manifest_record["config"] = minimal_conf_for_report(conf)
+            manifest["experiments"][name] = manifest_record
         save_manifest(manifest)
 
     return load_manifest()

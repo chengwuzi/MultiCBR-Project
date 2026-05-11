@@ -1,0 +1,793 @@
+===== NetEase Module2 Mechanism Study =====
+generated_at: 2026-05-11 14:34:32
+
+This report compares exactly two conditions: baseline vs module2.
+module2 is treated as one complete module: BI-side user enhancement (beta=0.35) + pre-fusion anchor CL (lambda=0.005, temp=0.2).
+No beta/lambda tuning, no module splitting, no DWT, no latent rebuild.
+
+===== Experiment Configs =====
+[baseline] status=SUCCESS best_epoch=44 checkpoint=/code/25-chenglong/MultiCBR/analysis_outputs/netease_module2_study/checkpoints/baseline_seed4096_attempt1.pt
+{
+  "dataset": "NetEase",
+  "seed": 4096,
+  "epochs": 50,
+  "batch_size_train": 2048,
+  "batch_size_test": 2048,
+  "topk": [
+    10,
+    20,
+    40,
+    80
+  ],
+  "aug_type": "Noise",
+  "UB_ratios": [
+    0.0
+  ],
+  "UI_ratios": [
+    0.0
+  ],
+  "BI_ratios": [
+    0.2
+  ],
+  "fusion_weights": {
+    "modal_weight": [
+      0.5,
+      0.2,
+      0.3
+    ],
+    "UB_layer": [
+      0.35,
+      0.15,
+      0.5
+    ],
+    "UI_layer": [
+      0.25,
+      0.65,
+      0.1
+    ],
+    "BI_layer": [
+      0.4,
+      0.4,
+      0.2
+    ]
+  },
+  "lrs": [
+    0.001
+  ],
+  "l2_regs": [
+    1e-05
+  ],
+  "c_lambdas": [
+    0.05
+  ],
+  "c_temps": [
+    0.2
+  ],
+  "latent_rebuild.enabled": false,
+  "ui_bundle_user_agg_beta": 0.0,
+  "bi_user_bundle_agg_beta": 0.0,
+  "anchor_cl": {
+    "enabled": false,
+    "anchor_cl_lambda": 0.005,
+    "temp": 0.2,
+    "user_cl": true,
+    "bundle_cl": true,
+    "ub_ui_user_weight": 1.0,
+    "ub_bi_user_weight": 1.0,
+    "ub_ui_bundle_weight": 1.0,
+    "ub_bi_bundle_weight": 1.0
+  }
+}
+[module2] status=SUCCESS best_epoch=49 checkpoint=/code/25-chenglong/MultiCBR/analysis_outputs/netease_module2_study/checkpoints/module2_seed4096_attempt1.pt
+{
+  "dataset": "NetEase",
+  "seed": 4096,
+  "epochs": 50,
+  "batch_size_train": 2048,
+  "batch_size_test": 2048,
+  "topk": [
+    10,
+    20,
+    40,
+    80
+  ],
+  "aug_type": "Noise",
+  "UB_ratios": [
+    0.0
+  ],
+  "UI_ratios": [
+    0.0
+  ],
+  "BI_ratios": [
+    0.2
+  ],
+  "fusion_weights": {
+    "modal_weight": [
+      0.5,
+      0.2,
+      0.3
+    ],
+    "UB_layer": [
+      0.35,
+      0.15,
+      0.5
+    ],
+    "UI_layer": [
+      0.25,
+      0.65,
+      0.1
+    ],
+    "BI_layer": [
+      0.4,
+      0.4,
+      0.2
+    ]
+  },
+  "lrs": [
+    0.001
+  ],
+  "l2_regs": [
+    1e-05
+  ],
+  "c_lambdas": [
+    0.05
+  ],
+  "c_temps": [
+    0.2
+  ],
+  "latent_rebuild.enabled": false,
+  "ui_bundle_user_agg_beta": 0.0,
+  "bi_user_bundle_agg_beta": 0.35,
+  "anchor_cl": {
+    "enabled": true,
+    "anchor_cl_lambda": 0.005,
+    "temp": 0.2,
+    "user_cl": true,
+    "bundle_cl": true,
+    "ub_ui_user_weight": 1.0,
+    "ub_bi_user_weight": 1.0,
+    "ub_ui_bundle_weight": 1.0,
+    "ub_bi_bundle_weight": 1.0
+  }
+}
+
+===== Overall Test Metrics =====
+baseline TOP10 VAL_REC=0.054855 VAL_NDCG=0.030201 TEST_REC=0.059049 TEST_NDCG=0.039059
+baseline TOP20 VAL_REC=0.087674 VAL_NDCG=0.038972 TEST_REC=0.090048 TEST_NDCG=0.048730
+baseline TOP40 VAL_REC=0.130266 VAL_NDCG=0.048264 TEST_REC=0.135344 TEST_NDCG=0.060667
+baseline TOP80 VAL_REC=0.186192 VAL_NDCG=0.058581 TEST_REC=0.190442 TEST_NDCG=0.073109
+module2 TOP10 VAL_REC=0.057144 VAL_NDCG=0.031219 TEST_REC=0.061537 TEST_NDCG=0.040568
+module2 TOP20 VAL_REC=0.091214 VAL_NDCG=0.040288 TEST_REC=0.095432 TEST_NDCG=0.051087
+module2 TOP40 VAL_REC=0.134856 VAL_NDCG=0.049807 TEST_REC=0.139275 TEST_NDCG=0.062787
+module2 TOP80 VAL_REC=0.192373 VAL_NDCG=0.060430 TEST_REC=0.195798 TEST_NDCG=0.075509
+
+===== Overall Delta: module2 - baseline =====
+TOP10 DELTA_REC=0.002489 REL_REC=4.21% DELTA_NDCG=0.001509 REL_NDCG=3.86%
+TOP20 DELTA_REC=0.005384 REL_REC=5.98% DELTA_NDCG=0.002357 REL_NDCG=4.84%
+TOP40 DELTA_REC=0.003931 REL_REC=2.90% DELTA_NDCG=0.002120 REL_NDCG=3.49%
+TOP80 DELTA_REC=0.005356 REL_REC=2.81% DELTA_NDCG=0.002399 REL_NDCG=3.28%
+
+===== Bucket Metrics: train_connected_ratio =====
+ratio_0 TOP20 users=2812 base_R=0.073944 module2_R=0.083083 dR=0.009139 base_N=0.038123 module2_N=0.041890 dN=0.003766 rank_mean_base=4625.65 rank_mean_module2=4846.52 dRank=220.87 conn=0.000000 ub_deg=7.708393 overlap=0.000000
+ratio_0 TOP80 users=2812 base_R=0.150965 module2_R=0.152674 dR=0.001710 base_N=0.054633 module2_N=0.057095 dN=0.002463 rank_mean_base=4625.65 rank_mean_module2=4846.52 dRank=220.87 conn=0.000000 ub_deg=7.708393 overlap=0.000000
+ratio_0_0.25 TOP20 users=6168 base_R=0.069362 module2_R=0.072896 dR=0.003534 base_N=0.040688 module2_N=0.042315 dN=0.001627 rank_mean_base=4043.51 rank_mean_module2=4164.70 dRank=121.19 conn=0.160064 ub_deg=15.573768 overlap=0.005237
+ratio_0_0.25 TOP80 users=6168 base_R=0.154892 module2_R=0.158921 dR=0.004030 base_N=0.062630 module2_N=0.064574 dN=0.001944 rank_mean_base=4043.51 rank_mean_module2=4164.70 dRank=121.19 conn=0.160064 ub_deg=15.573768 overlap=0.005237
+ratio_0.25_0.5 TOP20 users=6371 base_R=0.094572 module2_R=0.096674 dR=0.002102 base_N=0.050715 module2_N=0.052120 dN=0.001405 rank_mean_base=3536.68 rank_mean_module2=3625.88 dRank=89.20 conn=0.377474 ub_deg=11.218333 overlap=0.014560
+ratio_0.25_0.5 TOP80 users=6371 base_R=0.196638 module2_R=0.203549 dR=0.006911 base_N=0.076104 module2_N=0.078416 dN=0.002312 rank_mean_base=3536.68 rank_mean_module2=3625.88 dRank=89.20 conn=0.377474 ub_deg=11.218333 overlap=0.014560
+ratio_0.5_0.75 TOP20 users=2400 base_R=0.116066 module2_R=0.127878 dR=0.011812 base_N=0.059232 module2_N=0.063289 dN=0.004057 rank_mean_base=2879.50 rank_mean_module2=2897.37 dRank=17.87 conn=0.630376 ub_deg=9.530833 overlap=0.031818
+ratio_0.5_0.75 TOP80 users=2400 base_R=0.250450 module2_R=0.262999 dR=0.012549 base_N=0.091064 module2_N=0.094973 dN=0.003908 rank_mean_base=2879.50 rank_mean_module2=2897.37 dRank=17.87 conn=0.630376 ub_deg=9.530833 overlap=0.031818
+ratio_gt_0.75 TOP20 users=763 base_R=0.197010 module2_R=0.210690 dR=0.013680 base_N=0.103218 module2_N=0.108880 dN=0.005661 rank_mean_base=2028.53 rank_mean_module2=2036.39 dRank=7.86 conn=0.886080 ub_deg=7.579292 overlap=0.065367
+ratio_gt_0.75 TOP80 users=763 base_R=0.382829 module2_R=0.376741 dR=-0.006088 base_N=0.144434 module2_N=0.146262 dN=0.001828 rank_mean_base=2028.53 rank_mean_module2=2036.39 dRank=7.86 conn=0.886080 ub_deg=7.579292 overlap=0.065367
+
+===== Bucket Metrics: avg_overlap_ratio_per_train_bundle =====
+overlap_q1_min_0.00170068 TOP20 users=4620 base_R=0.074511 module2_R=0.081664 dR=0.007154 base_N=0.040971 module2_N=0.043118 dN=0.002147 rank_mean_base=4446.87 rank_mean_module2=4620.69 dRank=173.82 conn=0.049273 ub_deg=10.816017 overlap=0.000367
+overlap_q1_min_0.00170068 TOP80 users=4620 base_R=0.156486 module2_R=0.159019 dR=0.002533 base_N=0.059666 module2_N=0.061187 dN=0.001520 rank_mean_base=4446.87 rank_mean_module2=4620.69 dRank=173.82 conn=0.049273 ub_deg=10.816017 overlap=0.000367
+overlap_q2_0.00170068_0.00647963 TOP20 users=4630 base_R=0.072816 module2_R=0.079104 dR=0.006288 base_N=0.042592 module2_N=0.044973 dN=0.002381 rank_mean_base=3899.34 rank_mean_module2=3998.33 dRank=98.98 conn=0.229540 ub_deg=14.252484 overlap=0.003958
+overlap_q2_0.00170068_0.00647963 TOP80 users=4630 base_R=0.161124 module2_R=0.169741 dR=0.008617 base_N=0.065111 module2_N=0.067979 dN=0.002868 rank_mean_base=3899.34 rank_mean_module2=3998.33 dRank=98.98 conn=0.229540 ub_deg=14.252484 overlap=0.003958
+overlap_q3_0.00647963_0.0159116 TOP20 users=4632 base_R=0.087977 module2_R=0.091572 dR=0.003595 base_N=0.047357 module2_N=0.049330 dN=0.001973 rank_mean_base=3597.86 rank_mean_module2=3706.55 dRank=108.69 conn=0.366698 ub_deg=12.020725 overlap=0.010503
+overlap_q3_0.00647963_0.0159116 TOP80 users=4632 base_R=0.187806 module2_R=0.193455 dR=0.005649 base_N=0.072432 module2_N=0.074591 dN=0.002159 rank_mean_base=3597.86 rank_mean_module2=3706.55 dRank=108.69 conn=0.366698 ub_deg=12.020725 overlap=0.010503
+overlap_q4_0.0159116_max TOP20 users=4632 base_R=0.124840 module2_R=0.129344 dR=0.004504 base_N=0.063976 module2_N=0.066902 dN=0.002926 rank_mean_base=2952.22 rank_mean_module2=2999.93 dRank=47.70 conn=0.559627 ub_deg=9.979491 overlap=0.039428
+overlap_q4_0.0159116_max TOP80 users=4632 base_R=0.256253 module2_R=0.260873 dR=0.004620 base_N=0.095190 module2_N=0.098237 dN=0.003047 rank_mean_base=2952.22 rank_mean_module2=2999.93 dRank=47.70 conn=0.559627 ub_deg=9.979491 overlap=0.039428
+
+===== Bucket Metrics: user_test_recover_zero_ratio =====
+recover_zero_0 TOP20 users=2884 base_R=0.169279 module2_R=0.179259 dR=0.009980 base_N=0.080716 module2_N=0.084581 dN=0.003865 rank_mean_base=2025.28 rank_mean_module2=2149.98 dRank=124.70 conn=0.456500 ub_deg=6.529126 overlap=0.027097
+recover_zero_0 TOP80 users=2884 base_R=0.329404 module2_R=0.333492 dR=0.004089 base_N=0.113628 module2_N=0.116194 dN=0.002565 rank_mean_base=2025.28 rank_mean_module2=2149.98 dRank=124.70 conn=0.456500 ub_deg=6.529126 overlap=0.027097
+recover_zero_0_0.5 TOP20 users=3551 base_R=0.109912 module2_R=0.112370 dR=0.002458 base_N=0.062435 module2_N=0.063002 dN=0.000567 rank_mean_base=2915.18 rank_mean_module2=3017.32 dRank=102.14 conn=0.373556 ub_deg=11.755562 overlap=0.016840
+recover_zero_0_0.5 TOP80 users=3551 base_R=0.237084 module2_R=0.243678 dR=0.006594 base_N=0.095841 module2_N=0.097371 dN=0.001530 rank_mean_base=2915.18 rank_mean_module2=3017.32 dRank=102.14 conn=0.373556 ub_deg=11.755562 overlap=0.016840
+recover_zero_0.5_1 TOP20 users=2952 base_R=0.074237 module2_R=0.078420 dR=0.004183 base_N=0.055760 module2_N=0.057612 dN=0.001851 rank_mean_base=3541.03 rank_mean_module2=3587.47 dRank=46.44 conn=0.261996 ub_deg=26.418022 overlap=0.009675
+recover_zero_0.5_1 TOP80 users=2952 base_R=0.170074 module2_R=0.173653 dR=0.003580 base_N=0.086181 module2_N=0.088261 dN=0.002079 rank_mean_base=3541.03 rank_mean_module2=3587.47 dRank=46.44 conn=0.261996 ub_deg=26.418022 overlap=0.009675
+recover_zero_1 TOP20 users=9127 base_R=0.062397 module2_R=0.067856 dR=0.005458 base_N=0.031016 module2_N=0.033756 dN=0.002740 rank_mean_base=4633.79 rank_mean_module2=4757.20 dRank=123.41 conn=0.237174 ub_deg=8.688945 overlap=0.009290
+recover_zero_1 TOP80 users=9127 base_R=0.134973 module2_R=0.140823 dR=0.005850 base_N=0.047234 module2_N=0.050022 dN=0.002788 rank_mean_base=4633.79 rank_mean_module2=4757.20 dRank=123.41 conn=0.237174 ub_deg=8.688945 overlap=0.009290
+
+===== Bucket Metrics: user_ub_train_deg =====
+ub_deg_0_5 TOP20 users=2771 base_R=0.098881 module2_R=0.110069 dR=0.011187 base_N=0.044191 module2_N=0.047643 dN=0.003452 rank_mean_base=4074.40 rank_mean_module2=4205.17 dRank=130.77 conn=0.344394 ub_deg=4.009383 overlap=0.018806
+ub_deg_0_5 TOP80 users=2771 base_R=0.197763 module2_R=0.206785 dR=0.009022 base_N=0.062443 module2_N=0.065450 dN=0.003008 rank_mean_base=4074.40 rank_mean_module2=4205.17 dRank=130.77 conn=0.344394 ub_deg=4.009383 overlap=0.018806
+ub_deg_6_8 TOP20 users=6796 base_R=0.094320 module2_R=0.099838 dR=0.005518 base_N=0.043811 module2_N=0.046014 dN=0.002203 rank_mean_base=3825.26 rank_mean_module2=3949.36 dRank=124.10 conn=0.309560 ub_deg=7.010006 overlap=0.013821
+ub_deg_6_8 TOP80 users=6796 base_R=0.193423 module2_R=0.199750 dR=0.006327 base_N=0.064421 module2_N=0.066707 dN=0.002286 rank_mean_base=3825.26 rank_mean_module2=3949.36 dRank=124.10 conn=0.309560 ub_deg=7.010006 overlap=0.013821
+ub_deg_9_12 TOP20 users=4739 base_R=0.086534 module2_R=0.089277 dR=0.002743 base_N=0.047837 module2_N=0.049430 dN=0.001593 rank_mean_base=3607.21 rank_mean_module2=3686.52 dRank=79.31 conn=0.294702 ub_deg=10.338468 overlap=0.012422
+ub_deg_9_12 TOP80 users=4739 base_R=0.186326 module2_R=0.189052 dR=0.002726 base_N=0.072599 module2_N=0.074264 dN=0.001665 rank_mean_base=3607.21 rank_mean_module2=3686.52 dRank=79.31 conn=0.294702 ub_deg=10.338468 overlap=0.012422
+ub_deg_13_19 TOP20 users=2385 base_R=0.084018 module2_R=0.090531 dR=0.006513 base_N=0.053347 module2_N=0.057838 dN=0.004492 rank_mean_base=3582.57 rank_mean_module2=3678.16 dRank=95.59 conn=0.279655 ub_deg=15.463732 overlap=0.011642
+ub_deg_13_19 TOP80 users=2385 base_R=0.190629 module2_R=0.195388 dR=0.004759 base_N=0.085066 module2_N=0.089059 dN=0.003993 rank_mean_base=3582.57 rank_mean_module2=3678.16 dRank=95.59 conn=0.279655 ub_deg=15.463732 overlap=0.011642
+ub_deg_20_plus TOP20 users=1823 base_R=0.077718 module2_R=0.079169 dR=0.001451 base_N=0.070244 module2_N=0.070703 dN=0.000459 rank_mean_base=3298.32 rank_mean_module2=3394.96 dRank=96.64 conn=0.252053 ub_deg=40.174986 overlap=0.010219
+ub_deg_20_plus TOP80 users=1823 base_R=0.178660 module2_R=0.182444 dR=0.003784 base_N=0.107397 module2_N=0.109116 dN=0.001719 rank_mean_base=3298.32 rank_mean_module2=3394.96 dRank=96.64 conn=0.252053 ub_deg=40.174986 overlap=0.010219
+
+===== Bucket Metrics: user_ui_deg =====
+ui_deg_q1_min_40 TOP20 users=4680 base_R=0.092421 module2_R=0.101589 dR=0.009168 base_N=0.051011 module2_N=0.054679 dN=0.003668 rank_mean_base=3580.41 rank_mean_module2=3700.76 dRank=120.35 conn=0.176757 ub_deg=11.919444 overlap=0.005494
+ui_deg_q1_min_40 TOP80 users=4680 base_R=0.201863 module2_R=0.206402 dR=0.004539 base_N=0.077342 module2_N=0.079942 dN=0.002600 rank_mean_base=3580.41 rank_mean_module2=3700.76 dRank=120.35 conn=0.176757 ub_deg=11.919444 overlap=0.005494
+ui_deg_q2_40_66 TOP20 users=4708 base_R=0.092550 module2_R=0.096614 dR=0.004064 base_N=0.050799 module2_N=0.052669 dN=0.001869 rank_mean_base=3804.99 rank_mean_module2=3877.92 dRank=72.93 conn=0.268305 ub_deg=12.507647 overlap=0.011114
+ui_deg_q2_40_66 TOP80 users=4708 base_R=0.185878 module2_R=0.196538 dR=0.010660 base_N=0.073849 module2_N=0.077335 dN=0.003485 rank_mean_base=3804.99 rank_mean_module2=3877.92 dRank=72.93 conn=0.268305 ub_deg=12.507647 overlap=0.011114
+ui_deg_q3_66_83 TOP20 users=4704 base_R=0.079869 module2_R=0.085974 dR=0.006105 base_N=0.043052 module2_N=0.045501 dN=0.002449 rank_mean_base=3980.74 rank_mean_module2=4085.54 dRank=104.80 conn=0.337310 ub_deg=11.799957 overlap=0.014752
+ui_deg_q3_66_83 TOP80 users=4704 base_R=0.174600 module2_R=0.178307 dR=0.003708 base_N=0.066106 module2_N=0.068161 dN=0.002055 rank_mean_base=3980.74 rank_mean_module2=4085.54 dRank=104.80 conn=0.337310 ub_deg=11.799957 overlap=0.014752
+ui_deg_q4_83_max TOP20 users=4422 base_R=0.095700 module2_R=0.097717 dR=0.002018 base_N=0.050151 module2_N=0.051541 dN=0.001390 rank_mean_base=3514.89 rank_mean_module2=3647.45 dRank=132.56 conn=0.430583 ub_deg=10.784261 overlap=0.023489
+ui_deg_q4_83_max TOP80 users=4422 base_R=0.200067 module2_R=0.202395 dR=0.002328 base_N=0.075292 module2_N=0.076689 dN=0.001397 rank_mean_base=3514.89 rank_mean_module2=3647.45 dRank=132.56 conn=0.430583 ub_deg=10.784261 overlap=0.023489
+
+===== 2D Bucket: user_ub_train_deg x train_connected_ratio =====
+ub_low_0_8|conn_low_0_0.25 TOP20 users=4361 base_R=0.076129 module2_R=0.085416 dR=0.009287 base_N=0.034946 module2_N=0.038796 dN=0.003850 rank_mean_base=4430.88 rank_mean_module2=4630.78 dRank=199.89 conn=0.094984 ub_deg=6.142169 overlap=0.003294
+ub_low_0_8|conn_low_0_0.25 TOP80 users=4361 base_R=0.160399 module2_R=0.164756 dR=0.004357 base_N=0.051791 module2_N=0.054767 dN=0.002976 rank_mean_base=4430.88 rank_mean_module2=4630.78 dRank=199.89 conn=0.094984 ub_deg=6.142169 overlap=0.003294
+ub_low_0_8|conn_high_gt_0.25 TOP20 users=5206 base_R=0.111986 module2_R=0.117365 dR=0.005378 base_N=0.051440 module2_N=0.052927 dN=0.001488 rank_mean_base=3450.54 rank_mean_module2=3514.70 dRank=64.16 conn=0.507848 ub_deg=6.139839 overlap=0.025293
+ub_low_0_8|conn_high_gt_0.25 TOP80 users=5206 base_R=0.223396 module2_R=0.232808 dR=0.009412 base_N=0.073948 module2_N=0.076040 dN=0.002093 rank_mean_base=3450.54 rank_mean_module2=3514.70 dRank=64.16 conn=0.507848 ub_deg=6.139839 overlap=0.025293
+ub_mid_9_19|conn_low_0_0.25 TOP20 users=3578 base_R=0.066639 module2_R=0.068222 dR=0.001584 base_N=0.039663 module2_N=0.040929 dN=0.001265 rank_mean_base=4129.97 rank_mean_module2=4233.66 dRank=103.69 conn=0.122013 ub_deg=12.132756 overlap=0.003767
+ub_mid_9_19|conn_low_0_0.25 TOP80 users=3578 base_R=0.147187 module2_R=0.149697 dR=0.002511 base_N=0.061062 module2_N=0.062656 dN=0.001594 rank_mean_base=4129.97 rank_mean_module2=4233.66 dRank=103.69 conn=0.122013 ub_deg=12.132756 overlap=0.003767
+ub_mid_9_19|conn_high_gt_0.25 TOP20 users=3546 base_R=0.104916 module2_R=0.111365 dR=0.006449 base_N=0.059790 module2_N=0.063663 dN=0.003873 rank_mean_base=3063.17 rank_mean_module2=3128.82 dRank=65.66 conn=0.458828 ub_deg=11.975183 overlap=0.020630
+ub_mid_9_19|conn_high_gt_0.25 TOP80 users=3546 base_R=0.228713 module2_R=0.233023 dR=0.004310 base_N=0.092626 module2_N=0.095928 dN=0.003303 rank_mean_base=3063.17 rank_mean_module2=3128.82 dRank=65.66 conn=0.458828 ub_deg=11.975183 overlap=0.020630
+ub_high_20_plus|conn_low_0_0.25 TOP20 users=1041 base_R=0.062747 module2_R=0.064028 dR=0.001281 base_N=0.061334 module2_N=0.060669 dN=-0.000665 rank_mean_base=3696.07 rank_mean_module2=3816.94 dRank=120.87 conn=0.131109 ub_deg=45.665706 overlap=0.004281
+ub_high_20_plus|conn_low_0_0.25 TOP80 users=1041 base_R=0.147696 module2_R=0.149309 dR=0.001614 base_N=0.091825 module2_N=0.092051 dN=0.000226 rank_mean_base=3696.07 rank_mean_module2=3816.94 dRank=120.87 conn=0.131109 ub_deg=45.665706 overlap=0.004281
+ub_high_20_plus|conn_high_gt_0.25 TOP20 users=782 base_R=0.097646 module2_R=0.099324 dR=0.001677 base_N=0.082106 module2_N=0.084061 dN=0.001955 rank_mean_base=2768.84 rank_mean_module2=2833.24 dRank=64.40 conn=0.413054 ub_deg=32.865729 overlap=0.018123
+ub_high_20_plus|conn_high_gt_0.25 TOP80 users=782 base_R=0.219879 module2_R=0.226552 dR=0.006673 base_N=0.128126 module2_N=0.131832 dN=0.003706 rank_mean_base=2768.84 rank_mean_module2=2833.24 dRank=64.40 conn=0.413054 ub_deg=32.865729 overlap=0.018123
+
+===== Alignment Overall =====
+user_cos_UB_BI all_users count=18528 base_mean=0.437373 module2_mean=0.797196 delta=0.359824 base_p50=0.434575 module2_p50=0.807316
+user_cos_UB_UI all_users count=18528 base_mean=0.910539 module2_mean=0.952923 delta=0.042384 base_p50=0.919768 module2_p50=0.957969
+user_cos_UI_BI all_users count=18528 base_mean=0.578248 module2_mean=0.807566 delta=0.229317 base_p50=0.582606 module2_p50=0.815666
+bundle_cos_UB_BI all_bundles count=22864 base_mean=0.666110 module2_mean=0.725755 delta=0.059646 base_p50=0.701809 module2_p50=0.809008
+bundle_cos_UB_UI all_bundles count=22864 base_mean=0.425951 module2_mean=0.517935 delta=0.091984 base_p50=0.427781 module2_p50=0.575554
+bundle_cos_UI_BI all_bundles count=22864 base_mean=0.814841 module2_mean=0.834759 delta=0.019918 base_p50=0.833233 module2_p50=0.846566
+user_norm_fused all_users count=18528 base_mean=0.558298 module2_mean=0.610525 delta=0.052228 base_p50=0.548992 module2_p50=0.600583
+bundle_norm_fused all_bundles count=22864 base_mean=0.536653 module2_mean=0.559022 delta=0.022368 base_p50=0.542495 module2_p50=0.565759
+
+===== Alignment By train_connected_ratio: focus on user_cos_UB_BI =====
+ratio_0 count=2826 base=0.295219 module2=0.745920 delta_cos=0.450701 delta_ndcg20=0.003766
+ratio_0_0.25 count=6168 base=0.389996 module2=0.779946 delta_cos=0.389950 delta_ndcg20=0.001627
+ratio_0.25_0.5 count=6371 base=0.470581 module2=0.810480 delta_cos=0.339899 delta_ndcg20=0.001405
+ratio_0.5_0.75 count=2400 base=0.570152 module2=0.843485 delta_cos=0.273332 delta_ndcg20=0.004057
+ratio_gt_0.75 count=763 base=0.651920 module2=0.870046 delta_cos=0.218126 delta_ndcg20=0.005661
+
+===== New Hit Analysis =====
+TOP20 new_hit count=1010 conn_mean=0.295641 train_overlap_mean=0.012684 test_overlap_mean=0.021979 recover_zero_mean=0.665246 bundle_pop_mean=74.540594
+TOP20 lost_hit count=828 conn_mean=0.272511 train_overlap_mean=0.011881 test_overlap_mean=0.018776 recover_zero_mean=0.672687 bundle_pop_mean=77.077295
+TOP20 both_hit count=3791 conn_mean=0.346779 train_overlap_mean=0.017328 test_overlap_mean=0.034265 recover_zero_mean=0.590983 bundle_pop_mean=87.062516
+TOP80 new_hit count=1738 conn_mean=0.276787 train_overlap_mean=0.011327 test_overlap_mean=0.017653 recover_zero_mean=0.694505 bundle_pop_mean=59.263521
+TOP80 lost_hit count=1518 conn_mean=0.266399 train_overlap_mean=0.010913 test_overlap_mean=0.013220 recover_zero_mean=0.689737 bundle_pop_mean=62.725955
+TOP80 both_hit count=8693 conn_mean=0.338653 train_overlap_mean=0.016655 test_overlap_mean=0.028286 recover_zero_mean=0.610452 bundle_pop_mean=67.202232
+
+===== Conclusion Hints =====
+largest_delta_ndcg20_by_train_connected_ratio=ratio_gt_0.75 delta_ndcg20=0.005661 users=763
+largest_delta_user_cos_UB_BI_by_train_connected_ratio=ratio_0 delta_cos=0.450701 count=2826
+top20_new_hit_vs_both_hit=new_conn=0.295641, both_conn=0.346779; new_test_overlap=0.021979, both_test_overlap=0.034265
+
+Auxiliary CSV files are under analysis_outputs/netease_module2_study/tables/.
+
+
+
+
+
+
+
+
+
+
+____________________________________________________________________________________________________________________________________________________________
+____________________________________________________________________________________________________________________________________________________________
+____________________________________________________________________________________________________________________________________________________________
+____________________________________________________________________________________________________________________________________________________________
+
+
+
+
+
+
+
+
+
+
+
+
+
+下面是一份针对这次 NetEase 模块2机制诊断实验的完整解析汇报。核心不是复述数值，而是把这些数值串成“模块2到底解决了什么问题”的证据链。
+
+**1. 实验设置确认**
+
+这次实验只比较两个条件：
+
+| 条件 | 配置 |
+|---|---|
+| baseline | 原始 MultiCBR，关闭 DWT，关闭 latent rebuild，`bi_beta=0`，`anchor_cl=false` |
+| module2 | `bi_beta=0.35` + 融合前对比，`lambda=0.005`，`temp=0.2` |
+
+两者都固定：
+
+```text
+dataset = NetEase
+seed = 4096
+epochs = 50
+aug_type = Noise
+UB/UI/BI ratio = 0.0 / 0.0 / 0.2
+fusion_weights = NetEase 当前最优配置
+latent_rebuild.enabled = false
+ui_bundle_user_agg_beta = 0
+```
+
+所以这份报告确实是在研究：
+
+> 关闭 DWT 与 latent rebuild 后，模块2整体相对 baseline 到底改变了什么。
+
+baseline best epoch 是 44，module2 best epoch 是 49。后续所有机制分析都基于各自 best checkpoint。
+
+---
+
+**2. 整体性能：模块2复现成功**
+
+整体 Test 指标：
+
+| TopK | baseline Recall | module2 Recall | ΔRecall | baseline NDCG | module2 NDCG | ΔNDCG |
+|---|---:|---:|---:|---:|---:|---:|
+| 10 | 0.059049 | 0.061537 | +0.002489 | 0.039059 | 0.040568 | +0.001509 |
+| 20 | 0.090048 | 0.095432 | +0.005384 | 0.048730 | 0.051087 | +0.002357 |
+| 40 | 0.135344 | 0.139275 | +0.003931 | 0.060667 | 0.062787 | +0.002120 |
+| 80 | 0.190442 | 0.195798 | +0.005356 | 0.073109 | 0.075509 | +0.002399 |
+
+相对提升：
+
+```text
+Recall@20 +5.98%
+NDCG@20  +4.84%
+Recall@80 +2.81%
+NDCG@80  +3.28%
+```
+
+这说明模块2的提升不是偶然出现在某个 TopK，而是 Top10/20/40/80 全线提升。尤其 Recall@20 和 NDCG@20 都比较明显，说明模块2既提升了命中数量，也提升了排序质量。
+
+---
+
+**3. train_connected_ratio 分桶：结构连接弱用户确实受益，但不是唯一受益群体**
+
+`train_connected_ratio` 表示：
+
+> 用户训练 bundle 中，有多少比例的 bundle 与用户历史 item 有 item overlap。
+
+越低，说明 user-item 与 bundle-item 之间的 item-level bridge 越弱。
+
+关键结果：
+
+| 桶 | conn 均值 | ΔR@20 | ΔN@20 | ΔR@80 | ΔN@80 |
+|---|---:|---:|---:|---:|---:|
+| ratio_0 | 0.000 | +0.009139 | +0.003766 | +0.001710 | +0.002463 |
+| 0-0.25 | 0.160 | +0.003534 | +0.001627 | +0.004030 | +0.001944 |
+| 0.25-0.5 | 0.377 | +0.002102 | +0.001405 | +0.006911 | +0.002312 |
+| 0.5-0.75 | 0.630 | +0.011812 | +0.004057 | +0.012549 | +0.003908 |
+| >0.75 | 0.886 | +0.013680 | +0.005661 | -0.006088 | +0.001828 |
+
+这里有两个重要现象。
+
+第一，`ratio_0` 用户的 R@20/NDCG@20 提升很明显：
+
+```text
+R@20 +0.009139
+N@20 +0.003766
+```
+
+这支持“模块2能帮助完全缺乏 item-level bridge 的用户”。
+
+第二，最大 NDCG@20 提升反而出现在高 connected ratio 用户：
+
+```text
+ratio_gt_0.75: N@20 +0.005661
+```
+
+所以不能简单写成：
+
+> 模块2只帮助低连接用户。
+
+更准确是：
+
+> 模块2在低连接用户上能缓解结构稀疏，在高连接用户上也能进一步优化排序质量。
+
+这说明模块2的作用可能有两层：一层是补足弱连接用户的 BI-user 表示，另一层是通过融合前对比改善整体跨视图排序语义。
+
+---
+
+**4. avg_overlap_ratio 分桶：低 overlap 用户的 Recall 收益更突出**
+
+`avg_overlap_ratio_per_train_bundle` 表示：
+
+> 用户训练 bundle 的 item 组成，有多少比例能被用户历史 item 覆盖。
+
+这个指标比 `train_connected_ratio` 更细。它不是只看有没有 overlap，而是看 overlap 强不强。
+
+四分位结果：
+
+| 桶 | overlap 均值 | ΔR@20 | ΔN@20 | ΔR@80 | ΔN@80 |
+|---|---:|---:|---:|---:|---:|
+| Q1 最低 | 0.000367 | +0.007154 | +0.002147 | +0.002533 | +0.001520 |
+| Q2 | 0.003958 | +0.006288 | +0.002381 | +0.008617 | +0.002868 |
+| Q3 | 0.010503 | +0.003595 | +0.001973 | +0.005649 | +0.002159 |
+| Q4 最高 | 0.039428 | +0.004504 | +0.002926 | +0.004620 | +0.003047 |
+
+这一节很支持“item-level bridge 稀疏”解释。
+
+Q1/Q2 的 R@20 提升更大：
+
+```text
+Q1 +0.007154
+Q2 +0.006288
+```
+
+说明当用户 item 历史几乎无法覆盖训练 bundle 组成时，模块2能带来更明显的 Top20 召回收益。
+
+但 Q4 的 NDCG 提升最高：
+
+```text
+Q4 N@20 +0.002926
+Q4 N@80 +0.003047
+```
+
+所以这里也不是单调低 overlap 最大，而是：
+
+> 低 overlap 用户更体现 Recall 补偿，高 overlap 用户更体现排序质量改善。
+
+这对论文叙事很有价值：模块2不是只“补稀疏”，也改善跨视图融合后的排序。
+
+---
+
+**5. user_test_recover_zero_ratio：模块2能帮助测试样本难恢复的用户**
+
+`user_test_recover_zero_ratio` 表示：
+
+> 用户测试正样本中，有多少比例的 bundle 与用户历史 item 完全没有 overlap。
+
+越高，说明测试目标越难靠 UI 历史直接恢复。
+
+结果：
+
+| 桶 | ΔR@20 | ΔN@20 | ΔR@80 | ΔN@80 |
+|---|---:|---:|---:|---:|
+| recover_zero=0 | +0.009980 | +0.003865 | +0.004089 | +0.002565 |
+| 0-0.5 | +0.002458 | +0.000567 | +0.006594 | +0.001530 |
+| 0.5-1 | +0.004183 | +0.001851 | +0.003580 | +0.002079 |
+| =1 | +0.005458 | +0.002740 | +0.005850 | +0.002788 |
+
+这里最重要的是：`recover_zero=1` 用户仍然有明显提升：
+
+```text
+R@20 +0.005458
+N@20 +0.002740
+R@80 +0.005850
+N@80 +0.002788
+```
+
+这说明即使测试 bundle 完全无法由用户历史 item overlap 解释，模块2仍然有效。这是支持“模块2不只是依赖 item overlap，而是在引入 bundle-level 行为偏好”的证据。
+
+不过 `recover_zero=0` 用户提升也很大，所以也不能说模块2只帮难恢复用户。更准确：
+
+> 模块2对容易恢复和难恢复用户都有收益，但它在 recover-zero 高的用户上仍保持稳定提升，说明它具备处理 item-overlap 缺失样本的能力。
+
+---
+
+**6. user_ub_train_deg：模块2不只是解决普通交互稀疏**
+
+`user_ub_train_deg` 是用户训练 UB 交互数。它衡量普通意义上的 user-bundle 行为稀疏。
+
+结果：
+
+| UB 度桶 | ΔR@20 | ΔN@20 | ΔR@80 | ΔN@80 |
+|---|---:|---:|---:|---:|
+| 0-5 | +0.011187 | +0.003452 | +0.009022 | +0.003008 |
+| 6-8 | +0.005518 | +0.002203 | +0.006327 | +0.002286 |
+| 9-12 | +0.002743 | +0.001593 | +0.002726 | +0.001665 |
+| 13-19 | +0.006513 | +0.004492 | +0.004759 | +0.003993 |
+| 20+ | +0.001451 | +0.000459 | +0.003784 | +0.001719 |
+
+低 UB 度用户确实收益大，尤其 0-5：
+
+```text
+R@20 +0.011187
+N@20 +0.003452
+```
+
+这说明模块2确实缓解一部分普通交互稀疏问题。
+
+但 13-19 桶的 NDCG@20 最高：
+
+```text
+N@20 +0.004492
+```
+
+这说明模块2不是只对冷用户有效。对于有一定 bundle 行为、但可能多视图表达不一致的用户，它也能改善排序。
+
+因此更好的说法是：
+
+> 模块2同时缓解普通 UB 交互稀疏和跨视图结构稀疏，但其核心机制不应简单归因于冷启动。
+
+---
+
+**7. 二维分桶：区分“交互少”和“结构桥接弱”**
+
+二维分桶是这份报告里很重要的一节：
+
+```text
+user_ub_train_deg × train_connected_ratio
+```
+
+它把用户分成：
+
+- UB 度低/中/高
+- connected ratio 低/高
+
+这样可以判断模块2解决的是“交互少”，还是“桥接弱”。
+
+关键结果：
+
+| 桶 | ΔR@20 | ΔN@20 |
+|---|---:|---:|
+| low UB + low conn | +0.009287 | +0.003850 |
+| low UB + high conn | +0.005378 | +0.001488 |
+| mid UB + low conn | +0.001584 | +0.001265 |
+| mid UB + high conn | +0.006449 | +0.003873 |
+| high UB + low conn | +0.001281 | -0.000665 |
+| high UB + high conn | +0.001677 | +0.001955 |
+
+最值得注意的是：
+
+```text
+low UB + low conn
+R@20 +0.009287
+N@20 +0.003850
+```
+
+这说明模块2对“双重稀疏”用户很有效：既 UB 交互少，又 item-level bridge 弱。
+
+但是：
+
+```text
+high UB + low conn
+N@20 -0.000665
+```
+
+这提醒我们：对于 UB 行为很多但 item bridge 低的用户，模块2并没有显著提升，甚至 NDCG@20 略降。
+
+因此当前最稳的解释不是：
+
+> 模块2解决所有结构稀疏。
+
+而是：
+
+> 模块2尤其帮助 UB 行为较少且 item-level bridge 弱的用户，同时在部分中低连接用户上改善排序；但对高 UB 度、低 connected ratio 用户的帮助有限。
+
+这很关键，避免论文说得太满。
+
+---
+
+**8. 表示对齐：最强机制证据**
+
+这是整份报告最有价值的一节。
+
+整体表示对齐变化：
+
+| 指标 | baseline | module2 | Δ |
+|---|---:|---:|---:|
+| user cos(UB, BI) | 0.437373 | 0.797196 | +0.359824 |
+| user cos(UB, UI) | 0.910539 | 0.952923 | +0.042384 |
+| user cos(UI, BI) | 0.578248 | 0.807566 | +0.229317 |
+| bundle cos(UB, BI) | 0.666110 | 0.725755 | +0.059646 |
+| bundle cos(UB, UI) | 0.425951 | 0.517935 | +0.091984 |
+| bundle cos(UI, BI) | 0.814841 | 0.834759 | +0.019918 |
+
+最关键的是：
+
+```text
+user cos(UB, BI): +0.359824
+```
+
+这是非常大的变化。说明模块2主要不是微调排序，而是显著改变了用户侧 BI 视图和 UB 行为视图之间的关系。
+
+按 connected ratio 看：
+
+| 桶 | baseline cos(UB,BI) | module2 cos(UB,BI) | Δcos |
+|---|---:|---:|---:|
+| ratio_0 | 0.295219 | 0.745920 | +0.450701 |
+| 0-0.25 | 0.389996 | 0.779946 | +0.389950 |
+| 0.25-0.5 | 0.470581 | 0.810480 | +0.339899 |
+| 0.5-0.75 | 0.570152 | 0.843485 | +0.273332 |
+| >0.75 | 0.651920 | 0.870046 | +0.218126 |
+
+这个结果非常漂亮，因为它呈现出清晰趋势：
+
+> connected ratio 越低，baseline 的 UB-BI 用户表示越不一致；模块2带来的 UB-BI 对齐提升越大。
+
+这正好支撑我们的核心机制：
+
+> NetEase 中低 item-level bridge 用户的 BI-user 表示与 UB 行为语义存在严重错位；模块2显著缓解了这种错位。
+
+即使低连接桶不是指标提升最大，表示对齐这一节仍然证明了模块2确实针对结构稀疏场景产生了很强的表示修复作用。
+
+---
+
+**9. 新增命中分析：模块2新增命中更偏困难样本**
+
+Top20：
+
+| 类型 | conn | train overlap | test overlap | recover zero | pop |
+|---|---:|---:|---:|---:|---:|
+| new_hit | 0.295641 | 0.012684 | 0.021979 | 0.665246 | 74.54 |
+| lost_hit | 0.272511 | 0.011881 | 0.018776 | 0.672687 | 77.08 |
+| both_hit | 0.346779 | 0.017328 | 0.034265 | 0.590983 | 87.06 |
+
+Top80：
+
+| 类型 | conn | train overlap | test overlap | recover zero | pop |
+|---|---:|---:|---:|---:|---:|
+| new_hit | 0.276787 | 0.011327 | 0.017653 | 0.694505 | 59.26 |
+| lost_hit | 0.266399 | 0.010913 | 0.013220 | 0.689737 | 62.73 |
+| both_hit | 0.338653 | 0.016655 | 0.028286 | 0.610452 | 67.20 |
+
+这里有三点。
+
+第一，new_hit 比 both_hit 的 connected ratio 更低：
+
+```text
+Top20: 0.295641 < 0.346779
+Top80: 0.276787 < 0.338653
+```
+
+第二，new_hit 的 test overlap 更低：
+
+```text
+Top20: 0.021979 < 0.034265
+Top80: 0.017653 < 0.028286
+```
+
+第三，new_hit 的 bundle popularity 更低：
+
+```text
+Top20: 74.54 < 87.06
+Top80: 59.26 < 67.20
+```
+
+这说明模块2新增命中的样本更偏：
+
+- 低连接用户
+- 低 item overlap 测试样本
+- 更不热门的 bundle
+
+这是很强的样本级证据。它说明模块2不是只把本来就容易命中的热门 bundle 排得更前，而是确实增加了一些更难的命中。
+
+不过 new_hit 和 lost_hit 很接近，甚至 lost_hit 的 connected/test overlap 更低一些。这意味着模块2也会丢失部分困难样本。最终收益来自 new_hit 数量多于 lost_hit：
+
+```text
+Top20 new_hit 1010 > lost_hit 828
+Top80 new_hit 1738 > lost_hit 1518
+```
+
+所以应该写成：
+
+> 模块2在困难样本上产生了净增益，而不是无损地提升所有困难样本。
+
+---
+
+**10. rank_mean 指标需要谨慎**
+
+报告中很多桶的 `dRank` 是正数，表示平均正样本排名变大，也就是平均 rank 变差。
+
+例如低 overlap Q1：
+
+```text
+rank_mean_base=4446.87
+rank_mean_module2=4620.69
+dRank=+173.82
+```
+
+但同时 Recall/NDCG 提升。
+
+这说明：
+
+> module2 可能把一部分正样本推入 TopK，但让更多非 TopK 正样本平均排名略微后移。
+
+推荐任务关注 TopK，因此平均全体正样本 rank 不适合作为主证据。后续如果要继续看 rank，建议改看：
+
+- 新增命中样本的 rank
+- TopK 边界附近正样本的 rank
+- 每用户 best positive rank
+- rank 的 p10/p25，而不是 mean
+
+目前论文里不建议重点使用 `rank_mean`。
+
+---
+
+**11. 当前最稳的机制解释**
+
+结合所有结果，我认为现在最稳的解释是：
+
+> NetEase 中存在明显的 user-item 行为与 bundle-item 组成之间的结构弱连接，使得原始 MultiCBR 的 BI 视图用户表示难以充分对齐 UB 行为语义。模块2通过 BI 侧用户增强和融合前对比，将 BI-user 表示显著拉近 UB-user 行为表示，尤其在 item-level bridge 较弱的用户上对齐改善最大。最终，模块2不仅提升整体 Recall/NDCG，还新增命中了更多低连接、低 overlap、低流行度的困难样本，说明它缓解了结构稀疏导致的用户偏好恢复不足。
+
+这句话可以作为论文机制主线。
+
+---
+
+**12. 但需要避免的错误表述**
+
+不要写：
+
+```text
+模块2只帮助低连接用户。
+```
+
+因为高 connected ratio 用户的 NDCG@20 提升也很强。
+
+不要写：
+
+```text
+overlap 越低，提升越大。
+```
+
+因为 Q4 的 NDCG 提升最高。
+
+不要写：
+
+```text
+模块2让所有正样本排名都前移。
+```
+
+因为 rank_mean 反而变差。
+
+更准确的写法是：
+
+```text
+模块2显著修复 UB-BI 用户表示错位；这种表示修复在低连接用户上最强。
+模块2在低 overlap 用户上带来明显 Recall 收益，同时在高 overlap 用户上也改善排序质量。
+模块2新增命中更偏低连接、低 overlap、低流行度样本，说明它对困难样本存在净增益。
+```
+
+---
+
+**13. 后续研讨方向**
+
+我建议接下来重点围绕三条线讨论：
+
+1. **论文主故事线**
+   - 结构稀疏不是唯一受益场景，但它是模块2最容易解释、证据最强的机制入口。
+   - 主证据应放在 `UB-BI alignment` 和 `new_hit_analysis`。
+
+2. **是否补分析**
+   - 不重训，只用现有 CSV。
+   - 可以进一步看 new_hit vs lost_hit 在各个桶中的净数量。
+   - 例如每个 `train_connected_ratio` 桶里：
+     ```text
+     net_gain = new_hit_count - lost_hit_count
+     ```
+   - 这个会比平均特征更直接。
+
+3. **论文里怎么命名模块2**
+   - 不建议叫“子视图增强 + 融合前对比”这么散。
+   - 可以考虑叫：
+     ```text
+     BI-guided Cross-view Alignment
+     ```
+     或中文：
+     ```text
+     BI 侧用户偏好补偿与跨视图对齐模块
+     ```
+
+这份报告总体是有价值的，而且方向比跑之前更清晰了：**模块2最硬的解释不是“低连接用户指标最大提升”，而是“显著修复低连接用户的 UB-BI 表示错位，并带来困难样本净增益”。**
+
+
+
+
+
+
+
+
+
+
+
+
+

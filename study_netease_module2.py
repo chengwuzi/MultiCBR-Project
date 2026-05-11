@@ -32,6 +32,7 @@ REPORT_PATH = OUTPUT_ROOT / "report.txt"
 MANIFEST_PATH = OUTPUT_ROOT / "manifest.json"
 
 TOPKS = [10, 20, 40, 80]
+MECHANISM_TOPKS = [10, 20]
 MAX_TOPK = max(TOPKS)
 DEFAULT_SEED = 4096
 
@@ -817,7 +818,9 @@ def overlap_for_pair(ui_graph, bi_graph, user_id, bundle_id):
     return count, float(count / max(bundle_items.size, 1))
 
 
-def new_hit_analysis(baseline_eval, module2_eval, dataset, connectivity, topk_values=(20, 80)):
+def new_hit_analysis(baseline_eval, module2_eval, dataset, connectivity, topk_values=None):
+    if topk_values is None:
+        topk_values = MECHANISM_TOPKS
     ui_graph, bi_graph, test_graph, bundle_pop = load_graph_sets(dataset)
     rows = []
     pair_rows = []
@@ -972,7 +975,7 @@ def delta_alignment_correlation_rows(baseline_eval, module2_eval, connectivity, 
             scopes.append((feature_name, bucket_name, valid_users & valid_feature & fn(values)))
 
     for feature_name, bucket_name, mask in scopes:
-        for topk in [20, 80]:
+        for topk in MECHANISM_TOPKS:
             for metric_name in ["recall", "ndcg"]:
                 metric_key = f"{metric_name}@{topk}"
                 delta_metric = module2_eval["per_user"][metric_key] - baseline_eval["per_user"][metric_key]
@@ -1056,7 +1059,7 @@ def delta_cos_quantile_rows(baseline_eval, module2_eval, connectivity):
             "avg_user_test_recover_zero_ratio": mean_valid(connectivity["user_test_recover_zero_ratio"], mask),
             "avg_user_ub_train_deg": mean_valid(connectivity["user_ub_train_deg"], mask),
         }
-        for topk in [20, 80]:
+        for topk in MECHANISM_TOPKS:
             for metric_name in ["recall", "ndcg"]:
                 metric_key = f"{metric_name}@{topk}"
                 delta_metric = module2_eval["per_user"][metric_key] - baseline_eval["per_user"][metric_key]
@@ -1233,6 +1236,7 @@ def build_report(
     lines.append("This report compares exactly two conditions: baseline vs module2.")
     lines.append("module2 is treated as one complete module: BI-side user enhancement (beta=0.35) + pre-fusion anchor CL (lambda=0.005, temp=0.2).")
     lines.append("No beta/lambda tuning, no module splitting, no DWT, no latent rebuild.")
+    lines.append(f"Mechanism sections focus on TOP{MECHANISM_TOPKS[0]}/TOP{MECHANISM_TOPKS[1]}, matching the intended paper setting.")
     lines.append("")
 
     lines.append("===== Experiment Configs =====")
@@ -1280,11 +1284,14 @@ def build_report(
     lines.append("===== Alignment By train_connected_ratio: focus on user_cos_UB_BI =====")
     for row in align_rows:
         if row["feature"] == "train_connected_ratio" and row["metric"] == "user_cos_UB_BI":
-            delta_ndcg20 = find_bucket_delta(bucket_rows, "train_connected_ratio", row["bucket"], 20, "delta_ndcg")
+            delta_ndcg_parts = []
+            for topk in MECHANISM_TOPKS:
+                delta_ndcg = find_bucket_delta(bucket_rows, "train_connected_ratio", row["bucket"], topk, "delta_ndcg")
+                delta_ndcg_parts.append(f"delta_ndcg{topk}={fmt_float(delta_ndcg)}")
             lines.append(
                 f"{row['bucket']} count={row['count']} "
                 f"base={fmt_float(row['baseline_mean'])} module2={fmt_float(row['module2_mean'])} "
-                f"delta_cos={fmt_float(row['delta_mean'])} delta_ndcg20={fmt_float(delta_ndcg20)}"
+                f"delta_cos={fmt_float(row['delta_mean'])} {' '.join(delta_ndcg_parts)}"
             )
     lines.append("")
 
@@ -1324,7 +1331,7 @@ def build_report(
 def append_bucket_section(lines, feature, rows, title=None):
     title = title or f"Bucket Metrics: {feature}"
     lines.append(f"===== {title} =====")
-    filtered = [row for row in rows if row["feature"] == feature and row["topk"] in [20, 80]]
+    filtered = [row for row in rows if row["feature"] == feature and row["topk"] in MECHANISM_TOPKS]
     for row in filtered:
         lines.append(
             f"{row['bucket']} TOP{row['topk']} users={row['users']} "
@@ -1346,7 +1353,7 @@ def find_bucket_delta(rows, feature, bucket, topk, key):
 def append_hit_bucket_gain_section(lines, feature, rows, title=None):
     title = title or f"Hit Net Gain: {feature}"
     lines.append(f"===== {title} =====")
-    filtered = [row for row in rows if row["feature"] == feature and row["topk"] in [20, 80]]
+    filtered = [row for row in rows if row["feature"] == feature and row["topk"] in MECHANISM_TOPKS]
     for row in filtered:
         lines.append(
             f"{row['bucket']} TOP{row['topk']} users={row['users']} "
@@ -1364,7 +1371,7 @@ def append_correlation_section(lines, rows):
     focus = [
         row for row in rows
         if row["feature"] in ["overall", "train_connected_ratio"]
-        and row["topk"] in [20, 80]
+        and row["topk"] in MECHANISM_TOPKS
         and row["metric"] in ["recall", "ndcg"]
     ]
     for row in focus:
@@ -1379,11 +1386,14 @@ def append_correlation_section(lines, rows):
 def append_delta_cos_quantile_section(lines, rows):
     lines.append("===== Delta Cos Quantile Metrics: users grouped by delta user_cos_UB_BI =====")
     for row in rows:
+        metric_parts = []
+        for topk in MECHANISM_TOPKS:
+            metric_parts.append(f"dR{topk}={fmt_float(row[f'delta_recall@{topk}'])}")
+            metric_parts.append(f"dN{topk}={fmt_float(row[f'delta_ndcg@{topk}'])}")
         lines.append(
             f"{row['bucket']} users={row['users']} "
             f"mean_dcos={fmt_float(row['delta_cos_mean'])} "
-            f"dR20={fmt_float(row['delta_recall@20'])} dN20={fmt_float(row['delta_ndcg@20'])} "
-            f"dR80={fmt_float(row['delta_recall@80'])} dN80={fmt_float(row['delta_ndcg@80'])} "
+            f"{' '.join(metric_parts)} "
             f"conn={fmt_float(row['avg_train_connected_ratio'])} overlap={fmt_float(row['avg_overlap_ratio_per_train_bundle'])} "
             f"ub_deg={fmt_float(row['avg_user_ub_train_deg'])}"
         )
@@ -1392,16 +1402,17 @@ def append_delta_cos_quantile_section(lines, rows):
 
 def conclusion_hints(bucket_rows, align_rows, hit_rows, hit_bucket_rows, corr_rows, delta_cos_bucket_rows):
     hints = []
-    candidates = [
-        row for row in bucket_rows
-        if row["feature"] == "train_connected_ratio" and row["topk"] == 20 and row["users"] > 0
-    ]
-    if candidates:
-        best = max(candidates, key=lambda r: -1e9 if np.isnan(r["delta_ndcg"]) else r["delta_ndcg"])
-        hints.append(
-            "largest_delta_ndcg20_by_train_connected_ratio="
-            f"{best['bucket']} delta_ndcg20={fmt_float(best['delta_ndcg'])} users={best['users']}"
-        )
+    for topk in MECHANISM_TOPKS:
+        candidates = [
+            row for row in bucket_rows
+            if row["feature"] == "train_connected_ratio" and row["topk"] == topk and row["users"] > 0
+        ]
+        if candidates:
+            best = max(candidates, key=lambda r: -1e9 if np.isnan(r["delta_ndcg"]) else r["delta_ndcg"])
+            hints.append(
+                f"largest_delta_ndcg{topk}_by_train_connected_ratio="
+                f"{best['bucket']} delta_ndcg{topk}={fmt_float(best['delta_ndcg'])} users={best['users']}"
+            )
 
     align_candidates = [
         row for row in align_rows
@@ -1414,44 +1425,46 @@ def conclusion_hints(bucket_rows, align_rows, hit_rows, hit_bucket_rows, corr_ro
             f"{best['bucket']} delta_cos={fmt_float(best['delta_mean'])} count={best['count']}"
         )
 
-    hit20 = {row["hit_type"]: row for row in hit_rows if row["topk"] == 20}
-    if "new_hit" in hit20 and "both_hit" in hit20:
-        new_row = hit20["new_hit"]
-        both_row = hit20["both_hit"]
-        hints.append(
-            "top20_new_hit_vs_both_hit="
-            f"new_conn={fmt_float(new_row['train_connected_ratio_mean'])}, both_conn={fmt_float(both_row['train_connected_ratio_mean'])}; "
-            f"new_test_overlap={fmt_float(new_row['test_overlap_ratio_mean'])}, both_test_overlap={fmt_float(both_row['test_overlap_ratio_mean'])}"
-        )
+    for topk in MECHANISM_TOPKS:
+        hit_by_type = {row["hit_type"]: row for row in hit_rows if row["topk"] == topk}
+        if "new_hit" in hit_by_type and "both_hit" in hit_by_type:
+            new_row = hit_by_type["new_hit"]
+            both_row = hit_by_type["both_hit"]
+            hints.append(
+                f"top{topk}_new_hit_vs_both_hit="
+                f"new_conn={fmt_float(new_row['train_connected_ratio_mean'])}, both_conn={fmt_float(both_row['train_connected_ratio_mean'])}; "
+                f"new_test_overlap={fmt_float(new_row['test_overlap_ratio_mean'])}, both_test_overlap={fmt_float(both_row['test_overlap_ratio_mean'])}"
+            )
 
-    hit_gain_candidates = [
-        row for row in hit_bucket_rows
-        if row["feature"] == "train_connected_ratio" and row["topk"] == 20 and row["users"] > 0
-    ]
-    if hit_gain_candidates:
-        best = max(hit_gain_candidates, key=lambda r: r["net_gain_per_user"])
-        hints.append(
-            "largest_top20_net_hit_gain_per_user_by_train_connected_ratio="
-            f"{best['bucket']} net/user={fmt_float(best['net_gain_per_user'])} new={best['new_hits']} lost={best['lost_hits']}"
-        )
+        hit_gain_candidates = [
+            row for row in hit_bucket_rows
+            if row["feature"] == "train_connected_ratio" and row["topk"] == topk and row["users"] > 0
+        ]
+        if hit_gain_candidates:
+            best = max(hit_gain_candidates, key=lambda r: r["net_gain_per_user"])
+            hints.append(
+                f"largest_top{topk}_net_hit_gain_per_user_by_train_connected_ratio="
+                f"{best['bucket']} net/user={fmt_float(best['net_gain_per_user'])} new={best['new_hits']} lost={best['lost_hits']}"
+            )
 
-    overall_corr = [
-        row for row in corr_rows
-        if row["feature"] == "overall" and row["bucket"] == "all_users" and row["topk"] == 20 and row["metric"] == "ndcg"
-    ]
-    if overall_corr:
-        row = overall_corr[0]
-        hints.append(
-            "overall_delta_cos_vs_delta_ndcg20="
-            f"pearson={fmt_float(row['pearson'])} spearman={fmt_float(row['spearman'])}"
-        )
+        overall_corr = [
+            row for row in corr_rows
+            if row["feature"] == "overall" and row["bucket"] == "all_users" and row["topk"] == topk and row["metric"] == "ndcg"
+        ]
+        if overall_corr:
+            row = overall_corr[0]
+            hints.append(
+                f"overall_delta_cos_vs_delta_ndcg{topk}="
+                f"pearson={fmt_float(row['pearson'])} spearman={fmt_float(row['spearman'])}"
+            )
 
-    if delta_cos_bucket_rows:
-        best = max(delta_cos_bucket_rows, key=lambda r: -1e9 if np.isnan(r.get("delta_ndcg@20", float("nan"))) else r["delta_ndcg@20"])
-        hints.append(
-            "largest_delta_ndcg20_by_delta_cos_quantile="
-            f"{best['bucket']} dcos={fmt_float(best['delta_cos_mean'])} dN20={fmt_float(best['delta_ndcg@20'])}"
-        )
+        if delta_cos_bucket_rows:
+            metric_key = f"delta_ndcg@{topk}"
+            best = max(delta_cos_bucket_rows, key=lambda r: -1e9 if np.isnan(r.get(metric_key, float("nan"))) else r[metric_key])
+            hints.append(
+                f"largest_delta_ndcg{topk}_by_delta_cos_quantile="
+                f"{best['bucket']} dcos={fmt_float(best['delta_cos_mean'])} dN{topk}={fmt_float(best[metric_key])}"
+            )
 
     if not hints:
         hints.append("No automatic hints available; inspect the tables manually.")

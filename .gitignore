@@ -20,6 +20,9 @@ checkpoints/*
 runs
 runs*
 runs/*
+analysis_outputs
+analysis_outputs*
+analysis_outputs/*
 log
 log*
 log/*

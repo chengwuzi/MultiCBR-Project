@@ -1,0 +1,583 @@
+NetEase 模块2实验分析与当前研究结论总结
+生成目的：用于后续对话快速接手当前工作。
+
+一、当前研究背景
+
+本项目研究 MultiCBR 在三个数据集上的表现。后续论文计划把 DWT 模块作为一个工作，把“子视图增强 + 融合前对比”合并为另一个工作，暂记为模块2。
+
+当前重点数据集是 NetEase，因为模块2在 NetEase 上带来的提升最大。这里暂时不讨论 DWT，DWT 可解释性已经比较明确；当前核心问题是解释模块2为什么有效，它到底解决了什么问题。
+
+模块2在当前研究中被视为一个整体，不再拆分：
+
+1. BI 侧用户增强：
+   bi_user_bundle_agg_beta = 0.35
+
+2. 融合前 anchor contrastive learning：
+   anchor_cl.enabled = true
+   anchor_cl_lambda = 0.005
+   temp = 0.2
+
+重要约束：
+
+1. bi_beta=0.35 是已经调好的最优值，不再围绕 beta 调参。
+2. anchor_cl 参数也已经调好，不再调 lambda/temp。
+3. ui_bundle_user_agg_beta 在三个数据集上都没用，后续计划去掉，目前不作为解释重点。
+4. 当前研究重点不是继续找更高分，而是剖析模块2解决了什么问题，为什么带来提升。
+
+
+二、当前脚本与实验设计
+
+已开发脚本：
+
+study_netease_module2.py
+
+脚本只跑两个条件：
+
+1. baseline
+   关闭 DWT
+   关闭 latent_rebuild
+   ui_bundle_user_agg_beta = 0
+   bi_user_bundle_agg_beta = 0
+   anchor_cl.enabled = false
+
+2. module2
+   关闭 DWT
+   关闭 latent_rebuild
+   ui_bundle_user_agg_beta = 0
+   bi_user_bundle_agg_beta = 0.35
+   anchor_cl.enabled = true
+   anchor_cl_lambda = 0.005
+   temp = 0.2
+
+固定 seed：
+
+seed = 4096
+
+脚本支持：
+
+1. 自动训练 baseline/module2。
+2. 每个实验最多重试 3 次。
+3. 保存 best epoch checkpoint。
+4. 基于 best epoch checkpoint 做机制分析。
+5. 支持 analysis-only 复用已有 checkpoint 重新生成报告。
+
+复用已有结果生成报告命令：
+
+python -u study_netease_module2.py --gpu 0 --analysis-only --force-analysis
+
+输出目录：
+
+analysis_outputs/netease_module2_study/
+
+主要输出：
+
+1. report.txt
+2. tables/overall_metrics.csv
+3. tables/overall_delta.csv
+4. tables/bucket_metrics.csv
+5. tables/two_dimensional_bucket_metrics.csv
+6. tables/alignment_metrics.csv
+7. tables/new_hit_summary.csv
+8. tables/new_hit_pairs.csv
+9. tables/hit_bucket_gain.csv
+10. tables/delta_alignment_correlation.csv
+11. tables/delta_cos_quantile_metrics.csv
+
+注意：
+
+最新版本报告的机制分析章节聚焦 TOP10/TOP20，因为论文里也准备只写 TOP10/TOP20 的实验结果。
+
+
+三、整体实验结果
+
+baseline best_epoch = 44
+module2 best_epoch = 49
+
+Overall Test Metrics:
+
+TOP10:
+baseline TEST_REC = 0.059049
+baseline TEST_NDCG = 0.039059
+module2  TEST_REC = 0.061537
+module2  TEST_NDCG = 0.040568
+delta Recall = +0.002489, relative +4.21%
+delta NDCG   = +0.001509, relative +3.86%
+
+TOP20:
+baseline TEST_REC = 0.090048
+baseline TEST_NDCG = 0.048730
+module2  TEST_REC = 0.095432
+module2  TEST_NDCG = 0.051087
+delta Recall = +0.005384, relative +5.98%
+delta NDCG   = +0.002357, relative +4.84%
+
+TOP40:
+delta Recall = +0.003931, relative +2.90%
+delta NDCG   = +0.002120, relative +3.49%
+
+TOP80:
+delta Recall = +0.005356, relative +2.81%
+delta NDCG   = +0.002399, relative +3.28%
+
+当前论文重点关注 TOP10/TOP20，因为这两个位置相对提升最大，也更能体现前排推荐质量。
+
+
+四、最核心机制证据：UB-BI 跨视图表示错位被修复
+
+Alignment Overall:
+
+user_cos_UB_BI:
+baseline = 0.437373
+module2  = 0.797196
+delta    = +0.359824
+
+user_cos_UB_UI:
+baseline = 0.910539
+module2  = 0.952923
+delta    = +0.042384
+
+user_cos_UI_BI:
+baseline = 0.578248
+module2  = 0.807566
+delta    = +0.229317
+
+最强变化是 user_cos_UB_BI，说明模块2主要修复的是 UB 行为视图和 BI 物品语义视图之间的表示不一致。
+
+按 train_connected_ratio 分桶看 user_cos_UB_BI:
+
+ratio_0:
+delta_cos = +0.450701
+
+ratio_0_0.25:
+delta_cos = +0.389950
+
+ratio_0.25_0.5:
+delta_cos = +0.339899
+
+ratio_0.5_0.75:
+delta_cos = +0.273332
+
+ratio_gt_0.75:
+delta_cos = +0.218126
+
+结论：
+
+低连通用户的 UB-BI 对齐修复幅度最大。说明模块2确实在缓解 item-level bridge 不足导致的跨视图语义错位。
+
+
+五、当前对模块2“解决了什么问题”的定性
+
+不要简单写成：
+
+模块2主要解决 UB 稀疏。
+
+更准确的说法：
+
+模块2主要解决 NetEase 中 UB 行为视图与 BI 物品语义视图之间由于结构稀疏和 item-level bridge 不足造成的跨视图表示错位问题。
+
+通俗表达：
+
+baseline 中，UB 侧和 BI 侧有时候各学各的。
+UB 行为视图认为用户像一种偏好，BI 物品语义视图又把用户拉向另一种偏好。
+两边没对齐，模型就不知道该如何充分利用 item 语义。
+模块2做的事，就是把用户行为信号和 bundle-item 语义信号重新对上号，让二者互相校准。
+
+一句话版：
+
+模块2不是单纯解决“用户数据少”，而是解决“用户行为信号和 bundle-item 语义信号没对齐、传不过来、用不充分”的问题。
+
+UB 稀疏和低连通度是这个根问题的两个外在表现。
+
+
+六、Top10 与 Top20 的收益来源存在错位
+
+最新报告补充 Top10 后发现：
+
+Top10 和 Top20 的收益来源不完全一样。
+
+这不是坏事，但论文里不能硬说二者完全同源。
+
+当前更稳的解释是：
+
+Top10 更偏“前排排序校准”。
+Top20 更偏“候选补充 / 困难样本召回”。
+
+通俗理解：
+
+Top10：把本来就有希望、信号比较强的目标排得更准、更靠前。
+Top20：把原来漏掉、但其实相关的困难目标补回来。
+
+底层机制相同：
+
+模块2先修复 UB-BI 跨视图表示错位。
+
+但修复之后，在不同 TopK 位置上表现不同：
+
+1. 在 Top10，收益更容易出现在高连通或中等 UB 且有较强语义桥接的用户上，体现为排序增强。
+2. 在 Top20，收益更容易覆盖低 UB、低连通、低 overlap、recover_zero 等困难区域，体现为候选补充。
+
+
+七、Top10 收益来源分析
+
+Top10 整体收益：
+
+Recall@10 +0.002489
+NDCG@10   +0.001509
+
+Top10 新增命中：
+
+new_hit = 707
+lost_hit = 615
+net = +92
+
+说明 Top10 提升确实来自净新增命中，不只是内部重排波动。
+
+按 train_connected_ratio：
+
+ratio_0:
+dR10 = +0.002645
+dN10 = +0.002202
+net = +10
+
+ratio_0_0.25:
+dR10 = +0.002564
+dN10 = +0.001225
+net = +26
+
+ratio_0.25_0.5:
+dR10 = +0.002360
+dN10 = +0.001522
+net = +49
+
+ratio_0.5_0.75:
+dR10 = -0.000094
+dN10 = +0.000460
+net = -2
+
+ratio_gt_0.75:
+dR10 = +0.010496
+dN10 = +0.004434
+net = +9
+net/user = +0.011796
+
+Top10 按连通度最强的是 ratio_gt_0.75，即高连通用户。
+
+按 user_ub_train_deg：
+
+ub_deg_0_5:
+dR10 = +0.003970
+dN10 = +0.001705
+net = +11
+
+ub_deg_6_8:
+dR10 = +0.002281
+dN10 = +0.001276
+net = +15
+
+ub_deg_9_12:
+dR10 = +0.001653
+dN10 = +0.001261
+net = +21
+
+ub_deg_13_19:
+dR10 = +0.004801
+dN10 = +0.003826
+net = +49
+net/user = +0.020545
+
+ub_deg_20_plus:
+dR10 = +0.000160
+dN10 = -0.000308
+net = -4
+
+Top10 按 UB 度数最强的是 ub_deg_13_19，即中等偏高 UB 用户。极高 UB 用户反而不稳定。
+
+二维分桶：
+
+ub_mid_9_19 | conn_high_gt_0.25:
+TOP10 dN = +0.003022
+net = +45
+
+这是 Top10 最漂亮的一块，说明 Top10 收益更像中等 UB + 较高连通用户的排序增强。
+
+Top10 当前结论：
+
+模块2在 Top10 的收益主要来自前排排序校准。它把已有较强语义桥接、但 baseline 没充分排序好的目标推到更靠前，典型受益群体是中等 UB 且连通较充分的用户，同时高连通用户的 Top10 NDCG 提升最大。
+
+
+八、Top20 收益来源分析
+
+Top20 整体收益：
+
+Recall@20 +0.005384
+NDCG@20   +0.002357
+
+Top20 新增命中：
+
+new_hit = 1010
+lost_hit = 828
+net = +182
+
+Top20 比 Top10 更明显地覆盖稀疏修复区域。
+
+按 train_connected_ratio：
+
+ratio_0:
+dR20 = +0.009139
+dN20 = +0.003766
+net = +30
+
+ratio_0_0.25:
+dR20 = +0.003534
+dN20 = +0.001627
+net = +32
+
+ratio_0.25_0.5:
+dR20 = +0.002102
+dN20 = +0.001405
+net = +49
+
+ratio_0.5_0.75:
+dR20 = +0.011812
+dN20 = +0.004057
+net = +56
+net/user = +0.023333
+
+ratio_gt_0.75:
+dR20 = +0.013680
+dN20 = +0.005661
+net = +15
+
+Top20 的高连通用户 NDCG 仍然最高，但净命中贡献更分散，ratio_0.5_0.75 的 net/user 最高。
+
+按 user_ub_train_deg：
+
+ub_deg_0_5:
+dR20 = +0.011187
+dN20 = +0.003452
+net = +31
+
+ub_deg_6_8:
+dR20 = +0.005518
+dN20 = +0.002203
+net = +49
+
+ub_deg_9_12:
+dR20 = +0.002743
+dN20 = +0.001593
+net = +26
+
+ub_deg_13_19:
+dR20 = +0.006513
+dN20 = +0.004492
+net = +65
+
+ub_deg_20_plus:
+dR20 = +0.001451
+dN20 = +0.000459
+net = +11
+
+Top20 的关键受益群体包括低 UB 和中等 UB，极高 UB 的边际收益较小。
+
+二维分桶：
+
+ub_low_0_8 | conn_low_0_0.25:
+TOP20 dN = +0.003850
+net = +45
+
+ub_mid_9_19 | conn_high_gt_0.25:
+TOP20 dN = +0.003873
+net = +68
+
+ub_high_20_plus | conn_low_0_0.25:
+TOP20 dN = -0.000665
+net = -6
+
+ub_high_20_plus | conn_high_gt_0.25:
+TOP20 dN = +0.001955
+net = +17
+
+Top20 当前结论：
+
+Top20 收益主要来自两类用户：
+
+1. 低 UB + 低连通用户的稀疏补偿。
+2. 中等 UB + 较高连通用户的排序增强。
+
+因此 Top20 更像“补回来 + 排上去”共同作用。
+
+
+九、新增命中的样本性质
+
+Top10:
+
+new_hit count = 707
+lost_hit count = 615
+both_hit count = 2323
+
+new_hit vs both_hit:
+
+conn:
+0.288846 vs 0.351994
+
+test_overlap:
+0.025327 vs 0.037409
+
+Top20:
+
+new_hit count = 1010
+lost_hit count = 828
+both_hit count = 3791
+
+new_hit vs both_hit:
+
+conn:
+0.295641 vs 0.346779
+
+test_overlap:
+0.021979 vs 0.034265
+
+结论：
+
+无论 Top10 还是 Top20，模块2新增命中的目标都比原本 baseline/module2 都能命中的目标更难：
+
+1. 用户连通度更低。
+2. 测试 overlap 更低。
+3. 更不依赖显式 item overlap。
+
+这支持论文表述：
+
+模块2新增命中并非只来自容易样本，而更多来自跨视图连接较弱、item overlap 较低的困难目标。
+
+
+十、recover_zero 结果
+
+recover_zero_1 代表测试目标中完全无法通过训练历史 overlap 直接恢复的情况。
+
+Top10:
+
+recover_zero_1:
+dR10 = +0.002898
+dN10 = +0.002075
+net = +41
+
+Top20:
+
+recover_zero_1:
+dR20 = +0.005458
+dN20 = +0.002740
+net = +68
+
+结论：
+
+模块2不仅提升容易通过 overlap 找回的目标，也确实帮助模型找回一部分直接 overlap 难以恢复的 bundle。这支持“模块2不只是简单利用显式 item overlap，而是通过 BI 侧增强和跨视图对齐注入更间接的 item-level 语义”的解释。
+
+
+十一、delta alignment correlation 的边界
+
+虽然 user_cos_UB_BI 的整体提升非常大，但逐用户层面，delta_cos 和指标提升的相关性几乎为 0。
+
+Top10:
+
+overall delta_cos vs delta_ndcg10:
+pearson = -0.003738
+spearman = 0.006001
+
+Top20:
+
+overall delta_cos vs delta_ndcg20:
+pearson = -0.003731
+spearman = 0.000591
+
+结论：
+
+不能写成“对齐提升越大，性能提升越大”。
+
+更准确：
+
+UB-BI 对齐修复是模块2的机制基础，但不是逐用户收益的线性充分条件。最终能否转化成 Top10/20 收益，还取决于该用户是否存在可恢复、可排序的候选目标。
+
+
+十二、delta cos 分桶结果
+
+按 delta user_cos_UB_BI 分四档：
+
+q1 mean_dcos = 0.167535
+dN10 = +0.001946
+dN20 = +0.002282
+
+q2 mean_dcos = 0.302791
+dN10 = +0.000724
+dN20 = +0.002035
+
+q3 mean_dcos = 0.408154
+dN10 = +0.002572
+dN20 = +0.003713
+
+q4 mean_dcos = 0.562675
+dN10 = +0.000794
+dN20 = +0.001398
+
+最好的是 q3，不是 q4。
+
+结论：
+
+对齐修复存在“转化窗口”：
+
+1. 修复太小，帮助有限。
+2. 修复很大，往往对应极端稀疏或极端错位用户，这些用户缺少足够可恢复候选，指标转化不一定最高。
+3. 中等偏高修复用户同时具备错位问题和可恢复信号，因此收益最大。
+
+
+十三、当前论文解释建议
+
+不要写得过窄：
+
+模块2主要解决 UB 稀疏。
+
+也不要写得过强：
+
+模块2使对齐越大，指标越高。
+
+推荐主线：
+
+模块2解决 NetEase 中 UB 行为视图与 BI 物品语义视图之间由于结构稀疏和 item-level bridge 不足造成的跨视图表示错位问题。通过 BI 侧用户增强和融合前对比约束，模块2显著拉近 UB-BI 用户表示，使 item-level 语义能够更好地参与用户偏好建模。
+
+在不同推荐深度下，该机制表现为不同收益：
+
+1. 在 Top10，模块2更体现前排排序校准，即把连通较充分、语义信号较可靠用户的相关 bundle 推到更靠前。
+2. 在 Top20，模块2更体现候选补充，即帮助低 UB、低连通、低 overlap 或 recover_zero 用户找回 baseline 漏掉的困难目标。
+
+因此 Top10/Top20 的收益来源存在结构差异，但二者共同指向同一个底层机制：模块2提升了 UB 行为信号与 BI item 语义信号之间的协同。
+
+
+十四、可直接写入论文的表述草稿
+
+中文草稿：
+
+在 NetEase 数据集中，用户的 bundle 交互行为与 bundle-item 语义信息之间存在明显的跨视图错位。一方面，低 UB 或低连通用户缺乏足够的 item-level bridge，使 BI 侧语义难以有效传递到用户偏好建模中；另一方面，对于具有一定交互和连通基础的用户，baseline 仍可能无法充分将 BI 侧语义信号转化为前排排序收益。模块2通过 BI 侧用户增强引入 item-level 语义反馈，并在融合前施加跨视图对比约束，使 UB 行为视图与 BI 语义视图在用户表示层面保持一致。实验结果显示，模块2显著提升 user_cos_UB_BI，且低连通用户的对齐修复幅度最大，说明该模块有效缓解了结构稀疏引起的跨视图表示错位。
+
+进一步的分桶与新命中分析表明，模块2在不同 TopK 下表现出不同的收益形态。在 Top10 上，收益主要体现为前排排序校准，尤其对中等 UB 且连通较充分的用户更明显；在 Top20 上，收益进一步扩展为候选补充，能够帮助低 UB、低连通和低 overlap 用户找回 baseline 遗漏的困难目标。新增命中样本相比双方共同命中样本具有更低的连通度和更低的 test overlap，说明模块2并非仅强化容易推荐的目标，而是提升了模型对跨视图桥接不足目标的识别能力。
+
+需要注意的是，UB-BI 表示对齐提升与逐用户指标提升并非线性相关，说明对齐修复是性能提升的表征基础，但最终能否转化为 Top10/Top20 收益，还取决于候选目标是否具有可恢复和可排序的信号。
+
+
+十五、后续工作建议
+
+目前 NetEase 的机制解释已经比较完整，可以支撑论文写法。
+
+后续如果还要继续做，优先级如下：
+
+1. 把这套解释压缩成论文“机制分析/实验分析”小节。
+2. 从 report.txt 中挑关键表格，不一定全部放论文，可以选择：
+   - overall Top10/20
+   - user_cos_UB_BI alignment
+   - train_connected_ratio 分桶
+   - user_ub_train_deg 分桶
+   - 2D bucket: user_ub_train_deg x train_connected_ratio
+   - new_hit_summary
+3. 其他两个数据集可以只做辅助验证，不必像 NetEase 一样深挖，除非论文需要跨数据集机制一致性。
+
+当前最稳结论：
+
+模块2不是单纯解决 UB 稀疏，而是解决 UB 行为信号与 BI item 语义信号之间“对不齐、传不过来、用不充分”的问题。Top10 更体现排序校准，Top20 更体现候选补充，二者共同来自 UB-BI 跨视图对齐的改善。

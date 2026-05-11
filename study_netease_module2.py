@@ -449,6 +449,8 @@ def evaluate_user_level(model, dataset, conf, device):
         "num_pos": np.zeros(dataset.num_users, dtype=np.float32),
         "pos_score_sum": np.zeros(dataset.num_users, dtype=np.float64),
         "pos_score_mean": np.full(dataset.num_users, np.nan, dtype=np.float64),
+        "pos_rank_mean": np.full(dataset.num_users, np.nan, dtype=np.float64),
+        "pos_rank_min": np.full(dataset.num_users, np.nan, dtype=np.float64),
     }
     for topk in TOPKS:
         per_user[f"recall@{topk}"] = np.full(dataset.num_users, np.nan, dtype=np.float64)
@@ -482,6 +484,12 @@ def evaluate_user_level(model, dataset, conf, device):
                 positives = set(np.flatnonzero(ground_truth_u_b[row_idx].numpy() > 0))
                 if not positives:
                     continue
+                positive_tensor = torch.tensor(sorted(positives), dtype=torch.long, device=device)
+                row_scores = pred[row_idx]
+                positive_scores = row_scores[positive_tensor]
+                positive_ranks = (row_scores.unsqueeze(0) > positive_scores.unsqueeze(1)).sum(dim=1).float() + 1.0
+                per_user["pos_rank_mean"][user_id] = float(positive_ranks.mean().detach().cpu().item())
+                per_user["pos_rank_min"][user_id] = float(positive_ranks.min().detach().cpu().item())
                 ideal_len_cache = {}
                 for topk in TOPKS:
                     rec_list = batch_top_np[row_idx, :topk]
@@ -676,6 +684,12 @@ def metric_rows_for_mask(feature_name, bucket_name, mask, baseline_eval, module2
                 "baseline_pos_score": mean_valid(baseline_eval["per_user"]["pos_score_mean"], mask),
                 "module2_pos_score": mean_valid(module2_eval["per_user"]["pos_score_mean"], mask),
                 "delta_pos_score": mean_valid(module2_eval["per_user"]["pos_score_mean"] - baseline_eval["per_user"]["pos_score_mean"], mask),
+                "baseline_pos_rank_mean": mean_valid(baseline_eval["per_user"]["pos_rank_mean"], mask),
+                "module2_pos_rank_mean": mean_valid(module2_eval["per_user"]["pos_rank_mean"], mask),
+                "delta_pos_rank_mean": mean_valid(module2_eval["per_user"]["pos_rank_mean"] - baseline_eval["per_user"]["pos_rank_mean"], mask),
+                "baseline_pos_rank_min": mean_valid(baseline_eval["per_user"]["pos_rank_min"], mask),
+                "module2_pos_rank_min": mean_valid(module2_eval["per_user"]["pos_rank_min"], mask),
+                "delta_pos_rank_min": mean_valid(module2_eval["per_user"]["pos_rank_min"] - baseline_eval["per_user"]["pos_rank_min"], mask),
             }
         )
         rows.append(row)
@@ -1070,6 +1084,7 @@ def append_bucket_section(lines, feature, rows, title=None):
             f"{row['bucket']} TOP{row['topk']} users={row['users']} "
             f"base_R={fmt_float(row['baseline_recall'])} module2_R={fmt_float(row['module2_recall'])} dR={fmt_float(row['delta_recall'])} "
             f"base_N={fmt_float(row['baseline_ndcg'])} module2_N={fmt_float(row['module2_ndcg'])} dN={fmt_float(row['delta_ndcg'])} "
+            f"rank_mean_base={fmt_float(row['baseline_pos_rank_mean'], 2)} rank_mean_module2={fmt_float(row['module2_pos_rank_mean'], 2)} dRank={fmt_float(row['delta_pos_rank_mean'], 2)} "
             f"conn={fmt_float(row['avg_train_connected_ratio'])} ub_deg={fmt_float(row['avg_user_ub_train_deg'])} overlap={fmt_float(row['avg_overlap_ratio_per_train_bundle'])}"
         )
     lines.append("")

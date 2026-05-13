@@ -50,7 +50,7 @@ def np_edge_dropout(values, dropout_ratio):
 
 
 class MultiCBR(nn.Module):
-    def __init__(self, conf, raw_graph, user_beta_mask=None):
+    def __init__(self, conf, raw_graph):
         super().__init__()
         self.conf = conf
         device = self.conf["device"]
@@ -64,12 +64,6 @@ class MultiCBR(nn.Module):
         self.num_layers = self.conf["num_layers"]
         self.c_temp = self.conf["c_temp"]
         
-        # Register user_beta_mask as a buffer so it's part of the model state but not a parameter
-        if user_beta_mask is None:
-             # Fallback to all-ones if not provided
-             user_beta_mask = torch.ones(self.num_users, dtype=torch.float32)
-        self.register_buffer("user_beta_mask", user_beta_mask.to(device))
-
         self.fusion_weights = conf['fusion_weights']
 
         self.init_emb()
@@ -296,10 +290,7 @@ class MultiCBR(nn.Module):
             BI_users_feature_from_bundles = self.aggregate(self.UB_aggregation_graph, BI_bundles_feature, "UB", test)
 
         # BI view: Residual Combination
-        # Apply user_beta_mask: only users in the mask get the bundle supplement
-        supplement = self.bi_user_bundle_agg_beta * BI_users_feature_from_bundles
-        conditional_supplement = supplement * self.user_beta_mask.unsqueeze(1)
-        BI_users_feature = BI_users_feature_from_items + conditional_supplement
+        BI_users_feature = BI_users_feature_from_items + self.bi_user_bundle_agg_beta * BI_users_feature_from_bundles
 
         users_feature = [UB_users_feature, UI_users_feature, BI_users_feature]
         bundles_feature = [UB_bundles_feature, UI_bundles_feature, BI_bundles_feature]

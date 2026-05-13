@@ -379,7 +379,7 @@ def run_cbr_training(conf, dataset, device):
         checkpoint_conf_path = checkpoint_conf_path + "/" + setting
 
         run = SummaryWriter(run_path)
-        model = MultiCBR(conf, dataset.graphs, dataset.user_beta_mask).to(device)
+        model = MultiCBR(conf, dataset.graphs).to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=conf["l2_reg"])
         latent_diffusion_model, latent_diffusion_optimizer = create_cbr_latent_rebuild_components(
             conf,

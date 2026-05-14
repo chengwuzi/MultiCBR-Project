@@ -17,9 +17,7 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models.DWT import DWT, resolve_dwt_graph_config
-from models.AnchorViewBundleNet import AnchorViewBundleNet
-from models.LatentDiffusionRebuilder import LatentDiffusionRebuilder
+from models.model import AnchorViewBundleNet, DWT, LatentDiffusionRebuilder, resolve_dwt_graph_config
 from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 

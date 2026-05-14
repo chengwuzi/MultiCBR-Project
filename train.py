@@ -18,8 +18,8 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from models.DWT import DWT, resolve_dwt_graph_config
+from models.AnchorViewBundleNet import AnchorViewBundleNet
 from models.LatentDiffusionRebuilder import LatentDiffusionRebuilder
-from models.MultiCBR import MultiCBR
 from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 
@@ -27,7 +27,7 @@ def get_cmd():
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
-    parser.add_argument("-m", "--model", default="MultiCBR", type=str, help="which model to use, options: MultiCBR")
+    parser.add_argument("-m", "--model", default="AnchorViewBundleNet", type=str, help="which model to use, options: AnchorViewBundleNet")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
     parser.add_argument("--ui_bundle_user_agg_beta", default=None, type=float, help="coefficient for user-side aggregation in UI view")
     parser.add_argument("--bi_user_bundle_agg_beta", default=None, type=float, help="coefficient for bundle-side aggregation in BI view")
@@ -379,7 +379,7 @@ def run_cbr_training(conf, dataset, device):
         checkpoint_conf_path = checkpoint_conf_path + "/" + setting
 
         run = SummaryWriter(run_path)
-        model = MultiCBR(conf, dataset.graphs).to(device)
+        model = AnchorViewBundleNet(conf, dataset.graphs).to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=conf["l2_reg"])
         latent_diffusion_model, latent_diffusion_optimizer = create_cbr_latent_rebuild_components(
             conf,
@@ -695,7 +695,7 @@ def main(args=None):
         paras = args
 
     dataset_name = paras["dataset"]
-    assert paras["model"] in ["MultiCBR"], "Pls select models from: MultiCBR"
+    assert paras["model"] in ["AnchorViewBundleNet"], "Pls select models from: AnchorViewBundleNet"
 
     if "_" in dataset_name:
         conf = conf[dataset_name.split("_")[0]]

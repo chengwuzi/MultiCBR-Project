@@ -31,6 +31,10 @@ def laplace_transform(graph):
 
 
 def to_tensor(graph):
+    return _as_sparse_tensor(graph)
+
+
+def _as_sparse_tensor(graph):
     graph = graph.tocoo()
     values = graph.data
     indices = np.vstack((graph.row, graph.col))
@@ -49,7 +53,15 @@ def np_edge_dropout(values, dropout_ratio):
     return values
 
 
-class MultiCBR(nn.Module):
+class AnchorViewBundleNet(nn.Module):
+    """Anchor-guided multi-view bundle recommendation model.
+
+    The model keeps three recommendation views over user-bundle, user-item,
+    and bundle-item relations. Two project-specific components live on top of
+    the base propagation path: cross-view residual aggregation and UB-anchored
+    pre-fusion contrastive learning.
+    """
+
     def __init__(self, conf, raw_graph):
         super().__init__()
         self.conf = conf
@@ -72,11 +84,18 @@ class MultiCBR(nn.Module):
         assert isinstance(raw_graph, list)
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
         
-        # New Simple Aggregation Supplement coefficients
         self.ui_bundle_user_agg_beta = self.conf.get("ui_bundle_user_agg_beta", 0.1)
         self.bi_user_bundle_agg_beta = self.conf.get("bi_user_bundle_agg_beta", 0.1)
 
-        # generate the graph without any dropouts for testing
+        self._init_static_view_graphs()
+        self._init_training_view_graphs()
+
+        if self.conf['aug_type'] == 'MD':
+            self.init_md_dropouts()
+        elif self.conf['aug_type'] == "Noise":
+            self.init_noise_eps()
+
+    def _init_static_view_graphs(self):
         self.UB_propagation_graph_ori = self.get_propagation_graph(self.ub_graph)
 
         self.UI_propagation_graph_ori = self.get_propagation_graph(self.ui_graph)
@@ -84,14 +103,11 @@ class MultiCBR(nn.Module):
 
         self.BI_propagation_graph_ori = self.get_propagation_graph(self.bi_graph)
         self.BI_aggregation_graph_ori = self.get_aggregation_graph(self.bi_graph)
-        
-        # New Aggregation Graphs for Supplement (Simple Aggregation)
-        # UI View: Bundle <- Users (using UB graph transpose)
+
         self.BU_aggregation_graph_ori = self.get_aggregation_graph(self.ub_graph.T)
-        # BI View: User <- Bundles (using UB graph)
         self.UB_aggregation_graph_ori = self.get_aggregation_graph(self.ub_graph)
 
-        # generate the graph with the configured dropouts for training, if aug_type is OP or MD, the following graphs with be identical with the aboves
+    def _init_training_view_graphs(self):
         self.UB_propagation_graph = self.get_propagation_graph(self.ub_graph, self.conf["UB_ratio"])
 
         self.UI_propagation_graph = self.get_propagation_graph(self.ui_graph, self.conf["UI_ratio"])
@@ -99,21 +115,15 @@ class MultiCBR(nn.Module):
 
         self.BI_propagation_graph = self.get_propagation_graph(self.bi_graph, self.conf["BI_ratio"])
         self.BI_aggregation_graph = self.get_aggregation_graph(self.bi_graph, self.conf["BI_ratio"])
-        
-        # New Aggregation Graphs for Supplement (with dropout if needed, using UB_ratio for consistency)
+
         self.BU_aggregation_graph = self.get_aggregation_graph(self.ub_graph.T, self.conf["UB_ratio"])
         self.UB_aggregation_graph = self.get_aggregation_graph(self.ub_graph, self.conf["UB_ratio"])
 
-        if self.conf['aug_type'] == 'MD':
-            self.init_md_dropouts()
-        elif self.conf['aug_type'] == "Noise":
-            self.init_noise_eps()
-
     def set_ub_graph(self, ub_graph):
         self.ub_graph = ub_graph
+        self._refresh_anchor_view_graphs()
 
-        # Evaluation-time graphs should follow the same rebuilt UB structure so
-        # inference uses the same message-passing graph as training.
+    def _refresh_anchor_view_graphs(self):
         self.UB_propagation_graph_ori = self.get_propagation_graph(self.ub_graph)
         self.BU_aggregation_graph_ori = self.get_aggregation_graph(self.ub_graph.T)
         self.UB_aggregation_graph_ori = self.get_aggregation_graph(self.ub_graph)
@@ -203,7 +213,11 @@ class MultiCBR(nn.Module):
 
 
     def propagate(self, graph, A_feature, B_feature, graph_type, layer_coef, test):
-        features = torch.cat((A_feature, B_feature), 0)
+        return self._propagate_view_pair(graph, A_feature, B_feature, graph_type, layer_coef, test)
+
+
+    def _propagate_view_pair(self, graph, source_feature, target_feature, graph_type, layer_coef, test):
+        features = torch.cat((source_feature, target_feature), 0)
         all_features = [features]
 
         for i in range(self.num_layers):
@@ -212,32 +226,37 @@ class MultiCBR(nn.Module):
                 mess_dropout = self.mess_dropout_dict[graph_type]
                 features = mess_dropout(features)
             elif self.conf["aug_type"] == "Noise" and not test:
-                random_noise = torch.rand_like(features).to(self.device)
-                eps = self.eps_dict[graph_type]
-                features += torch.sign(features) * F.normalize(random_noise, dim=-1) * eps
+                features = self._add_feature_noise(features, graph_type)
 
             all_features.append(F.normalize(features, p=2, dim=1))
 
         all_features = torch.stack(all_features, 1) * layer_coef
         all_features = torch.sum(all_features, dim=1)
-        A_feature, B_feature = torch.split(all_features, (A_feature.shape[0], B_feature.shape[0]), 0)
+        A_feature, B_feature = torch.split(all_features, (source_feature.shape[0], target_feature.shape[0]), 0)
 
         return A_feature, B_feature
 
 
     def aggregate(self, agg_graph, node_feature, graph_type, test):
+        return self._aggregate_neighbor_view(agg_graph, node_feature, graph_type, test)
+
+
+    def _aggregate_neighbor_view(self, agg_graph, node_feature, graph_type, test):
         aggregated_feature = torch.matmul(agg_graph, node_feature)
 
-        # simple embedding dropout on bundle embeddings
         if self.conf["aug_type"] == "MD" and not test:
             mess_dropout = self.mess_dropout_dict[graph_type]
             aggregated_feature = mess_dropout(aggregated_feature)
         elif self.conf["aug_type"] == "Noise" and not test:
-            random_noise = torch.rand_like(aggregated_feature).to(self.device)
-            eps = self.eps_dict[graph_type]
-            aggregated_feature += torch.sign(aggregated_feature) * F.normalize(random_noise, dim=-1) * eps
+            aggregated_feature = self._add_feature_noise(aggregated_feature, graph_type)
 
         return aggregated_feature
+
+
+    def _add_feature_noise(self, feature, graph_type):
+        random_noise = torch.rand_like(feature).to(self.device)
+        eps = self.eps_dict[graph_type]
+        return feature + torch.sign(feature) * F.normalize(random_noise, dim=-1) * eps
 
 
     def fuse_users_bundles_feature(self, users_feature, bundles_feature):

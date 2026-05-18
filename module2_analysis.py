@@ -13,6 +13,7 @@ import numpy as np
 DATASET = "NetEase"
 DEFAULT_INPUT_ROOT = Path("analysis_outputs") / DATASET
 TOPK = 20
+ANALYSIS_TOPKS = [10, 20, 40]
 
 RUNS = {
     "A": "run_A_baseline",
@@ -35,6 +36,25 @@ RUNS = {
     "N": "run_N_bi_drop_0.4_baseline",
     "O": "run_O_bi_drop_0.4_full_module2",
 }
+
+REQUIRED_PACKAGE_FILES = [
+    "config.yaml",
+    "metrics.json",
+    "per_user_metrics.csv",
+    "user_train_degree.csv",
+    "bundle_train_degree.csv",
+    "top10_recommendations.npy",
+    "top20_recommendations.npy",
+    "top40_recommendations.npy",
+    "test_ground_truth.json",
+    "view_similarity.json",
+    "representations/user_UB.npy",
+    "representations/user_UI.npy",
+    "representations/user_BI.npy",
+    "representations/bundle_UB.npy",
+    "representations/bundle_UI.npy",
+    "representations/bundle_BI.npy",
+]
 
 
 def parse_args():
@@ -142,10 +162,6 @@ def experiment1_user_sparsity(root, out_dir):
         groups = split_by_degree(user_ids, degrees, n_groups)
         for group_idx, users in enumerate(groups):
             group_degrees = np.asarray([base[int(u)]["train_ub_degree"] for u in users], dtype=np.float64)
-            b_recall = mean_group_metric(base, users, "recall@20")
-            m_recall = mean_group_metric(full, users, "recall@20")
-            b_ndcg = mean_group_metric(base, users, "ndcg@20")
-            m_ndcg = mean_group_metric(full, users, "ndcg@20")
             row = {
                 "group_id": group_idx + 1,
                 "group_name": f"group_{group_idx + 1}_of_{n_groups}",
@@ -154,13 +170,8 @@ def experiment1_user_sparsity(root, out_dir):
                 "train_ub_degree_min": int(group_degrees.min()) if len(group_degrees) else 0,
                 "train_ub_degree_max": int(group_degrees.max()) if len(group_degrees) else 0,
                 "train_ub_degree_mean": float(group_degrees.mean()) if len(group_degrees) else 0.0,
-                "baseline_recall@20": b_recall,
-                "module2_recall@20": m_recall,
-                "relative_improvement_recall@20": safe_rel(m_recall, b_recall),
-                "baseline_ndcg@20": b_ndcg,
-                "module2_ndcg@20": m_ndcg,
-                "relative_improvement_ndcg@20": safe_rel(m_ndcg, b_ndcg),
             }
+            add_baseline_module2_metric_columns(row, base, full, users)
             rows.append(row)
         all_outputs[f"{n_groups}_groups"] = rows
         fieldnames = list(rows[0].keys())
@@ -200,22 +211,36 @@ def build_variant_row(root, key, variant_name, beta_setting, extra):
         "variant_key": key,
         "variant_name": variant_name,
         "beta_setting": beta_setting,
-        "recall@20": metrics["recall@20"],
-        "ndcg@20": metrics["ndcg@20"],
         "user_UB_BI_similarity": sim["user_UB_BI"],
         "bundle_UB_BI_similarity": sim["bundle_UB_BI"],
     }
+    for topk in ANALYSIS_TOPKS:
+        row[f"recall@{topk}"] = metric_value(metrics, "recall", topk)
+        row[f"ndcg@{topk}"] = metric_value(metrics, "ndcg", topk)
     row.update(extra)
     return row
 
 
 def add_relative_columns(rows, baseline_row, beta_row=None):
     for row in rows:
-        row["relative_improvement_vs_baseline_recall@20"] = safe_rel(row["recall@20"], baseline_row["recall@20"])
-        row["relative_improvement_vs_baseline_ndcg@20"] = safe_rel(row["ndcg@20"], baseline_row["ndcg@20"])
-        if beta_row is not None:
-            row["relative_improvement_vs_beta_only_recall@20"] = safe_rel(row["recall@20"], beta_row["recall@20"])
-            row["relative_improvement_vs_beta_only_ndcg@20"] = safe_rel(row["ndcg@20"], beta_row["ndcg@20"])
+        for topk in ANALYSIS_TOPKS:
+            row[f"relative_improvement_vs_baseline_recall@{topk}"] = safe_rel(
+                row[f"recall@{topk}"],
+                baseline_row[f"recall@{topk}"],
+            )
+            row[f"relative_improvement_vs_baseline_ndcg@{topk}"] = safe_rel(
+                row[f"ndcg@{topk}"],
+                baseline_row[f"ndcg@{topk}"],
+            )
+            if beta_row is not None:
+                row[f"relative_improvement_vs_beta_only_recall@{topk}"] = safe_rel(
+                    row[f"recall@{topk}"],
+                    beta_row[f"recall@{topk}"],
+                )
+                row[f"relative_improvement_vs_beta_only_ndcg@{topk}"] = safe_rel(
+                    row[f"ndcg@{topk}"],
+                    beta_row[f"ndcg@{topk}"],
+                )
     return rows
 
 
@@ -269,8 +294,30 @@ def experiment3_alignment_paths(root, out_dir):
     return {"main": rows, "supplemental_beta0": supplemental}
 
 
-def load_top20(root, key):
-    return np.load(root / RUNS[key] / "top20_recommendations.npy")
+def metric_value(metrics, name, topk):
+    nested = metrics.get("test", {})
+    key = f"{name}@{topk}"
+    if key in nested:
+        return nested[key]
+    return metrics[key]
+
+
+def add_baseline_module2_metric_columns(row, base, full, users):
+    for topk in ANALYSIS_TOPKS:
+        b_recall = mean_group_metric(base, users, f"recall@{topk}")
+        m_recall = mean_group_metric(full, users, f"recall@{topk}")
+        b_ndcg = mean_group_metric(base, users, f"ndcg@{topk}")
+        m_ndcg = mean_group_metric(full, users, f"ndcg@{topk}")
+        row[f"baseline_recall@{topk}"] = b_recall
+        row[f"module2_recall@{topk}"] = m_recall
+        row[f"relative_improvement_recall@{topk}"] = safe_rel(m_recall, b_recall)
+        row[f"baseline_ndcg@{topk}"] = b_ndcg
+        row[f"module2_ndcg@{topk}"] = m_ndcg
+        row[f"relative_improvement_ndcg@{topk}"] = safe_rel(m_ndcg, b_ndcg)
+
+
+def load_topk(root, key, topk):
+    return np.load(root / RUNS[key] / f"top{topk}_recommendations.npy")
 
 
 def load_ground_truth(root, key="A"):
@@ -318,31 +365,34 @@ def experiment4_bundle_tail(root, out_dir):
     degree_by_bundle = {int(b): int(d) for b, d in zip(bundle_ids, degrees)}
     groups = split_by_degree(bundle_ids, degrees, 4)
     names = ["Tail", "Mid-tail", "Mid-head", "Head"]
-    base_top20 = load_top20(root, "A")
-    full_top20 = load_top20(root, "B")
+    base_topk = {topk: load_topk(root, "A", topk) for topk in ANALYSIS_TOPKS}
+    full_topk = {topk: load_topk(root, "B", topk) for topk in ANALYSIS_TOPKS}
     gt = load_ground_truth(root)
     rows = []
     for idx, bundles in enumerate(groups):
         bundle_set = set(map(int, bundles))
         group_degrees = np.asarray([degree_by_bundle[int(b)] for b in bundles], dtype=np.float64)
-        base_metrics = group_bundle_metric(base_top20, gt, bundle_set)
-        full_metrics = group_bundle_metric(full_top20, gt, bundle_set)
-        rows.append({
+        row = {
             "group_id": idx + 1,
             "group_name": names[idx],
             "number_of_bundles": int(len(bundles)),
-            "number_of_test_positives": base_metrics["number_of_test_positives"],
-            "number_of_eval_users": base_metrics["number_of_eval_users"],
             "bundle_train_degree_min": int(group_degrees.min()) if len(group_degrees) else 0,
             "bundle_train_degree_max": int(group_degrees.max()) if len(group_degrees) else 0,
             "bundle_train_degree_mean": float(group_degrees.mean()) if len(group_degrees) else 0.0,
-            "baseline_recall@20": base_metrics["recall@20"],
-            "module2_recall@20": full_metrics["recall@20"],
-            "relative_improvement_recall@20": safe_rel(full_metrics["recall@20"], base_metrics["recall@20"]),
-            "baseline_ndcg@20": base_metrics["ndcg@20"],
-            "module2_ndcg@20": full_metrics["ndcg@20"],
-            "relative_improvement_ndcg@20": safe_rel(full_metrics["ndcg@20"], base_metrics["ndcg@20"]),
-        })
+        }
+        for topk in ANALYSIS_TOPKS:
+            base_metrics = group_bundle_metric(base_topk[topk], gt, bundle_set)
+            full_metrics = group_bundle_metric(full_topk[topk], gt, bundle_set)
+            if topk == TOPK:
+                row["number_of_test_positives"] = base_metrics["number_of_test_positives"]
+                row["number_of_eval_users"] = base_metrics["number_of_eval_users"]
+            row[f"baseline_recall@{topk}"] = base_metrics["recall@20"]
+            row[f"module2_recall@{topk}"] = full_metrics["recall@20"]
+            row[f"relative_improvement_recall@{topk}"] = safe_rel(full_metrics["recall@20"], base_metrics["recall@20"])
+            row[f"baseline_ndcg@{topk}"] = base_metrics["ndcg@20"]
+            row[f"module2_ndcg@{topk}"] = full_metrics["ndcg@20"]
+            row[f"relative_improvement_ndcg@{topk}"] = safe_rel(full_metrics["ndcg@20"], base_metrics["ndcg@20"])
+        rows.append(row)
     write_csv(out_dir / "experiment4_bundle_tail.csv", rows, list(rows[0].keys()))
     write_json(out_dir / "experiment4_bundle_tail.json", rows)
     return rows
@@ -403,19 +453,23 @@ def experiment6_bi_drop(root, out_dir):
     for ratio, base_key, full_key in pairs:
         base = load_metrics(root, base_key)
         full = load_metrics(root, full_key)
-        gap_recall = full["recall@20"] - base["recall@20"]
-        gap_ndcg = full["ndcg@20"] - base["ndcg@20"]
-        rows.append({
+        row = {
             "bi_drop_ratio": ratio,
-            "baseline_recall@20": base["recall@20"],
-            "module2_recall@20": full["recall@20"],
-            "gap_recall@20": gap_recall,
-            "baseline_ndcg@20": base["ndcg@20"],
-            "module2_ndcg@20": full["ndcg@20"],
-            "gap_ndcg@20": gap_ndcg,
-            "relative_gap_recall@20": safe_rel(full["recall@20"], base["recall@20"]),
-            "relative_gap_ndcg@20": safe_rel(full["ndcg@20"], base["ndcg@20"]),
-        })
+        }
+        for topk in ANALYSIS_TOPKS:
+            base_recall = metric_value(base, "recall", topk)
+            full_recall = metric_value(full, "recall", topk)
+            base_ndcg = metric_value(base, "ndcg", topk)
+            full_ndcg = metric_value(full, "ndcg", topk)
+            row[f"baseline_recall@{topk}"] = base_recall
+            row[f"module2_recall@{topk}"] = full_recall
+            row[f"gap_recall@{topk}"] = full_recall - base_recall
+            row[f"baseline_ndcg@{topk}"] = base_ndcg
+            row[f"module2_ndcg@{topk}"] = full_ndcg
+            row[f"gap_ndcg@{topk}"] = full_ndcg - base_ndcg
+            row[f"relative_gap_recall@{topk}"] = safe_rel(full_recall, base_recall)
+            row[f"relative_gap_ndcg@{topk}"] = safe_rel(full_ndcg, base_ndcg)
+        rows.append(row)
     write_csv(out_dir / "experiment6_bi_drop_robustness.csv", rows, list(rows[0].keys()))
     write_json(out_dir / "experiment6_bi_drop_robustness.json", rows)
     return rows
@@ -424,12 +478,16 @@ def experiment6_bi_drop(root, out_dir):
 def verify_packages(root, allow_missing):
     required_keys = list(RUNS.keys())
     missing = []
+    incomplete = {}
     for key in required_keys:
         run_dir = root / RUNS[key]
-        if not (run_dir / "metrics.json").exists():
+        missing_files = [path for path in REQUIRED_PACKAGE_FILES if not (run_dir / path).exists()]
+        if not run_dir.exists():
             missing.append(key)
-    if missing and not allow_missing:
-        raise FileNotFoundError(f"Missing required runs: {missing}")
+        elif missing_files:
+            incomplete[key] = missing_files
+    if (missing or incomplete) and not allow_missing:
+        raise FileNotFoundError(f"Missing runs: {missing}; incomplete packages: {incomplete}")
     return missing
 
 

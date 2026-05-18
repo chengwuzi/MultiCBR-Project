@@ -9,6 +9,7 @@ import os
 import shutil
 import time
 import traceback
+import gc
 from copy import deepcopy
 from datetime import datetime
 from pathlib import Path
@@ -28,6 +29,7 @@ from utility import Datasets
 
 DATASET = "NetEase"
 TOPK = 20
+ANALYSIS_TOPKS = [10, 20, 40]
 DEFAULT_OUTPUT_ROOT = Path("analysis_outputs") / DATASET
 
 
@@ -208,7 +210,7 @@ def apply_run_spec(conf, run_spec, args):
     conf["bi_user_bundle_agg_beta"] = float(run_spec["bi_user_bundle_agg_beta"])
     conf["bi_drop_ratio"] = float(run_spec["bi_drop_ratio"])
     conf["bi_drop_seed"] = int(args.bi_drop_seed)
-    conf["topk"] = sorted(set(conf.get("topk", []) + [TOPK]))
+    conf["topk"] = sorted(set(conf.get("topk", []) + ANALYSIS_TOPKS))
     if args.epochs is not None:
         conf["epochs"] = args.epochs
     return conf
@@ -222,6 +224,8 @@ def analysis_package_complete(run_dir):
         "user_train_degree.csv",
         "bundle_train_degree.csv",
         "top20_recommendations.npy",
+        "top10_recommendations.npy",
+        "top40_recommendations.npy",
         "test_ground_truth.json",
         "view_similarity.json",
         "representations/user_UB.npy",
@@ -274,6 +278,7 @@ def build_dataset_and_device(conf):
 
 
 def run_single_training(conf, dataset, device, run_dir):
+    run_name = conf["run_name"]
     lr = conf["lrs"][0]
     l2_reg = conf["l2_regs"][0]
     conf["l2_reg"] = l2_reg
@@ -299,9 +304,18 @@ def run_single_training(conf, dataset, device, run_dir):
     best_model_path = run_dir / "best_model.pt"
 
     for epoch in range(conf["epochs"]):
+        print(
+            f"[{run_name}] epoch {epoch + 1}/{conf['epochs']} started",
+            flush=True,
+        )
         epoch_anchor = epoch * batch_cnt
         model.train(True)
         pbar = tqdm(enumerate(dataset.train_loader), total=batch_cnt, disable=True)
+        epoch_loss = 0.0
+        epoch_bpr_loss = 0.0
+        epoch_c_loss = 0.0
+        epoch_anchor_cl_loss = 0.0
+        epoch_steps = 0
 
         for batch_i, batch in pbar:
             optimizer.zero_grad()
@@ -314,20 +328,59 @@ def run_single_training(conf, dataset, device, run_dir):
             loss = bpr_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
             loss.backward()
             optimizer.step()
+            epoch_loss += float(loss.detach().cpu().item())
+            epoch_bpr_loss += float(bpr_loss.detach().cpu().item())
+            epoch_c_loss += float(c_loss.detach().cpu().item())
+            epoch_anchor_cl_loss += float(anchor_cl_loss.detach().cpu().item())
+            epoch_steps += 1
 
             if (batch_anchor + 1) % test_interval_bs == 0:
+                print(
+                    f"[{run_name}] evaluating at epoch {epoch + 1}, batch {batch_i + 1}/{batch_cnt}",
+                    flush=True,
+                )
                 metrics = {
                     "val": test(model, dataset.val_loader, conf),
                     "test": test(model, dataset.test_loader, conf),
                 }
                 current_score = metric_selection_score(metrics["val"])
+                eval_summary = " ".join(
+                    [
+                        (
+                            f"@{topk}:"
+                            f"val_rec={metrics['val']['recall'][topk]:.6f},"
+                            f"val_ndcg={metrics['val']['ndcg'][topk]:.6f},"
+                            f"test_rec={metrics['test']['recall'][topk]:.6f},"
+                            f"test_ndcg={metrics['test']['ndcg'][topk]:.6f}"
+                        )
+                        for topk in ANALYSIS_TOPKS
+                    ]
+                )
+                print(
+                    f"[{run_name}] eval epoch={epoch + 1} {eval_summary}",
+                    flush=True,
+                )
                 if current_score > best_score:
                     best_score = current_score
                     best_metrics = metrics
                     best_epoch = epoch
                     torch.save(model.state_dict(), best_model_path)
+                    print(
+                        f"[{run_name}] new best checkpoint saved at epoch {epoch + 1}",
+                        flush=True,
+                    )
+        if epoch_steps > 0:
+            print(
+                f"[{run_name}] epoch {epoch + 1}/{conf['epochs']} finished "
+                f"avg_loss={epoch_loss / epoch_steps:.6f} "
+                f"avg_bpr={epoch_bpr_loss / epoch_steps:.6f} "
+                f"avg_c={epoch_c_loss / epoch_steps:.6f} "
+                f"avg_anchor_cl={epoch_anchor_cl_loss / epoch_steps:.6f}",
+                flush=True,
+            )
 
     if best_epoch < 0:
+        print(f"[{run_name}] no scheduled eval happened; running final evaluation", flush=True)
         metrics = {
             "val": test(model, dataset.val_loader, conf),
             "test": test(model, dataset.test_loader, conf),
@@ -336,7 +389,11 @@ def run_single_training(conf, dataset, device, run_dir):
         best_epoch = conf["epochs"] - 1
         torch.save(model.state_dict(), best_model_path)
 
-    model.load_state_dict(torch.load(best_model_path, map_location=device, weights_only=False))
+    print(
+        f"[{run_name}] loading best checkpoint from epoch {best_epoch + 1}",
+        flush=True,
+    )
+    model.load_state_dict(torch.load(best_model_path, map_location=device))
     return model, best_metrics, best_epoch, best_model_path
 
 
@@ -382,17 +439,25 @@ def export_analysis_package(conf, dataset, model, best_metrics, best_epoch, run_
         view_similarity = compute_view_similarity(pre_users, pre_bundles)
         write_json(run_dir / "view_similarity.json", view_similarity)
 
-        top20 = np.zeros((dataset.num_users, TOPK), dtype=np.int64)
+        max_topk = max(conf["topk"])
+        topk_recommendations = {
+            topk: np.zeros((dataset.num_users, topk), dtype=np.int64)
+            for topk in conf["topk"]
+        }
         test_graph = dataset.bundle_test_data.u_b_graph.tocsr()
         train_graph = dataset.bundle_train_data.u_b_graph.tocsr()
         for users, _, train_mask_u_b in dataset.test_loader:
             user_ids = users.to(device)
             scores = model.evaluate(representations, user_ids)
             scores -= 1e8 * train_mask_u_b.to(device)
-            _, indices = torch.topk(scores, TOPK)
-            top20[users.numpy()] = indices.cpu().numpy()
+            _, indices = torch.topk(scores, max_topk)
+            indices_np = indices.cpu().numpy()
+            user_np = users.numpy()
+            for topk in conf["topk"]:
+                topk_recommendations[topk][user_np] = indices_np[:, :topk]
 
-    np.save(run_dir / "top20_recommendations.npy", top20)
+    for topk, values in topk_recommendations.items():
+        np.save(run_dir / f"top{topk}_recommendations.npy", values)
     test_ground_truth = sparse_rows_to_dict(test_graph)
     write_json(run_dir / "test_ground_truth.json", test_ground_truth)
 
@@ -401,7 +466,13 @@ def export_analysis_package(conf, dataset, model, best_metrics, best_epoch, run_
     bundle_test_count = np.asarray(test_graph.getnnz(axis=0), dtype=np.int64)
     write_degree_csv(run_dir / "user_train_degree.csv", "user_id", user_train_degree)
     write_bundle_degree_csv(run_dir / "bundle_train_degree.csv", bundle_train_degree, bundle_test_count)
-    write_per_user_metrics(run_dir / "per_user_metrics.csv", top20, test_ground_truth, user_train_degree)
+    write_per_user_metrics(
+        run_dir / "per_user_metrics.csv",
+        topk_recommendations,
+        test_ground_truth,
+        user_train_degree,
+        conf["topk"],
+    )
 
     metrics = {
         "run_name": conf["run_name"],
@@ -410,6 +481,8 @@ def export_analysis_package(conf, dataset, model, best_metrics, best_epoch, run_
         "ndcg@20": float(best_metrics["test"]["ndcg"][20]),
         "val_recall@20": float(best_metrics["val"]["recall"][20]),
         "val_ndcg@20": float(best_metrics["val"]["ndcg"][20]),
+        "test": metrics_by_topk(best_metrics["test"], conf["topk"]),
+        "val": metrics_by_topk(best_metrics["val"], conf["topk"]),
         "all_metrics": best_metrics,
     }
     write_json(run_dir / "metrics.json", metrics)
@@ -468,32 +541,46 @@ def write_bundle_degree_csv(path, train_degrees, test_counts):
             writer.writerow([idx, int(degree), int(test_counts[idx])])
 
 
-def write_per_user_metrics(path, top20, test_ground_truth, user_train_degree):
+def metrics_by_topk(metrics, topks):
+    result = {}
+    for topk in topks:
+        result[f"recall@{topk}"] = float(metrics["recall"][topk])
+        result[f"ndcg@{topk}"] = float(metrics["ndcg"][topk])
+    return result
+
+
+def write_per_user_metrics(path, topk_recommendations, test_ground_truth, user_train_degree, topks):
+    max_topk = max(topks)
     with open(path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
-        writer.writerow([
+        header = [
             "user_id",
             "train_ub_degree",
             "test_pos_count",
-            "recall@20",
-            "ndcg@20",
-            "top20_bundles",
             "test_bundles",
-        ])
-        for user_id in range(top20.shape[0]):
+        ]
+        for topk in topks:
+            header.extend([f"recall@{topk}", f"ndcg@{topk}", f"top{topk}_bundles"])
+        writer.writerow(header)
+        for user_id in range(topk_recommendations[max_topk].shape[0]):
             positives = test_ground_truth[str(user_id)]
-            hits = len(set(map(int, top20[user_id])) & set(positives))
-            recall = hits / len(positives) if positives else 0.0
-            ndcg = per_user_ndcg(top20[user_id], positives)
-            writer.writerow([
+            row = [
                 user_id,
                 int(user_train_degree[user_id]),
                 len(positives),
-                recall,
-                ndcg,
-                " ".join(str(int(x)) for x in top20[user_id]),
                 " ".join(str(int(x)) for x in positives),
-            ])
+            ]
+            for topk in topks:
+                recs = topk_recommendations[topk][user_id]
+                hits = len(set(map(int, recs)) & set(positives))
+                recall = hits / len(positives) if positives else 0.0
+                ndcg = per_user_ndcg(recs, positives)
+                row.extend([
+                    recall,
+                    ndcg,
+                    " ".join(str(int(x)) for x in recs),
+                ])
+            writer.writerow(row)
 
 
 def run_with_retries(base_conf, run_spec, args, output_root):
@@ -502,8 +589,11 @@ def run_with_retries(base_conf, run_spec, args, output_root):
     if analysis_package_complete(run_dir) and not args.force:
         return {
             "run_name": run_spec["run_name"],
+            "description": run_spec["description"],
+            "config_summary": run_config_summary(run_spec, args),
             "status": "skipped_complete",
             "run_dir": str(run_dir),
+            "package_complete": True,
             "attempts": attempts,
         }
 
@@ -511,12 +601,20 @@ def run_with_retries(base_conf, run_spec, args, output_root):
         started = datetime.now().isoformat(timespec="seconds")
         attempt_record = {"attempt": attempt_idx, "started_at": started, "status": "running"}
         attempts.append(attempt_record)
+        print(
+            f"[{run_spec['run_name']}] attempt {attempt_idx}/{args.max_retries} started at {started}",
+            flush=True,
+        )
         try:
             ensure_clean_run_dir(run_dir, force=True)
+            write_json(run_dir / "attempts.json", {"run_name": run_spec["run_name"], "attempts": attempts})
             conf = apply_run_spec(base_conf, run_spec, args)
             dataset, device = build_dataset_and_device(conf)
             model, best_metrics, best_epoch, best_model_path = run_single_training(conf, dataset, device, run_dir)
             export_analysis_package(conf, dataset, model, best_metrics, best_epoch, run_dir)
+            package_complete = analysis_package_complete(run_dir)
+            if not package_complete:
+                raise RuntimeError(f"Analysis package is incomplete for {run_spec['run_name']}")
             attempt_record.update({
                 "status": "success",
                 "finished_at": datetime.now().isoformat(timespec="seconds"),
@@ -524,11 +622,22 @@ def run_with_retries(base_conf, run_spec, args, output_root):
                 "recall@20": float(best_metrics["test"]["recall"][20]),
                 "ndcg@20": float(best_metrics["test"]["ndcg"][20]),
                 "best_model_path": str(best_model_path),
+                "package_complete": package_complete,
             })
+            write_json(run_dir / "attempts.json", {"run_name": run_spec["run_name"], "attempts": attempts})
+            print(
+                f"[{run_spec['run_name']}] attempt {attempt_idx} succeeded "
+                f"recall@20={best_metrics['test']['recall'][20]:.6f} "
+                f"ndcg@20={best_metrics['test']['ndcg'][20]:.6f}",
+                flush=True,
+            )
             return {
                 "run_name": run_spec["run_name"],
+                "description": run_spec["description"],
+                "config_summary": run_config_summary(run_spec, args),
                 "status": "success",
                 "run_dir": str(run_dir),
+                "package_complete": package_complete,
                 "attempts": attempts,
                 "final_metrics": {
                     "best_epoch": int(best_epoch),
@@ -543,14 +652,50 @@ def run_with_retries(base_conf, run_spec, args, output_root):
                 "error": repr(exc),
                 "traceback": traceback.format_exc(),
             })
+            run_dir.mkdir(parents=True, exist_ok=True)
             write_json(run_dir / "attempts.json", {"run_name": run_spec["run_name"], "attempts": attempts})
+            print(
+                f"[{run_spec['run_name']}] attempt {attempt_idx} failed: {repr(exc)}",
+                flush=True,
+            )
             time.sleep(3)
+        finally:
+            cleanup_runtime()
 
     return {
         "run_name": run_spec["run_name"],
+        "description": run_spec["description"],
+        "config_summary": run_config_summary(run_spec, args),
         "status": "failed",
         "run_dir": str(run_dir),
+        "package_complete": analysis_package_complete(run_dir),
         "attempts": attempts,
+    }
+
+
+def cleanup_runtime():
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+
+
+def run_config_summary(run_spec, args):
+    anchor = run_spec["anchor_cl"]
+    return {
+        "anchor_cl_enabled": bool(anchor["enabled"]),
+        "anchor_cl_lambda": float(anchor["anchor_cl_lambda"]),
+        "temp": float(anchor["temp"]),
+        "user_cl": bool(anchor["user_cl"]),
+        "bundle_cl": bool(anchor["bundle_cl"]),
+        "ub_ui_user_weight": float(anchor["ub_ui_user_weight"]),
+        "ub_bi_user_weight": float(anchor["ub_bi_user_weight"]),
+        "ub_ui_bundle_weight": float(anchor["ub_ui_bundle_weight"]),
+        "ub_bi_bundle_weight": float(anchor["ub_bi_bundle_weight"]),
+        "ui_bundle_user_agg_beta": float(run_spec["ui_bundle_user_agg_beta"]),
+        "bi_user_bundle_agg_beta": float(run_spec["bi_user_bundle_agg_beta"]),
+        "bi_drop_ratio": float(run_spec["bi_drop_ratio"]),
+        "bi_drop_seed": int(args.bi_drop_seed),
+        "latent_rebuild_enabled": False,
     }
 
 
@@ -567,6 +712,20 @@ def write_report(output_root, selected_runs, results):
         f.write(f"Dataset: {DATASET}\n\n")
         for result in results:
             f.write(f"{result['run_name']}: {result['status']}\n")
+            f.write(f"  description: {result.get('description', '')}\n")
+            f.write(f"  package_complete: {result.get('package_complete', False)}\n")
+            if result.get("config_summary"):
+                conf = result["config_summary"]
+                f.write(
+                    "  config: "
+                    f"anchor={conf['anchor_cl_enabled']} "
+                    f"user_cl={conf['user_cl']} "
+                    f"bundle_cl={conf['bundle_cl']} "
+                    f"weights=({conf['ub_ui_user_weight']}, {conf['ub_bi_user_weight']}, "
+                    f"{conf['ub_ui_bundle_weight']}, {conf['ub_bi_bundle_weight']}) "
+                    f"beta=({conf['ui_bundle_user_agg_beta']}, {conf['bi_user_bundle_agg_beta']}) "
+                    f"bi_drop={conf['bi_drop_ratio']} seed={conf['bi_drop_seed']}\n"
+                )
             if "final_metrics" in result:
                 metrics = result["final_metrics"]
                 f.write(

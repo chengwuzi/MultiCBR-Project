@@ -118,13 +118,43 @@ def load_per_user(root, key):
     parsed = {}
     for row in rows:
         user_id = int(row["user_id"])
-        parsed[user_id] = {
+        item = {
             "train_ub_degree": int(row["train_ub_degree"]),
             "test_pos_count": int(row["test_pos_count"]),
-            "recall@20": float(row["recall@20"]),
-            "ndcg@20": float(row["ndcg@20"]),
         }
+        for topk in ANALYSIS_TOPKS:
+            recall_key = f"recall@{topk}"
+            ndcg_key = f"ndcg@{topk}"
+            if recall_key in row and row[recall_key] != "":
+                item[recall_key] = float(row[recall_key])
+            if ndcg_key in row and row[ndcg_key] != "":
+                item[ndcg_key] = float(row[ndcg_key])
+        parsed[user_id] = item
+    fill_missing_per_user_topk_metrics(root, key, parsed)
     return parsed
+
+
+def fill_missing_per_user_topk_metrics(root, key, per_user):
+    missing_topks = [
+        topk
+        for topk in ANALYSIS_TOPKS
+        if any(f"recall@{topk}" not in item or f"ndcg@{topk}" not in item for item in per_user.values())
+    ]
+    if not missing_topks:
+        return
+
+    ground_truth = load_ground_truth(root, key)
+    recommendations = {}
+    for topk in missing_topks:
+        recommendations[topk] = load_or_derive_topk(root, key, topk)
+
+    for user_id, item in per_user.items():
+        positives = ground_truth.get(user_id, [])
+        for topk in missing_topks:
+            recs = recommendations[topk][user_id]
+            hits = len(set(map(int, recs)) & set(positives))
+            item[f"recall@{topk}"] = hits / len(positives) if positives else 0.0
+            item[f"ndcg@{topk}"] = per_user_ndcg(recs, positives)
 
 
 def load_bundle_degrees(root, key="A"):
@@ -318,6 +348,23 @@ def add_baseline_module2_metric_columns(row, base, full, users):
 
 def load_topk(root, key, topk):
     return np.load(root / RUNS[key] / f"top{topk}_recommendations.npy")
+
+
+def load_or_derive_topk(root, key, topk):
+    exact_path = root / RUNS[key] / f"top{topk}_recommendations.npy"
+    if exact_path.exists():
+        return np.load(exact_path)
+
+    for larger_topk in sorted(k for k in ANALYSIS_TOPKS if k > topk):
+        larger_path = root / RUNS[key] / f"top{larger_topk}_recommendations.npy"
+        if larger_path.exists():
+            return np.load(larger_path)[:, :topk]
+
+    raise FileNotFoundError(
+        f"Missing top{topk}_recommendations.npy for {RUNS[key]}. "
+        "This package was likely exported by an older script. "
+        "Rerun that run with the current module2_experiment.py to export this top-k."
+    )
 
 
 def load_ground_truth(root, key="A"):

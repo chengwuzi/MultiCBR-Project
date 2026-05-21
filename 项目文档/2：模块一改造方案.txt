@@ -1,0 +1,653 @@
+模块一改造方案记录
+
+本文档用于记录围绕“模块一：预训练表示引导的扩散净化模块”的两个潜在改造方向，供后续继续研究。
+
+当前背景：
+当前项目中的模块一已经在 iFashion 上取得了较明显指标提升，因此短期内不一定要放弃现有实现。后续优先可以补做一个“直接使用 z0 选 TopK”的对照实验，用于回答论文叙事中的核心质疑：为什么不直接用 observed bundle set 的池化原型 z0 进行筛边。
+
+在此基础上，下面记录两个更激进的改造方向：
+
+1. 主题二：任务导向的 observed-set diffusion TopK 选边方案
+2. 主题三：用户表示扩散净化后选 TopK 方案
+
+
+一、主题二：任务导向的 observed-set diffusion TopK 选边方案
+
+1. 出发点
+
+当前模块一的训练目标主要是：
+
+z0 = mean(observed bundle embeddings)
+z_t = add_noise(z0, t)
+z_pred = denoiser(z_t, user_vec, t)
+L = DiffLoss + set_weight * SetLoss
+
+其中：
+
+DiffLoss = MSE(z_pred, z0)
+SetLoss = 1 - mean cosine(z_pred, observed bundle embeddings)
+
+这个设计的核心问题是：z0 本身来自用户全部 observed bundles 的平均。如果 observed set 中存在弱偏好边、偶然交互边或噪声边，那么 z0 也可能被这些噪声边拉偏。于是会产生一个关键质疑：
+
+既然训练目标是让 z_pred 恢复到 z0，而最后又用 z_star 去 observed bundles 中选 TopK，那么为什么不直接使用 z0 去选 TopK？
+
+因此，主题二的核心思想是：
+
+保留“z0 加噪 -> denoiser 降噪”的扩散框架，但不再把降噪目标定义为恢复 z0，而是定义为：降噪后的表示应该能够从 observed bundles 中选出对用户偏好预测有用的 TopK 核心边。
+
+换句话说：
+
+旧目标：z_pred 应该接近 z0。
+新目标：z_pred 选出的 TopK 小集合，应该能够代表用户，并预测用户其他真实偏好。
+
+
+2. 核心流程
+
+对于用户 u，记其训练集中已观测 bundle 集合为：
+
+O_u = {b1, b2, ..., bn}
+
+首先仍然构造 observed-set latent：
+
+z0 = mean(emb(b)), b in O_u
+
+然后按照当前扩散模块的方式采样 timestep，并对 z0 加噪：
+
+z_t = sqrt(alpha_bar_t) * z0 + sqrt(1 - alpha_bar_t) * epsilon
+
+其中 epsilon 是高斯噪声。
+
+之后使用用户条件 denoiser：
+
+z_pred = denoiser(z_t, user_vec, t)
+
+这里的 z_pred 不再被视为“要恢复到 z0 的重建向量”，而是被视为：
+
+从含噪 observed-set latent 中提炼出来的核心边选择查询向量。
+
+然后用 z_pred 对用户已观测 bundle 集合 O_u 中的每个 bundle 打分：
+
+score_i = cosine(z_pred, emb(b_i))
+
+根据分数从完整 observed set 中选出 TopK：
+
+S_u = TopK(score_i), S_u subset O_u, |S_u| = k
+
+iFashion 当前配置中：
+
+k = 3
+
+将选出的 TopK bundle embeddings 平均，得到用户核心边集合表示：
+
+r_u = mean(emb(b)), b in S_u
+
+再用 r_u 去预测用户 observed set 中未被选中的其他正样本：
+
+Q_u = O_u - S_u
+
+训练目标是：
+
+r_u 对 Q_u 中真实正样本的打分，应高于 r_u 对负样本 bundle 的打分。
+
+可使用 BPR 形式：
+
+L_topk = -log sigmoid(score(r_u, q_pos) - score(r_u, b_neg))
+
+其中：
+
+q_pos 来自 O_u - S_u
+b_neg 来自用户未交互过的 bundle
+
+
+3. 为什么候选集合不随机二分
+
+曾考虑过将 observed set 随机拆成两部分：
+
+C_u：给模型看的候选集合，用来选 TopK
+Q_u：藏起来的 query positives，用来预测
+
+但这种方案有一个明显问题：真正应该保留的核心边可能被随机分到 Q_u 中，导致模型从一开始就没有机会选择它。对于 iFashion 这种 k=3 很小的场景，这个问题尤其严重，因为每条核心边都很宝贵。
+
+因此，主题二中更合理的设计是：
+
+候选集合始终使用完整 O_u；
+模型始终从完整 observed set 中选 TopK；
+query positives 从未被选中的 O_u - S_u 中采样。
+
+这样训练阶段和推理阶段保持一致：
+
+训练时：从完整 observed set 中选 TopK。
+推理时：从完整 observed set 中选 TopK。
+
+
+4. 降噪输出 z_pred 的核心意义
+
+在主题二中，z_pred 的意义不再是“z0 的重建版本”，而是：
+
+从含噪 observed-set latent 中提炼出的核心边选择查询向量。
+
+它的职责不是直接作为最终推荐模型的用户表示，而是用于回答：
+
+在用户已观测的 bundle 交互中，哪些边最适合作为该用户的核心训练边？
+
+因此，z_pred 更像一个 selector query，而不是普通的 recommendation user embedding。
+
+
+5. TopK 小集合 S_u 的核心意义
+
+主题二中选出的 TopK 不只是“与 z_pred 最相似的几个 bundle”，而是被训练成：
+
+一个小规模、高信息量、能够代表用户剩余偏好的核心交互集合。
+
+也就是说，S_u 的价值通过它能否预测 O_u - S_u 中的其他 observed positives 来检验。
+
+如果 S_u 能够把用户剩余真实 observed bundles 排在负样本前面，说明这组 TopK 边具有较强的用户代表性和训练价值。
+
+对于 iFashion 的 k=3 场景，这一点尤其重要。因为每个用户最终只保留少量训练边，如果只选“最接近中心”的 bundle，可能会得到高置信但冗余的小集合；而主题二希望训练出的是：
+
+少量但能代表用户偏好结构的核心训练边。
+
+
+6. 加噪降噪的意义
+
+主题二仍然保留扩散模型身份。
+
+加噪的意义：
+
+人为制造 observed-set latent 的扰动，用于模拟不可靠交互、弱偏好边、偶然行为对用户集合级偏好表示造成的污染。
+
+降噪的意义：
+
+从不同噪声强度下的 z_t 中提取稳定的核心偏好查询 z_pred，使其在扰动情况下仍然能选出有用的 TopK 核心边。
+
+也就是说，扩散的价值不再是“恢复 z0”，而是：
+
+训练一个对 observed-set latent 扰动鲁棒的核心边选择器。
+
+普通 TopK 选边器学习的是：
+
+在当前 observed set 上怎么选。
+
+主题二的扩散式 TopK 净化器学习的是：
+
+在 observed set 表示被扰动后，仍然怎么选出稳定、有代表性、能服务推荐目标的核心训练边。
+
+
+7. 可选的噪声一致性约束
+
+为了进一步体现扩散降噪的鲁棒意义，可以引入噪声一致性损失。
+
+对同一用户、同一 observed set，采样两个不同噪声版本：
+
+z_t1 = noise(z0, t1)
+z_t2 = noise(z0, t2)
+
+经过 denoiser 得到：
+
+z_pred1 = denoiser(z_t1, user_vec, t1)
+z_pred2 = denoiser(z_t2, user_vec, t2)
+
+要求两个输出保持一致：
+
+L_consistency = 1 - cosine(z_pred1, z_pred2)
+
+这个约束的意义是：
+
+同一用户的 observed-set latent 即使受到不同噪声扰动，denoiser 也应该提取出相对稳定的核心偏好查询。
+
+第一版总损失可考虑：
+
+L = L_topk_predict + lambda_cons * L_consistency
+
+可选保留一个很小的 DiffLoss 作为稳定锚点：
+
+L = L_topk_predict + lambda_cons * L_consistency + lambda_diff * L_diff
+
+建议初始范围：
+
+lambda_cons = 0.05 或 0.1
+lambda_diff = 0 或 0.01
+
+SetLoss 暂时不建议作为重点，因为已有实验显示 iFashion 上将 set_weight 设为 0 后指标几乎不变。
+
+
+8. 与最终推荐目标的契合度
+
+最终目标是提升下游 DWT / CBR 模型在测试集上的 Recall 和 NDCG。
+
+主题二不是直接端到端优化 Recall/NDCG，但它比当前 DiffLoss 更接近最终目标。
+
+当前 DiffLoss 优化的是：
+
+z_pred 是否接近 observed set 的平均原型 z0。
+
+主题二优化的是：
+
+z_pred 选出的 TopK 核心边集合，能否预测用户剩余真实偏好。
+
+后者更接近推荐任务的结构：
+
+用少量历史交互表示用户 -> 预测用户其他可能喜欢的 bundle。
+
+因此，主题二可以看作一个低成本的下游目标代理：
+
+如果 TopK 核心边能预测用户剩余 observed positives，那么这些边更可能是高质量训练监督，也更可能帮助下游推荐模型提升排序指标。
+
+
+9. 工程风险
+
+主题二最大的问题是 TopK 的离散性。
+
+如果前向中直接 hard TopK，再用选出的 S_u 计算 r_u，那么梯度无法从 L_topk 回传到 z_pred 的打分排序过程。
+
+可考虑的实现方式：
+
+1. Soft selection：
+训练时不用 hard TopK，而是对 observed bundles 的 score 做 softmax，得到 soft weighted representation；推理时仍然使用 hard TopK。
+
+2. Top-k mask + softmax：
+前向选出 top-k mask，只在 top-k 内做 softmax 加权，得到可微近似。
+
+3. Straight-through TopK：
+前向使用 hard TopK，反向近似使用 soft 权重。
+
+第一版建议采用最稳妥的 soft selection 或 top-k masked softmax。
+
+其他风险：
+
+1. 若用户 observed 数量小于等于 k，则无法构造 O_u - S_u，需要跳过该用户或只使用稳定项。
+2. 负样本采样策略会显著影响效果。
+3. consistency 权重过大可能导致输出塌缩。
+4. 训练目标变化较大，需要重新调参。
+
+
+10. 主题二的论文叙事
+
+可以表述为：
+
+为了使扩散净化目标更贴近下游捆绑推荐任务，我们不再仅仅恢复 observed set 的集合级原型，而是训练去噪表示筛选一个核心交互集合，使该集合能够预测用户剩余偏好。由此，扩散模块从重建导向转变为任务导向的边净化机制。
+
+一句话总结：
+
+主题二保留扩散加噪-降噪框架，但把降噪目标从“恢复 observed set 均值”改为“输出能稳定筛选 TopK 核心训练边的查询向量”，并通过“TopK 小集合能否预测用户剩余真实偏好”来训练它。
+
+
+
+二、主题三：用户表示扩散净化后选 TopK 方案
+
+1. 出发点
+
+主题三来自一个更直接的想法：
+
+与其对 observed bundle set 的平均表示 z0 加噪降噪，不如直接对预训练用户表示进行加噪降噪。
+
+因为最终我们真正想要的是：
+
+一个干净、稳定、能代表用户偏好的用户表示。
+
+当前 z0 路线是：
+
+observed bundle set mean -> noisy set prototype -> denoised set prototype -> TopK
+
+主题三路线是：
+
+pretrained user embedding -> noisy user preference -> denoised user preference -> TopK
+
+从论文直觉上看，主题三更加贴近推荐任务本身，因为推荐打分天然就是用户表示与 bundle 表示的匹配。
+
+
+2. 核心流程
+
+给定：
+
+e_u = pretrained user embedding
+E_b = pretrained bundle embeddings
+O_u = 用户已观测 bundle 集合
+
+训练阶段：
+
+e_t = noise(e_u, t)
+e_pred = denoiser(e_t, context, t)
+
+推理阶段：
+
+e_star = denoise(e_u)
+
+然后使用 e_star 和用户 observed bundles 中的 bundle embeddings 计算相似度：
+
+score_b = cosine(e_star, emb(b)), b in O_u
+
+选择 TopK：
+
+S_u = TopK(score_b), S_u subset O_u
+
+因此，主题三中选边依据是：
+
+降噪后的用户偏好表示与已观测 bundle 的匹配程度。
+
+
+3. 降噪输出 e_pred / e_star 的核心意义
+
+主题三中，降噪输出的意义是：
+
+经过扩散净化后的用户偏好表示。
+
+它不是 observed set 的平均原型，而是用户侧的偏好表示。它的目标是承载用户全局偏好，并尽量去除由噪声交互带来的不稳定因素。
+
+可以把它理解为：
+
+denoised user preference representation
+
+它的职责是回答：
+
+这个用户自身更稳定、更核心的偏好方向是什么？
+
+
+4. 选出的 TopK 的核心意义
+
+主题三中，TopK 表示：
+
+与降噪用户偏好最一致的已观测交互边。
+
+它更强调高置信：
+
+如果某个 observed bundle 与降噪后的用户偏好表示高度一致，那么这条边更可能代表用户真实偏好，因此更适合作为训练期 UB 监督。
+
+与主题二相比：
+
+主题二的 TopK 更强调“核心小集合的代表性和预测剩余偏好的能力”。
+主题三的 TopK 更强调“与干净用户偏好的一致性和高置信程度”。
+
+
+5. 训练目标不能只是 MSE
+
+如果主题三只是训练：
+
+MSE(e_pred, e_u)
+
+那么会再次出现类似问题：
+
+既然目标是恢复 e_u，为什么不直接用 e_u 选 TopK？
+
+因此，主题三不应该以重建用户 embedding 作为唯一目标。
+
+更合理的主目标是 ranking loss：
+
+降噪后的用户表示 e_pred 应该把用户 observed positives 排在 negative bundles 前面。
+
+BPR 形式：
+
+L_rank = -log sigmoid(score(e_pred, b_pos) - score(e_pred, b_neg))
+
+其中：
+
+b_pos 来自用户 observed bundles
+b_neg 来自用户未交互 bundles
+
+这个目标的含义是：
+
+降噪后的用户偏好表示应该具备区分用户正负 bundle 的能力。
+
+
+6. 主题三中 ranking loss 的解释边界
+
+需要注意：如果主题三仅使用普通正负 ranking loss，那么 e_pred 更像一个推荐查询向量，而不一定专门优化“小 K TopK 集合的代表性”。
+
+因此，主题三与最终目标的契合方式是：
+
+先学习一个干净用户偏好表示；
+再用该表示筛选与用户偏好最一致的 observed edges；
+这些高置信边用于下游训练，从而期望提升最终推荐指标。
+
+这条路径是合理的，但比主题二稍微间接。
+
+主题三更适合讲：
+
+用户偏好表示净化 -> 高置信 observed edge selection。
+
+主题二更适合讲：
+
+核心 TopK 小集合优化 -> 服务下游推荐。
+
+
+7. 可加入 observed-set context
+
+如果 denoiser 只输入 e_t 和 timestep，可能过于接近普通 user embedding denoising，甚至学成 identity mapping。
+
+为了增强个性化和与 observed set 的关联，可以加入 observed-set context：
+
+z0 = mean(emb(O_u))
+
+denoiser 输入可以设计为：
+
+[e_t, z0, e_t * z0, |e_t - z0|, time_embedding]
+
+这样主题三就变成：
+
+observed-set-aware user preference denoising
+
+即：
+
+在用户预训练表示的基础上，结合用户已观测 bundle 集合语义，对用户偏好表示进行扩散净化。
+
+这个折中版本可能比纯 user embedding denoising 更稳。
+
+
+8. 可选噪声一致性约束
+
+主题三同样可以加入噪声一致性。
+
+对同一个用户，采样两个不同噪声版本：
+
+e_t1 = noise(e_u, t1)
+e_t2 = noise(e_u, t2)
+
+经过 denoiser：
+
+e_pred1 = denoiser(e_t1, context, t1)
+e_pred2 = denoiser(e_t2, context, t2)
+
+约束：
+
+L_consistency = 1 - cosine(e_pred1, e_pred2)
+
+总损失可考虑：
+
+L = L_rank + lambda_cons * L_consistency
+
+可选小重建项：
+
+L = L_rank + lambda_cons * L_consistency + lambda_rec * MSE(e_pred, e_u)
+
+其中 MSE 只能作为很小的稳定锚点，不建议作为主目标。
+
+
+9. 与最终推荐目标的契合度
+
+主题三契合最终目标的方式是：
+
+最终推荐任务依赖用户表示与 bundle 表示的匹配；
+主题三直接净化用户表示，并用净化后的用户表示筛选高置信 observed edges；
+如果净化后的用户表示更可靠，那么被选出的 TopK 边更可能是高质量训练监督；
+进而帮助下游 DWT / CBR 模型学习更好的用户-bundle 表示。
+
+因此，主题三与最终推荐目标是契合的，但它的契合路径是：
+
+净化用户偏好表示 -> 高置信边筛选 -> 改善训练图 -> 提升下游推荐。
+
+相比主题二：
+
+主题二更直接优化 TopK 小集合的预测效用；
+主题三更直接优化用户偏好表示的推荐辨别能力。
+
+
+10. 主题三的优点
+
+1. 论文故事更加直观。
+
+可以讲成：
+
+预训练用户表示承载全局偏好，但可能受到噪声交互污染。通过扩散去噪得到更稳定的用户偏好表示，并以此从已观测交互中筛选高置信训练边。
+
+2. 更符合推荐打分直觉。
+
+推荐本质上是 user representation 与 bundle representation 的匹配。主题三直接净化 user representation，因此更自然。
+
+3. 更能体现“代表用户特征”。
+
+相比 z0 由 bundle set 平均得到，用户表示本身更容易被解释为用户偏好特征。
+
+4. 可以绕开“为什么不直接 z0 TopK”的核心质疑。
+
+因为主题三不再以 z0 作为主要筛边查询，而是以净化后的用户表示作为查询。
+
+
+11. 主题三的风险
+
+1. 如果预训练 user embedding 本身噪声较大，MSE 重建没有意义。
+
+因此必须引入 ranking loss 或其他任务导向目标。
+
+2. 容易被质疑为普通推荐模型。
+
+如果只做 e_pred 对 positives > negatives，那么主题三可能看起来像一个普通 user-bundle matching 模型。需要强调扩散加噪和噪声一致性带来的鲁棒用户偏好学习。
+
+3. 小 K 代表性不一定强。
+
+主题三更强调高置信边，不一定显式训练 TopK 小集合去预测用户剩余偏好。因此对于 iFashion 的 k=3，它可能不如主题二那样直接优化小集合代表性。
+
+4. 开发改动更大。
+
+当前代码是围绕 observed bundle set pooling 的 LatentDiffusionRebuilder 设计的。主题三需要重构输入、训练目标和推理逻辑。
+
+
+12. 主题三的论文叙事
+
+可以表述为：
+
+为了避免直接依赖可能受噪声交互影响的 observed-set pooling 原型，我们进一步考虑从用户侧进行偏好净化。具体而言，对预训练用户表示施加潜在扩散扰动，并结合 observed bundle set 语义作为上下文，训练用户条件去噪器恢复稳定用户偏好表示。推理阶段，以去噪后的用户表示作为查询，仅从用户已观测交互中筛选与其干净偏好最一致的 TopK 高置信边。
+
+一句话总结：
+
+主题三将扩散净化对象从 observed-set prototype 转向 user preference embedding，用降噪后的用户偏好表示进行保守式高置信边筛选。
+
+
+
+三、主题二与主题三的对比
+
+1. 净化对象不同
+
+主题二：
+
+净化 observed bundle set 的集合级 latent。
+
+主题三：
+
+净化 pretrained user embedding。
+
+
+2. 降噪输出意义不同
+
+主题二：
+
+z_pred 是核心边选择查询向量。
+
+主题三：
+
+e_pred 是降噪后的用户偏好表示。
+
+
+3. TopK 意义不同
+
+主题二：
+
+TopK 是能代表用户并预测剩余偏好的核心训练边集合。
+
+主题三：
+
+TopK 是与降噪用户偏好最一致的高置信 observed edges。
+
+
+4. 与最终目标的契合方式不同
+
+主题二：
+
+直接训练 TopK 小集合的预测效用，更适合小 k 场景。
+
+主题三：
+
+训练干净用户表示的正负辨别能力，再用它筛高置信边，逻辑更直观但稍间接。
+
+
+5. 工程复杂度不同
+
+主题二：
+
+更接近当前代码，但需要处理 soft TopK / 梯度问题。
+
+主题三：
+
+故事更自然，但需要较大幅度重构 LatentDiffusionRebuilder。
+
+
+6. 推荐优先级
+
+短期论文稳妥路线：
+
+保留当前实现，补做 z0 直接 TopK 对照实验，强化论文叙事。
+
+若后续要开发新方案：
+
+优先考虑主题二，因为它更贴近当前模块结构，也更针对 iFashion 的 k=3 小集合代表性问题。
+
+主题三：
+
+作为更大胆的模块一重构方向，可在主题二之后继续探索。
+
+
+
+四、当前最重要的后续实验建议
+
+在不改代码主体的前提下，建议优先补做：
+
+直接 z0 选 TopK 的对照实验。
+
+该实验用于验证：
+
+当前扩散 denoiser 输出 z_star 是否确实优于原始 observed-set pooling 原型 z0。
+
+如果结果为：
+
+z_star TopK > z0 TopK
+
+则当前论文故事会非常稳：
+
+扩散扰动训练 + 用户条件去噪确实比静态集合均值更适合作为高置信边筛选依据。
+
+如果结果差距不大：
+
+说明当前模块一的收益可能主要来自 TopK 保守筛边本身，而不是 denoiser 学到的鲁棒表示；此时论文叙事需要更谨慎，并可将主题二/主题三作为后续改造方向。
+
+如果结果为：
+
+z0 TopK >= z_star TopK
+
+则说明当前 DiffLoss 导向的 denoiser 价值不足，需要认真考虑主题二或主题三的任务导向改造。
+
+
+
+五、最终简短结论
+
+当前实现不建议轻易放弃，因为 iFashion 上已经有明显指标提升。
+
+但从理论上看，当前 DiffLoss 恢复 z0 的目标确实存在“为什么不直接 z0 TopK”的质疑。因此，短期应该先补 z0 TopK 对照实验。
+
+主题二是更贴近当前框架的改造方向：
+
+保留 observed-set diffusion，但让降噪输出服务于 TopK 核心边集合的预测效用。
+
+主题三是更直观但改动更大的改造方向：
+
+直接净化用户偏好表示，再用降噪用户表示筛选高置信 observed edges。
+
+后续若要开发新方案，建议先从主题二的小规模版本开始验证。

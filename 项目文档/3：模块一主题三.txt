@@ -1,0 +1,774 @@
+模块一主题三方案记录：观测集合感知的用户偏好扩散式核心边筛选
+
+本文档用于记录围绕模块一的主题三改造方案，供后续开发实现使用。
+
+当前背景：
+
+已有 z0-TopK 对照实验表明，当前模块一的 diffusion-Top3 与 z0-Top3 在 iFashion 上几乎完全贴近。z0-Top3 没有超过 diffusion-Top3，但差距极小。这说明 TopK 保守筛边本身有效，而当前 DiffLoss 导向的扩散 denoiser 相比静态 z0 原型的独立增益很弱。
+
+当前模块一的问题在于：
+
+z0 = mean(observed bundle embeddings)
+z_t = add_noise(z0, t)
+z_pred = denoiser(z_t, user_vec, t)
+L = DiffLoss + set_weight * SetLoss
+
+由于主目标是让 z_pred 恢复 z0，模型很容易学到：
+
+z_star ≈ z0
+
+因此最终 diffusion-TopK 很容易退化为 z0-TopK，难以支撑“扩散去噪显著优于静态原型筛边”的叙事。
+
+主题三的目标是换一个净化对象：不再对 observed-set prototype z0 做扩散净化，而是对 pretrained user embedding 做扩散净化，并让扩散输出直接服务于 TopK 核心训练边选择。
+
+
+一、主题三的核心定位
+
+主题三建议命名为：
+
+中文：观测集合感知的用户偏好扩散式核心边筛选模块
+
+英文：Observed-set-aware User Preference Diffusion for Core UB Edge Selection
+
+它的核心思想不是训练一个普通的推荐用户向量，而是训练一个用于已观测 UB 边筛选的 selector query。
+
+一句话定义：
+
+对预训练用户偏好表示进行 observed-set-aware 扩散扰动与去噪，得到用于已观测 UB 边筛选的用户偏好 query；训练时通过 soft core edge selection 得到核心边集合表示，并用该集合表示预测 held-out observed positives，使扩散输出直接服务于高质量 TopK 训练边选择；推理时仅从用户原始 observed bundles 中保守筛选 TopK 边，用于下游捆绑推荐训练。
+
+主题三仍坚持保守式筛边原则：
+
+1. 只从用户原始 observed bundles 中选边。
+2. 不生成未观测 user-bundle 边。
+3. 不重建完整 UB 矩阵。
+4. 最终目标是构造更高质量的训练期 UB 图，服务下游 DWT / CBR 捆绑推荐。
+
+
+二、与当前模块一的区别
+
+当前模块一：
+
+净化对象：observed-set prototype z0
+辅助条件：pretrained user embedding e_u
+训练目标：z_pred 恢复 z0，并保持 observed set 语义一致
+推理筛边：用 z_star 在 observed bundles 内选 TopK
+
+主题三：
+
+净化对象：pretrained user embedding e_u
+辅助条件：observed-set prototype z0
+训练目标：由扩散 query 选出的核心边集合能预测 held-out observed positives
+推理筛边：用 denoised user preference query 在 observed bundles 内选 TopK
+
+可以理解为：
+
+当前模块一：用 user embedding 辅助净化 z0。
+
+主题三：用 observed-set context 辅助净化 user embedding。
+
+
+三、符号定义
+
+对用户 u：
+
+e_u：预训练 user embedding。
+
+O_u：用户 u 在训练集中已观测到的 bundle 集合。
+
+E_b：预训练 bundle embedding 表。
+
+z0_u：用户 observed bundle set 的集合语义表示。
+
+z0_u = mean(emb(b)), b in O_u
+
+e_t：对 e_u 加噪后的 noisy user preference embedding。
+
+q_u：denoiser 输出的 denoised user preference query。
+
+p_u：从 O_u 中随机藏起来的 held-out observed positive。
+
+C_u：训练时用于软选择核心边的候选集合。
+
+C_u = O_u - {p_u}
+
+r_u：由 q_u 从 C_u 中软选择得到的核心边集合表示。
+
+n_u：用户未交互过的 negative bundle。
+
+
+四、扩散过程
+
+主题三对 pretrained user embedding e_u 进行加噪：
+
+e_t = sqrt(alpha_bar_t) * e_u + sqrt(1 - alpha_bar_t) * epsilon
+
+其中：
+
+t 为扩散时间步；
+epsilon 为高斯噪声；
+alpha_bar_t 由 beta schedule 累积得到，沿用当前 LatentDiffusionRebuilder 中的实现方式即可。
+
+扩散过程的意义：
+
+1. 模拟用户偏好表示受到噪声污染。
+2. 迫使 denoiser 从不同噪声强度下恢复稳定的用户偏好筛边 query。
+3. 避免直接依赖静态 pretrained user embedding。
+
+
+五、Denoiser 输入设计
+
+主题三 denoiser 的输入为：
+
+[e_t, z0_u, e_t * z0_u, |e_t - z0_u|, time_embedding(t)]
+
+各项含义如下。
+
+1. e_t
+
+加噪后的用户偏好表示。
+
+含义：
+
+当前被扰动的用户偏好状态。
+
+作用：
+
+作为扩散模型的主要输入，让 denoiser 学会从 noisy user embedding 中恢复稳定筛边 query。
+
+维度：
+
+[batch_size, embedding_dim]
+
+
+2. z0_u
+
+用户 observed bundle set 的均值表示。
+
+z0_u = mean(emb(b)), b in O_u
+
+含义：
+
+用户真实训练交互集合的语义上下文。
+
+作用：
+
+帮助 denoiser 感知用户实际交互过的 bundle 集合，避免主题三退化成纯 user embedding denoising。
+
+维度：
+
+[batch_size, embedding_dim]
+
+
+3. e_t * z0_u
+
+e_t 与 z0_u 的逐元素乘法。
+
+含义：
+
+用户预训练偏好与 observed-set 语义之间的交互特征。
+
+作用：
+
+如果某些维度在 e_t 和 z0_u 中同时较强，说明该偏好方向同时被用户表示和 observed set 支持。
+
+维度：
+
+[batch_size, embedding_dim]
+
+
+4. |e_t - z0_u|
+
+e_t 与 z0_u 的逐元素绝对差。
+
+含义：
+
+用户预训练偏好与 observed-set 语义之间的偏差。
+
+作用：
+
+帮助 denoiser 判断用户表示与 observed set 之间的不一致部分，这些不一致可能来自噪声交互、弱偏好边或预训练表示偏移。
+
+维度：
+
+[batch_size, embedding_dim]
+
+
+5. time_embedding(t)
+
+时间步嵌入。
+
+含义：
+
+当前噪声强度。
+
+作用：
+
+告诉 denoiser 当前输入处于哪个扩散噪声阶段。
+
+维度：
+
+[batch_size, time_dim]
+
+
+拼接后的输入维度：
+
+4 * embedding_dim + time_dim
+
+若 embedding_dim=64，time_dim=16，则输入维度为：
+
+4 * 64 + 16 = 272
+
+Denoiser 输出：
+
+q_u = denoiser([e_t, z0_u, e_t * z0_u, |e_t - z0_u|, time_embedding(t)])
+
+q_u 的维度为：
+
+[batch_size, embedding_dim]
+
+q_u 的语义：
+
+q_u 不是普通推荐 user embedding，而是用于从 observed bundles 中筛选核心训练边的 denoised user preference query。
+
+
+六、主训练目标：核心边集合预测 held-out observed positive
+
+主题三最重要的设计是：不直接训练 q_u 本身做普通推荐，而是训练 q_u 选出的核心边集合是否有用。
+
+具体流程如下。
+
+1. 对用户 u，从 O_u 中随机采样一个 observed bundle 作为 held-out positive：
+
+p_u in O_u
+
+2. 构造候选集合：
+
+C_u = O_u - {p_u}
+
+3. 使用 q_u 对 C_u 中每个 bundle 打分：
+
+score_i = cosine(q_u, emb(b_i)), b_i in C_u
+
+4. 使用 soft selection 得到核心边集合表示。
+
+第一版建议直接使用 softmax selection：
+
+w_i = softmax(score_i / tau_select)
+
+r_u = sum(w_i * emb(b_i)), b_i in C_u
+
+其中：
+
+tau_select 为 soft selection 温度。
+
+r_u 表示由 q_u 从用户 observed candidates 中软选择出的核心边集合表示。
+
+5. 采样 negative bundle：
+
+n_u not in O_u
+
+6. 使用 r_u 去预测 held-out positive：
+
+score_pos = cosine(r_u, emb(p_u))
+
+score_neg = cosine(r_u, emb(n_u))
+
+7. 主损失：
+
+L_core = -log sigmoid(score_pos - score_neg)
+
+该目标的意义：
+
+由 q_u 选出的核心 observed bundles 应该能够代表用户，并预测用户剩余真实 observed positive。
+
+这与最终目标高度一致：
+
+保留少量高质量 observed UB 边，使它们作为训练监督服务下游捆绑推荐。
+
+
+七、为什么不直接用普通 BPR 训练 q_u
+
+不建议第一版只使用：
+
+score_pos = cosine(q_u, emb(p_u))
+
+score_neg = cosine(q_u, emb(n_u))
+
+L_query = -log sigmoid(score_pos - score_neg)
+
+因为这种目标只训练 q_u 本身是否是一个好的推荐查询向量，并没有直接约束 q_u 选出的 TopK observed edges 是否是高质量训练边。
+
+当前研究目标不是让 q_u 直接做最终推荐，而是让 q_u 服务于：
+
+observed edge selection
+
+因此主目标必须落在核心边集合 r_u 上，而不是只落在 q_u 本身上。
+
+
+八、辅助损失设计
+
+开发时建议把以下三个辅助损失都实现出来，但第一阶段默认关闭或权重设为 0。
+
+第一阶段只启用主损失 L_core，先判断主题三是否有基本价值。
+
+如果 L_core 版本能够超过 z0-Top3 / diffusion-Top3，再逐步打开辅助损失进行调参。
+
+
+1. L_query：query-level ranking loss
+
+定义：
+
+q_u 本身也应该能把 held-out observed positive 排在 negative bundle 前面。
+
+score_pos_query = cosine(q_u, emb(p_u))
+
+score_neg_query = cosine(q_u, emb(n_u))
+
+L_query = -log sigmoid(score_pos_query - score_neg_query)
+
+作用：
+
+防止 q_u 完全漂掉，使 q_u 保持基本的正负 bundle 辨别能力。
+
+定位：
+
+辅助项，不是主目标。
+
+建议初始权重：
+
+lambda_query = 0
+
+若主损失有效但训练不稳定，可尝试：
+
+lambda_query = 0.05 或 0.1
+
+
+2. L_consistency：noise consistency loss
+
+定义：
+
+对同一用户采样两个不同噪声版本：
+
+e_t1 = q_sample(e_u, t1)
+
+e_t2 = q_sample(e_u, t2)
+
+q_u1 = denoiser(e_t1, z0_u, t1)
+
+q_u2 = denoiser(e_t2, z0_u, t2)
+
+要求两个输出 query 保持一致：
+
+L_consistency = 1 - cosine(q_u1, q_u2)
+
+作用：
+
+让同一用户在不同噪声扰动下得到稳定的核心边筛选 query。
+
+定位：
+
+辅助稳定项。
+
+建议初始权重：
+
+lambda_consistency = 0
+
+若主损失有效但输出波动较大，可尝试：
+
+lambda_consistency = 0.05
+
+
+3. L_anchor：small anchor loss
+
+定义：
+
+用极小权重约束 q_u 不要完全偏离 pretrained user embedding e_u。
+
+可选形式一：
+
+L_anchor = 1 - cosine(q_u, e_u)
+
+可选形式二：
+
+L_anchor = MSE(q_u, e_u)
+
+建议优先使用 cosine anchor，因为它只约束方向，不强行恢复数值。
+
+作用：
+
+提供轻微稳定锚点，避免 q_u 在早期训练中完全漂移。
+
+定位：
+
+极小辅助项，只做稳定，不做主目标。
+
+建议初始权重：
+
+lambda_anchor = 0
+
+若训练出现明显不稳定，可尝试：
+
+lambda_anchor = 0.001
+
+不建议使用较大 anchor 权重，否则会退化为：
+
+q_u ≈ e_u
+
+从而再次引发“为什么不直接用 e_u 选 TopK”的质疑。
+
+
+九、第一阶段推荐总损失
+
+第一阶段只启用主损失：
+
+L = L_core
+
+配置上建议：
+
+lambda_query = 0
+lambda_consistency = 0
+lambda_anchor = 0
+
+第一阶段目标不是一次性调出最优，而是判断主题三是否具备基本价值：
+
+theme3-Top3 是否超过 z0-Top3 和当前 diffusion-Top3。
+
+若 L_core 版本有效，再进入第二阶段：
+
+L = L_core + lambda_query * L_query
+
+若第二阶段有效但不稳定，再进入第三阶段：
+
+L = L_core + lambda_query * L_query + lambda_consistency * L_consistency
+
+最后才考虑极小 anchor：
+
+L = L_core + lambda_query * L_query + lambda_consistency * L_consistency + lambda_anchor * L_anchor
+
+
+十、推理阶段
+
+训练完成后，对每个用户 u：
+
+1. 构造 observed-set context：
+
+z0_u = mean(emb(b)), b in O_u
+
+2. 从 pretrained user embedding e_u 开始 denoise：
+
+e_star = refine_user_query(e_u, z0_u)
+
+可沿用当前 refine_latent 的迭代方式：
+
+for step in reversed(range(num_steps)):
+    q_u = denoiser(current_user_state, z0_u, step)
+    current_user_state = q_u
+
+3. 使用 e_star / q_u 对完整 O_u 中所有 observed bundle 打分：
+
+score_b = cosine(q_u, emb(b)), b in O_u
+
+4. 保留 TopK：
+
+S_u = TopK(score_b), S_u subset O_u
+
+5. 构造 rebuilt UB graph：
+
+只保留 (u, b), b in S_u
+
+该 rebuilt UB graph 继续送入 DWT / CBR 下游训练流程。
+
+
+十一、与当前项目代码的落点
+
+当前项目中与模块一相关的主要代码位置：
+
+models/model.py:
+
+LatentDiffusionRebuilder
+
+train.py:
+
+build_observed_bundle_batch
+train_latent_diffusion_epoch
+rebuild_ub_graph_with_latent_diffusion
+create_latent_diffusion_rebuilder
+run_dwt_training
+
+utility.py:
+
+Datasets.user_observed_bundles
+Datasets.train_active_user_indices
+Datasets.train_bundle_indices
+load_external_embedding_tensor
+
+主题三建议新增并列类：
+
+UserPreferenceDiffusionRebuilder
+
+不要直接覆盖 LatentDiffusionRebuilder，以便保留当前模块一作为 baseline。
+
+UserPreferenceDiffusionRebuilder 建议包含：
+
+1. _pool_observed(observed_bundle_indices, observed_mask)
+
+复用当前逻辑，用于得到 z0_u。
+
+2. _time_embedding(timesteps)
+
+复用当前 sinusoidal time embedding。
+
+3. q_sample(e_u, timesteps, noise=None)
+
+对 pretrained user embedding 加噪。
+
+4. _model_features(e_t, z0_u, timesteps)
+
+拼接：
+
+[e_t, z0_u, e_t * z0_u, |e_t - z0_u|, time_embedding(t)]
+
+5. _predict_query(e_t, z0_u, timesteps)
+
+输出 q_u。
+
+6. training_loss(batch)
+
+实现 L_core，并预留 L_query、L_consistency、L_anchor。
+
+第一阶段默认：
+
+只返回 L_core。
+
+7. refine_user_query(user_indices, observed_bundle_indices, observed_mask)
+
+推理阶段从 e_u 开始迭代 denoise，得到 q_u。
+
+8. rebuild_topk(user_indices, observed_bundle_indices, rebuild_k)
+
+用 q_u 在 observed bundles 中 hard TopK，返回 selected_bundles 与 selected_valid。
+
+
+十二、训练 batch 中需要补充的信息
+
+当前 build_observed_bundle_batch 返回：
+
+user_indices
+observed_indices
+observed_mask
+
+主题三第一版可以继续使用这些信息。
+
+training_loss 内部需要完成：
+
+1. 对每个用户从 observed_indices 中采样一个 held-out positive p_u。
+
+2. 将 p_u 从 candidate mask 中去掉，得到 C_u。
+
+3. 从全量 bundle 中为每个用户采样 negative n_u，要求 n_u 不在该用户 observed set 中。
+
+注意：
+
+如果某个用户 observed 数量小于等于 1，则无法构造 C_u 和 held-out positive。iFashion 中用户训练交互平均较多，通常问题不大，但代码仍需防御：
+
+observed_count <= 1 的用户可以跳过，或者退化为 query-level loss。
+
+
+十三、soft selection 细节
+
+第一版建议不用 hard TopK，因为 hard TopK 不可导。
+
+使用 softmax over candidates：
+
+w_i = softmax(score_i / tau_select)
+
+r_u = sum(w_i * emb(b_i))
+
+这样梯度可以从 L_core 回传到 q_u 的打分逻辑。
+
+可配置参数：
+
+tau_select
+
+建议初始值：
+
+tau_select = 0.1 或 0.2
+
+如果 softmax 太尖锐，训练可能不稳定；
+如果 softmax 太平，r_u 会接近所有候选的平均，容易退化回 z0。
+
+后续可考虑 top-k masked softmax：
+
+前向先选 top-k mask，只在 top-k 内做 softmax 聚合。
+
+但第一版建议先用完整 candidate softmax，降低开发复杂度。
+
+
+十四、负采样策略
+
+第一版使用简单随机负采样：
+
+对每个用户随机采样 bundle n_u，要求 n_u 不在 O_u。
+
+后续如果效果不明显，可以考虑 hard negative：
+
+从与 q_u 相似度较高但未交互的 bundle 中采样。
+
+但第一版不要复杂化。
+
+
+十五、推荐实验设计
+
+第一阶段只在 iFashion 上跑：
+
+origin
+z0-Top3
+current diffusion-Top3
+theme3-Top3
+
+已有关键基线：
+
+z0-Top3:
+TOP 20: REC_T=0.15631, NDCG_T=0.13145
+
+current diffusion-Top3:
+TOP 20: REC_T=0.15668, NDCG_T=0.13148
+
+主题三第一阶段的最低目标：
+
+theme3-Top3 的 NDCG@20 应超过 0.13148。
+
+如果能达到：
+
+NDCG@20 > 0.132
+
+则说明主题三具备继续调参价值。
+
+如果 theme3-Top3 仍贴近 0.1314，说明用户表示扩散净化路线也未能显著超过 z0-TopK，需要回到主题二或考虑 BI 关系提炼。
+
+
+十六、推荐配置项
+
+建议在 dwt 或 latent diffusion 配置中新增：
+
+rebuild_strategy: "user_pref_diffusion"
+
+user_pref_diffusion:
+  enabled: true
+  rebuild_k: 3
+  hidden_dim: 128
+  time_dim: 16
+  denoiser_layers: 2
+  dropout: 0.1
+  num_steps: 12
+  beta_start: 1.0e-4
+  beta_end: 0.02
+  lr: 1.0e-3
+  weight_decay: 1.0e-5
+  batch_size: 1024
+  infer_batch_size: 256
+  tau_select: 0.1
+  lambda_query: 0.0
+  lambda_consistency: 0.0
+  lambda_anchor: 0.0
+  anchor_type: "cosine"
+
+第一阶段默认：
+
+lambda_query = 0
+lambda_consistency = 0
+lambda_anchor = 0
+
+即只启用：
+
+L = L_core
+
+
+十七、预期风险
+
+1. L_core 可能训练不稳定。
+
+原因：
+
+soft selection 的 r_u 依赖 q_u 的打分分布，温度 tau_select 对结果影响较大。
+
+应对：
+
+先调 tau_select，再考虑打开 lambda_query。
+
+
+2. soft selection 可能退化为 z0。
+
+原因：
+
+如果 softmax 太平，r_u 接近候选集合均值。
+
+应对：
+
+降低 tau_select，或后续使用 top-k masked softmax。
+
+
+3. q_u 可能变成普通推荐向量。
+
+原因：
+
+如果 L_query 权重过大，模型目标会偏向 q_u 本身推荐，而不是核心边集合有效性。
+
+应对：
+
+第一阶段关闭 L_query，后续只用小权重。
+
+
+4. anchor 权重过大会导致退化。
+
+原因：
+
+如果强约束 q_u 接近 e_u，会再次出现“为什么不直接 e_u TopK”的质疑。
+
+应对：
+
+lambda_anchor 设为 0 或 0.001。
+
+
+5. 主题三不一定优于主题二。
+
+主题三更换了净化对象，故事更自然，但它不如主题二那样直接沿着 observed-set prototype 做 selector 学习。
+
+如果主题三失败，不代表任务导向 TopK 思路失败，仍应继续考虑主题二。
+
+
+十八、最终开发原则
+
+第一版开发必须保持克制：
+
+1. 新增 UserPreferenceDiffusionRebuilder，不覆盖当前 LatentDiffusionRebuilder。
+
+2. 第一阶段只启用 L_core。
+
+3. L_query、L_consistency、L_anchor 都实现成可配置项，但默认权重为 0。
+
+4. 推理阶段仍只从 observed bundles 中 hard TopK。
+
+5. 第一阶段只在 iFashion 上验证 theme3-Top3。
+
+6. 目标是超过 z0-Top3 / current diffusion-Top3，而不是只超过 origin。
+
+7. 如果第一阶段不超过 0.13148 NDCG@20，不建议继续大规模调参。
+
+
+十九、最终简短结论
+
+主题三不是简单的“用户表示加噪降噪”，而是“用户偏好扩散 query 驱动的 observed edge selection”。
+
+其关键是：
+
+扩散输出 q_u 必须通过核心边集合 r_u 的预测效用来训练，而不是只通过 q_u 自身的普通 BPR 来训练。
+
+第一阶段只启用主损失 L_core：
+
+从 observed set 中藏一个 positive；
+用 q_u 在剩余 observed bundles 中软选择核心集合 r_u；
+用 r_u 预测 held-out positive，并区分 negative bundle。
+
+如果该方案能超过 z0-Top3 / diffusion-Top3，则说明主题三具备继续调参和写入论文故事的价值。
+

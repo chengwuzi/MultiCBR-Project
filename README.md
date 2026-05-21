@@ -17,6 +17,9 @@ conda activate recbole
 
 python -u train.py -d iFashion 2>&1 | tee logs_run.txt
 
+python -u train.py -d iFashion  -g 1 -i theme3_tau0.1_tgt4 2>&1 | tee theme3_ifashion_tau0.1_tgt4.log
+
+
 python -u train.py -d Youshu 2>&1 | tee logs_run.txt
 
 python -u train.py -d NetEase 2>&1 | tee logs_run.txt

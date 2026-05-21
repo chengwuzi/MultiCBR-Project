@@ -102,7 +102,8 @@ iFashion:
   test_interval: 5
 
   dwt:
-    use_latent_diffusion_rebuild: true
+    rebuild_strategy: "user_pref_diffusion" # options: origin, latent_diffusion, user_pref_diffusion
+    use_latent_diffusion_rebuild: false # legacy compatibility flag; rebuild_strategy takes precedence
     rebuild_k: 3
     latent_diffusion_user_embedding_path: './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt'
     latent_diffusion_bundle_embedding_path: './datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt'
@@ -120,6 +121,27 @@ iFashion:
     latent_diffusion_infer_batch_size: 256
     latent_diffusion_reset_after_epoch: -1
     latent_diffusion_reset_optimizer: false
+
+    user_pref_diffusion:
+      enabled: true
+      hidden_dim: 128
+      time_dim: 16
+      denoiser_layers: 2
+      dropout: 0.1
+      num_steps: 12
+      beta_start: 1.0e-4
+      beta_end: 0.02
+      lr: 1.0e-3
+      weight_decay: 1.0e-5
+      batch_size: 1024
+      infer_batch_size: 256
+      tau_select: 0.1
+      target_num: 4
+      neg_num_for_core: 1
+      lambda_query: 0.0
+      lambda_consistency: 0.0
+      lambda_anchor: 0.0
+      anchor_type: "cosine"
 
     gamma_1: 0.3
     gamma_2: 0.2

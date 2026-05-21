@@ -17,7 +17,13 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models.model import AnchorViewBundleNet, DWT, LatentDiffusionRebuilder, resolve_dwt_graph_config
+from models.model import (
+    AnchorViewBundleNet,
+    DWT,
+    LatentDiffusionRebuilder,
+    UserPreferenceDiffusionRebuilder,
+    resolve_dwt_graph_config,
+)
 from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 
@@ -100,6 +106,31 @@ def report_latent_rebuild_epoch(run, log_path, epoch, latent_diffusion_loss, reb
     run.add_scalar(f"{prefix}/density", graph_stats["density"], epoch)
 
 
+def report_user_pref_rebuild_epoch(run, log_path, epoch, loss_stats, rebuilt_ub_graph, dataset_name, prefix):
+    graph_stats = summarize_sparse_graph(rebuilt_ub_graph)
+    message = (
+        f"[{prefix}] epoch={epoch + 1} dataset={dataset_name} "
+        f"loss={loss_stats['loss']:.6f} core={loss_stats['core']:.6f} "
+        f"query={loss_stats['query']:.6f} consistency={loss_stats['consistency']:.6f} "
+        f"anchor={loss_stats['anchor']:.6f} rebuilt_edges={graph_stats['nnz']} "
+        f"avg_user_edges={graph_stats['avg_interactions']:.6f} "
+        f"user_coverage={graph_stats['row_coverage']:.6f} "
+        f"bundle_coverage={graph_stats['col_coverage']:.6f} "
+        f"density={graph_stats['density']:.10f}"
+    )
+    print(message)
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
+
+    for key, value in loss_stats.items():
+        run.add_scalar(f"{prefix}/{key}_epoch", value, epoch)
+    run.add_scalar(f"{prefix}/rebuilt_edges", graph_stats["nnz"], epoch)
+    run.add_scalar(f"{prefix}/avg_user_edges", graph_stats["avg_interactions"], epoch)
+    run.add_scalar(f"{prefix}/user_coverage", graph_stats["row_coverage"], epoch)
+    run.add_scalar(f"{prefix}/bundle_coverage", graph_stats["col_coverage"], epoch)
+    run.add_scalar(f"{prefix}/density", graph_stats["density"], epoch)
+
+
 def build_dwt_training_ub_graph(ub_graph, conf, device):
     adjacency_matrix = sp.bmat([
         [sp.csr_matrix((conf["num_users"], conf["num_users"])), ub_graph],
@@ -149,6 +180,29 @@ def build_observed_bundle_batch(dataset, user_indices, device):
         "observed_indices": observed_indices,
         "observed_mask": observed_mask,
     }
+
+
+def resolve_dwt_rebuild_strategy(dwt_conf):
+    strategy = dwt_conf.get("rebuild_strategy")
+    if strategy is None:
+        strategy = "latent_diffusion" if dwt_conf.get("use_latent_diffusion_rebuild", False) else "origin"
+    strategy = str(strategy).strip().lower()
+    aliases = {
+        "none": "origin",
+        "noise": "origin",
+        "original": "origin",
+        "latent": "latent_diffusion",
+        "diffusion": "latent_diffusion",
+        "old_diffusion": "latent_diffusion",
+        "user_pref": "user_pref_diffusion",
+        "theme3": "user_pref_diffusion",
+        "theme_three": "user_pref_diffusion",
+    }
+    strategy = aliases.get(strategy, strategy)
+    valid_strategies = {"origin", "latent_diffusion", "user_pref_diffusion"}
+    if strategy not in valid_strategies:
+        raise ValueError(f"Unsupported DWT rebuild_strategy: {strategy}")
+    return strategy
 
 
 def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimizer, dataset, rebuild_conf, device):
@@ -238,6 +292,114 @@ def create_latent_diffusion_rebuilder(dwt_conf, user_embedding_tensor, bundle_em
         weight_decay=dwt_conf["latent_diffusion_weight_decay"],
     )
     return latent_diffusion_model, latent_diffusion_optimizer
+
+
+def create_user_pref_diffusion_rebuilder(dwt_conf, user_embedding_tensor, bundle_embedding_tensor, device):
+    user_pref_conf = dwt_conf.get("user_pref_diffusion", {})
+    if not user_pref_conf:
+        raise ValueError("rebuild_strategy=user_pref_diffusion requires dwt.user_pref_diffusion config block")
+
+    user_pref_model = UserPreferenceDiffusionRebuilder(
+        user_pref_conf,
+        user_embedding_tensor.to(device),
+        bundle_embedding_tensor.to(device),
+    ).to(device)
+    user_pref_optimizer = torch.optim.Adam(
+        user_pref_model.parameters(),
+        lr=user_pref_conf["lr"],
+        weight_decay=user_pref_conf["weight_decay"],
+    )
+    return user_pref_model, user_pref_optimizer
+
+
+def train_user_pref_diffusion_epoch(user_pref_model, user_pref_optimizer, dataset, rebuild_conf, device):
+    active_users = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
+    if active_users.size == 0:
+        return {
+            "loss": 0.0,
+            "core": 0.0,
+            "query": 0.0,
+            "consistency": 0.0,
+            "anchor": 0.0,
+        }
+
+    user_order = np.random.permutation(active_users)
+    batch_size = rebuild_conf["user_pref_diffusion"]["batch_size"]
+    step_num = (user_order.shape[0] + batch_size - 1) // batch_size
+    pbar = tqdm(range(step_num), total=step_num, disable=True)
+    totals = {
+        "loss": 0.0,
+        "core": 0.0,
+        "query": 0.0,
+        "consistency": 0.0,
+        "anchor": 0.0,
+    }
+    effective_steps = 0
+
+    user_pref_model.train(True)
+    for step_idx in pbar:
+        start = step_idx * batch_size
+        end = min((step_idx + 1) * batch_size, user_order.shape[0])
+        batch = build_observed_bundle_batch(dataset, user_order[start:end], device)
+
+        user_pref_optimizer.zero_grad()
+        loss_dict = user_pref_model.training_loss(batch)
+        loss = loss_dict["loss"]
+        loss.backward()
+        user_pref_optimizer.step()
+
+        for key in totals:
+            totals[key] += float(loss_dict[key].detach().item())
+        effective_steps += 1
+
+    return {key: value / max(effective_steps, 1) for key, value in totals.items()}
+
+
+def rebuild_ub_graph_with_user_pref_diffusion(user_pref_model, dataset, rebuild_conf, device):
+    user_pref_conf = rebuild_conf["user_pref_diffusion"]
+    batch_size = user_pref_conf["infer_batch_size"]
+    rebuild_k = rebuild_conf["rebuild_k"]
+    user_indices = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
+    u_list = []
+    b_list = []
+    edge_list = []
+
+    if user_indices.size == 0:
+        return sp.coo_matrix(
+            (dataset.num_users, dataset.num_bundles),
+            dtype=np.float32,
+        ).tocsr()
+
+    user_pref_model.eval()
+    with torch.no_grad():
+        for start in tqdm(range(0, user_indices.shape[0], batch_size), desc="UserPrefDiffusion Rebuild", disable=True):
+            end = min(start + batch_size, user_indices.shape[0])
+            batch = build_observed_bundle_batch(dataset, user_indices[start:end], device)
+            selected_bundles, selected_valid = user_pref_model.rebuild_topk(
+                batch["user_indices"],
+                batch["observed_indices"],
+                rebuild_k=rebuild_k,
+            )
+
+            selected_bundles = selected_bundles.cpu().numpy()
+            selected_valid = selected_valid.cpu().numpy()
+            batch_users = batch["user_indices"].cpu().numpy()
+            for row_idx, user_id in enumerate(batch_users):
+                for col_idx in range(selected_bundles.shape[1]):
+                    if not selected_valid[row_idx, col_idx]:
+                        continue
+                    u_list.append(int(user_id))
+                    b_list.append(int(selected_bundles[row_idx, col_idx]))
+                    edge_list.append(1.0)
+
+    rebuilt_ub_graph = sp.coo_matrix(
+        (
+            np.array(edge_list, dtype=np.float32),
+            (np.array(u_list, dtype=np.int32), np.array(b_list, dtype=np.int32)),
+        ),
+        shape=(dataset.num_users, dataset.num_bundles),
+    ).tocsr()
+    return rebuilt_ub_graph
 
 
 def reset_latent_diffusion_rebuilder(dwt_conf, latent_diffusion_model, latent_diffusion_optimizer):
@@ -495,7 +657,9 @@ def run_dwt_training(conf, dataset, device):
     dwt_conf = conf.get("dwt", {})
     if not dwt_conf:
         raise ValueError("train_style=dwt requires a dwt config block.")
-    use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
+    rebuild_strategy = resolve_dwt_rebuild_strategy(dwt_conf)
+    use_latent_diffusion_rebuild = rebuild_strategy == "latent_diffusion"
+    use_user_pref_diffusion_rebuild = rebuild_strategy == "user_pref_diffusion"
     dwt_graph_conf = resolve_dwt_graph_config(conf)
 
     for lr, embedding_size, num_layers in product(
@@ -524,9 +688,14 @@ def run_dwt_training(conf, dataset, device):
         settings = []
         if conf["info"] != "":
             settings += [conf["info"]]
+        rebuild_label = {
+            "origin": "Origin",
+            "latent_diffusion": "LatentRebuild",
+            "user_pref_diffusion": "UserPrefDiff",
+        }[rebuild_strategy]
         settings += [
             "DWT",
-            "LatentRebuild" if use_latent_diffusion_rebuild else "Noise",
+            rebuild_label,
             "Neg_%d" % conf["neg_num"],
             str(conf["batch_size_train"]),
             str(lr),
@@ -550,6 +719,18 @@ def run_dwt_training(conf, dataset, device):
                 f"ldlr{dwt_conf['latent_diffusion_lr']}",
                 f"ldw{dwt_conf['latent_diffusion_set_loss_weight']}",
             ]
+        if use_user_pref_diffusion_rebuild:
+            user_pref_conf = dwt_conf["user_pref_diffusion"]
+            settings += [
+                f"k{dwt_conf['rebuild_k']}",
+                f"step{user_pref_conf['num_steps']}",
+                f"uplr{user_pref_conf['lr']}",
+                f"tau{user_pref_conf['tau_select']}",
+                f"tgt{user_pref_conf['target_num']}",
+                f"lq{user_pref_conf.get('lambda_query', 0.0)}",
+                f"lc{user_pref_conf.get('lambda_consistency', 0.0)}",
+                f"la{user_pref_conf.get('lambda_anchor', 0.0)}",
+            ]
 
         setting = "_".join(settings)
         if len(setting) > 100:
@@ -565,7 +746,7 @@ def run_dwt_training(conf, dataset, device):
         model = DWT(conf, dataset.graphs).to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=0.0)
 
-        if use_latent_diffusion_rebuild:
+        if use_latent_diffusion_rebuild or use_user_pref_diffusion_rebuild:
             user_embedding_tensor = load_external_embedding_tensor(
                 dwt_conf["latent_diffusion_user_embedding_path"],
                 dataset.num_users,
@@ -578,15 +759,30 @@ def run_dwt_training(conf, dataset, device):
             )
             if user_embedding_tensor.shape[1] != bundle_embedding_tensor.shape[1]:
                 raise ValueError("Latent diffusion user and bundle embeddings must share the same dimension")
+
+        if use_latent_diffusion_rebuild:
             latent_diffusion_model, latent_diffusion_optimizer = create_latent_diffusion_rebuilder(
                 dwt_conf,
                 user_embedding_tensor,
                 bundle_embedding_tensor,
                 device,
             )
+            user_pref_model = None
+            user_pref_optimizer = None
+        elif use_user_pref_diffusion_rebuild:
+            user_pref_model, user_pref_optimizer = create_user_pref_diffusion_rebuilder(
+                dwt_conf,
+                user_embedding_tensor,
+                bundle_embedding_tensor,
+                device,
+            )
+            latent_diffusion_model = None
+            latent_diffusion_optimizer = None
         else:
             latent_diffusion_model = None
             latent_diffusion_optimizer = None
+            user_pref_model = None
+            user_pref_optimizer = None
             model.set_training_ub_graph(build_dwt_training_ub_graph(dataset.graphs[0], conf, device))
 
         batch_cnt = len(dataset.train_loader)
@@ -630,6 +826,32 @@ def run_dwt_training(conf, dataset, device):
                     rebuilt_ub_graph,
                     conf["dataset"],
                     "latent_diffusion",
+                )
+                model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
+            elif use_user_pref_diffusion_rebuild:
+                user_pref_loss_stats = train_user_pref_diffusion_epoch(
+                    user_pref_model,
+                    user_pref_optimizer,
+                    dataset,
+                    dwt_conf,
+                    device,
+                )
+                rebuilt_ub_graph = rebuild_ub_graph_with_user_pref_diffusion(
+                    user_pref_model,
+                    dataset,
+                    dwt_conf,
+                    device,
+                )
+                if epoch == 0:
+                    print_statistics(rebuilt_ub_graph, "U-B statistics from User preference diffusion rebuild")
+                report_user_pref_rebuild_epoch(
+                    run,
+                    log_path,
+                    epoch,
+                    user_pref_loss_stats,
+                    rebuilt_ub_graph,
+                    conf["dataset"],
+                    "user_pref_diffusion",
                 )
                 model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
 

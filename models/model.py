@@ -475,6 +475,277 @@ class LatentDiffusionRebuilder(nn.Module):
         return selected_bundles, selected_valid
 
 
+class UserPreferenceDiffusionRebuilder(nn.Module):
+    def __init__(self, conf, user_embeddings, bundle_embeddings):
+        super().__init__()
+
+        if user_embeddings.ndim != 2 or bundle_embeddings.ndim != 2:
+            raise ValueError("External user and bundle embeddings must be 2D")
+        if user_embeddings.shape[1] != bundle_embeddings.shape[1]:
+            raise ValueError("User and bundle embeddings must share the same embedding dimension")
+
+        self.embedding_dim = user_embeddings.shape[1]
+        self.hidden_dim = conf["hidden_dim"]
+        self.time_dim = conf["time_dim"]
+        self.num_steps = conf["num_steps"]
+        self.dropout = conf["dropout"]
+        self.tau_select = conf["tau_select"]
+        self.target_num = conf["target_num"]
+        self.neg_num_for_core = conf.get("neg_num_for_core", 1)
+        if self.neg_num_for_core != 1:
+            raise ValueError("UserPreferenceDiffusionRebuilder currently expects neg_num_for_core=1")
+
+        self.lambda_query = conf.get("lambda_query", 0.0)
+        self.lambda_consistency = conf.get("lambda_consistency", 0.0)
+        self.lambda_anchor = conf.get("lambda_anchor", 0.0)
+        self.anchor_type = conf.get("anchor_type", "cosine")
+
+        model_input_dim = self.embedding_dim * 4 + self.time_dim
+        self.denoiser = MLP(
+            model_input_dim,
+            self.hidden_dim,
+            self.embedding_dim,
+            num_layers=conf["denoiser_layers"],
+            dropout=self.dropout,
+        )
+
+        self.register_buffer("user_embeddings", user_embeddings.detach().float())
+        self.register_buffer("bundle_embeddings", bundle_embeddings.detach().float())
+
+        betas = torch.linspace(
+            conf["beta_start"],
+            conf["beta_end"],
+            self.num_steps,
+            dtype=torch.float32,
+        )
+        alphas = 1.0 - betas
+        alphas_cumprod = torch.cumprod(alphas, dim=0)
+        self.register_buffer("betas", betas)
+        self.register_buffer("alphas_cumprod", alphas_cumprod)
+        self.register_buffer("sqrt_alphas_cumprod", torch.sqrt(alphas_cumprod))
+        self.register_buffer(
+            "sqrt_one_minus_alphas_cumprod",
+            torch.sqrt(torch.clamp(1.0 - alphas_cumprod, min=1.0e-8)),
+        )
+
+    def reset_parameters(self):
+        self.denoiser.reset_parameters()
+
+    def _time_embedding(self, timesteps):
+        device = timesteps.device
+        half_dim = self.time_dim // 2
+        if half_dim == 0:
+            return torch.zeros((timesteps.shape[0], 0), device=device)
+        freqs = torch.exp(
+            -math.log(10000.0)
+            * torch.arange(half_dim, dtype=torch.float32, device=device)
+            / max(half_dim, 1)
+        )
+        args = timesteps.float().unsqueeze(1) * freqs.unsqueeze(0)
+        emb = torch.cat([torch.cos(args), torch.sin(args)], dim=1)
+        if self.time_dim % 2 == 1:
+            emb = torch.cat([emb, torch.zeros((emb.shape[0], 1), device=device)], dim=1)
+        return emb
+
+    def _pool_observed(self, observed_bundle_indices, observed_mask):
+        safe_indices = observed_bundle_indices.clamp(min=0)
+        observed_vecs = self.bundle_embeddings[safe_indices]
+        observed_mask = observed_mask.unsqueeze(-1)
+        summed = (observed_vecs * observed_mask).sum(dim=1)
+        counts = observed_mask.sum(dim=1).clamp(min=1.0)
+        return summed / counts
+
+    def _model_features(self, e_t, z0, timesteps):
+        return torch.cat(
+            [
+                e_t,
+                z0,
+                e_t * z0,
+                torch.abs(e_t - z0),
+                self._time_embedding(timesteps),
+            ],
+            dim=-1,
+        )
+
+    def _predict_query(self, e_t, z0, timesteps):
+        features = self._model_features(e_t, z0, timesteps)
+        return self.denoiser(features)
+
+    def _extract(self, values, timesteps, reference):
+        out = values[timesteps].view(-1, 1)
+        return out.expand_as(reference)
+
+    def q_sample(self, e0, timesteps, noise=None):
+        if noise is None:
+            noise = torch.randn_like(e0)
+        coeff1 = self._extract(self.sqrt_alphas_cumprod, timesteps, e0)
+        coeff2 = self._extract(self.sqrt_one_minus_alphas_cumprod, timesteps, e0)
+        return coeff1 * e0 + coeff2 * noise
+
+    def _sample_target_mask(self, observed_mask):
+        valid_mask = observed_mask.bool()
+        batch_size, max_len = valid_mask.shape
+        target_mask = torch.zeros_like(valid_mask)
+        trainable_rows = torch.zeros(batch_size, dtype=torch.bool, device=observed_mask.device)
+
+        for row_idx in range(batch_size):
+            valid_positions = torch.nonzero(valid_mask[row_idx], as_tuple=False).flatten()
+            observed_count = valid_positions.numel()
+            if observed_count <= 1:
+                continue
+            effective_target_num = min(self.target_num, observed_count - 1)
+            perm = torch.randperm(observed_count, device=observed_mask.device)[:effective_target_num]
+            target_positions = valid_positions[perm]
+            target_mask[row_idx, target_positions] = True
+            trainable_rows[row_idx] = True
+
+        return target_mask, trainable_rows
+
+    def _sample_negative_bundles(self, observed_indices, observed_mask):
+        device = observed_indices.device
+        batch_size = observed_indices.shape[0]
+        neg_ids = torch.empty(batch_size, dtype=torch.long, device=device)
+        num_bundles = self.bundle_embeddings.shape[0]
+
+        observed_cpu = observed_indices.detach().cpu()
+        observed_mask_cpu = observed_mask.detach().cpu().bool()
+        for row_idx in range(batch_size):
+            observed_set = set(observed_cpu[row_idx][observed_mask_cpu[row_idx]].tolist())
+            while True:
+                candidate = int(torch.randint(0, num_bundles, (1,), device=device).item())
+                if candidate not in observed_set:
+                    neg_ids[row_idx] = candidate
+                    break
+        return neg_ids
+
+    def training_loss(self, batch):
+        user_indices = batch["user_indices"]
+        observed_indices = batch["observed_indices"]
+        observed_mask = batch["observed_mask"]
+        device = observed_indices.device
+
+        z0 = self._pool_observed(observed_indices, observed_mask)
+        user_vec = self.user_embeddings[user_indices]
+        timesteps = torch.randint(0, self.num_steps, (user_vec.shape[0],), device=device)
+        e_t = self.q_sample(user_vec, timesteps)
+        q = self._predict_query(e_t, z0, timesteps)
+
+        safe_indices = observed_indices.clamp(min=0)
+        observed_vecs = self.bundle_embeddings[safe_indices]
+        target_mask, trainable_rows = self._sample_target_mask(observed_mask)
+        if not trainable_rows.any():
+            zero = q.sum() * 0.0
+            return {
+                "loss": zero,
+                "core": zero.detach(),
+                "query": zero.detach(),
+                "consistency": zero.detach(),
+                "anchor": zero.detach(),
+            }
+
+        candidate_mask = observed_mask.bool() & ~target_mask
+        row_filter = trainable_rows
+        q_valid = q[row_filter]
+        user_vec_valid = user_vec[row_filter]
+        observed_vecs_valid = observed_vecs[row_filter]
+        observed_indices_valid = observed_indices[row_filter]
+        observed_mask_valid = observed_mask[row_filter]
+        target_mask_valid = target_mask[row_filter]
+        candidate_mask_valid = candidate_mask[row_filter]
+
+        target_weight = target_mask_valid.float().unsqueeze(-1)
+        target_counts = target_weight.sum(dim=1).clamp(min=1.0)
+        target_center = (observed_vecs_valid * target_weight).sum(dim=1) / target_counts
+
+        q_norm = F.normalize(q_valid, dim=-1).unsqueeze(1)
+        observed_norm = F.normalize(observed_vecs_valid, dim=-1)
+        candidate_scores = (q_norm * observed_norm).sum(dim=-1)
+        candidate_scores = candidate_scores.masked_fill(~candidate_mask_valid, float("-inf"))
+        selection_weights = torch.softmax(candidate_scores / self.tau_select, dim=1)
+        core_rep = (selection_weights.unsqueeze(-1) * observed_vecs_valid).sum(dim=1)
+
+        neg_ids = self._sample_negative_bundles(observed_indices_valid, observed_mask_valid)
+        neg_vec = self.bundle_embeddings[neg_ids]
+
+        core_norm = F.normalize(core_rep, dim=-1)
+        target_norm = F.normalize(target_center, dim=-1)
+        neg_norm = F.normalize(neg_vec, dim=-1)
+        score_pos = (core_norm * target_norm).sum(dim=-1)
+        score_neg = (core_norm * neg_norm).sum(dim=-1)
+        core_loss = F.softplus(-(score_pos - score_neg)).mean()
+
+        query_loss = torch.zeros((), dtype=core_loss.dtype, device=device)
+        if self.lambda_query != 0.0:
+            q_direct_norm = F.normalize(q_valid, dim=-1)
+            score_pos_query = (q_direct_norm * target_norm).sum(dim=-1)
+            score_neg_query = (q_direct_norm * neg_norm).sum(dim=-1)
+            query_loss = F.softplus(-(score_pos_query - score_neg_query)).mean()
+
+        consistency_loss = torch.zeros((), dtype=core_loss.dtype, device=device)
+        if self.lambda_consistency != 0.0:
+            timesteps_2 = torch.randint(0, self.num_steps, (user_vec.shape[0],), device=device)
+            e_t_2 = self.q_sample(user_vec, timesteps_2)
+            q_2 = self._predict_query(e_t_2, z0, timesteps_2)[row_filter]
+            consistency_loss = (1.0 - (F.normalize(q_valid, dim=-1) * F.normalize(q_2, dim=-1)).sum(dim=-1)).mean()
+
+        anchor_loss = torch.zeros((), dtype=core_loss.dtype, device=device)
+        if self.lambda_anchor != 0.0:
+            if self.anchor_type == "mse":
+                anchor_loss = F.mse_loss(q_valid, user_vec_valid)
+            else:
+                anchor_loss = (
+                    1.0
+                    - (F.normalize(q_valid, dim=-1) * F.normalize(user_vec_valid, dim=-1)).sum(dim=-1)
+                ).mean()
+
+        total_loss = (
+            core_loss
+            + self.lambda_query * query_loss
+            + self.lambda_consistency * consistency_loss
+            + self.lambda_anchor * anchor_loss
+        )
+
+        return {
+            "loss": total_loss,
+            "core": core_loss.detach(),
+            "query": query_loss.detach(),
+            "consistency": consistency_loss.detach(),
+            "anchor": anchor_loss.detach(),
+        }
+
+    def refine_user_query(self, user_indices, observed_bundle_indices, observed_mask):
+        z0 = self._pool_observed(observed_bundle_indices, observed_mask)
+        q = self.user_embeddings[user_indices]
+        for step in reversed(range(self.num_steps)):
+            timesteps = torch.full((q.shape[0],), step, dtype=torch.long, device=q.device)
+            q = self._predict_query(q, z0, timesteps)
+        return q
+
+    def rebuild_topk(self, user_indices, observed_bundle_indices, rebuild_k=1):
+        if rebuild_k <= 0:
+            raise ValueError("rebuild_k must be positive")
+
+        device = self.user_embeddings.device
+        user_indices = user_indices.to(device)
+        observed_bundle_indices = observed_bundle_indices.to(device)
+        valid_mask = observed_bundle_indices.ge(0)
+        observed_mask = valid_mask.float()
+        safe_indices = observed_bundle_indices.clamp(min=0)
+
+        q_star = self.refine_user_query(user_indices, safe_indices, observed_mask)
+        q_norm = F.normalize(q_star, dim=-1).unsqueeze(1)
+        observed_vecs = self.bundle_embeddings[safe_indices]
+        observed_norm = F.normalize(observed_vecs, dim=-1)
+        scores = (q_norm * observed_norm).sum(dim=-1)
+        scores = scores.masked_fill(~valid_mask, float("-inf"))
+
+        topk = min(rebuild_k, observed_bundle_indices.shape[1])
+        _, selected_pos = torch.topk(scores, k=topk, dim=1)
+        selected_bundles = torch.gather(safe_indices, 1, selected_pos)
+        selected_valid = torch.gather(valid_mask, 1, selected_pos)
+        return selected_bundles, selected_valid
+
+
 class AnchorViewBundleNet(nn.Module):
     """Anchor-guided multi-view bundle recommendation model.
 

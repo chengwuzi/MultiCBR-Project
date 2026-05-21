@@ -34,7 +34,7 @@ z_star ≈ z0
 
 一句话定义：
 
-对预训练用户偏好表示进行 observed-set-aware 扩散扰动与去噪，得到用于已观测 UB 边筛选的用户偏好 query；训练时通过 soft core edge selection 得到核心边集合表示，并用该集合表示预测 held-out observed positives，使扩散输出直接服务于高质量 TopK 训练边选择；推理时仅从用户原始 observed bundles 中保守筛选 TopK 边，用于下游捆绑推荐训练。
+对预训练用户偏好表示进行 observed-set-aware 扩散扰动与去噪，得到用于已观测 UB 边筛选的用户偏好 query；训练时从用户历史中随机藏起一小组 target bundles，通过 soft core edge selection 从剩余 observed bundles 中得到核心边集合表示，并用该核心集合表示预测 target bundles 的稳健中心，使扩散输出直接服务于高质量 TopK 训练边选择；推理时仅从用户原始 observed bundles 中保守筛选 TopK 边，用于下游捆绑推荐训练。
 
 主题三仍坚持保守式筛边原则：
 
@@ -57,7 +57,7 @@ z_star ≈ z0
 
 净化对象：pretrained user embedding e_u
 辅助条件：observed-set prototype z0
-训练目标：由扩散 query 选出的核心边集合能预测 held-out observed positives
+训练目标：由扩散 query 选出的核心边集合能预测 held-out target set 的稳健兴趣中心
 推理筛边：用 denoised user preference query 在 observed bundles 内选 TopK
 
 可以理解为：
@@ -85,11 +85,17 @@ e_t：对 e_u 加噪后的 noisy user preference embedding。
 
 q_u：denoiser 输出的 denoised user preference query。
 
-p_u：从 O_u 中随机藏起来的 held-out observed positive。
+P_u：从 O_u 中随机藏起来的一小组 held-out target bundles。
+
+target_num：P_u 中包含的 target bundle 数量。iFashion 第一阶段固定为 4。
+
+g_u：held-out target set 的稳健中心表示。
+
+g_u = mean(emb(p)), p in P_u
 
 C_u：训练时用于软选择核心边的候选集合。
 
-C_u = O_u - {p_u}
+C_u = O_u - P_u
 
 r_u：由 q_u 从 C_u 中软选择得到的核心边集合表示。
 
@@ -231,25 +237,39 @@ q_u 的语义：
 q_u 不是普通推荐 user embedding，而是用于从 observed bundles 中筛选核心训练边的 denoised user preference query。
 
 
-六、主训练目标：核心边集合预测 held-out observed positive
+六、主训练目标：核心边集合预测 held-out target set 中心
 
 主题三最重要的设计是：不直接训练 q_u 本身做普通推荐，而是训练 q_u 选出的核心边集合是否有用。
 
 具体流程如下。
 
-1. 对用户 u，从 O_u 中随机采样一个 observed bundle 作为 held-out positive：
+1. 对用户 u，从 O_u 中随机采样一小组 observed bundles 作为 held-out target set：
 
-p_u in O_u
+P_u subset O_u
 
-2. 构造候选集合：
+iFashion 第一阶段固定：
 
-C_u = O_u - {p_u}
+target_num = 4
 
-3. 使用 q_u 对 C_u 中每个 bundle 打分：
+即每个用户训练时随机藏起 4 个 observed bundles。
+
+2. 构造 target set 的稳健中心：
+
+g_u = mean(emb(p)), p in P_u
+
+这里的 g_u 表示被藏起那一小组历史交互的共同兴趣方向。
+
+从单个 p_u 改为 P_u 的原因是：单条 observed edge 可能本身就是噪声，若强行预测它，会把 denoiser 的训练方向带歪。使用 4 个 target bundles 的 mean 中心，可以稀释单条噪声边影响，让主监督更接近用户稳定兴趣。
+
+3. 构造候选集合：
+
+C_u = O_u - P_u
+
+4. 使用 q_u 对 C_u 中每个 bundle 打分：
 
 score_i = cosine(q_u, emb(b_i)), b_i in C_u
 
-4. 使用 soft selection 得到核心边集合表示。
+5. 使用 soft selection 得到核心边集合表示。
 
 第一版建议直接使用 softmax selection：
 
@@ -263,34 +283,50 @@ tau_select 为 soft selection 温度。
 
 r_u 表示由 q_u 从用户 observed candidates 中软选择出的核心边集合表示。
 
-5. 采样 negative bundle：
+6. 采样 negative bundle：
 
 n_u not in O_u
 
-6. 使用 r_u 去预测 held-out positive：
+7. 使用 r_u 去预测 held-out target set 的中心：
 
-score_pos = cosine(r_u, emb(p_u))
+score_pos = cosine(r_u, g_u)
 
 score_neg = cosine(r_u, emb(n_u))
 
-7. 主损失：
+8. 主损失：
 
 L_core = -log sigmoid(score_pos - score_neg)
 
+也就是：
+
+L_core = -log sigmoid(cosine(r_u, g_u) - cosine(r_u, emb(n_u)))
+
 该目标的意义：
 
-由 q_u 选出的核心 observed bundles 应该能够代表用户，并预测用户剩余真实 observed positive。
+由 q_u 选出的核心 observed bundles 应该能够代表用户，并预测用户另一小组真实 observed bundles 的共同兴趣中心，而不是死记或解释某一条可能有噪声的单边。
 
 这与最终目标高度一致：
 
 保留少量高质量 observed UB 边，使它们作为训练监督服务下游捆绑推荐。
+
+iFashion 训练 UB 分布支持 target_num=4：
+
+用户数：53897
+
+训练 UB 交互数：1213676
+
+所有用户都有训练 UB 交互。
+
+每用户训练 UB 数最小值为 14，平均值为 22.52，中位数为 19。
+
+因此即使每次藏起 4 条 target edges，最少仍有 10 条 observed candidates 可供 q_u 软选择；而最终 rebuild_k=3，所以候选集合规模足够。
 
 
 七、为什么不直接用普通 BPR 训练 q_u
 
 不建议第一版只使用：
 
-score_pos = cosine(q_u, emb(p_u))
+score_pos = cosine(q_u, g_u)
 
 score_neg = cosine(q_u, emb(n_u))
 
@@ -318,9 +354,11 @@ observed edge selection
 
 定义：
 
-q_u 本身也应该能把 held-out observed positive 排在 negative bundle 前面。
+q_u 本身也应该能把 held-out target set 的中心 g_u 排在 negative bundle 前面。
 
-score_pos_query = cosine(q_u, emb(p_u))
+第一阶段 target set 版本中，可定义为：
+
+score_pos_query = cosine(q_u, g_u)
 
 score_neg_query = cosine(q_u, emb(n_u))
 
@@ -460,9 +498,15 @@ e_star = refine_user_query(e_u, z0_u)
 
 可沿用当前 refine_latent 的迭代方式：
 
+current_user_state = e_u
+
 for step in reversed(range(num_steps)):
+
     q_u = denoiser(current_user_state, z0_u, step)
+
     current_user_state = q_u
+
+e_star = current_user_state
 
 3. 使用 e_star / q_u 对完整 O_u 中所有 observed bundle 打分：
 
@@ -561,17 +605,21 @@ observed_mask
 
 training_loss 内部需要完成：
 
-1. 对每个用户从 observed_indices 中采样一个 held-out positive p_u。
+1. 对每个用户从 observed_indices 中随机采样 target_num 个 held-out target bundles，构成 P_u。
 
-2. 将 p_u 从 candidate mask 中去掉，得到 C_u。
+2. 将 P_u 从 candidate mask 中去掉，得到 C_u。
 
-3. 从全量 bundle 中为每个用户采样 negative n_u，要求 n_u 不在该用户 observed set 中。
+3. 对 P_u 中 bundle embedding 做 mean pooling，得到 target center：
+
+g_u = mean(emb(p)), p in P_u
+
+4. 从全量 bundle 中为每个用户采样 negative n_u，要求 n_u 不在该用户 observed set 中。
 
 注意：
 
-如果某个用户 observed 数量小于等于 1，则无法构造 C_u 和 held-out positive。iFashion 中用户训练交互平均较多，通常问题不大，但代码仍需防御：
+如果某个用户 observed 数量不足以同时构造 P_u 和 C_u，则需要退化处理。iFashion 训练集中每个用户最少有 14 条 UB 训练交互，target_num=4 时不会触发该问题，但代码仍需防御：
 
-observed_count <= 1 的用户可以跳过，或者退化为 query-level loss。
+observed_count <= target_num 的用户可以跳过，或者将当前 batch 内该用户的 target_num 临时降为 max(1, observed_count - 1)。
 
 
 十三、soft selection 细节
@@ -604,7 +652,74 @@ tau_select = 0.1 或 0.2
 但第一版建议先用完整 candidate softmax，降低开发复杂度。
 
 
-十四、负采样策略
+十四、开发实现时的关键细节
+
+为避免后续开发时出现理解偏差，第一版实现需要注意以下细节。
+
+1. target 采样只从有效 observed 位置中采样。
+
+observed_indices 中 padding 位置为 -1，不能参与 P_u 采样。
+
+实现时应基于 observed_mask 得到每个用户的有效 observed positions，再随机采样 target_num 个位置作为 P_u。
+
+2. candidate mask 必须排除 P_u。
+
+候选集合为：
+
+C_u = O_u - P_u
+
+实现上可构造：
+
+candidate_mask = observed_mask，并将 target positions 置为 0。
+
+soft selection 只在 candidate_mask=1 的位置上做 softmax。
+
+3. target center 使用 P_u 中 bundle embedding 的 mean pooling。
+
+第一版不做复杂加权：
+
+g_u = mean(emb(p)), p in P_u
+
+这里 emb(p) 使用外部预训练 bundle embedding，与当前 LatentDiffusionRebuilder 中的 bundle_embeddings 来源保持一致。
+
+4. cosine 前建议显式 normalize。
+
+计算 score_i、score_pos、score_neg 时建议使用 F.normalize 后点积，避免向量尺度影响相似度：
+
+score_i = dot(normalize(q_u), normalize(emb(b_i)))
+
+score_pos = dot(normalize(r_u), normalize(g_u))
+
+score_neg = dot(normalize(r_u), normalize(emb(n_u)))
+
+5. r_u 的构造需要保留梯度回传到 q_u。
+
+bundle_embeddings 可以是固定 buffer，但 softmax 权重 w_i 来自 q_u 的打分，因此：
+
+r_u = sum(w_i * emb(b_i))
+
+必须保持 w_i 的计算链路可导，不要在 soft selection 处 detach。
+
+6. 第一版推理阶段不使用 target set。
+
+P_u、g_u 只用于训练 L_core。
+
+推理时对完整 O_u 打分，直接 hard TopK：
+
+score_b = cosine(q_u, emb(b)), b in O_u
+
+S_u = TopK(score_b)
+
+7. 第一版负采样保持简单。
+
+negative bundle n_u 只需满足：
+
+n_u not in O_u
+
+不要第一版就做 hard negative，以免同时改变过多变量。
+
+
+十五、负采样策略
 
 第一版使用简单随机负采样：
 
@@ -617,7 +732,7 @@ tau_select = 0.1 或 0.2
 但第一版不要复杂化。
 
 
-十五、推荐实验设计
+十六、推荐实验设计
 
 第一阶段只在 iFashion 上跑：
 
@@ -647,7 +762,7 @@ NDCG@20 > 0.132
 如果 theme3-Top3 仍贴近 0.1314，说明用户表示扩散净化路线也未能显著超过 z0-TopK，需要回到主题二或考虑 BI 关系提炼。
 
 
-十六、推荐配置项
+十七、推荐配置项
 
 建议在 dwt 或 latent diffusion 配置中新增：
 
@@ -668,6 +783,7 @@ user_pref_diffusion:
   batch_size: 1024
   infer_batch_size: 256
   tau_select: 0.1
+  target_num: 4
   lambda_query: 0.0
   lambda_consistency: 0.0
   lambda_anchor: 0.0
@@ -684,7 +800,7 @@ lambda_anchor = 0
 L = L_core
 
 
-十七、预期风险
+十八、预期风险
 
 1. L_core 可能训练不稳定。
 
@@ -697,7 +813,20 @@ soft selection 的 r_u 依赖 q_u 的打分分布，温度 tau_select 对结果�
 先调 tau_select，再考虑打开 lambda_query。
 
 
-2. soft selection 可能退化为 z0。
+2. target set 中仍可能混入噪声边。
+
+原因：
+
+主题三仍然把 observed bundles 作为弱监督来源，不能保证每条历史边都是真实核心偏好。
+
+应对：
+
+第一阶段不用单个 held-out positive，而是固定 target_num=4，并用 g_u = mean(emb(p)), p in P_u 作为目标中心，以降低单条噪声边对主损失的影响。
+
+如果后续发现训练目标仍然不稳，再考虑 target set 内部的轻量加权平均，但第一版不建议引入预训练 UB 点积分数作为硬监督，以免退化为复刻 e_u/z0 相似度规则。
+
+
+3. soft selection 可能退化为 z0。
 
 原因：
 
@@ -708,7 +837,7 @@ soft selection 的 r_u 依赖 q_u 的打分分布，温度 tau_select 对结果�
 降低 tau_select，或后续使用 top-k masked softmax。
 
 
-3. q_u 可能变成普通推荐向量。
+4. q_u 可能变成普通推荐向量。
 
 原因：
 
@@ -719,7 +848,7 @@ soft selection 的 r_u 依赖 q_u 的打分分布，温度 tau_select 对结果�
 第一阶段关闭 L_query，后续只用小权重。
 
 
-4. anchor 权重过大会导致退化。
+5. anchor 权重过大会导致退化。
 
 原因：
 
@@ -730,14 +859,14 @@ soft selection 的 r_u 依赖 q_u 的打分分布，温度 tau_select 对结果�
 lambda_anchor 设为 0 或 0.001。
 
 
-5. 主题三不一定优于主题二。
+6. 主题三不一定优于主题二。
 
 主题三更换了净化对象，故事更自然，但它不如主题二那样直接沿着 observed-set prototype 做 selector 学习。
 
 如果主题三失败，不代表任务导向 TopK 思路失败，仍应继续考虑主题二。
 
 
-十八、最终开发原则
+十九、最终开发原则
 
 第一版开发必须保持克制：
 
@@ -756,7 +885,7 @@ lambda_anchor 设为 0 或 0.001。
 7. 如果第一阶段不超过 0.13148 NDCG@20，不建议继续大规模调参。
 
 
-十九、最终简短结论
+二十、最终简短结论
 
 主题三不是简单的“用户表示加噪降噪”，而是“用户偏好扩散 query 驱动的 observed edge selection”。
 
@@ -766,15 +895,16 @@ lambda_anchor 设为 0 或 0.001。
 
 第一阶段只启用主损失 L_core：
 
-从 observed set 中藏一个 positive；
+从 observed set 中藏起 target_num=4 个 target bundles；
+将这 4 个 target bundles 的 mean pooling 表示作为 g_u；
 用 q_u 在剩余 observed bundles 中软选择核心集合 r_u；
-用 r_u 预测 held-out positive，并区分 negative bundle。
+用 r_u 预测 g_u，并区分 negative bundle。
 
 如果该方案能超过 z0-Top3 / diffusion-Top3，则说明主题三具备继续调参和写入论文故事的价值。
 
 
 
-二十、主题三第一阶段参数指导
+二十一、主题三第一阶段参数指导
 
 主题三会引入一些新参数，但不应从零开始大规模网格搜索。基于当前模块一、z0-TopK 对照实验以及 iFashion 上已有结果，第一阶段应尽量固定大部分参数，只小范围探索最关键的新参数。
 
@@ -903,17 +1033,29 @@ L_anchor = 1 - cosine(q_u, e_u)
 lambda_anchor 不能过大，否则 q_u 会被强行拉回 e_u，重新引发“为什么不直接 e_u TopK”的质疑。
 
 
-4. held-out positive 数量
+4. held-out target set 数量
 
 第一阶段固定：
 
-heldout_num = 1
+target_num = 4
 
 原因：
 
-每个用户先藏一个 observed positive，训练目标最清楚，开发复杂度最低。
+原先设想的单 held-out positive 容易被噪声边污染。若随机藏起的单个 p_u 本身是弱偏好或偶然交互，L_core 会错误地逼迫 q_u 选择一组核心边去解释该噪声边。
 
-后续如果 L_core 有价值，再考虑多个 held-out positives。
+修正后采用一小组 target bundles，并用其 mean pooling 中心作为监督目标：
+
+P_u subset O_u, |P_u| = target_num
+
+g_u = mean(emb(p)), p in P_u
+
+iFashion 训练 UB 统计支持 target_num=4：
+
+每个用户训练 UB 交互最少为 14，平均为 22.52，中位数为 19。
+
+藏起 4 条 target edges 后，最少仍剩 10 条 candidate edges；最终 rebuild_k=3，因此候选集合足够。
+
+target_num=4 的定位是：在不明显稀释目标兴趣的前提下，降低单条噪声 observed edge 对主损失的影响。
 
 
 5. negative 数量
@@ -937,9 +1079,9 @@ neg_num_for_core = 2 或 4
 
 第一阶段使用完整候选集合：
 
-C_u = O_u - {p_u}
+C_u = O_u - P_u
 
-即从除 held-out positive 之外的所有 observed bundles 中做 soft selection。
+即从除 held-out target set 之外的所有 observed bundles 中做 soft selection。
 
 第一阶段不建议上来就做 top-k masked softmax。
 
@@ -984,7 +1126,7 @@ user_pref_diffusion:
 
   tau_select: 0.1
 
-  heldout_num: 1
+  target_num: 4
 
   neg_num_for_core: 1
 

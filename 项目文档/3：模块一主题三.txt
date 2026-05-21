@@ -1390,3 +1390,108 @@ z0-Top3 NDCG@20 = 0.13145
 current diffusion-Top3 NDCG@20 = 0.13148
 
 如果该朴素用户表示重建版本仍然明显低于上述对照线，则主题三可以正式停止推进，后续转向主题二或 BI 关系提炼。
+
+
+二十三、主题三最终结论：停止推进
+
+经过多轮实验和实现修正后，主题三路线最终停止推进。
+
+主题三的核心目标原本是：
+
+将模块一的净化对象从 observed-set prototype z0 转向 pretrained user embedding e_u；
+
+希望通过用户表示扩散净化，得到更适合在 observed bundles 内筛选 TopK 核心训练边的用户表示；
+
+最终服务 iFashion 上的 DWT 捆绑推荐指标提升。
+
+围绕该方向，已经依次尝试过以下版本：
+
+1. target-set L_core 版本。
+
+训练逻辑：
+
+从用户 observed set 中藏起 target bundles；
+
+用 q_u 在剩余 observed bundles 中 soft select 得到核心集合表示 r_u；
+
+用 r_u 预测 target set center g_u；
+
+主损失为：
+
+L_core = softplus(-(cosine(r_u, g_u) - cosine(r_u, negative)))
+
+该版本的问题：
+
+loss 容易进入平台区；
+
+随机负样本较弱；
+
+target mean center 可能过平；
+
+最终指标没有达到 z0-TopK / current diffusion-Top3 水平。
+
+2. one-step 推理修正版。
+
+曾发现 target-set L_core 版本中，训练是单步 denoising objective，但推理使用 iterative denoise，存在训练/推理分布偏移风险。
+
+因此修正为 one-step 推理：
+
+q_u = denoiser(e_u, z0_u, infer_step)
+
+该修正解决了推理方式不一致的问题，但仍未带来足够指标提升。
+
+3. hard negative 增强版。
+
+为增强 L_core 监督压力，尝试：
+
+neg_num_for_core = 8
+
+neg_sampling = hard
+
+即每个用户采样多个未交互 bundle，并取与 r_u 相似度最高的 hardest negative 进入主损失。
+
+该版本使训练 loss 变难，但最终仍未超过 z0-TopK / current diffusion-Top3。
+
+4. 朴素 user_reconstruction 版本。
+
+最后将主题三简化为与原模块一最一致的形式：
+
+对 e_u 加噪；
+
+denoiser 结合 z0_u 降噪；
+
+loss 直接回归加噪前的干净用户表示 e_u：
+
+L_reconstruct = MSE(e_pred, e_u)
+
+推理阶段使用与原模块一一致的 12-step iterative refinement。
+
+随后用降噪后的用户表示在 observed bundles 内选 TopK。
+
+该版本相比 origin 有一定提升，但仍无法达到 z0-TopK 的水平。
+
+此外，还尝试提高加噪强度，例如增大 beta_end，但仍未扭转结论。
+
+最终判断：
+
+主题三在 iFashion 上不再作为模块一后续主线推进。
+
+停止原因不是单一实现细节，而是多种合理版本均未超过关键对照：
+
+z0-Top3 NDCG@20 = 0.13145
+
+current diffusion-Top3 NDCG@20 = 0.13148
+
+主题三最多只能相对 origin 带来一定提升，但不足以证明“对 pretrained user embedding 做扩散净化”优于 observed-set prototype 方向。
+
+该负结果说明：
+
+iFashion 上，模块一的有效成分更可能来自 observed-set 内部的高置信 UB 边筛选，而不是对用户预训练表示 e_u 本身做扩散净化。
+
+后续模块一改造应优先转向：
+
+主题二：围绕 observed-set prototype / observed-set 内部关系做任务导向筛选；
+
+或 BI 关系提炼：尤其针对 Youshu、NetEase 这类 bundle-item 组成较大的数据集。
+
+主题三代码可以保留作为实验分支，但不建议继续投入调参或作为论文主线。

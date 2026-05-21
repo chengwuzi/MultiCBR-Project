@@ -124,6 +124,7 @@ iFashion:
 
     user_pref_diffusion:
       enabled: true
+      objective: "user_reconstruction"
       hidden_dim: 128
       time_dim: 16
       denoiser_layers: 2
@@ -143,7 +144,7 @@ iFashion:
       lambda_consistency: 0.0
       lambda_anchor: 0.0
       anchor_type: "cosine"
-      infer_mode: "one_step" # one_step matches the training objective; iterative is kept only for ablation
+      infer_mode: "iterative" # match the original module-1 iterative refinement style
       infer_step: 0
 
     gamma_1: 0.3

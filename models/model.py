@@ -485,6 +485,9 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
             raise ValueError("User and bundle embeddings must share the same embedding dimension")
 
         self.embedding_dim = user_embeddings.shape[1]
+        self.objective = conf.get("objective", "core_prediction")
+        if self.objective not in {"core_prediction", "user_reconstruction"}:
+            raise ValueError(f"Unsupported user preference diffusion objective: {self.objective}")
         self.hidden_dim = conf["hidden_dim"]
         self.time_dim = conf["time_dim"]
         self.num_steps = conf["num_steps"]
@@ -638,6 +641,18 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
         e_t = self.q_sample(user_vec, timesteps)
         q = self._predict_query(e_t, z0, timesteps)
 
+        if self.objective == "user_reconstruction":
+            reconstruct_loss = F.mse_loss(q, user_vec)
+            zero = reconstruct_loss.detach() * 0.0
+            return {
+                "loss": reconstruct_loss,
+                "reconstruct": reconstruct_loss.detach(),
+                "core": zero,
+                "query": zero,
+                "consistency": zero,
+                "anchor": zero,
+            }
+
         safe_indices = observed_indices.clamp(min=0)
         observed_vecs = self.bundle_embeddings[safe_indices]
         target_mask, trainable_rows = self._sample_target_mask(observed_mask)
@@ -645,6 +660,7 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
             zero = q.sum() * 0.0
             return {
                 "loss": zero,
+                "reconstruct": zero.detach(),
                 "core": zero.detach(),
                 "query": zero.detach(),
                 "consistency": zero.detach(),
@@ -723,6 +739,7 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
 
         return {
             "loss": total_loss,
+            "reconstruct": torch.zeros((), dtype=total_loss.dtype, device=device),
             "core": core_loss.detach(),
             "query": query_loss.detach(),
             "consistency": consistency_loss.detach(),

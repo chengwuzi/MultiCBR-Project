@@ -110,7 +110,8 @@ def report_user_pref_rebuild_epoch(run, log_path, epoch, loss_stats, rebuilt_ub_
     graph_stats = summarize_sparse_graph(rebuilt_ub_graph)
     message = (
         f"[{prefix}] epoch={epoch + 1} dataset={dataset_name} "
-        f"loss={loss_stats['loss']:.6f} core={loss_stats['core']:.6f} "
+        f"loss={loss_stats['loss']:.6f} reconstruct={loss_stats.get('reconstruct', 0.0):.6f} "
+        f"core={loss_stats['core']:.6f} "
         f"query={loss_stats['query']:.6f} consistency={loss_stats['consistency']:.6f} "
         f"anchor={loss_stats['anchor']:.6f} rebuilt_edges={graph_stats['nnz']} "
         f"avg_user_edges={graph_stats['avg_interactions']:.6f} "
@@ -317,6 +318,7 @@ def train_user_pref_diffusion_epoch(user_pref_model, user_pref_optimizer, datase
     if active_users.size == 0:
         return {
             "loss": 0.0,
+            "reconstruct": 0.0,
             "core": 0.0,
             "query": 0.0,
             "consistency": 0.0,
@@ -329,6 +331,7 @@ def train_user_pref_diffusion_epoch(user_pref_model, user_pref_optimizer, datase
     pbar = tqdm(range(step_num), total=step_num, disable=True)
     totals = {
         "loss": 0.0,
+        "reconstruct": 0.0,
         "core": 0.0,
         "query": 0.0,
         "consistency": 0.0,
@@ -722,6 +725,8 @@ def run_dwt_training(conf, dataset, device):
         if use_user_pref_diffusion_rebuild:
             user_pref_conf = dwt_conf["user_pref_diffusion"]
             settings += [
+                user_pref_conf.get("objective", "core_prediction"),
+                user_pref_conf.get("infer_mode", "one_step"),
                 f"k{dwt_conf['rebuild_k']}",
                 f"step{user_pref_conf['num_steps']}",
                 f"uplr{user_pref_conf['lr']}",

@@ -492,25 +492,31 @@ L = L_core + lambda_query * L_query + lambda_consistency * L_consistency + lambd
 
 z0_u = mean(emb(b)), b in O_u
 
-2. 从 pretrained user embedding e_u 得到 denoised selector query：
+2. 从 pretrained user embedding e_u 得到 denoised user representation：
 
 e_star = refine_user_query(e_u, z0_u)
 
-第一版推荐使用 one-step 推理，而不是递归多步推理：
+当前默认 objective=user_reconstruction，因此推理阶段与原模块一保持一致，使用 12-step iterative refinement：
 
-infer_step = 0
+q = e_u
 
-q_u = denoiser(e_u, z0_u, infer_step)
+for step in reversed(range(num_steps)):
 
-原因：
+    q = denoiser(q, z0_u, step)
 
-主题三训练阶段是单步 denoising objective：
+e_star = q
+
+说明：
+
+如果 objective=core_prediction，则曾经建议使用 one-step 推理以避免训练/推理分布偏移。但当前最终开发版已经切换为朴素用户表示重建：
 
 e_t = q_sample(e_u, t)
 
-q_u = denoiser(e_t, z0_u, t)
+e_pred = denoiser(e_t, z0_u, t)
 
-训练时 denoiser 没有学习“把自己的输出继续作为下一步输入”的递归过程。如果推理阶段连续执行多次 denoiser，会产生分布偏移，可能导致 q_u 塌向少数中心 bundle。因此第一版默认使用 one_step 推理，iterative 推理只作为后续消融选项。
+L_reconstruct = MSE(e_pred, e_u)
+
+因此当前实验为了和原模块一口径一致，默认使用 iterative 推理。
 
 3. 使用 e_star / q_u 对完整 O_u 中所有 observed bundle 打分：
 
@@ -1229,3 +1235,158 @@ NDCG@20 > 0.132
 主损失 L_core 有苗头后，再依次尝试 lambda_query、lambda_consistency、lambda_anchor；
 
 不要一开始把主题三做成复杂多损失大网格搜索。
+
+
+二十二、当前最终开发版修正：朴素用户表示去噪重建
+
+经过 theme3 target-set L_core、one-step 推理、hard negative 等实验后，当前主题三开发版做一次收敛修正：不再默认使用复杂的核心边预测损失，而是回到与原模块一最一致的朴素扩散去噪范式。
+
+当前默认 objective：
+
+objective = user_reconstruction
+
+核心思想：
+
+对原始预训练用户表示 e_u 加噪；
+
+denoiser 结合 observed-set context z0_u 进行降噪；
+
+训练目标直接回归加噪前的干净用户表示 e_u；
+
+推理阶段沿用原模块一的 12-step iterative refinement；
+
+最后用降噪后的用户表示在 observed bundles 中选择 TopK。
+
+该版本对应的训练过程为：
+
+z0_u = mean(emb(b)), b in O_u
+
+t ~ Uniform(0, ..., num_steps - 1)
+
+epsilon ~ N(0, I)
+
+e_t = sqrt(alpha_bar_t) * e_u + sqrt(1 - alpha_bar_t) * epsilon
+
+e_pred = denoiser([e_t, z0_u, e_t * z0_u, |e_t - z0_u|, time_embedding(t)])
+
+L_reconstruct = MSE(e_pred, e_u)
+
+当前默认不启用：
+
+L_core
+
+target set prediction
+
+hard negative ranking
+
+L_query
+
+L_consistency
+
+L_anchor
+
+这些复杂项只作为历史实验分支保留，不再作为当前主题三主线。
+
+推理阶段为：
+
+q = e_u
+
+for step in reversed(range(num_steps)):
+
+    q = denoiser(q, z0_u, step)
+
+score_b = cosine(q, emb(b)), b in O_u
+
+S_u = TopK(score_b), S_u subset O_u
+
+这样做的原因：
+
+1. 与原模块一实现口径保持一致。
+
+原模块一是：
+
+z_t = add_noise(z0, t)
+
+z_pred = denoiser(z_t, user_vec, t)
+
+L = MSE(z_pred, z0) + SetLoss
+
+推理时用 iterative refinement。
+
+当前修正版只是把净化对象从 z0 换为 e_u：
+
+e_t = add_noise(e_u, t)
+
+e_pred = denoiser(e_t, z0_u, t)
+
+L = MSE(e_pred, e_u)
+
+推理同样使用 iterative refinement。
+
+2. Loss 足够简单，避免复杂监督带来的解释困难。
+
+此前 L_core 版本需要考虑 target set 噪声、mean center 是否过平、random negative 是否太弱、hard negative 是否过强等问题。当前版本直接回归干净用户表示，实验含义更清楚：
+
+observed-set-aware diffusion 是否能把 pretrained user embedding 净化成更适合筛选 observed UB 边的表示。
+
+3. 仍然保留 observed-set-aware 条件。
+
+虽然 loss 是 MSE(e_pred, e_u)，但 denoiser 输入仍包含 z0_u、e_t * z0_u、|e_t - z0_u|，因此该模块不是纯 user embedding autoencoder，而是由用户历史 observed bundle set 条件化的用户表示净化。
+
+当前推荐配置：
+
+user_pref_diffusion:
+
+  enabled: true
+
+  objective: user_reconstruction
+
+  hidden_dim: 128
+
+  time_dim: 16
+
+  denoiser_layers: 2
+
+  dropout: 0.1
+
+  num_steps: 12
+
+  beta_start: 1.0e-4
+
+  beta_end: 0.02
+
+  lr: 1.0e-3
+
+  weight_decay: 1.0e-5
+
+  batch_size: 1024
+
+  infer_batch_size: 256
+
+  infer_mode: iterative
+
+  infer_step: 0
+
+  lambda_query: 0.0
+
+  lambda_consistency: 0.0
+
+  lambda_anchor: 0.0
+
+说明：
+
+target_num、neg_num_for_core、neg_sampling、tau_select 等参数仍保留在代码中，是为了兼容旧的 core_prediction objective；在 objective=user_reconstruction 时不参与训练。
+
+当前判定实验：
+
+只跑 iFashion。
+
+rebuild_k = 3。
+
+目标仍是超过或接近：
+
+z0-Top3 NDCG@20 = 0.13145
+
+current diffusion-Top3 NDCG@20 = 0.13148
+
+如果该朴素用户表示重建版本仍然明显低于上述对照线，则主题三可以正式停止推进，后续转向主题二或 BI 关系提炼。

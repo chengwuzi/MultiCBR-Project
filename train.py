@@ -7,12 +7,14 @@ import json
 import argparse
 import hashlib
 import random
+import copy
 from datetime import datetime
 from itertools import product
 
 import numpy as np
 import scipy.sparse as sp
 import torch
+import torch.nn.functional as F
 import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
@@ -208,6 +210,63 @@ def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebu
             selected_bundles = selected_bundles.cpu().numpy()
             selected_valid = selected_valid.cpu().numpy()
             batch_users = batch["user_indices"].cpu().numpy()
+            for row_idx, user_id in enumerate(batch_users):
+                for col_idx in range(selected_bundles.shape[1]):
+                    if not selected_valid[row_idx, col_idx]:
+                        continue
+                    u_list.append(int(user_id))
+                    b_list.append(int(selected_bundles[row_idx, col_idx]))
+                    edge_list.append(1.0)
+
+    rebuilt_ub_graph = sp.coo_matrix(
+        (
+            np.array(edge_list, dtype=np.float32),
+            (np.array(u_list, dtype=np.int32), np.array(b_list, dtype=np.int32)),
+        ),
+        shape=(dataset.num_users, dataset.num_bundles),
+    ).tocsr()
+    return rebuilt_ub_graph
+
+
+def rebuild_ub_graph_with_z0_topk(dataset, bundle_embedding_tensor, rebuild_k, device, batch_size=256):
+    if rebuild_k <= 0:
+        raise ValueError("rebuild_k must be positive")
+
+    user_indices = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
+    if user_indices.size == 0:
+        return sp.coo_matrix(
+            (dataset.num_users, dataset.num_bundles),
+            dtype=np.float32,
+        ).tocsr()
+
+    bundle_embeddings = bundle_embedding_tensor.to(device)
+    u_list = []
+    b_list = []
+    edge_list = []
+
+    with torch.no_grad():
+        for start in tqdm(range(0, user_indices.shape[0], batch_size), desc="Z0 TopK Rebuild", disable=True):
+            end = min(start + batch_size, user_indices.shape[0])
+            batch = build_observed_bundle_batch(dataset, user_indices[start:end], device)
+            observed_indices = batch["observed_indices"]
+            observed_mask = batch["observed_mask"]
+            valid_mask = observed_indices.ge(0)
+            safe_indices = observed_indices.clamp(min=0)
+
+            observed_vecs = bundle_embeddings[safe_indices]
+            z0 = (observed_vecs * observed_mask.unsqueeze(-1)).sum(dim=1)
+            z0 = z0 / observed_mask.sum(dim=1, keepdim=True).clamp(min=1.0)
+
+            z0_norm = F.normalize(z0, dim=-1)
+            observed_norm = F.normalize(observed_vecs, dim=-1)
+            scores = (z0_norm.unsqueeze(1) * observed_norm).sum(dim=-1)
+            scores = scores.masked_fill(~valid_mask, float("-inf"))
+            topk = min(rebuild_k, observed_indices.shape[1])
+            _, selected_pos = torch.topk(scores, k=topk, dim=1)
+            selected_bundles = torch.gather(safe_indices, 1, selected_pos).cpu().numpy()
+            selected_valid = torch.gather(valid_mask, 1, selected_pos).cpu().numpy()
+            batch_users = batch["user_indices"].cpu().numpy()
+
             for row_idx, user_id in enumerate(batch_users):
                 for col_idx in range(selected_bundles.shape[1]):
                     if not selected_valid[row_idx, col_idx]:
@@ -432,7 +491,11 @@ def run_cbr_training(conf, dataset, device):
 
             epoch_anchor = epoch * batch_cnt
             model.train(True)
-            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)
+            pbar = tqdm(
+                enumerate(dataset.train_loader),
+                total=len(dataset.train_loader),
+                disable=not conf.get("show_progress", False),
+            )
 
             for batch_i, batch in pbar:
                 model.train(True)
@@ -495,8 +558,23 @@ def run_dwt_training(conf, dataset, device):
     dwt_conf = conf.get("dwt", {})
     if not dwt_conf:
         raise ValueError("train_style=dwt requires a dwt config block.")
-    use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
+    rebuild_strategy = dwt_conf.get("rebuild_strategy")
+    if rebuild_strategy is None:
+        rebuild_strategy = "diffusion" if dwt_conf.get("use_latent_diffusion_rebuild", False) else "origin"
+    rebuild_strategy = str(rebuild_strategy).strip().lower()
+    if rebuild_strategy in {"none", "raw"}:
+        rebuild_strategy = "origin"
+    if rebuild_strategy in {"z0", "z0-topk", "z0_top3"}:
+        rebuild_strategy = "z0_topk"
+    if rebuild_strategy in {"latent", "latent_diffusion"}:
+        rebuild_strategy = "diffusion"
+    if rebuild_strategy not in {"origin", "z0_topk", "diffusion"}:
+        raise ValueError(f"Unsupported DWT rebuild_strategy: {rebuild_strategy}")
+
+    use_latent_diffusion_rebuild = rebuild_strategy == "diffusion"
+    use_z0_rebuild = rebuild_strategy == "z0_topk"
     dwt_graph_conf = resolve_dwt_graph_config(conf)
+    experiment_results = []
 
     for lr, embedding_size, num_layers in product(
         conf["lrs"],
@@ -526,7 +604,11 @@ def run_dwt_training(conf, dataset, device):
             settings += [conf["info"]]
         settings += [
             "DWT",
-            "LatentRebuild" if use_latent_diffusion_rebuild else "Noise",
+            {
+                "origin": "Origin",
+                "z0_topk": "Z0TopK",
+                "diffusion": "LatentRebuild",
+            }[rebuild_strategy],
             "Neg_%d" % conf["neg_num"],
             str(conf["batch_size_train"]),
             str(lr),
@@ -550,6 +632,8 @@ def run_dwt_training(conf, dataset, device):
                 f"ldlr{dwt_conf['latent_diffusion_lr']}",
                 f"ldw{dwt_conf['latent_diffusion_set_loss_weight']}",
             ]
+        elif use_z0_rebuild:
+            settings += [f"k{dwt_conf['rebuild_k']}"]
 
         setting = "_".join(settings)
         if len(setting) > 100:
@@ -584,6 +668,37 @@ def run_dwt_training(conf, dataset, device):
                 bundle_embedding_tensor,
                 device,
             )
+        elif use_z0_rebuild:
+            bundle_embedding_tensor = load_external_embedding_tensor(
+                dwt_conf["latent_diffusion_bundle_embedding_path"],
+                dataset.num_bundles,
+                "bundle",
+                required_ids=dataset.train_bundle_indices,
+                fill_missing_with_zeros=True,
+            )
+            rebuilt_ub_graph = rebuild_ub_graph_with_z0_topk(
+                dataset,
+                bundle_embedding_tensor,
+                dwt_conf["rebuild_k"],
+                device,
+                batch_size=dwt_conf.get("latent_diffusion_infer_batch_size", 256),
+            )
+            print_statistics(rebuilt_ub_graph, "U-B statistics from z0 top-k rebuild")
+            graph_stats = summarize_sparse_graph(rebuilt_ub_graph)
+            z0_message = (
+                f"[z0_topk] dataset={conf['dataset']} rebuild_k={dwt_conf['rebuild_k']} "
+                f"rebuilt_edges={graph_stats['nnz']} "
+                f"avg_user_edges={graph_stats['avg_interactions']:.6f} "
+                f"user_coverage={graph_stats['row_coverage']:.6f} "
+                f"bundle_coverage={graph_stats['col_coverage']:.6f} "
+                f"density={graph_stats['density']:.10f}"
+            )
+            print(z0_message)
+            with open(log_path, "a", encoding="utf-8") as log_file:
+                log_file.write(z0_message + "\n")
+            model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
+            latent_diffusion_model = None
+            latent_diffusion_optimizer = None
         else:
             latent_diffusion_model = None
             latent_diffusion_optimizer = None
@@ -595,6 +710,8 @@ def run_dwt_training(conf, dataset, device):
         best_metrics, best_perform = init_best_metrics(conf)
         best_epoch = 0
         for epoch in range(conf["epochs"]):
+            progress_name = conf.get("experiment_name", setting)
+            print(f"[{progress_name}] epoch {epoch + 1}/{conf['epochs']} training...")
             if (
                 use_latent_diffusion_rebuild
                 and dwt_conf.get("latent_diffusion_reset_after_epoch", -1) >= 0
@@ -635,7 +752,11 @@ def run_dwt_training(conf, dataset, device):
 
             epoch_anchor = epoch * batch_cnt
             model.train(True)
-            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)
+            pbar = tqdm(
+                enumerate(dataset.train_loader),
+                total=len(dataset.train_loader),
+                disable=not conf.get("show_progress", False),
+            )
 
             for batch_i, batch in pbar:
                 model.train(True)
@@ -681,6 +802,24 @@ def run_dwt_training(conf, dataset, device):
                         best_perform,
                         best_epoch,
                     )
+
+        experiment_results.append(
+            {
+                "dataset": conf["dataset"],
+                "model": conf["model"],
+                "train_style": "dwt",
+                "rebuild_strategy": rebuild_strategy,
+                "setting": setting,
+                "log_path": log_path,
+                "checkpoint_model_path": checkpoint_model_path,
+                "checkpoint_conf_path": checkpoint_conf_path,
+                "best_epoch": best_epoch,
+                "best_metrics": copy.deepcopy(best_metrics),
+                "best_perform": copy.deepcopy(best_perform),
+            }
+        )
+
+    return experiment_results
 
 
 def main(args=None):

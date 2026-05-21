@@ -137,11 +137,14 @@ iFashion:
       infer_batch_size: 256
       tau_select: 0.1
       target_num: 4
-      neg_num_for_core: 1
+      neg_num_for_core: 8
+      neg_sampling: "hard"
       lambda_query: 0.0
       lambda_consistency: 0.0
       lambda_anchor: 0.0
       anchor_type: "cosine"
+      infer_mode: "one_step" # one_step matches the training objective; iterative is kept only for ablation
+      infer_step: 0
 
     gamma_1: 0.3
     gamma_2: 0.2

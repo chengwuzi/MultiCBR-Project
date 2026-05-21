@@ -492,13 +492,18 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
         self.tau_select = conf["tau_select"]
         self.target_num = conf["target_num"]
         self.neg_num_for_core = conf.get("neg_num_for_core", 1)
-        if self.neg_num_for_core != 1:
-            raise ValueError("UserPreferenceDiffusionRebuilder currently expects neg_num_for_core=1")
+        if self.neg_num_for_core < 1:
+            raise ValueError("neg_num_for_core must be at least 1")
+        self.neg_sampling = conf.get("neg_sampling", "random")
+        if self.neg_sampling not in {"random", "hard"}:
+            raise ValueError(f"Unsupported neg_sampling: {self.neg_sampling}")
 
         self.lambda_query = conf.get("lambda_query", 0.0)
         self.lambda_consistency = conf.get("lambda_consistency", 0.0)
         self.lambda_anchor = conf.get("lambda_anchor", 0.0)
         self.anchor_type = conf.get("anchor_type", "cosine")
+        self.infer_mode = conf.get("infer_mode", "one_step")
+        self.infer_step = int(conf.get("infer_step", 0))
 
         model_input_dim = self.embedding_dim * 4 + self.time_dim
         self.denoiser = MLP(
@@ -604,18 +609,21 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
     def _sample_negative_bundles(self, observed_indices, observed_mask):
         device = observed_indices.device
         batch_size = observed_indices.shape[0]
-        neg_ids = torch.empty(batch_size, dtype=torch.long, device=device)
+        neg_ids = torch.empty(batch_size, self.neg_num_for_core, dtype=torch.long, device=device)
         num_bundles = self.bundle_embeddings.shape[0]
 
         observed_cpu = observed_indices.detach().cpu()
         observed_mask_cpu = observed_mask.detach().cpu().bool()
         for row_idx in range(batch_size):
             observed_set = set(observed_cpu[row_idx][observed_mask_cpu[row_idx]].tolist())
-            while True:
+            sampled = set()
+            neg_col = 0
+            while neg_col < self.neg_num_for_core:
                 candidate = int(torch.randint(0, num_bundles, (1,), device=device).item())
-                if candidate not in observed_set:
-                    neg_ids[row_idx] = candidate
-                    break
+                if candidate not in observed_set and candidate not in sampled:
+                    neg_ids[row_idx, neg_col] = candidate
+                    sampled.add(candidate)
+                    neg_col += 1
         return neg_ids
 
     def training_loss(self, batch):
@@ -671,14 +679,22 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
         target_norm = F.normalize(target_center, dim=-1)
         neg_norm = F.normalize(neg_vec, dim=-1)
         score_pos = (core_norm * target_norm).sum(dim=-1)
-        score_neg = (core_norm * neg_norm).sum(dim=-1)
+        score_neg_all = (core_norm.unsqueeze(1) * neg_norm).sum(dim=-1)
+        if self.neg_sampling == "hard":
+            score_neg = score_neg_all.max(dim=1).values
+        else:
+            score_neg = score_neg_all.mean(dim=1)
         core_loss = F.softplus(-(score_pos - score_neg)).mean()
 
         query_loss = torch.zeros((), dtype=core_loss.dtype, device=device)
         if self.lambda_query != 0.0:
             q_direct_norm = F.normalize(q_valid, dim=-1)
             score_pos_query = (q_direct_norm * target_norm).sum(dim=-1)
-            score_neg_query = (q_direct_norm * neg_norm).sum(dim=-1)
+            score_neg_query_all = (q_direct_norm.unsqueeze(1) * neg_norm).sum(dim=-1)
+            if self.neg_sampling == "hard":
+                score_neg_query = score_neg_query_all.max(dim=1).values
+            else:
+                score_neg_query = score_neg_query_all.mean(dim=1)
             query_loss = F.softplus(-(score_pos_query - score_neg_query)).mean()
 
         consistency_loss = torch.zeros((), dtype=core_loss.dtype, device=device)
@@ -715,11 +731,21 @@ class UserPreferenceDiffusionRebuilder(nn.Module):
 
     def refine_user_query(self, user_indices, observed_bundle_indices, observed_mask):
         z0 = self._pool_observed(observed_bundle_indices, observed_mask)
-        q = self.user_embeddings[user_indices]
-        for step in reversed(range(self.num_steps)):
-            timesteps = torch.full((q.shape[0],), step, dtype=torch.long, device=q.device)
-            q = self._predict_query(q, z0, timesteps)
-        return q
+        user_vec = self.user_embeddings[user_indices]
+
+        if self.infer_mode == "iterative":
+            q = user_vec
+            for step in reversed(range(self.num_steps)):
+                timesteps = torch.full((q.shape[0],), step, dtype=torch.long, device=q.device)
+                q = self._predict_query(q, z0, timesteps)
+            return q
+
+        if self.infer_mode != "one_step":
+            raise ValueError(f"Unsupported user preference diffusion infer_mode: {self.infer_mode}")
+
+        infer_step = min(max(self.infer_step, 0), self.num_steps - 1)
+        timesteps = torch.full((user_vec.shape[0],), infer_step, dtype=torch.long, device=user_vec.device)
+        return self._predict_query(user_vec, z0, timesteps)
 
     def rebuild_topk(self, user_indices, observed_bundle_indices, rebuild_k=1):
         if rebuild_k <= 0:

@@ -492,21 +492,25 @@ L = L_core + lambda_query * L_query + lambda_consistency * L_consistency + lambd
 
 z0_u = mean(emb(b)), b in O_u
 
-2. 从 pretrained user embedding e_u 开始 denoise：
+2. 从 pretrained user embedding e_u 得到 denoised selector query：
 
 e_star = refine_user_query(e_u, z0_u)
 
-可沿用当前 refine_latent 的迭代方式：
+第一版推荐使用 one-step 推理，而不是递归多步推理：
 
-current_user_state = e_u
+infer_step = 0
 
-for step in reversed(range(num_steps)):
+q_u = denoiser(e_u, z0_u, infer_step)
 
-    q_u = denoiser(current_user_state, z0_u, step)
+原因：
 
-    current_user_state = q_u
+主题三训练阶段是单步 denoising objective：
 
-e_star = current_user_state
+e_t = q_sample(e_u, t)
+
+q_u = denoiser(e_t, z0_u, t)
+
+训练时 denoiser 没有学习“把自己的输出继续作为下一步输入”的递归过程。如果推理阶段连续执行多次 denoiser，会产生分布偏移，可能导致 q_u 塌向少数中心 bundle。因此第一版默认使用 one_step 推理，iterative 推理只作为后续消融选项。
 
 3. 使用 e_star / q_u 对完整 O_u 中所有 observed bundle 打分：
 
@@ -710,26 +714,36 @@ score_b = cosine(q_u, emb(b)), b in O_u
 
 S_u = TopK(score_b)
 
-7. 第一版负采样保持简单。
+7. 负采样使用 hard negative 增强主损失。
 
-negative bundle n_u 只需满足：
+negative bundle n_j 需要满足：
 
-n_u not in O_u
+n_j not in O_u
 
-不要第一版就做 hard negative，以免同时改变过多变量。
+当前建议：
+
+neg_num_for_core = 8
+
+neg_sampling = hard
+
+即每个用户采样 8 个随机未交互 bundle，并取其中与 r_u 相似度最高的 hardest negative 进入 L_core。
 
 
 十五、负采样策略
 
-第一版使用简单随机负采样：
+当前主题三使用 hard negative 增强主损失：
 
-对每个用户随机采样 bundle n_u，要求 n_u 不在 O_u。
+对每个用户随机采样多个 bundle n_j，要求 n_j 不在 O_u。
 
-后续如果效果不明显，可以考虑 hard negative：
+默认：
 
-从与 q_u 相似度较高但未交互的 bundle 中采样。
+neg_num_for_core = 8
 
-但第一版不要复杂化。
+neg_sampling = hard
+
+实现方式不是从全量 bundle 精确搜索 hard negative，而是先随机采样 8 个未交互 bundle，再取其中与 r_u 相似度最高的作为当前 batch 的 hardest negative。
+
+这样比单个 random negative 更难，但计算成本仍然可控。
 
 
 十六、推荐实验设计
@@ -1058,21 +1072,49 @@ iFashion 训练 UB 统计支持 target_num=4：
 target_num=4 的定位是：在不明显稀释目标兴趣的前提下，降低单条噪声 observed edge 对主损失的影响。
 
 
-5. negative 数量
+5. negative 数量与 hard negative
 
-第一阶段固定：
+原始第一阶段曾固定：
 
 neg_num_for_core = 1
 
-原因：
+但从 theme3_tau0.1_tgt4 的早期日志看，L_core 很快从 0.423 左右降到 0.419 左右后进入平台区。这说明模型能较容易地区分 target set center 和随机负样本，但该监督压力不足以继续逼出更好的核心边选择。
 
-当前项目原始训练也是 neg_num=1，第一阶段先保持一致。
+因此修正后的主题三第一阶段建议使用 harder negative：
 
-如果后续需要增强 ranking 强度，可以尝试：
+neg_num_for_core = 8
 
-neg_num_for_core = 2 或 4
+neg_sampling = hard
 
-但不建议第一阶段就调整。
+做法：
+
+对每个用户随机采样 8 个不在 O_u 中的 negative bundles：
+
+n_1, ..., n_8 not in O_u
+
+计算：
+
+score_neg_j = cosine(r_u, emb(n_j))
+
+取 hardest negative：
+
+score_neg = max_j score_neg_j
+
+主损失变为：
+
+L_core = softplus(-(score_pos - score_neg))
+
+其中：
+
+score_pos = cosine(r_u, g_u)
+
+这样可以增强主损失压力，避免模型只学到“历史均值能打过随机负样本”的简单解。
+
+如果 hard negative 训练不稳定，可临时退回：
+
+neg_num_for_core = 1
+
+neg_sampling = random
 
 
 6. soft selection 候选范围
@@ -1128,7 +1170,9 @@ user_pref_diffusion:
 
   target_num: 4
 
-  neg_num_for_core: 1
+  neg_num_for_core: 8
+
+  neg_sampling: hard
 
   lambda_query: 0.0
 

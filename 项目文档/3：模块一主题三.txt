@@ -772,3 +772,274 @@ lambda_anchor 设为 0 或 0.001。
 
 如果该方案能超过 z0-Top3 / diffusion-Top3，则说明主题三具备继续调参和写入论文故事的价值。
 
+
+
+二十、主题三第一阶段参数指导
+
+主题三会引入一些新参数，但不应从零开始大规模网格搜索。基于当前模块一、z0-TopK 对照实验以及 iFashion 上已有结果，第一阶段应尽量固定大部分参数，只小范围探索最关键的新参数。
+
+
+1. 建议直接沿用当前模块一的参数
+
+以下参数建议第一阶段直接沿用当前模块一，不要改：
+
+num_steps: 12
+
+beta_start: 1.0e-4
+
+beta_end: 0.02
+
+hidden_dim: 128
+
+time_dim: 16
+
+denoiser_layers: 2
+
+dropout: 0.1
+
+lr: 1.0e-3
+
+weight_decay: 1.0e-5
+
+batch_size: 1024
+
+infer_batch_size: 256
+
+rebuild_k: 3
+
+原因：
+
+当前完整模块一 diffusion-Top3 至少没有输给 z0-Top3，说明当前扩散步数、beta schedule、网络容量、学习率和 batch 设置并不离谱。
+
+主题三第一阶段的核心目的是验证“净化对象从 z0 改为 e_u，并使用任务导向 L_core”是否有效，而不是同时重新搜索所有底层训练参数。
+
+
+2. 第一阶段最关键的新参数：tau_select
+
+tau_select 控制 soft selection 的尖锐程度：
+
+tau_select 越小，soft selection 越接近 hard TopK；
+
+tau_select 越大，soft selection 越接近平均池化，容易退化为类似 z0 的表示。
+
+建议初始值：
+
+tau_select = 0.1
+
+第一阶段只建议小范围尝试：
+
+tau_select in [0.05, 0.1, 0.2]
+
+不建议一开始做更大范围搜索。
+
+如果 tau_select=0.2 效果差，可能说明 soft selection 太平，r_u 接近 observed candidates 的均值。
+
+如果 tau_select=0.05 训练不稳定，则优先回到 tau_select=0.1。
+
+
+3. 辅助损失权重的调参顺序
+
+第一阶段默认关闭所有辅助损失：
+
+lambda_query = 0.0
+
+lambda_consistency = 0.0
+
+lambda_anchor = 0.0
+
+即第一阶段只启用：
+
+L = L_core
+
+如果只使用 L_core 的版本已经表现出价值，再按以下顺序逐步打开辅助损失。
+
+
+第一步：lambda_query
+
+可尝试范围：
+
+lambda_query in [0.05, 0.1]
+
+作用：
+
+让 q_u 本身保留基本正负 bundle 辨别能力，防止 q_u 完全漂掉。
+
+注意：
+
+lambda_query 不建议超过 0.1，否则主题三可能退化为普通 query-level ranking 模型，而不是核心边集合选择模型。
+
+
+第二步：lambda_consistency
+
+可尝试范围：
+
+lambda_consistency in [0.02, 0.05]
+
+作用：
+
+让同一用户在不同噪声扰动下得到更稳定的 q_u。
+
+注意：
+
+建议在 lambda_query 已经确认有效或主损失训练存在波动时再试，不要第一阶段直接加入。
+
+
+第三步：lambda_anchor
+
+可尝试范围：
+
+lambda_anchor in [0.0, 0.001]
+
+作用：
+
+给 q_u 一个极小的方向稳定锚点，避免训练早期完全漂移。
+
+推荐形式：
+
+L_anchor = 1 - cosine(q_u, e_u)
+
+注意：
+
+lambda_anchor 不能过大，否则 q_u 会被强行拉回 e_u，重新引发“为什么不直接 e_u TopK”的质疑。
+
+
+4. held-out positive 数量
+
+第一阶段固定：
+
+heldout_num = 1
+
+原因：
+
+每个用户先藏一个 observed positive，训练目标最清楚，开发复杂度最低。
+
+后续如果 L_core 有价值，再考虑多个 held-out positives。
+
+
+5. negative 数量
+
+第一阶段固定：
+
+neg_num_for_core = 1
+
+原因：
+
+当前项目原始训练也是 neg_num=1，第一阶段先保持一致。
+
+如果后续需要增强 ranking 强度，可以尝试：
+
+neg_num_for_core = 2 或 4
+
+但不建议第一阶段就调整。
+
+
+6. soft selection 候选范围
+
+第一阶段使用完整候选集合：
+
+C_u = O_u - {p_u}
+
+即从除 held-out positive 之外的所有 observed bundles 中做 soft selection。
+
+第一阶段不建议上来就做 top-k masked softmax。
+
+如果后续发现 r_u 仍然退化得接近 z0，可再尝试：
+
+selection_mode = topk_softmax
+
+selector_train_k = 3 或 6
+
+但这属于第二阶段。
+
+
+7. 第一阶段推荐配置
+
+建议第一版配置如下：
+
+user_pref_diffusion:
+
+  rebuild_k: 3
+
+  hidden_dim: 128
+
+  time_dim: 16
+
+  denoiser_layers: 2
+
+  dropout: 0.1
+
+  num_steps: 12
+
+  beta_start: 1.0e-4
+
+  beta_end: 0.02
+
+  lr: 1.0e-3
+
+  weight_decay: 1.0e-5
+
+  batch_size: 1024
+
+  infer_batch_size: 256
+
+  tau_select: 0.1
+
+  heldout_num: 1
+
+  neg_num_for_core: 1
+
+  lambda_query: 0.0
+
+  lambda_consistency: 0.0
+
+  lambda_anchor: 0.0
+
+  anchor_type: cosine
+
+
+8. 第一轮最多跑三个实验
+
+第一轮不要做大规模网格搜索。
+
+建议只跑：
+
+tau_select = 0.05
+
+tau_select = 0.1
+
+tau_select = 0.2
+
+其他参数全部固定。
+
+当前关键对照线：
+
+z0-Top3:
+
+TOP 20: REC_T=0.15631, NDCG_T=0.13145
+
+current diffusion-Top3:
+
+TOP 20: REC_T=0.15668, NDCG_T=0.13148
+
+如果三组 tau_select 中有任意一组达到：
+
+NDCG@20 > 0.132
+
+则说明主题三具备继续调参价值。
+
+如果三组全部低于 0.131 左右，则不建议盲目继续大规模调参，应重新评估主题三方向，或回到主题二。
+
+
+9. 参数策略总结
+
+第一阶段参数策略可以概括为：
+
+沿用当前模块一的扩散结构参数；
+
+只小范围调 tau_select；
+
+辅助损失先实现但默认关闭；
+
+主损失 L_core 有苗头后，再依次尝试 lambda_query、lambda_consistency、lambda_anchor；
+
+不要一开始把主题三做成复杂多损失大网格搜索。

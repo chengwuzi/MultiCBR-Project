@@ -651,3 +651,192 @@ z0 TopK >= z_star TopK
 直接净化用户偏好表示，再用降噪用户表示筛选高置信 observed edges。
 
 后续若要开发新方案，建议先从主题二的小规模版本开始验证。
+
+
+
+六、z0-TopK 对照实验阶段性结果补充（2026-05-21）
+
+1. 实验背景
+
+根据前文分析，当前模块一最大的理论疑点在于：
+
+z0 = mean(observed bundle embeddings)
+z_t = add_noise(z0, t)
+z_pred = denoiser(z_t, user_vec, t)
+L = DiffLoss + set_weight * SetLoss
+
+由于 DiffLoss 的主要目标是让 z_pred 恢复 z0，因此存在一个直接质疑：
+
+既然 denoiser 最终学习的是恢复 observed-set pooling 原型 z0，为什么不直接使用 z0 在 observed bundles 中选 TopK？
+
+为回答该问题，已完成 iFashion 上的 z0-TopK 对照实验。
+
+实验设置：
+
+iFashion 数据集；
+模块二 anchor_cl 关闭；
+子视图增强关闭：ui_bundle_user_agg_beta=0.0，bi_user_bundle_agg_beta=0.0；
+z0-TopK 只从用户原始 observed bundles 中选边，不引入未观测新边；
+下游仍使用 DWT 训练路径；
+主要关注 z0-TopK 是否超过已有完整模块一 diffusion-Top3。
+
+
+2. origin、z0-Top3 与 diffusion-Top3 结果
+
+origin：
+
+TOP 10: REC_T=0.10527, NDCG_T=0.10375
+
+TOP 20: REC_T=0.14982, NDCG_T=0.12179
+
+TOP 40: REC_T=0.20440, NDCG_T=0.14104
+
+TOP 80: REC_T=0.26791, NDCG_T=0.16000
+
+z0-Top3：
+
+TOP 10: REC_T=0.11420, NDCG_T=0.11456
+
+TOP 20: REC_T=0.15631, NDCG_T=0.13145
+
+TOP 40: REC_T=0.20627, NDCG_T=0.14906
+
+TOP 80: REC_T=0.26323, NDCG_T=0.16608
+
+已有完整模块一 diffusion-Top3：
+
+TOP 10: REC_T=0.11445, NDCG_T=0.11454
+
+TOP 20: REC_T=0.15668, NDCG_T=0.13148
+
+TOP 40: REC_T=0.20674, NDCG_T=0.14908
+
+TOP 80: REC_T=0.26436, NDCG_T=0.16629
+
+z0-Top3 相比 origin：
+
+TOP 10: ΔREC_T=+0.00894, ΔNDCG_T=+0.01081
+
+TOP 20: ΔREC_T=+0.00650, ΔNDCG_T=+0.00966
+
+TOP 40: ΔREC_T=+0.00187, ΔNDCG_T=+0.00801
+
+TOP 80: ΔREC_T=-0.00468, ΔNDCG_T=+0.00608
+
+z0-Top3 相比 diffusion-Top3：
+
+TOP 10: ΔREC_T=-0.00025, ΔNDCG_T=+0.00002
+
+TOP 20: ΔREC_T=-0.00037, ΔNDCG_T=-0.00003
+
+TOP 40: ΔREC_T=-0.00047, ΔNDCG_T=-0.00002
+
+TOP 80: ΔREC_T=-0.00113, ΔNDCG_T=-0.00021
+
+
+3. z0-Top6、z0-Top9、z0-Top12 结果
+
+z0-Top6：
+
+TOP 10: REC_T=0.11395, NDCG_T=0.11416
+
+TOP 20: REC_T=0.15678, NDCG_T=0.13136
+
+TOP 40: REC_T=0.20619, NDCG_T=0.14876
+
+TOP 80: REC_T=0.26307, NDCG_T=0.16576
+
+z0-Top9：
+
+TOP 10: REC_T=0.11109, NDCG_T=0.11081
+
+TOP 20: REC_T=0.15431, NDCG_T=0.12823
+
+TOP 40: REC_T=0.20594, NDCG_T=0.14641
+
+TOP 80: REC_T=0.26471, NDCG_T=0.16397
+
+z0-Top12：
+
+TOP 10: REC_T=0.10896, NDCG_T=0.10821
+
+TOP 20: REC_T=0.15228, NDCG_T=0.12567
+
+TOP 40: REC_T=0.20501, NDCG_T=0.14424
+
+TOP 80: REC_T=0.26498, NDCG_T=0.16216
+
+按 NDCG@20 判断，本次 z0-TopK 中最好的是 z0-Top3 或 z0-Top6 附近：
+
+z0-Top3: NDCG@20 = 0.13145
+z0-Top6: NDCG@20 = 0.13136
+z0-Top9: NDCG@20 = 0.12823
+z0-Top12: NDCG@20 = 0.12567
+diffusion-Top3: NDCG@20 = 0.13148
+
+
+4. 阶段性分析
+
+第一，z0-Top3 相比 origin 有明显提升，尤其 NDCG@10、NDCG@20、NDCG@40、NDCG@80 均有提升。
+
+这说明“从用户已观测 bundle 中保守筛选少量高置信训练边”这一思想本身是有效的。换句话说，iFashion 上模块一的主要有效成分至少包括 TopK 保守筛边。
+
+第二，z0-Top3 没有超过完整模块一 diffusion-Top3，但二者结果几乎完全贴近。
+
+diffusion-Top3 在 Recall@10、Recall@20、Recall@40、Recall@80 以及 NDCG@20、NDCG@40、NDCG@80 上均略高于 z0-Top3，但差距极小。NDCG@10 上 z0-Top3 甚至略高 0.00002，但该差距可以视为几乎持平。
+
+这说明当前完整模块一并没有被 z0-Top3 推翻，但 diffusion denoiser 相比静态 z0 原型的独立增益非常弱。
+
+第三，增大 z0 的 TopK 并没有带来更好的整体排序效果。
+
+z0-Top6 在 Recall@20 上略高于 z0-Top3 和 diffusion-Top3，但 NDCG@20 低于二者；当 K 增大到 9 和 12 后，NDCG 明显下降。
+
+这说明 iFashion 上小 K 高置信筛边更有效，K 过大可能重新引入弱偏好边或噪声边，从而削弱高位排序质量。
+
+第四，本次结果说明问题不主要在 rebuild_k，而在当前 diffusion 的训练目标。
+
+当前 denoiser 的训练目标主要是恢复 z0，因此模型很容易学习到接近 z0 的映射：
+
+z_star ≈ z0
+
+于是最终 diffusion-Top3 与 z0-Top3 几乎一致。这与前文理论担忧一致，即 DiffLoss 恢复 z0 的目标不足以让 denoiser 学到明显优于静态 observed-set 原型的筛边查询能力。
+
+
+5. 对后续改造方向的影响
+
+本次实验后，当前模块一的结论应更加谨慎：
+
+可以保留的结论：
+
+预训练表示空间中的保守式 TopK 训练边筛选是有效的；
+小规模高置信 observed edge selection 能改善 iFashion 上的排序效果；
+完整 diffusion-Top3 没有被 z0-Top3 超过，因此当前模块一尚未被直接推翻。
+
+需要谨慎的结论：
+
+不能强表述为 diffusion denoising 相比 z0 原型带来了显著额外收益；
+不能把模块一的全部性能提升都归因于加噪-降噪机制；
+当前 DiffLoss 导向的 denoiser 更可能只是学到接近 z0 的平滑映射。
+
+因此，后续若继续强化模块一，优先级应更加明确：
+
+优先研究主题二：任务导向的 observed-set diffusion TopK 选边方案。
+
+原因是主题二正面解决当前暴露的问题：
+
+不再让 z_pred 仅仅恢复 z0；
+而是让 z_pred 成为核心边选择查询向量；
+并通过“选出的 TopK 核心边能否预测用户剩余 observed positives”来训练它。
+
+主题三仍然保留为备用方向：
+
+如果主题二仍无法显著超过 z0-TopK，则可以考虑将净化对象从 observed-set prototype 转向 pretrained user embedding，尝试用户表示扩散净化后再进行高置信边筛选。
+
+
+6. 更新后的简短结论
+
+z0-TopK 实验证明，当前模块一中“TopK 保守筛边”是有效的，但“扩散去噪”相对 z0 原型的独立贡献很弱。
+
+因此，当前模块一如果继续作为论文核心，需要弱化“扩散显著优于静态原型”的叙事，转而强调“预训练表示引导的保守式 UB 边净化”。
+
+若要重新支撑更强的扩散故事，下一步应优先开发主题二：任务导向的 observed-set diffusion TopK selector。

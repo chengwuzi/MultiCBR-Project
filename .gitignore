@@ -23,6 +23,9 @@ runs/*
 log
 log*
 log/*
+outputs
+outputs*
+outputs/*
 /.idea/.gitignore
 /.idea/copilot.data.migration.ask2agent.xml
 /.idea/misc.xml

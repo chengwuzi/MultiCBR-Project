@@ -14,6 +14,7 @@ import numpy as np
 import scipy.sparse as sp
 import torch
 import torch.optim as optim
+import torch.nn.functional as F
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
@@ -31,6 +32,14 @@ def get_cmd():
     parser.add_argument("--bi_user_bundle_agg_beta", default=None, type=float, help="coefficient for bundle-side aggregation in BI view")
     parser.add_argument("-e", "--epochs", default=None, type=int, help="number of epochs to train")
     parser.add_argument("--seed", default=None, type=int, help="random seed for reproducibility")
+    parser.add_argument(
+        "--dwt_rebuild_strategy",
+        default=None,
+        type=str,
+        choices=["raw", "diffusion", "random", "pretrain_sim", "popularity", "pooled_z0"],
+        help="UB graph rebuild strategy for DWT module-one ablations",
+    )
+    parser.add_argument("--dwt_rebuild_k", default=None, type=int, help="Top-K value for DWT UB graph rebuild")
     return parser.parse_args()
 
 
@@ -98,6 +107,82 @@ def report_latent_rebuild_epoch(run, log_path, epoch, latent_diffusion_loss, reb
     run.add_scalar(f"{prefix}/user_coverage", graph_stats["row_coverage"], epoch)
     run.add_scalar(f"{prefix}/bundle_coverage", graph_stats["col_coverage"], epoch)
     run.add_scalar(f"{prefix}/density", graph_stats["density"], epoch)
+
+
+def report_ub_rebuild_epoch(run, log_path, epoch, rebuilt_ub_graph, dataset_name, prefix, loss=None):
+    graph_stats = summarize_sparse_graph(rebuilt_ub_graph)
+    parts = [
+        f"[{prefix}] epoch={epoch + 1}",
+        f"dataset={dataset_name}",
+    ]
+    if loss is not None:
+        parts.append(f"loss={loss:.6f}")
+    parts += [
+        f"rebuilt_edges={graph_stats['nnz']}",
+        f"avg_user_edges={graph_stats['avg_interactions']:.6f}",
+        f"user_coverage={graph_stats['row_coverage']:.6f}",
+        f"bundle_coverage={graph_stats['col_coverage']:.6f}",
+        f"density={graph_stats['density']:.10f}",
+    ]
+    message = " ".join(parts)
+    print(message)
+    with open(log_path, "a", encoding="utf-8") as log_file:
+        log_file.write(message + "\n")
+
+    if loss is not None:
+        run.add_scalar(f"{prefix}/loss_epoch", loss, epoch)
+    run.add_scalar(f"{prefix}/rebuilt_edges", graph_stats["nnz"], epoch)
+    run.add_scalar(f"{prefix}/avg_user_edges", graph_stats["avg_interactions"], epoch)
+    run.add_scalar(f"{prefix}/user_coverage", graph_stats["row_coverage"], epoch)
+    run.add_scalar(f"{prefix}/bundle_coverage", graph_stats["col_coverage"], epoch)
+    run.add_scalar(f"{prefix}/density", graph_stats["density"], epoch)
+
+
+def save_rebuilt_ub_edges(rebuilt_ub_graph, output_dir, epoch):
+    """Save selected UB edges for later module-one analysis.
+
+    This is intentionally used only for the main diffusion Top-3 setting to
+    inspect which observed interactions are kept across epochs.
+    """
+    ensure_dir(output_dir)
+    graph_stats = summarize_sparse_graph(rebuilt_ub_graph)
+    coo_graph = rebuilt_ub_graph.tocoo()
+    edge_path = os.path.join(output_dir, f"epoch_{epoch + 1:03d}_edges.tsv")
+    edge_array = np.column_stack((coo_graph.row.astype(np.int64), coo_graph.col.astype(np.int64)))
+    np.savetxt(
+        edge_path,
+        edge_array,
+        fmt="%d",
+        delimiter="\t",
+        header="user_id\tbundle_id",
+        comments="",
+    )
+
+    manifest_path = os.path.join(output_dir, "manifest.tsv")
+    if not os.path.exists(manifest_path):
+        with open(manifest_path, "w", encoding="utf-8") as manifest_file:
+            manifest_file.write(
+                "epoch\tedge_file\trebuilt_edges\tavg_user_edges\t"
+                "user_coverage\tbundle_coverage\tdensity\n"
+            )
+    with open(manifest_path, "a", encoding="utf-8") as manifest_file:
+        manifest_file.write(
+            f"{epoch + 1}\t{edge_path}\t{graph_stats['nnz']}\t"
+            f"{graph_stats['avg_interactions']:.6f}\t"
+            f"{graph_stats['row_coverage']:.6f}\t"
+            f"{graph_stats['col_coverage']:.6f}\t"
+            f"{graph_stats['density']:.10f}\n"
+        )
+    return edge_path
+
+
+def prepare_diffusion_edge_dump_dir(output_dir):
+    ensure_dir(output_dir)
+    for file_name in os.listdir(output_dir):
+        if file_name.startswith("epoch_") and file_name.endswith("_edges.tsv"):
+            os.remove(os.path.join(output_dir, file_name))
+        elif file_name == "manifest.tsv":
+            os.remove(os.path.join(output_dir, file_name))
 
 
 def build_dwt_training_ub_graph(ub_graph, conf, device):
@@ -224,6 +309,104 @@ def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebu
         shape=(dataset.num_users, dataset.num_bundles),
     ).tocsr()
     return rebuilt_ub_graph
+
+
+def build_ub_graph_from_user_selected_bundles(dataset, user_to_bundles):
+    u_list = []
+    b_list = []
+    edge_list = []
+    for user_id, bundles in user_to_bundles.items():
+        for bundle_id in bundles:
+            u_list.append(int(user_id))
+            b_list.append(int(bundle_id))
+            edge_list.append(1.0)
+
+    if not edge_list:
+        return sp.coo_matrix(
+            (dataset.num_users, dataset.num_bundles),
+            dtype=np.float32,
+        ).tocsr()
+
+    return sp.coo_matrix(
+        (
+            np.array(edge_list, dtype=np.float32),
+            (np.array(u_list, dtype=np.int32), np.array(b_list, dtype=np.int32)),
+        ),
+        shape=(dataset.num_users, dataset.num_bundles),
+    ).tocsr()
+
+
+def _select_topk_from_scores(observed_bundles, scores, rebuild_k):
+    if rebuild_k <= 0:
+        raise ValueError("rebuild_k must be positive")
+    if len(observed_bundles) <= rebuild_k:
+        return [int(bundle_id) for bundle_id in observed_bundles]
+    order = np.argsort(-scores, kind="mergesort")[:rebuild_k]
+    return [int(observed_bundles[idx]) for idx in order]
+
+
+def rebuild_ub_graph_random_topk(dataset, rebuild_k):
+    user_to_bundles = {}
+    for user_id in dataset.train_active_user_indices:
+        observed = np.asarray(dataset.user_observed_bundles[int(user_id)], dtype=np.int64)
+        if observed.size <= rebuild_k:
+            selected = observed
+        else:
+            selected = np.random.choice(observed, size=rebuild_k, replace=False)
+        user_to_bundles[int(user_id)] = selected.tolist()
+    return build_ub_graph_from_user_selected_bundles(dataset, user_to_bundles)
+
+
+def rebuild_ub_graph_pretrain_similarity_topk(dataset, user_embedding_tensor, bundle_embedding_tensor, rebuild_k):
+    user_embeddings = F.normalize(user_embedding_tensor.float(), dim=-1).cpu()
+    bundle_embeddings = F.normalize(bundle_embedding_tensor.float(), dim=-1).cpu()
+    user_to_bundles = {}
+
+    for user_id in dataset.train_active_user_indices:
+        observed = np.asarray(dataset.user_observed_bundles[int(user_id)], dtype=np.int64)
+        if observed.size <= rebuild_k:
+            user_to_bundles[int(user_id)] = observed.tolist()
+            continue
+        observed_tensor = torch.from_numpy(observed).long()
+        scores = torch.mv(bundle_embeddings[observed_tensor], user_embeddings[int(user_id)]).numpy()
+        user_to_bundles[int(user_id)] = _select_topk_from_scores(observed, scores, rebuild_k)
+
+    return build_ub_graph_from_user_selected_bundles(dataset, user_to_bundles)
+
+
+def rebuild_ub_graph_popularity_topk(dataset, rebuild_k):
+    popularity = np.asarray(dataset.graphs[0].getnnz(axis=0)).reshape(-1)
+    user_to_bundles = {}
+
+    for user_id in dataset.train_active_user_indices:
+        observed = np.asarray(dataset.user_observed_bundles[int(user_id)], dtype=np.int64)
+        if observed.size <= rebuild_k:
+            user_to_bundles[int(user_id)] = observed.tolist()
+            continue
+        # Stable tie-breaking: popularity descending, bundle id ascending.
+        order = np.lexsort((observed, -popularity[observed]))[:rebuild_k]
+        user_to_bundles[int(user_id)] = [int(observed[idx]) for idx in order]
+
+    return build_ub_graph_from_user_selected_bundles(dataset, user_to_bundles)
+
+
+def rebuild_ub_graph_pooled_z0_topk(dataset, bundle_embedding_tensor, rebuild_k):
+    bundle_embeddings = F.normalize(bundle_embedding_tensor.float(), dim=-1).cpu()
+    raw_bundle_embeddings = bundle_embedding_tensor.float().cpu()
+    user_to_bundles = {}
+
+    for user_id in dataset.train_active_user_indices:
+        observed = np.asarray(dataset.user_observed_bundles[int(user_id)], dtype=np.int64)
+        if observed.size <= rebuild_k:
+            user_to_bundles[int(user_id)] = observed.tolist()
+            continue
+        observed_tensor = torch.from_numpy(observed).long()
+        z0 = raw_bundle_embeddings[observed_tensor].mean(dim=0)
+        z0 = F.normalize(z0, dim=-1)
+        scores = torch.mv(bundle_embeddings[observed_tensor], z0).numpy()
+        user_to_bundles[int(user_id)] = _select_topk_from_scores(observed, scores, rebuild_k)
+
+    return build_ub_graph_from_user_selected_bundles(dataset, user_to_bundles)
 
 
 def create_latent_diffusion_rebuilder(dwt_conf, user_embedding_tensor, bundle_embedding_tensor, device):
@@ -495,7 +678,17 @@ def run_dwt_training(conf, dataset, device):
     dwt_conf = conf.get("dwt", {})
     if not dwt_conf:
         raise ValueError("train_style=dwt requires a dwt config block.")
-    use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
+    rebuild_strategy = dwt_conf.get(
+        "rebuild_strategy",
+        "diffusion" if dwt_conf.get("use_latent_diffusion_rebuild", False) else "raw",
+    )
+    valid_rebuild_strategies = {"raw", "diffusion", "random", "pretrain_sim", "popularity", "pooled_z0"}
+    if rebuild_strategy not in valid_rebuild_strategies:
+        raise ValueError(f"Unsupported DWT rebuild_strategy: {rebuild_strategy}")
+    rebuild_k = int(dwt_conf.get("rebuild_k", 3))
+    if rebuild_strategy != "raw" and rebuild_k <= 0:
+        raise ValueError("DWT rebuild_k must be positive for Top-K rebuild strategies")
+    use_latent_diffusion_rebuild = rebuild_strategy == "diffusion"
     dwt_graph_conf = resolve_dwt_graph_config(conf)
 
     for lr, embedding_size, num_layers in product(
@@ -526,7 +719,8 @@ def run_dwt_training(conf, dataset, device):
             settings += [conf["info"]]
         settings += [
             "DWT",
-            "LatentRebuild" if use_latent_diffusion_rebuild else "Noise",
+            f"strategy_{rebuild_strategy}",
+            f"k{rebuild_k}" if rebuild_strategy != "raw" else "kAll",
             "Neg_%d" % conf["neg_num"],
             str(conf["batch_size_train"]),
             str(lr),
@@ -545,7 +739,6 @@ def run_dwt_training(conf, dataset, device):
         ]
         if use_latent_diffusion_rebuild:
             settings += [
-                f"k{dwt_conf['rebuild_k']}",
                 f"step{dwt_conf['latent_diffusion_num_steps']}",
                 f"ldlr{dwt_conf['latent_diffusion_lr']}",
                 f"ldw{dwt_conf['latent_diffusion_set_loss_weight']}",
@@ -564,18 +757,61 @@ def run_dwt_training(conf, dataset, device):
         run = SummaryWriter(run_path)
         model = DWT(conf, dataset.graphs).to(device)
         optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=0.0)
+        print(
+            "=" * 20
+            + f" DWT Module1 experiment: dataset={conf['dataset']} strategy={rebuild_strategy} "
+            + (f"k={rebuild_k}" if rebuild_strategy != "raw" else "k=all")
+            + f" info={conf.get('info', '')} "
+            + "=" * 20
+        )
+        rebuild_schedule = {
+            "raw": "raw train UB graph, built once",
+            "diffusion": "latent diffusion train+rebuild every epoch",
+            "random": "random Top-K UB graph, rebuilt every epoch",
+            "pretrain_sim": "pretrained user-bundle similarity Top-K, built once",
+            "popularity": "train UB popularity Top-K, built once",
+            "pooled_z0": "pooled z0 similarity Top-K, built once",
+        }[rebuild_strategy]
+        strategy_message = (
+            f"[Module1 Ablation] diffusion_rebuilder="
+            f"{'enabled' if use_latent_diffusion_rebuild else 'disabled'}; "
+            f"ub_rebuild_schedule={rebuild_schedule}"
+        )
+        print(strategy_message)
+        with open(log_path, "a", encoding="utf-8") as log_file:
+            log_file.write(strategy_message + "\n")
+        diffusion_edge_dump_dir = None
+        if rebuild_strategy == "diffusion" and rebuild_k == 3:
+            diffusion_edge_dump_dir = os.path.join(
+                "outputs",
+                "module1_ablation",
+                "diffusion_topk_edges",
+                conf["dataset"],
+                conf["model"],
+                setting,
+            )
+            prepare_diffusion_edge_dump_dir(diffusion_edge_dump_dir)
+            print(f"[Module1 Ablation] Diffusion Top-3 selected edges will be saved to: {diffusion_edge_dump_dir}")
 
-        if use_latent_diffusion_rebuild:
+        user_embedding_tensor = None
+        bundle_embedding_tensor = None
+        latent_diffusion_model = None
+        latent_diffusion_optimizer = None
+        static_ub_graph = None
+
+        if rebuild_strategy in {"diffusion", "pretrain_sim"}:
             user_embedding_tensor = load_external_embedding_tensor(
                 dwt_conf["latent_diffusion_user_embedding_path"],
                 dataset.num_users,
                 "user",
             )
+        if rebuild_strategy in {"diffusion", "pretrain_sim", "pooled_z0"}:
             bundle_embedding_tensor = load_external_embedding_tensor(
                 dwt_conf["latent_diffusion_bundle_embedding_path"],
                 dataset.num_bundles,
                 "bundle",
             )
+        if rebuild_strategy == "diffusion":
             if user_embedding_tensor.shape[1] != bundle_embedding_tensor.shape[1]:
                 raise ValueError("Latent diffusion user and bundle embeddings must share the same dimension")
             latent_diffusion_model, latent_diffusion_optimizer = create_latent_diffusion_rebuilder(
@@ -584,10 +820,66 @@ def run_dwt_training(conf, dataset, device):
                 bundle_embedding_tensor,
                 device,
             )
+        elif rebuild_strategy == "raw":
+            static_ub_graph = dataset.graphs[0]
+            model.set_training_ub_graph(build_dwt_training_ub_graph(static_ub_graph, conf, device))
+            print_statistics(static_ub_graph, "U-B statistics from raw train UB")
+            report_ub_rebuild_epoch(
+                run,
+                log_path,
+                0,
+                static_ub_graph,
+                conf["dataset"],
+                "ub_rebuild/raw",
+            )
+        elif rebuild_strategy == "pretrain_sim":
+            static_ub_graph = rebuild_ub_graph_pretrain_similarity_topk(
+                dataset,
+                user_embedding_tensor,
+                bundle_embedding_tensor,
+                rebuild_k,
+            )
+            model.set_training_ub_graph(build_dwt_training_ub_graph(static_ub_graph, conf, device))
+            print_statistics(static_ub_graph, "U-B statistics from pretrain similarity Top-K rebuild")
+            report_ub_rebuild_epoch(
+                run,
+                log_path,
+                0,
+                static_ub_graph,
+                conf["dataset"],
+                "ub_rebuild/pretrain_sim",
+            )
+        elif rebuild_strategy == "popularity":
+            static_ub_graph = rebuild_ub_graph_popularity_topk(dataset, rebuild_k)
+            model.set_training_ub_graph(build_dwt_training_ub_graph(static_ub_graph, conf, device))
+            print_statistics(static_ub_graph, "U-B statistics from popularity Top-K rebuild")
+            report_ub_rebuild_epoch(
+                run,
+                log_path,
+                0,
+                static_ub_graph,
+                conf["dataset"],
+                "ub_rebuild/popularity",
+            )
+        elif rebuild_strategy == "pooled_z0":
+            static_ub_graph = rebuild_ub_graph_pooled_z0_topk(
+                dataset,
+                bundle_embedding_tensor,
+                rebuild_k,
+            )
+            model.set_training_ub_graph(build_dwt_training_ub_graph(static_ub_graph, conf, device))
+            print_statistics(static_ub_graph, "U-B statistics from pooled z0 Top-K rebuild")
+            report_ub_rebuild_epoch(
+                run,
+                log_path,
+                0,
+                static_ub_graph,
+                conf["dataset"],
+                "ub_rebuild/pooled_z0",
+            )
         else:
-            latent_diffusion_model = None
-            latent_diffusion_optimizer = None
-            model.set_training_ub_graph(build_dwt_training_ub_graph(dataset.graphs[0], conf, device))
+            # Random Top-K is intentionally dynamic and rebuilt at every epoch.
+            pass
 
         batch_cnt = len(dataset.train_loader)
         test_interval_bs = int(batch_cnt * conf["test_interval"])
@@ -595,6 +887,12 @@ def run_dwt_training(conf, dataset, device):
         best_metrics, best_perform = init_best_metrics(conf)
         best_epoch = 0
         for epoch in range(conf["epochs"]):
+            print(
+                f"[Module1 Ablation] experiment={conf.get('info', '')} "
+                f"strategy={rebuild_strategy} "
+                f"{'k=' + str(rebuild_k) if rebuild_strategy != 'raw' else 'k=all'} "
+                f"epoch={epoch + 1}/{conf['epochs']}"
+            )
             if (
                 use_latent_diffusion_rebuild
                 and dwt_conf.get("latent_diffusion_reset_after_epoch", -1) >= 0
@@ -629,7 +927,26 @@ def run_dwt_training(conf, dataset, device):
                     latent_diffusion_loss,
                     rebuilt_ub_graph,
                     conf["dataset"],
-                    "latent_diffusion",
+                    "ub_rebuild/diffusion",
+                )
+                if diffusion_edge_dump_dir is not None:
+                    edge_path = save_rebuilt_ub_edges(rebuilt_ub_graph, diffusion_edge_dump_dir, epoch)
+                    edge_message = f"[ub_rebuild/diffusion_edges] epoch={epoch + 1} saved_edges={edge_path}"
+                    print(edge_message)
+                    with open(log_path, "a", encoding="utf-8") as log_file:
+                        log_file.write(edge_message + "\n")
+                model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
+            elif rebuild_strategy == "random":
+                rebuilt_ub_graph = rebuild_ub_graph_random_topk(dataset, rebuild_k)
+                if epoch == 0:
+                    print_statistics(rebuilt_ub_graph, "U-B statistics from random Top-K rebuild")
+                report_ub_rebuild_epoch(
+                    run,
+                    log_path,
+                    epoch,
+                    rebuilt_ub_graph,
+                    conf["dataset"],
+                    "ub_rebuild/random",
                 )
                 model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
 
@@ -705,10 +1022,15 @@ def main(args=None):
     conf["gpu"] = paras["gpu"]
     conf["info"] = paras["info"]
 
+    nested_override_keys = {"dwt_rebuild_strategy", "dwt_rebuild_k"}
     for key, value in paras.items():
-        if key not in ["dataset", "model", "gpu", "info"] and value is not None:
+        if key not in ["dataset", "model", "gpu", "info"] and key not in nested_override_keys and value is not None:
             conf[key] = value
 
+    if paras.get("dwt_rebuild_strategy") is not None:
+        conf.setdefault("dwt", {})["rebuild_strategy"] = paras["dwt_rebuild_strategy"]
+    if paras.get("dwt_rebuild_k") is not None:
+        conf.setdefault("dwt", {})["rebuild_k"] = paras["dwt_rebuild_k"]
     if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
         conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
     if "bi_user_bundle_agg_beta" in paras and paras["bi_user_bundle_agg_beta"] is not None:

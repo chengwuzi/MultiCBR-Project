@@ -1,0 +1,199 @@
+load config file done!
+Global random seed set to: 2026
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'train_style': 'dwt', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'seed': 2026, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.2], 'fusion_weights': {'modal_weight': [0.0, 0.5, 0.5], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.4, 0.3], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 30, 'test_interval': 5, 'dwt': {'rebuild_strategy': 'popularity', 'use_latent_diffusion_rebuild': True, 'rebuild_k': 5, 'latent_diffusion_user_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt', 'latent_diffusion_bundle_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt', 'latent_diffusion_hidden_dim': 128, 'latent_diffusion_time_dim': 16, 'latent_diffusion_denoiser_layers': 2, 'latent_diffusion_dropout': 0.1, 'latent_diffusion_num_steps': 12, 'latent_diffusion_beta_start': 0.0001, 'latent_diffusion_beta_end': 0.02, 'latent_diffusion_set_loss_weight': 0.05, 'latent_diffusion_lr': 0.001, 'latent_diffusion_weight_decay': 1e-05, 'latent_diffusion_batch_size': 1024, 'latent_diffusion_infer_batch_size': 256, 'latent_diffusion_reset_after_epoch': -1, 'latent_diffusion_reset_optimizer': False, 'gamma_1': 0.3, 'gamma_2': 0.2, 'tau': 0.08, 'lambda_1': 0.3, 'lambda_2': 1e-06}, 'anchor_cl': {'enabled': False, 'anchor_cl_lambda': 0.07, 'temp': 0.2, 'user_cl': True, 'bundle_cl': True, 'ub_ui_user_weight': 1.0, 'ub_bi_user_weight': 1.0, 'ub_ui_bundle_weight': 1.0, 'ub_bi_bundle_weight': 1.0}, 'ui_bundle_user_agg_beta': 0, 'bi_user_bundle_agg_beta': 0, 'dataset': 'iFashion', 'model': 'AnchorViewBundleNet', 'gpu': '0', 'info': 'M1D_pop_k5', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+train_style: dwt
+==================== DWT Module1 experiment: dataset=iFashion strategy=popularity k=5 info=M1D_pop_k5 ====================
+[Module1 Ablation] diffusion_rebuilder=disabled; ub_rebuild_schedule=train UB popularity Top-K, built once
+>>>>>>>>>>U-B statistics from popularity Top-K rebuild>>>>>>>>>>
+Average interactions 5.0
+Non-zero rows 1.0
+Non-zero columns 0.18520257095399725
+Matrix density 0.00018054452227919405
+[ub_rebuild/popularity] epoch=1 dataset=iFashion rebuilt_edges=269485 avg_user_edges=5.000000 user_coverage=1.000000 bundle_coverage=0.185203 density=0.0001805445
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=1/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=2/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=3/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=4/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=5/30
+2026-06-16 12:01:15, Top_10, Val:  recall: 0.088681, ndcg: 0.070848
+2026-06-16 12:01:15, Top_10, Test: recall: 0.089864, ndcg: 0.095030
+--------------------
+2026-06-16 12:01:15, Top_20, Val:  recall: 0.117181, ndcg: 0.080252
+2026-06-16 12:01:15, Top_20, Test: recall: 0.117359, ndcg: 0.105883
+--------------------
+2026-06-16 12:01:15, Top_40, Val:  recall: 0.150047, ndcg: 0.089149
+2026-06-16 12:01:15, Top_40, Test: recall: 0.151017, ndcg: 0.117673
+--------------------
+2026-06-16 12:01:15, Top_80, Val:  recall: 0.189538, ndcg: 0.098115
+2026-06-16 12:01:15, Top_80, Test: recall: 0.190088, ndcg: 0.129288
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 12:01:15, Best in epoch 4, TOP 10: REC_V=0.08868, NDCG_V=0.07085
+2026-06-16 12:01:15, Best in epoch 4, TOP 10: REC_T=0.08986, NDCG_T=0.09503
+2026-06-16 12:01:15, Best in epoch 4, TOP 20: REC_V=0.11718, NDCG_V=0.08025
+2026-06-16 12:01:15, Best in epoch 4, TOP 20: REC_T=0.11736, NDCG_T=0.10588
+2026-06-16 12:01:15, Best in epoch 4, TOP 40: REC_V=0.15005, NDCG_V=0.08915
+2026-06-16 12:01:15, Best in epoch 4, TOP 40: REC_T=0.15102, NDCG_T=0.11767
+2026-06-16 12:01:15, Best in epoch 4, TOP 80: REC_V=0.18954, NDCG_V=0.09812
+2026-06-16 12:01:15, Best in epoch 4, TOP 80: REC_T=0.19009, NDCG_T=0.12929
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=6/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=7/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=8/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=9/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=10/30
+2026-06-16 12:05:52, Top_10, Val:  recall: 0.105985, ndcg: 0.082447
+2026-06-16 12:05:52, Top_10, Test: recall: 0.108769, ndcg: 0.111973
+--------------------
+2026-06-16 12:05:52, Top_20, Val:  recall: 0.143011, ndcg: 0.094694
+2026-06-16 12:05:52, Top_20, Test: recall: 0.145034, ndcg: 0.126459
+--------------------
+2026-06-16 12:05:52, Top_40, Val:  recall: 0.185762, ndcg: 0.106293
+2026-06-16 12:05:52, Top_40, Test: recall: 0.187533, ndcg: 0.141411
+--------------------
+2026-06-16 12:05:52, Top_80, Val:  recall: 0.234961, ndcg: 0.117481
+2026-06-16 12:05:52, Top_80, Test: recall: 0.235997, ndcg: 0.155892
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 12:05:52, Best in epoch 9, TOP 10: REC_V=0.10598, NDCG_V=0.08245
+2026-06-16 12:05:52, Best in epoch 9, TOP 10: REC_T=0.10877, NDCG_T=0.11197
+2026-06-16 12:05:52, Best in epoch 9, TOP 20: REC_V=0.14301, NDCG_V=0.09469
+2026-06-16 12:05:52, Best in epoch 9, TOP 20: REC_T=0.14503, NDCG_T=0.12646
+2026-06-16 12:05:52, Best in epoch 9, TOP 40: REC_V=0.18576, NDCG_V=0.10629
+2026-06-16 12:05:52, Best in epoch 9, TOP 40: REC_T=0.18753, NDCG_T=0.14141
+2026-06-16 12:05:52, Best in epoch 9, TOP 80: REC_V=0.23496, NDCG_V=0.11748
+2026-06-16 12:05:52, Best in epoch 9, TOP 80: REC_T=0.23600, NDCG_T=0.15589
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=11/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=12/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=13/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=14/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=15/30
+2026-06-16 12:10:28, Top_10, Val:  recall: 0.113407, ndcg: 0.086505
+2026-06-16 12:10:28, Top_10, Test: recall: 0.114160, ndcg: 0.116448
+--------------------
+2026-06-16 12:10:28, Top_20, Val:  recall: 0.152470, ndcg: 0.099454
+2026-06-16 12:10:28, Top_20, Test: recall: 0.153651, ndcg: 0.132224
+--------------------
+2026-06-16 12:10:28, Top_40, Val:  recall: 0.199634, ndcg: 0.112250
+2026-06-16 12:10:28, Top_40, Test: recall: 0.200317, ndcg: 0.148665
+--------------------
+2026-06-16 12:10:28, Top_80, Val:  recall: 0.252507, ndcg: 0.124315
+2026-06-16 12:10:28, Top_80, Test: recall: 0.253388, ndcg: 0.164516
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 12:10:29, Best in epoch 14, TOP 10: REC_V=0.11341, NDCG_V=0.08651
+2026-06-16 12:10:29, Best in epoch 14, TOP 10: REC_T=0.11416, NDCG_T=0.11645
+2026-06-16 12:10:29, Best in epoch 14, TOP 20: REC_V=0.15247, NDCG_V=0.09945
+2026-06-16 12:10:29, Best in epoch 14, TOP 20: REC_T=0.15365, NDCG_T=0.13222
+2026-06-16 12:10:29, Best in epoch 14, TOP 40: REC_V=0.19963, NDCG_V=0.11225
+2026-06-16 12:10:29, Best in epoch 14, TOP 40: REC_T=0.20032, NDCG_T=0.14867
+2026-06-16 12:10:29, Best in epoch 14, TOP 80: REC_V=0.25251, NDCG_V=0.12432
+2026-06-16 12:10:29, Best in epoch 14, TOP 80: REC_T=0.25339, NDCG_T=0.16452
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=16/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=17/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=18/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=19/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=20/30
+2026-06-16 12:15:02, Top_10, Val:  recall: 0.114633, ndcg: 0.087538
+2026-06-16 12:15:02, Top_10, Test: recall: 0.115743, ndcg: 0.117876
+--------------------
+2026-06-16 12:15:02, Top_20, Val:  recall: 0.155183, ndcg: 0.100946
+2026-06-16 12:15:02, Top_20, Test: recall: 0.156717, ndcg: 0.134285
+--------------------
+2026-06-16 12:15:02, Top_40, Val:  recall: 0.203209, ndcg: 0.113954
+2026-06-16 12:15:02, Top_40, Test: recall: 0.204553, ndcg: 0.151150
+--------------------
+2026-06-16 12:15:02, Top_80, Val:  recall: 0.257892, ndcg: 0.126443
+2026-06-16 12:15:02, Top_80, Test: recall: 0.259055, ndcg: 0.167434
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 12:15:03, Best in epoch 19, TOP 10: REC_V=0.11463, NDCG_V=0.08754
+2026-06-16 12:15:03, Best in epoch 19, TOP 10: REC_T=0.11574, NDCG_T=0.11788
+2026-06-16 12:15:03, Best in epoch 19, TOP 20: REC_V=0.15518, NDCG_V=0.10095
+2026-06-16 12:15:03, Best in epoch 19, TOP 20: REC_T=0.15672, NDCG_T=0.13428
+2026-06-16 12:15:03, Best in epoch 19, TOP 40: REC_V=0.20321, NDCG_V=0.11395
+2026-06-16 12:15:03, Best in epoch 19, TOP 40: REC_T=0.20455, NDCG_T=0.15115
+2026-06-16 12:15:03, Best in epoch 19, TOP 80: REC_V=0.25789, NDCG_V=0.12644
+2026-06-16 12:15:03, Best in epoch 19, TOP 80: REC_T=0.25906, NDCG_T=0.16743
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=21/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=22/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=23/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=24/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=25/30
+2026-06-16 12:19:36, Top_10, Val:  recall: 0.115004, ndcg: 0.087766
+2026-06-16 12:19:36, Top_10, Test: recall: 0.116728, ndcg: 0.118884
+--------------------
+2026-06-16 12:19:36, Top_20, Val:  recall: 0.156538, ndcg: 0.101532
+2026-06-16 12:19:36, Top_20, Test: recall: 0.157910, ndcg: 0.135357
+--------------------
+2026-06-16 12:19:36, Top_40, Val:  recall: 0.205504, ndcg: 0.114816
+2026-06-16 12:19:36, Top_40, Test: recall: 0.206323, ndcg: 0.152418
+--------------------
+2026-06-16 12:19:36, Top_80, Val:  recall: 0.260274, ndcg: 0.127308
+2026-06-16 12:19:36, Top_80, Test: recall: 0.261207, ndcg: 0.168819
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 12:19:36, Best in epoch 24, TOP 10: REC_V=0.11500, NDCG_V=0.08777
+2026-06-16 12:19:36, Best in epoch 24, TOP 10: REC_T=0.11673, NDCG_T=0.11888
+2026-06-16 12:19:36, Best in epoch 24, TOP 20: REC_V=0.15654, NDCG_V=0.10153
+2026-06-16 12:19:36, Best in epoch 24, TOP 20: REC_T=0.15791, NDCG_T=0.13536
+2026-06-16 12:19:36, Best in epoch 24, TOP 40: REC_V=0.20550, NDCG_V=0.11482
+2026-06-16 12:19:36, Best in epoch 24, TOP 40: REC_T=0.20632, NDCG_T=0.15242
+2026-06-16 12:19:36, Best in epoch 24, TOP 80: REC_V=0.26027, NDCG_V=0.12731
+2026-06-16 12:19:36, Best in epoch 24, TOP 80: REC_T=0.26121, NDCG_T=0.16882
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=26/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=27/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=28/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=29/30
+[Module1 Ablation] experiment=M1D_pop_k5 strategy=popularity k=5 epoch=30/30
+2026-06-16 12:24:12, Top_10, Val:  recall: 0.115355, ndcg: 0.087959
+2026-06-16 12:24:12, Top_10, Test: recall: 0.117301, ndcg: 0.119410
+--------------------
+2026-06-16 12:24:12, Top_20, Val:  recall: 0.157389, ndcg: 0.101853
+2026-06-16 12:24:12, Top_20, Test: recall: 0.158240, ndcg: 0.135758
+--------------------
+2026-06-16 12:24:12, Top_40, Val:  recall: 0.205835, ndcg: 0.115028
+2026-06-16 12:24:12, Top_40, Test: recall: 0.206584, ndcg: 0.152784
+--------------------
+2026-06-16 12:24:12, Top_80, Val:  recall: 0.261576, ndcg: 0.127759
+2026-06-16 12:24:12, Top_80, Test: recall: 0.262336, ndcg: 0.169433
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 12:24:13, Best in epoch 29, TOP 10: REC_V=0.11536, NDCG_V=0.08796
+2026-06-16 12:24:13, Best in epoch 29, TOP 10: REC_T=0.11730, NDCG_T=0.11941
+2026-06-16 12:24:13, Best in epoch 29, TOP 20: REC_V=0.15739, NDCG_V=0.10185
+2026-06-16 12:24:13, Best in epoch 29, TOP 20: REC_T=0.15824, NDCG_T=0.13576
+2026-06-16 12:24:13, Best in epoch 29, TOP 40: REC_V=0.20584, NDCG_V=0.11503
+2026-06-16 12:24:13, Best in epoch 29, TOP 40: REC_T=0.20658, NDCG_T=0.15278
+2026-06-16 12:24:13, Best in epoch 29, TOP 80: REC_V=0.26158, NDCG_V=0.12776
+2026-06-16 12:24:13, Best in epoch 29, TOP 80: REC_T=0.26234, NDCG_T=0.16943

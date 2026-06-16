@@ -1,0 +1,259 @@
+load config file done!
+Global random seed set to: 2026
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'train_style': 'dwt', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'seed': 2026, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.2], 'fusion_weights': {'modal_weight': [0.0, 0.5, 0.5], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.4, 0.3], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 30, 'test_interval': 5, 'dwt': {'rebuild_strategy': 'diffusion', 'use_latent_diffusion_rebuild': True, 'rebuild_k': 3, 'latent_diffusion_user_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt', 'latent_diffusion_bundle_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt', 'latent_diffusion_hidden_dim': 128, 'latent_diffusion_time_dim': 16, 'latent_diffusion_denoiser_layers': 2, 'latent_diffusion_dropout': 0.1, 'latent_diffusion_num_steps': 12, 'latent_diffusion_beta_start': 0.0001, 'latent_diffusion_beta_end': 0.02, 'latent_diffusion_set_loss_weight': 0.05, 'latent_diffusion_lr': 0.001, 'latent_diffusion_weight_decay': 1e-05, 'latent_diffusion_batch_size': 1024, 'latent_diffusion_infer_batch_size': 256, 'latent_diffusion_reset_after_epoch': -1, 'latent_diffusion_reset_optimizer': False, 'gamma_1': 0.3, 'gamma_2': 0.2, 'tau': 0.08, 'lambda_1': 0.3, 'lambda_2': 1e-06}, 'anchor_cl': {'enabled': False, 'anchor_cl_lambda': 0.07, 'temp': 0.2, 'user_cl': True, 'bundle_cl': True, 'ub_ui_user_weight': 1.0, 'ub_bi_user_weight': 1.0, 'ub_ui_bundle_weight': 1.0, 'ub_bi_bundle_weight': 1.0}, 'ui_bundle_user_agg_beta': 0, 'bi_user_bundle_agg_beta': 0, 'dataset': 'iFashion', 'model': 'AnchorViewBundleNet', 'gpu': '0', 'info': 'M1A_diff_k3', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+train_style: dwt
+==================== DWT Module1 experiment: dataset=iFashion strategy=diffusion k=3 info=M1A_diff_k3 ====================
+[Module1 Ablation] diffusion_rebuilder=enabled; ub_rebuild_schedule=latent diffusion train+rebuild every epoch
+[Module1 Ablation] Diffusion Top-3 selected edges will be saved to: outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=1/30
+>>>>>>>>>>U-B statistics from Latent diffusion rebuild>>>>>>>>>>
+Average interactions 3.0
+Non-zero rows 1.0
+Non-zero columns 0.18827182783274354
+Matrix density 0.00010832671336751643
+[ub_rebuild/diffusion] epoch=1 dataset=iFashion loss=0.080877 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.188272 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=1 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_001_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=2/30
+[ub_rebuild/diffusion] epoch=2 dataset=iFashion loss=0.040972 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.222539 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=2 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_002_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=3/30
+[ub_rebuild/diffusion] epoch=3 dataset=iFashion loss=0.035385 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.234166 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=3 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_003_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=4/30
+[ub_rebuild/diffusion] epoch=4 dataset=iFashion loss=0.033036 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.239185 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=4 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_004_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=5/30
+[ub_rebuild/diffusion] epoch=5 dataset=iFashion loss=0.031726 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.246696 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=5 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_005_edges.tsv
+2026-06-16 04:05:54, Top_10, Val:  recall: 0.087391, ndcg: 0.069292
+2026-06-16 04:05:54, Top_10, Test: recall: 0.087944, ndcg: 0.092833
+--------------------
+2026-06-16 04:05:54, Top_20, Val:  recall: 0.115238, ndcg: 0.078501
+2026-06-16 04:05:54, Top_20, Test: recall: 0.116226, ndcg: 0.104082
+--------------------
+2026-06-16 04:05:54, Top_40, Val:  recall: 0.150782, ndcg: 0.088100
+2026-06-16 04:05:54, Top_40, Test: recall: 0.150277, ndcg: 0.116023
+--------------------
+2026-06-16 04:05:54, Top_80, Val:  recall: 0.191749, ndcg: 0.097424
+2026-06-16 04:05:54, Top_80, Test: recall: 0.190943, ndcg: 0.128124
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 04:05:54, Best in epoch 4, TOP 10: REC_V=0.08739, NDCG_V=0.06929
+2026-06-16 04:05:54, Best in epoch 4, TOP 10: REC_T=0.08794, NDCG_T=0.09283
+2026-06-16 04:05:54, Best in epoch 4, TOP 20: REC_V=0.11524, NDCG_V=0.07850
+2026-06-16 04:05:54, Best in epoch 4, TOP 20: REC_T=0.11623, NDCG_T=0.10408
+2026-06-16 04:05:54, Best in epoch 4, TOP 40: REC_V=0.15078, NDCG_V=0.08810
+2026-06-16 04:05:54, Best in epoch 4, TOP 40: REC_T=0.15028, NDCG_T=0.11602
+2026-06-16 04:05:54, Best in epoch 4, TOP 80: REC_V=0.19175, NDCG_V=0.09742
+2026-06-16 04:05:54, Best in epoch 4, TOP 80: REC_T=0.19094, NDCG_T=0.12812
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=6/30
+[ub_rebuild/diffusion] epoch=6 dataset=iFashion loss=0.030863 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.246046 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=6 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_006_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=7/30
+[ub_rebuild/diffusion] epoch=7 dataset=iFashion loss=0.030328 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.247057 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=7 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_007_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=8/30
+[ub_rebuild/diffusion] epoch=8 dataset=iFashion loss=0.029869 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.250740 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=8 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_008_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=9/30
+[ub_rebuild/diffusion] epoch=9 dataset=iFashion loss=0.029543 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.251643 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=9 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_009_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=10/30
+[ub_rebuild/diffusion] epoch=10 dataset=iFashion loss=0.029281 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.252329 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=10 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_010_edges.tsv
+2026-06-16 04:11:22, Top_10, Val:  recall: 0.106772, ndcg: 0.082730
+2026-06-16 04:11:22, Top_10, Test: recall: 0.107623, ndcg: 0.110630
+--------------------
+2026-06-16 04:11:22, Top_20, Val:  recall: 0.143402, ndcg: 0.094873
+2026-06-16 04:11:22, Top_20, Test: recall: 0.143697, ndcg: 0.125018
+--------------------
+2026-06-16 04:11:22, Top_40, Val:  recall: 0.186253, ndcg: 0.106492
+2026-06-16 04:11:22, Top_40, Test: recall: 0.186417, ndcg: 0.140034
+--------------------
+2026-06-16 04:11:22, Top_80, Val:  recall: 0.236677, ndcg: 0.117990
+2026-06-16 04:11:22, Top_80, Test: recall: 0.236549, ndcg: 0.154977
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 04:11:22, Best in epoch 9, TOP 10: REC_V=0.10677, NDCG_V=0.08273
+2026-06-16 04:11:22, Best in epoch 9, TOP 10: REC_T=0.10762, NDCG_T=0.11063
+2026-06-16 04:11:22, Best in epoch 9, TOP 20: REC_V=0.14340, NDCG_V=0.09487
+2026-06-16 04:11:22, Best in epoch 9, TOP 20: REC_T=0.14370, NDCG_T=0.12502
+2026-06-16 04:11:22, Best in epoch 9, TOP 40: REC_V=0.18625, NDCG_V=0.10649
+2026-06-16 04:11:22, Best in epoch 9, TOP 40: REC_T=0.18642, NDCG_T=0.14003
+2026-06-16 04:11:22, Best in epoch 9, TOP 80: REC_V=0.23668, NDCG_V=0.11799
+2026-06-16 04:11:22, Best in epoch 9, TOP 80: REC_T=0.23655, NDCG_T=0.15498
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=11/30
+[ub_rebuild/diffusion] epoch=11 dataset=iFashion loss=0.029113 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.250199 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=11 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_011_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=12/30
+[ub_rebuild/diffusion] epoch=12 dataset=iFashion loss=0.028972 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.257781 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=12 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_012_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=13/30
+[ub_rebuild/diffusion] epoch=13 dataset=iFashion loss=0.028755 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.258612 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=13 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_013_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=14/30
+[ub_rebuild/diffusion] epoch=14 dataset=iFashion loss=0.028642 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.252798 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=14 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_014_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=15/30
+[ub_rebuild/diffusion] epoch=15 dataset=iFashion loss=0.028545 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.255182 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=15 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_015_edges.tsv
+2026-06-16 04:16:40, Top_10, Val:  recall: 0.111422, ndcg: 0.085037
+2026-06-16 04:16:40, Top_10, Test: recall: 0.112513, ndcg: 0.113837
+--------------------
+2026-06-16 04:16:40, Top_20, Val:  recall: 0.151629, ndcg: 0.098359
+2026-06-16 04:16:40, Top_20, Test: recall: 0.153131, ndcg: 0.130103
+--------------------
+2026-06-16 04:16:40, Top_40, Val:  recall: 0.200002, ndcg: 0.111464
+2026-06-16 04:16:40, Top_40, Test: recall: 0.200633, ndcg: 0.146830
+--------------------
+2026-06-16 04:16:40, Top_80, Val:  recall: 0.254038, ndcg: 0.123785
+2026-06-16 04:16:40, Top_80, Test: recall: 0.254456, ndcg: 0.162896
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 04:16:40, Best in epoch 14, TOP 10: REC_V=0.11142, NDCG_V=0.08504
+2026-06-16 04:16:40, Best in epoch 14, TOP 10: REC_T=0.11251, NDCG_T=0.11384
+2026-06-16 04:16:40, Best in epoch 14, TOP 20: REC_V=0.15163, NDCG_V=0.09836
+2026-06-16 04:16:40, Best in epoch 14, TOP 20: REC_T=0.15313, NDCG_T=0.13010
+2026-06-16 04:16:40, Best in epoch 14, TOP 40: REC_V=0.20000, NDCG_V=0.11146
+2026-06-16 04:16:40, Best in epoch 14, TOP 40: REC_T=0.20063, NDCG_T=0.14683
+2026-06-16 04:16:40, Best in epoch 14, TOP 80: REC_V=0.25404, NDCG_V=0.12378
+2026-06-16 04:16:40, Best in epoch 14, TOP 80: REC_T=0.25446, NDCG_T=0.16290
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=16/30
+[ub_rebuild/diffusion] epoch=16 dataset=iFashion loss=0.028430 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.259767 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=16 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_016_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=17/30
+[ub_rebuild/diffusion] epoch=17 dataset=iFashion loss=0.028350 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.259334 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=17 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_017_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=18/30
+[ub_rebuild/diffusion] epoch=18 dataset=iFashion loss=0.028288 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.255146 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=18 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_018_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=19/30
+[ub_rebuild/diffusion] epoch=19 dataset=iFashion loss=0.028227 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.253846 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=19 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_019_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=20/30
+[ub_rebuild/diffusion] epoch=20 dataset=iFashion loss=0.028173 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.253521 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=20 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_020_edges.tsv
+2026-06-16 04:21:59, Top_10, Val:  recall: 0.111976, ndcg: 0.085068
+2026-06-16 04:21:59, Top_10, Test: recall: 0.113592, ndcg: 0.114239
+--------------------
+2026-06-16 04:21:59, Top_20, Val:  recall: 0.153848, ndcg: 0.098898
+2026-06-16 04:21:59, Top_20, Test: recall: 0.155346, ndcg: 0.130986
+--------------------
+2026-06-16 04:21:59, Top_40, Val:  recall: 0.203140, ndcg: 0.112246
+2026-06-16 04:21:59, Top_40, Test: recall: 0.204299, ndcg: 0.148207
+--------------------
+2026-06-16 04:21:59, Top_80, Val:  recall: 0.259106, ndcg: 0.125012
+2026-06-16 04:21:59, Top_80, Test: recall: 0.261331, ndcg: 0.165228
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 04:21:59, Best in epoch 19, TOP 10: REC_V=0.11198, NDCG_V=0.08507
+2026-06-16 04:21:59, Best in epoch 19, TOP 10: REC_T=0.11359, NDCG_T=0.11424
+2026-06-16 04:21:59, Best in epoch 19, TOP 20: REC_V=0.15385, NDCG_V=0.09890
+2026-06-16 04:21:59, Best in epoch 19, TOP 20: REC_T=0.15535, NDCG_T=0.13099
+2026-06-16 04:21:59, Best in epoch 19, TOP 40: REC_V=0.20314, NDCG_V=0.11225
+2026-06-16 04:21:59, Best in epoch 19, TOP 40: REC_T=0.20430, NDCG_T=0.14821
+2026-06-16 04:21:59, Best in epoch 19, TOP 80: REC_V=0.25911, NDCG_V=0.12501
+2026-06-16 04:21:59, Best in epoch 19, TOP 80: REC_T=0.26133, NDCG_T=0.16523
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=21/30
+[ub_rebuild/diffusion] epoch=21 dataset=iFashion loss=0.028191 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.257493 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=21 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_021_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=22/30
+[ub_rebuild/diffusion] epoch=22 dataset=iFashion loss=0.028048 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.254315 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=22 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_022_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=23/30
+[ub_rebuild/diffusion] epoch=23 dataset=iFashion loss=0.028029 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.257456 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=23 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_023_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=24/30
+[ub_rebuild/diffusion] epoch=24 dataset=iFashion loss=0.027936 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.258251 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=24 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_024_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=25/30
+[ub_rebuild/diffusion] epoch=25 dataset=iFashion loss=0.027893 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.261501 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=25 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_025_edges.tsv
+2026-06-16 04:27:23, Top_10, Val:  recall: 0.112907, ndcg: 0.085011
+2026-06-16 04:27:23, Top_10, Test: recall: 0.114132, ndcg: 0.114624
+--------------------
+2026-06-16 04:27:23, Top_20, Val:  recall: 0.155331, ndcg: 0.099081
+2026-06-16 04:27:23, Top_20, Test: recall: 0.155899, ndcg: 0.131352
+--------------------
+2026-06-16 04:27:23, Top_40, Val:  recall: 0.205647, ndcg: 0.112742
+2026-06-16 04:27:23, Top_40, Test: recall: 0.205666, ndcg: 0.148875
+--------------------
+2026-06-16 04:27:23, Top_80, Val:  recall: 0.260472, ndcg: 0.125248
+2026-06-16 04:27:23, Top_80, Test: recall: 0.263842, ndcg: 0.166215
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 04:27:23, Best in epoch 24, TOP 10: REC_V=0.11291, NDCG_V=0.08501
+2026-06-16 04:27:23, Best in epoch 24, TOP 10: REC_T=0.11413, NDCG_T=0.11462
+2026-06-16 04:27:23, Best in epoch 24, TOP 20: REC_V=0.15533, NDCG_V=0.09908
+2026-06-16 04:27:23, Best in epoch 24, TOP 20: REC_T=0.15590, NDCG_T=0.13135
+2026-06-16 04:27:23, Best in epoch 24, TOP 40: REC_V=0.20565, NDCG_V=0.11274
+2026-06-16 04:27:23, Best in epoch 24, TOP 40: REC_T=0.20567, NDCG_T=0.14887
+2026-06-16 04:27:23, Best in epoch 24, TOP 80: REC_V=0.26047, NDCG_V=0.12525
+2026-06-16 04:27:23, Best in epoch 24, TOP 80: REC_T=0.26384, NDCG_T=0.16622
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=26/30
+[ub_rebuild/diffusion] epoch=26 dataset=iFashion loss=0.027926 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.260598 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=26 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_026_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=27/30
+[ub_rebuild/diffusion] epoch=27 dataset=iFashion loss=0.027842 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.260345 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=27 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_027_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=28/30
+[ub_rebuild/diffusion] epoch=28 dataset=iFashion loss=0.027845 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.259406 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=28 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_028_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=29/30
+[ub_rebuild/diffusion] epoch=29 dataset=iFashion loss=0.027825 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.257493 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=29 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_029_edges.tsv
+[Module1 Ablation] experiment=M1A_diff_k3 strategy=diffusion k=3 epoch=30/30
+[ub_rebuild/diffusion] epoch=30 dataset=iFashion loss=0.027815 rebuilt_edges=161691 avg_user_edges=3.000000 user_coverage=1.000000 bundle_coverage=0.260526 density=0.0001083267
+[ub_rebuild/diffusion_edges] epoch=30 saved_edges=outputs/module1_ablation/diffusion_topk_edges/iFashion/AnchorViewBundleNet/M1A_diff_k3_DWT_strategy_diffusion_k3_Neg_1_2048_0.001_64_2_0.05-0.0-0.2_0.5-0.5-0.0_0.3-0.4-0.3_0.5_f5e82bac/epoch_030_edges.tsv
+2026-06-16 04:32:53, Top_10, Val:  recall: 0.113673, ndcg: 0.085399
+2026-06-16 04:32:53, Top_10, Test: recall: 0.114506, ndcg: 0.114614
+--------------------
+2026-06-16 04:32:53, Top_20, Val:  recall: 0.155598, ndcg: 0.099288
+2026-06-16 04:32:53, Top_20, Test: recall: 0.156908, ndcg: 0.131599
+--------------------
+2026-06-16 04:32:53, Top_40, Val:  recall: 0.206539, ndcg: 0.113119
+2026-06-16 04:32:53, Top_40, Test: recall: 0.206529, ndcg: 0.149059
+--------------------
+2026-06-16 04:32:53, Top_80, Val:  recall: 0.262778, ndcg: 0.125944
+2026-06-16 04:32:53, Top_80, Test: recall: 0.264572, ndcg: 0.166399
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 04:32:53, Best in epoch 29, TOP 10: REC_V=0.11367, NDCG_V=0.08540
+2026-06-16 04:32:53, Best in epoch 29, TOP 10: REC_T=0.11451, NDCG_T=0.11461
+2026-06-16 04:32:53, Best in epoch 29, TOP 20: REC_V=0.15560, NDCG_V=0.09929
+2026-06-16 04:32:53, Best in epoch 29, TOP 20: REC_T=0.15691, NDCG_T=0.13160
+2026-06-16 04:32:53, Best in epoch 29, TOP 40: REC_V=0.20654, NDCG_V=0.11312
+2026-06-16 04:32:53, Best in epoch 29, TOP 40: REC_T=0.20653, NDCG_T=0.14906
+2026-06-16 04:32:53, Best in epoch 29, TOP 80: REC_V=0.26278, NDCG_V=0.12594
+2026-06-16 04:32:53, Best in epoch 29, TOP 80: REC_T=0.26457, NDCG_T=0.16640

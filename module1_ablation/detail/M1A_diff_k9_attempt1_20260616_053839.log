@@ -1,0 +1,58 @@
+load config file done!
+Global random seed set to: 2026
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'train_style': 'dwt', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'seed': 2026, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.2], 'fusion_weights': {'modal_weight': [0.0, 0.5, 0.5], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.4, 0.3], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 30, 'test_interval': 5, 'dwt': {'rebuild_strategy': 'diffusion', 'use_latent_diffusion_rebuild': True, 'rebuild_k': 9, 'latent_diffusion_user_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt', 'latent_diffusion_bundle_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt', 'latent_diffusion_hidden_dim': 128, 'latent_diffusion_time_dim': 16, 'latent_diffusion_denoiser_layers': 2, 'latent_diffusion_dropout': 0.1, 'latent_diffusion_num_steps': 12, 'latent_diffusion_beta_start': 0.0001, 'latent_diffusion_beta_end': 0.02, 'latent_diffusion_set_loss_weight': 0.05, 'latent_diffusion_lr': 0.001, 'latent_diffusion_weight_decay': 1e-05, 'latent_diffusion_batch_size': 1024, 'latent_diffusion_infer_batch_size': 256, 'latent_diffusion_reset_after_epoch': -1, 'latent_diffusion_reset_optimizer': False, 'gamma_1': 0.3, 'gamma_2': 0.2, 'tau': 0.08, 'lambda_1': 0.3, 'lambda_2': 1e-06}, 'anchor_cl': {'enabled': False, 'anchor_cl_lambda': 0.07, 'temp': 0.2, 'user_cl': True, 'bundle_cl': True, 'ub_ui_user_weight': 1.0, 'ub_bi_user_weight': 1.0, 'ub_ui_bundle_weight': 1.0, 'ub_bi_bundle_weight': 1.0}, 'ui_bundle_user_agg_beta': 0, 'bi_user_bundle_agg_beta': 0, 'dataset': 'iFashion', 'model': 'AnchorViewBundleNet', 'gpu': '0', 'info': 'M1A_diff_k9', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+train_style: dwt
+==================== DWT Module1 experiment: dataset=iFashion strategy=diffusion k=9 info=M1A_diff_k9 ====================
+[Module1 Ablation] diffusion_rebuilder=enabled; ub_rebuild_schedule=latent diffusion train+rebuild every epoch
+[Module1 Ablation] experiment=M1A_diff_k9 strategy=diffusion k=9 epoch=1/30
+>>>>>>>>>>U-B statistics from Latent diffusion rebuild>>>>>>>>>>
+Average interactions 9.0
+Non-zero rows 1.0
+Non-zero columns 0.49277821910883224
+Matrix density 0.0003249801401025493
+[ub_rebuild/diffusion] epoch=1 dataset=iFashion loss=0.080877 rebuilt_edges=485073 avg_user_edges=9.000000 user_coverage=1.000000 bundle_coverage=0.492778 density=0.0003249801
+[Module1 Ablation] experiment=M1A_diff_k9 strategy=diffusion k=9 epoch=2/30
+[ub_rebuild/diffusion] epoch=2 dataset=iFashion loss=0.040972 rebuilt_edges=485073 avg_user_edges=9.000000 user_coverage=1.000000 bundle_coverage=0.527768 density=0.0003249801
+[Module1 Ablation] experiment=M1A_diff_k9 strategy=diffusion k=9 epoch=3/30
+[ub_rebuild/diffusion] epoch=3 dataset=iFashion loss=0.035385 rebuilt_edges=485073 avg_user_edges=9.000000 user_coverage=1.000000 bundle_coverage=0.540406 density=0.0003249801
+[Module1 Ablation] experiment=M1A_diff_k9 strategy=diffusion k=9 epoch=4/30
+[ub_rebuild/diffusion] epoch=4 dataset=iFashion loss=0.033036 rebuilt_edges=485073 avg_user_edges=9.000000 user_coverage=1.000000 bundle_coverage=0.546797 density=0.0003249801
+[Module1 Ablation] experiment=M1A_diff_k9 strategy=diffusion k=9 epoch=5/30
+[ub_rebuild/diffusion] epoch=5 dataset=iFashion loss=0.031726 rebuilt_edges=485073 avg_user_edges=9.000000 user_coverage=1.000000 bundle_coverage=0.555463 density=0.0003249801
+Traceback (most recent call last):
+  File "/code/25-chenglong/MultiCBR/train.py", line 1254, in <module>
+    main()
+  File "/code/25-chenglong/MultiCBR/train.py", line 1065, in main
+    run_dwt_training(conf, dataset, device)
+  File "/code/25-chenglong/MultiCBR/train.py", line 984, in run_dwt_training
+    "val": test(model, dataset.val_loader, conf),
+  File "/code/25-chenglong/MultiCBR/train.py", line 1185, in test
+    tmp_metrics = get_metrics(tmp_metrics, ground_truth_u_b, pred_b, conf["topk"])
+  File "/code/25-chenglong/MultiCBR/train.py", line 1201, in get_metrics
+    is_hit = grd[row_indice.view(-1).cpu(), col_indice.view(-1).cpu()].view(-1, topk)
+IndexError: index 4453000867801257747 is out of bounds for dimension 1 with size 27694

@@ -1,0 +1,236 @@
+{
+  "M1Raw": {
+    "method_group": "Raw",
+    "strategy": "raw",
+    "k": "all",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1Raw_attempt1_20260616_025421.log",
+    "updated_at": "2026-06-16 03:29:04"
+  },
+  "M1A_diff_k1": {
+    "method_group": "A",
+    "strategy": "diffusion",
+    "k": "1",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1A_diff_k1_attempt1_20260616_032904.log",
+    "updated_at": "2026-06-16 04:00:17"
+  },
+  "M1A_diff_k3": {
+    "method_group": "A",
+    "strategy": "diffusion",
+    "k": "3",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1A_diff_k3_attempt1_20260616_040017.log",
+    "updated_at": "2026-06-16 04:32:55"
+  },
+  "M1A_diff_k5": {
+    "method_group": "A",
+    "strategy": "diffusion",
+    "k": "5",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1A_diff_k5_attempt1_20260616_043255.log",
+    "updated_at": "2026-06-16 05:05:46"
+  },
+  "M1A_diff_k7": {
+    "method_group": "A",
+    "strategy": "diffusion",
+    "k": "7",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1A_diff_k7_attempt1_20260616_050547.log",
+    "updated_at": "2026-06-16 05:38:39"
+  },
+  "M1A_diff_k9": {
+    "method_group": "A",
+    "strategy": "diffusion",
+    "k": "9",
+    "status": "success",
+    "attempts": 2,
+    "log_path": "outputs/module1_ablation/logs/M1A_diff_k9_attempt2_20260616_054420.log",
+    "updated_at": "2026-06-16 06:17:10"
+  },
+  "M1B_rand_k1": {
+    "method_group": "B",
+    "strategy": "random",
+    "k": "1",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1B_rand_k1_attempt1_20260616_061710.log",
+    "updated_at": "2026-06-16 06:44:46"
+  },
+  "M1B_rand_k3": {
+    "method_group": "B",
+    "strategy": "random",
+    "k": "3",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1B_rand_k3_attempt1_20260616_064446.log",
+    "updated_at": "2026-06-16 07:12:26"
+  },
+  "M1B_rand_k5": {
+    "method_group": "B",
+    "strategy": "random",
+    "k": "5",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1B_rand_k5_attempt1_20260616_071226.log",
+    "updated_at": "2026-06-16 07:40:43"
+  },
+  "M1B_rand_k7": {
+    "method_group": "B",
+    "strategy": "random",
+    "k": "7",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1B_rand_k7_attempt1_20260616_074043.log",
+    "updated_at": "2026-06-16 08:09:32"
+  },
+  "M1B_rand_k9": {
+    "method_group": "B",
+    "strategy": "random",
+    "k": "9",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1B_rand_k9_attempt1_20260616_080932.log",
+    "updated_at": "2026-06-16 08:38:40"
+  },
+  "M1C_pre_k1": {
+    "method_group": "C",
+    "strategy": "pretrain_sim",
+    "k": "1",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1C_pre_k1_attempt1_20260616_083840.log",
+    "updated_at": "2026-06-16 09:06:27"
+  },
+  "M1C_pre_k3": {
+    "method_group": "C",
+    "strategy": "pretrain_sim",
+    "k": "3",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1C_pre_k3_attempt1_20260616_090628.log",
+    "updated_at": "2026-06-16 09:34:34"
+  },
+  "M1C_pre_k5": {
+    "method_group": "C",
+    "strategy": "pretrain_sim",
+    "k": "5",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1C_pre_k5_attempt1_20260616_093434.log",
+    "updated_at": "2026-06-16 10:02:53"
+  },
+  "M1C_pre_k7": {
+    "method_group": "C",
+    "strategy": "pretrain_sim",
+    "k": "7",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1C_pre_k7_attempt1_20260616_100253.log",
+    "updated_at": "2026-06-16 10:32:25"
+  },
+  "M1C_pre_k9": {
+    "method_group": "C",
+    "strategy": "pretrain_sim",
+    "k": "9",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1C_pre_k9_attempt1_20260616_103225.log",
+    "updated_at": "2026-06-16 11:02:01"
+  },
+  "M1D_pop_k1": {
+    "method_group": "D",
+    "strategy": "popularity",
+    "k": "1",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1D_pop_k1_attempt1_20260616_110201.log",
+    "updated_at": "2026-06-16 11:29:15"
+  },
+  "M1D_pop_k3": {
+    "method_group": "D",
+    "strategy": "popularity",
+    "k": "3",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1D_pop_k3_attempt1_20260616_112915.log",
+    "updated_at": "2026-06-16 11:56:27"
+  },
+  "M1D_pop_k5": {
+    "method_group": "D",
+    "strategy": "popularity",
+    "k": "5",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1D_pop_k5_attempt1_20260616_115627.log",
+    "updated_at": "2026-06-16 12:24:14"
+  },
+  "M1D_pop_k7": {
+    "method_group": "D",
+    "strategy": "popularity",
+    "k": "7",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1D_pop_k7_attempt1_20260616_122414.log",
+    "updated_at": "2026-06-16 12:52:44"
+  },
+  "M1D_pop_k9": {
+    "method_group": "D",
+    "strategy": "popularity",
+    "k": "9",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1D_pop_k9_attempt1_20260616_125244.log",
+    "updated_at": "2026-06-16 13:21:49"
+  },
+  "M1E_z0_k1": {
+    "method_group": "E",
+    "strategy": "pooled_z0",
+    "k": "1",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1E_z0_k1_attempt1_20260616_132149.log",
+    "updated_at": "2026-06-16 13:49:33"
+  },
+  "M1E_z0_k3": {
+    "method_group": "E",
+    "strategy": "pooled_z0",
+    "k": "3",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1E_z0_k3_attempt1_20260616_134933.log",
+    "updated_at": "2026-06-16 14:18:29"
+  },
+  "M1E_z0_k5": {
+    "method_group": "E",
+    "strategy": "pooled_z0",
+    "k": "5",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1E_z0_k5_attempt1_20260616_141829.log",
+    "updated_at": "2026-06-16 14:48:08"
+  },
+  "M1E_z0_k7": {
+    "method_group": "E",
+    "strategy": "pooled_z0",
+    "k": "7",
+    "status": "success",
+    "attempts": 2,
+    "log_path": "outputs/module1_ablation/logs/M1E_z0_k7_attempt2_20260616_145336.log",
+    "updated_at": "2026-06-16 15:22:50"
+  },
+  "M1E_z0_k9": {
+    "method_group": "E",
+    "strategy": "pooled_z0",
+    "k": "9",
+    "status": "success",
+    "attempts": 1,
+    "log_path": "outputs/module1_ablation/logs/M1E_z0_k9_attempt1_20260616_152250.log",
+    "updated_at": "2026-06-16 15:53:13"
+  }
+}

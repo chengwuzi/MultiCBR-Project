@@ -1,0 +1,219 @@
+load config file done!
+Global random seed set to: 2026
+>>>>>>>>>>B-I statistics>>>>>>>>>>
+Average interactions 3.86061954498291
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 9.070365408454437e-05
+>>>>>>>>>>U-I statistics>>>>>>>>>>
+Average interactions 42.50041580200195
+Non-zero rows 0.9989980889474368
+Non-zero columns 0.9486643328712732
+Matrix density 0.0009985296492948938
+>>>>>>>>>>U-B statistics in train>>>>>>>>>>
+Average interactions 22.5184326171875
+Non-zero rows 1.0
+Non-zero columns 1.0
+Matrix density 0.0008131159568128954
+>>>>>>>>>>U-B statistics in tune>>>>>>>>>>
+Average interactions 2.764662265777588
+Non-zero rows 1.0
+Non-zero columns 0.8580558965840976
+Matrix density 9.98289241748367e-05
+>>>>>>>>>>U-B statistics in test>>>>>>>>>>
+Average interactions 5.882052898406982
+Non-zero rows 1.0
+Non-zero columns 0.9736043908427818
+Matrix density 0.00021239448271911793
+{'data_path': './datasets', 'train_style': 'dwt', 'batch_size_train': 2048, 'batch_size_test': 2048, 'topk': [10, 20, 40, 80], 'neg_num': 1, 'seed': 2026, 'aug_type': 'Noise', 'ed_interval': 1, 'embedding_sizes': [64], 'num_layerss': [2], 'UB_ratios': [0.05], 'UI_ratios': [0.0], 'BI_ratios': [0.2], 'fusion_weights': {'modal_weight': [0.0, 0.5, 0.5], 'UB_layer': [0.5, 0.5, 0.0], 'UI_layer': [0.3, 0.4, 0.3], 'BI_layer': [0.5, 0.5, 0.0]}, 'lrs': [0.001], 'l2_regs': [1e-05], 'c_lambdas': [0.1], 'c_temps': [0.2], 'epochs': 30, 'test_interval': 5, 'dwt': {'rebuild_strategy': 'random', 'use_latent_diffusion_rebuild': True, 'rebuild_k': 1, 'latent_diffusion_user_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt', 'latent_diffusion_bundle_embedding_path': './datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt', 'latent_diffusion_hidden_dim': 128, 'latent_diffusion_time_dim': 16, 'latent_diffusion_denoiser_layers': 2, 'latent_diffusion_dropout': 0.1, 'latent_diffusion_num_steps': 12, 'latent_diffusion_beta_start': 0.0001, 'latent_diffusion_beta_end': 0.02, 'latent_diffusion_set_loss_weight': 0.05, 'latent_diffusion_lr': 0.001, 'latent_diffusion_weight_decay': 1e-05, 'latent_diffusion_batch_size': 1024, 'latent_diffusion_infer_batch_size': 256, 'latent_diffusion_reset_after_epoch': -1, 'latent_diffusion_reset_optimizer': False, 'gamma_1': 0.3, 'gamma_2': 0.2, 'tau': 0.08, 'lambda_1': 0.3, 'lambda_2': 1e-06}, 'anchor_cl': {'enabled': False, 'anchor_cl_lambda': 0.07, 'temp': 0.2, 'user_cl': True, 'bundle_cl': True, 'ub_ui_user_weight': 1.0, 'ub_bi_user_weight': 1.0, 'ub_ui_bundle_weight': 1.0, 'ub_bi_bundle_weight': 1.0}, 'ui_bundle_user_agg_beta': 0, 'bi_user_bundle_agg_beta': 0, 'dataset': 'iFashion', 'model': 'AnchorViewBundleNet', 'gpu': '0', 'info': 'M1B_rand_k1', 'num_users': 53897, 'num_bundles': 27694, 'num_items': 42563, 'device': device(type='cuda', index=0)}
+train_style: dwt
+==================== DWT Module1 experiment: dataset=iFashion strategy=random k=1 info=M1B_rand_k1 ====================
+[Module1 Ablation] diffusion_rebuilder=disabled; ub_rebuild_schedule=random Top-K UB graph, rebuilt every epoch
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=1/30
+>>>>>>>>>>U-B statistics from random Top-K rebuild>>>>>>>>>>
+Average interactions 1.0
+Non-zero rows 1.0
+Non-zero columns 0.6029464866035964
+Matrix density 3.610890445583881e-05
+[ub_rebuild/random] epoch=1 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.602946 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=2/30
+[ub_rebuild/random] epoch=2 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.603452 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=3/30
+[ub_rebuild/random] epoch=3 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601972 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=4/30
+[ub_rebuild/random] epoch=4 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601574 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=5/30
+[ub_rebuild/random] epoch=5 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.606774 density=0.0000361089
+2026-06-16 06:21:53, Top_10, Val:  recall: 0.068671, ndcg: 0.054769
+2026-06-16 06:21:53, Top_10, Test: recall: 0.070107, ndcg: 0.073333
+--------------------
+2026-06-16 06:21:53, Top_20, Val:  recall: 0.092311, ndcg: 0.062573
+2026-06-16 06:21:53, Top_20, Test: recall: 0.093921, ndcg: 0.082868
+--------------------
+2026-06-16 06:21:53, Top_40, Val:  recall: 0.122043, ndcg: 0.070586
+2026-06-16 06:21:53, Top_40, Test: recall: 0.123000, ndcg: 0.093080
+--------------------
+2026-06-16 06:21:53, Top_80, Val:  recall: 0.159050, ndcg: 0.078968
+2026-06-16 06:21:53, Top_80, Test: recall: 0.159005, ndcg: 0.103783
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 06:21:54, Best in epoch 4, TOP 10: REC_V=0.06867, NDCG_V=0.05477
+2026-06-16 06:21:54, Best in epoch 4, TOP 10: REC_T=0.07011, NDCG_T=0.07333
+2026-06-16 06:21:54, Best in epoch 4, TOP 20: REC_V=0.09231, NDCG_V=0.06257
+2026-06-16 06:21:54, Best in epoch 4, TOP 20: REC_T=0.09392, NDCG_T=0.08287
+2026-06-16 06:21:54, Best in epoch 4, TOP 40: REC_V=0.12204, NDCG_V=0.07059
+2026-06-16 06:21:54, Best in epoch 4, TOP 40: REC_T=0.12300, NDCG_T=0.09308
+2026-06-16 06:21:54, Best in epoch 4, TOP 80: REC_V=0.15905, NDCG_V=0.07897
+2026-06-16 06:21:54, Best in epoch 4, TOP 80: REC_T=0.15901, NDCG_T=0.10378
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=6/30
+[ub_rebuild/random] epoch=6 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.603669 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=7/30
+[ub_rebuild/random] epoch=7 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.599588 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=8/30
+[ub_rebuild/random] epoch=8 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.598325 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=9/30
+[ub_rebuild/random] epoch=9 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.602369 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=10/30
+[ub_rebuild/random] epoch=10 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.600058 density=0.0000361089
+2026-06-16 06:26:27, Top_10, Val:  recall: 0.097415, ndcg: 0.076211
+2026-06-16 06:26:27, Top_10, Test: recall: 0.098007, ndcg: 0.101365
+--------------------
+2026-06-16 06:26:27, Top_20, Val:  recall: 0.130491, ndcg: 0.087156
+2026-06-16 06:26:27, Top_20, Test: recall: 0.132135, ndcg: 0.115022
+--------------------
+2026-06-16 06:26:27, Top_40, Val:  recall: 0.171705, ndcg: 0.098333
+2026-06-16 06:26:27, Top_40, Test: recall: 0.172893, ndcg: 0.129382
+--------------------
+2026-06-16 06:26:27, Top_80, Val:  recall: 0.219453, ndcg: 0.109214
+2026-06-16 06:26:27, Top_80, Test: recall: 0.220524, ndcg: 0.143586
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 06:26:27, Best in epoch 9, TOP 10: REC_V=0.09741, NDCG_V=0.07621
+2026-06-16 06:26:27, Best in epoch 9, TOP 10: REC_T=0.09801, NDCG_T=0.10137
+2026-06-16 06:26:27, Best in epoch 9, TOP 20: REC_V=0.13049, NDCG_V=0.08716
+2026-06-16 06:26:27, Best in epoch 9, TOP 20: REC_T=0.13213, NDCG_T=0.11502
+2026-06-16 06:26:27, Best in epoch 9, TOP 40: REC_V=0.17171, NDCG_V=0.09833
+2026-06-16 06:26:27, Best in epoch 9, TOP 40: REC_T=0.17289, NDCG_T=0.12938
+2026-06-16 06:26:27, Best in epoch 9, TOP 80: REC_V=0.21945, NDCG_V=0.10921
+2026-06-16 06:26:27, Best in epoch 9, TOP 80: REC_T=0.22052, NDCG_T=0.14359
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=11/30
+[ub_rebuild/random] epoch=11 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601574 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=12/30
+[ub_rebuild/random] epoch=12 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.603958 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=13/30
+[ub_rebuild/random] epoch=13 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601863 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=14/30
+[ub_rebuild/random] epoch=14 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601972 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=15/30
+[ub_rebuild/random] epoch=15 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601430 density=0.0000361089
+2026-06-16 06:31:00, Top_10, Val:  recall: 0.107052, ndcg: 0.080666
+2026-06-16 06:31:00, Top_10, Test: recall: 0.108202, ndcg: 0.108000
+--------------------
+2026-06-16 06:31:00, Top_20, Val:  recall: 0.148019, ndcg: 0.094235
+2026-06-16 06:31:00, Top_20, Test: recall: 0.148300, ndcg: 0.124120
+--------------------
+2026-06-16 06:31:00, Top_40, Val:  recall: 0.195946, ndcg: 0.107252
+2026-06-16 06:31:00, Top_40, Test: recall: 0.196524, ndcg: 0.141084
+--------------------
+2026-06-16 06:31:00, Top_80, Val:  recall: 0.252006, ndcg: 0.120034
+2026-06-16 06:31:00, Top_80, Test: recall: 0.251398, ndcg: 0.157505
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 06:31:00, Best in epoch 14, TOP 10: REC_V=0.10705, NDCG_V=0.08067
+2026-06-16 06:31:00, Best in epoch 14, TOP 10: REC_T=0.10820, NDCG_T=0.10800
+2026-06-16 06:31:00, Best in epoch 14, TOP 20: REC_V=0.14802, NDCG_V=0.09424
+2026-06-16 06:31:00, Best in epoch 14, TOP 20: REC_T=0.14830, NDCG_T=0.12412
+2026-06-16 06:31:00, Best in epoch 14, TOP 40: REC_V=0.19595, NDCG_V=0.10725
+2026-06-16 06:31:00, Best in epoch 14, TOP 40: REC_T=0.19652, NDCG_T=0.14108
+2026-06-16 06:31:00, Best in epoch 14, TOP 80: REC_V=0.25201, NDCG_V=0.12003
+2026-06-16 06:31:00, Best in epoch 14, TOP 80: REC_T=0.25140, NDCG_T=0.15750
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=16/30
+[ub_rebuild/random] epoch=16 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.603235 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=17/30
+[ub_rebuild/random] epoch=17 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601610 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=18/30
+[ub_rebuild/random] epoch=18 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.604030 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=19/30
+[ub_rebuild/random] epoch=19 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.600455 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=20/30
+[ub_rebuild/random] epoch=20 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.599986 density=0.0000361089
+2026-06-16 06:35:34, Top_10, Val:  recall: 0.106377, ndcg: 0.078716
+2026-06-16 06:35:34, Top_10, Test: recall: 0.108033, ndcg: 0.105869
+--------------------
+2026-06-16 06:35:34, Top_20, Val:  recall: 0.150225, ndcg: 0.093222
+2026-06-16 06:35:34, Top_20, Test: recall: 0.150905, ndcg: 0.123206
+--------------------
+2026-06-16 06:35:34, Top_40, Val:  recall: 0.202083, ndcg: 0.107305
+2026-06-16 06:35:34, Top_40, Test: recall: 0.202522, ndcg: 0.141423
+--------------------
+2026-06-16 06:35:34, Top_80, Val:  recall: 0.260987, ndcg: 0.120778
+2026-06-16 06:35:34, Top_80, Test: recall: 0.261488, ndcg: 0.159057
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 06:35:34, Best in epoch 19, TOP 10: REC_V=0.10638, NDCG_V=0.07872
+2026-06-16 06:35:34, Best in epoch 19, TOP 10: REC_T=0.10803, NDCG_T=0.10587
+2026-06-16 06:35:34, Best in epoch 19, TOP 20: REC_V=0.15022, NDCG_V=0.09322
+2026-06-16 06:35:34, Best in epoch 19, TOP 20: REC_T=0.15091, NDCG_T=0.12321
+2026-06-16 06:35:34, Best in epoch 19, TOP 40: REC_V=0.20208, NDCG_V=0.10730
+2026-06-16 06:35:34, Best in epoch 19, TOP 40: REC_T=0.20252, NDCG_T=0.14142
+2026-06-16 06:35:34, Best in epoch 19, TOP 80: REC_V=0.26099, NDCG_V=0.12078
+2026-06-16 06:35:34, Best in epoch 19, TOP 80: REC_T=0.26149, NDCG_T=0.15906
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=21/30
+[ub_rebuild/random] epoch=21 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.603633 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=22/30
+[ub_rebuild/random] epoch=22 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.602116 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=23/30
+[ub_rebuild/random] epoch=23 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601394 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=24/30
+[ub_rebuild/random] epoch=24 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.598975 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=25/30
+[ub_rebuild/random] epoch=25 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.601610 density=0.0000361089
+2026-06-16 06:40:09, Top_10, Val:  recall: 0.105682, ndcg: 0.077670
+2026-06-16 06:40:09, Top_10, Test: recall: 0.106784, ndcg: 0.103647
+--------------------
+2026-06-16 06:40:09, Top_20, Val:  recall: 0.150494, ndcg: 0.092501
+2026-06-16 06:40:09, Top_20, Test: recall: 0.150912, ndcg: 0.121611
+--------------------
+2026-06-16 06:40:09, Top_40, Val:  recall: 0.203948, ndcg: 0.107005
+2026-06-16 06:40:09, Top_40, Test: recall: 0.203220, ndcg: 0.140038
+--------------------
+2026-06-16 06:40:09, Top_80, Val:  recall: 0.264719, ndcg: 0.120877
+2026-06-16 06:40:09, Top_80, Test: recall: 0.264195, ndcg: 0.158270
+--------------------
+top20 as the final evaluation standard
+褰撳墠缃戞牸鍙傛暟: 0.00 + 0.00
+2026-06-16 06:40:09, Best in epoch 24, TOP 10: REC_V=0.10568, NDCG_V=0.07767
+2026-06-16 06:40:09, Best in epoch 24, TOP 10: REC_T=0.10678, NDCG_T=0.10365
+2026-06-16 06:40:09, Best in epoch 24, TOP 20: REC_V=0.15049, NDCG_V=0.09250
+2026-06-16 06:40:09, Best in epoch 24, TOP 20: REC_T=0.15091, NDCG_T=0.12161
+2026-06-16 06:40:09, Best in epoch 24, TOP 40: REC_V=0.20395, NDCG_V=0.10701
+2026-06-16 06:40:09, Best in epoch 24, TOP 40: REC_T=0.20322, NDCG_T=0.14004
+2026-06-16 06:40:09, Best in epoch 24, TOP 80: REC_V=0.26472, NDCG_V=0.12088
+2026-06-16 06:40:09, Best in epoch 24, TOP 80: REC_T=0.26420, NDCG_T=0.15827
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=26/30
+[ub_rebuild/random] epoch=26 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.598975 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=27/30
+[ub_rebuild/random] epoch=27 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.599444 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=28/30
+[ub_rebuild/random] epoch=28 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.602260 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=29/30
+[ub_rebuild/random] epoch=29 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.603416 density=0.0000361089
+[Module1 Ablation] experiment=M1B_rand_k1 strategy=random k=1 epoch=30/30
+[ub_rebuild/random] epoch=30 dataset=iFashion rebuilt_edges=53897 avg_user_edges=1.000000 user_coverage=1.000000 bundle_coverage=0.600058 density=0.0000361089
+2026-06-16 06:44:45, Top_10, Val:  recall: 0.104743, ndcg: 0.076369
+2026-06-16 06:44:45, Top_10, Test: recall: 0.105528, ndcg: 0.102137
+--------------------
+2026-06-16 06:44:45, Top_20, Val:  recall: 0.150148, ndcg: 0.091407
+2026-06-16 06:44:45, Top_20, Test: recall: 0.150162, ndcg: 0.120300
+--------------------
+2026-06-16 06:44:45, Top_40, Val:  recall: 0.204409, ndcg: 0.106120
+2026-06-16 06:44:45, Top_40, Test: recall: 0.204347, ndcg: 0.139409
+--------------------
+2026-06-16 06:44:45, Top_80, Val:  recall: 0.265669, ndcg: 0.120095
+2026-06-16 06:44:45, Top_80, Test: recall: 0.266325, ndcg: 0.157918
+--------------------
+top20 as the final evaluation standard

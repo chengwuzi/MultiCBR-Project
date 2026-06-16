@@ -1,0 +1,184 @@
+iFashion Module-One Ablation Summary
+================================================================================
+
+[SUCCESS] M1A_diff_k1 | Diffusion Top-K | strategy=diffusion | k=1 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11079, NDCG_T=0.10899
+  TOP 20: REC_T=0.15600, NDCG_T=0.12727
+  TOP 40: REC_T=0.21018, NDCG_T=0.14634
+  TOP 80: REC_T=0.27108, NDCG_T=0.16456
+  Log: outputs/module1_ablation/logs/M1A_diff_k1_attempt1_20260616_032904.log
+
+[SUCCESS] M1A_diff_k3 | Diffusion Top-K | strategy=diffusion | k=3 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11451, NDCG_T=0.11461
+  TOP 20: REC_T=0.15691, NDCG_T=0.13160
+  TOP 40: REC_T=0.20653, NDCG_T=0.14906
+  TOP 80: REC_T=0.26457, NDCG_T=0.16640
+  Log: outputs/module1_ablation/logs/M1A_diff_k3_attempt1_20260616_040017.log
+
+[SUCCESS] M1A_diff_k5 | Diffusion Top-K | strategy=diffusion | k=5 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11469, NDCG_T=0.11509
+  TOP 20: REC_T=0.15716, NDCG_T=0.13213
+  TOP 40: REC_T=0.20683, NDCG_T=0.14962
+  TOP 80: REC_T=0.26373, NDCG_T=0.16663
+  Log: outputs/module1_ablation/logs/M1A_diff_k5_attempt1_20260616_043255.log
+
+[SUCCESS] M1A_diff_k7 | Diffusion Top-K | strategy=diffusion | k=7 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11347, NDCG_T=0.11328
+  TOP 20: REC_T=0.15651, NDCG_T=0.13056
+  TOP 40: REC_T=0.20730, NDCG_T=0.14843
+  TOP 80: REC_T=0.26493, NDCG_T=0.16567
+  Log: outputs/module1_ablation/logs/M1A_diff_k7_attempt1_20260616_050547.log
+
+[SUCCESS] M1A_diff_k9 | Diffusion Top-K | strategy=diffusion | k=9 | attempts=2 | best_epoch=29
+  TOP 10: REC_T=0.11163, NDCG_T=0.11120
+  TOP 20: REC_T=0.15528, NDCG_T=0.12878
+  TOP 40: REC_T=0.20685, NDCG_T=0.14698
+  TOP 80: REC_T=0.26624, NDCG_T=0.16471
+  Log: outputs/module1_ablation/logs/M1A_diff_k9_attempt2_20260616_054420.log
+
+[SUCCESS] M1B_rand_k1 | Random Top-K | strategy=random | k=1 | attempts=1 | best_epoch=24
+  TOP 10: REC_T=0.10678, NDCG_T=0.10365
+  TOP 20: REC_T=0.15091, NDCG_T=0.12161
+  TOP 40: REC_T=0.20322, NDCG_T=0.14004
+  TOP 80: REC_T=0.26420, NDCG_T=0.15827
+  Log: outputs/module1_ablation/logs/M1B_rand_k1_attempt1_20260616_061710.log
+
+[SUCCESS] M1B_rand_k3 | Random Top-K | strategy=random | k=3 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.10966, NDCG_T=0.10762
+  TOP 20: REC_T=0.15311, NDCG_T=0.12524
+  TOP 40: REC_T=0.20619, NDCG_T=0.14396
+  TOP 80: REC_T=0.26630, NDCG_T=0.16195
+  Log: outputs/module1_ablation/logs/M1B_rand_k3_attempt1_20260616_064446.log
+
+[SUCCESS] M1B_rand_k5 | Random Top-K | strategy=random | k=5 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.10901, NDCG_T=0.10735
+  TOP 20: REC_T=0.15306, NDCG_T=0.12512
+  TOP 40: REC_T=0.20684, NDCG_T=0.14409
+  TOP 80: REC_T=0.26861, NDCG_T=0.16254
+  Log: outputs/module1_ablation/logs/M1B_rand_k5_attempt1_20260616_071226.log
+
+[SUCCESS] M1B_rand_k7 | Random Top-K | strategy=random | k=7 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.10830, NDCG_T=0.10652
+  TOP 20: REC_T=0.15234, NDCG_T=0.12431
+  TOP 40: REC_T=0.20714, NDCG_T=0.14361
+  TOP 80: REC_T=0.26943, NDCG_T=0.16223
+  Log: outputs/module1_ablation/logs/M1B_rand_k7_attempt1_20260616_074043.log
+
+[SUCCESS] M1B_rand_k9 | Random Top-K | strategy=random | k=9 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.10787, NDCG_T=0.10613
+  TOP 20: REC_T=0.15305, NDCG_T=0.12441
+  TOP 40: REC_T=0.20715, NDCG_T=0.14345
+  TOP 80: REC_T=0.26973, NDCG_T=0.16218
+  Log: outputs/module1_ablation/logs/M1B_rand_k9_attempt1_20260616_080932.log
+
+[SUCCESS] M1C_pre_k1 | Pretrain Similarity Top-K | strategy=pretrain_sim | k=1 | attempts=1 | best_epoch=14
+  TOP 10: REC_T=0.09827, NDCG_T=0.09545
+  TOP 20: REC_T=0.14217, NDCG_T=0.11333
+  TOP 40: REC_T=0.19616, NDCG_T=0.13232
+  TOP 80: REC_T=0.25814, NDCG_T=0.15082
+  Log: outputs/module1_ablation/logs/M1C_pre_k1_attempt1_20260616_083840.log
+
+[SUCCESS] M1C_pre_k3 | Pretrain Similarity Top-K | strategy=pretrain_sim | k=3 | attempts=1 | best_epoch=14
+  TOP 10: REC_T=0.10297, NDCG_T=0.10043
+  TOP 20: REC_T=0.14662, NDCG_T=0.11812
+  TOP 40: REC_T=0.19913, NDCG_T=0.13661
+  TOP 80: REC_T=0.25886, NDCG_T=0.15448
+  Log: outputs/module1_ablation/logs/M1C_pre_k3_attempt1_20260616_090628.log
+
+[SUCCESS] M1C_pre_k5 | Pretrain Similarity Top-K | strategy=pretrain_sim | k=5 | attempts=1 | best_epoch=14
+  TOP 10: REC_T=0.10543, NDCG_T=0.10315
+  TOP 20: REC_T=0.14897, NDCG_T=0.12080
+  TOP 40: REC_T=0.20030, NDCG_T=0.13890
+  TOP 80: REC_T=0.25917, NDCG_T=0.15651
+  Log: outputs/module1_ablation/logs/M1C_pre_k5_attempt1_20260616_093434.log
+
+[SUCCESS] M1C_pre_k7 | Pretrain Similarity Top-K | strategy=pretrain_sim | k=7 | attempts=1 | best_epoch=14
+  TOP 10: REC_T=0.10547, NDCG_T=0.10378
+  TOP 20: REC_T=0.14897, NDCG_T=0.12142
+  TOP 40: REC_T=0.20032, NDCG_T=0.13951
+  TOP 80: REC_T=0.25960, NDCG_T=0.15724
+  Log: outputs/module1_ablation/logs/M1C_pre_k7_attempt1_20260616_100253.log
+
+[SUCCESS] M1C_pre_k9 | Pretrain Similarity Top-K | strategy=pretrain_sim | k=9 | attempts=1 | best_epoch=14
+  TOP 10: REC_T=0.10696, NDCG_T=0.10492
+  TOP 20: REC_T=0.14963, NDCG_T=0.12220
+  TOP 40: REC_T=0.20181, NDCG_T=0.14058
+  TOP 80: REC_T=0.26101, NDCG_T=0.15827
+  Log: outputs/module1_ablation/logs/M1C_pre_k9_attempt1_20260616_103225.log
+
+[SUCCESS] M1D_pop_k1 | Popularity Top-K | strategy=popularity | k=1 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11448, NDCG_T=0.11534
+  TOP 20: REC_T=0.15790, NDCG_T=0.13285
+  TOP 40: REC_T=0.21068, NDCG_T=0.15146
+  TOP 80: REC_T=0.27204, NDCG_T=0.16978
+  Log: outputs/module1_ablation/logs/M1D_pop_k1_attempt1_20260616_110201.log
+
+[SUCCESS] M1D_pop_k3 | Popularity Top-K | strategy=popularity | k=3 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11661, NDCG_T=0.11867
+  TOP 20: REC_T=0.15788, NDCG_T=0.13517
+  TOP 40: REC_T=0.20700, NDCG_T=0.15246
+  TOP 80: REC_T=0.26373, NDCG_T=0.16942
+  Log: outputs/module1_ablation/logs/M1D_pop_k3_attempt1_20260616_112915.log
+
+[SUCCESS] M1D_pop_k5 | Popularity Top-K | strategy=popularity | k=5 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11730, NDCG_T=0.11941
+  TOP 20: REC_T=0.15824, NDCG_T=0.13576
+  TOP 40: REC_T=0.20658, NDCG_T=0.15278
+  TOP 80: REC_T=0.26234, NDCG_T=0.16943
+  Log: outputs/module1_ablation/logs/M1D_pop_k5_attempt1_20260616_115627.log
+
+[SUCCESS] M1D_pop_k7 | Popularity Top-K | strategy=popularity | k=7 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11619, NDCG_T=0.11724
+  TOP 20: REC_T=0.15860, NDCG_T=0.13425
+  TOP 40: REC_T=0.20806, NDCG_T=0.15168
+  TOP 80: REC_T=0.26512, NDCG_T=0.16872
+  Log: outputs/module1_ablation/logs/M1D_pop_k7_attempt1_20260616_122414.log
+
+[SUCCESS] M1D_pop_k9 | Popularity Top-K | strategy=popularity | k=9 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11363, NDCG_T=0.11385
+  TOP 20: REC_T=0.15637, NDCG_T=0.13099
+  TOP 40: REC_T=0.20794, NDCG_T=0.14915
+  TOP 80: REC_T=0.26553, NDCG_T=0.16634
+  Log: outputs/module1_ablation/logs/M1D_pop_k9_attempt1_20260616_125244.log
+
+[SUCCESS] M1E_z0_k1 | Pooled z0 Top-K | strategy=pooled_z0 | k=1 | attempts=1 | best_epoch=24
+  TOP 10: REC_T=0.11143, NDCG_T=0.10984
+  TOP 20: REC_T=0.15537, NDCG_T=0.12757
+  TOP 40: REC_T=0.20878, NDCG_T=0.14639
+  TOP 80: REC_T=0.26907, NDCG_T=0.16443
+  Log: outputs/module1_ablation/logs/M1E_z0_k1_attempt1_20260616_132149.log
+
+[SUCCESS] M1E_z0_k3 | Pooled z0 Top-K | strategy=pooled_z0 | k=3 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11413, NDCG_T=0.11448
+  TOP 20: REC_T=0.15653, NDCG_T=0.13150
+  TOP 40: REC_T=0.20621, NDCG_T=0.14900
+  TOP 80: REC_T=0.26347, NDCG_T=0.16610
+  Log: outputs/module1_ablation/logs/M1E_z0_k3_attempt1_20260616_134933.log
+
+[SUCCESS] M1E_z0_k5 | Pooled z0 Top-K | strategy=pooled_z0 | k=5 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11390, NDCG_T=0.11452
+  TOP 20: REC_T=0.15630, NDCG_T=0.13153
+  TOP 40: REC_T=0.20573, NDCG_T=0.14889
+  TOP 80: REC_T=0.26267, NDCG_T=0.16591
+  Log: outputs/module1_ablation/logs/M1E_z0_k5_attempt1_20260616_141829.log
+
+[SUCCESS] M1E_z0_k7 | Pooled z0 Top-K | strategy=pooled_z0 | k=7 | attempts=2 | best_epoch=29
+  TOP 10: REC_T=0.11299, NDCG_T=0.11329
+  TOP 20: REC_T=0.15586, NDCG_T=0.13051
+  TOP 40: REC_T=0.20612, NDCG_T=0.14822
+  TOP 80: REC_T=0.26390, NDCG_T=0.16549
+  Log: outputs/module1_ablation/logs/M1E_z0_k7_attempt2_20260616_145336.log
+
+[SUCCESS] M1E_z0_k9 | Pooled z0 Top-K | strategy=pooled_z0 | k=9 | attempts=1 | best_epoch=29
+  TOP 10: REC_T=0.11121, NDCG_T=0.11071
+  TOP 20: REC_T=0.15444, NDCG_T=0.12810
+  TOP 40: REC_T=0.20600, NDCG_T=0.14623
+  TOP 80: REC_T=0.26482, NDCG_T=0.16379
+  Log: outputs/module1_ablation/logs/M1E_z0_k9_attempt1_20260616_152250.log
+
+[SUCCESS] M1Raw | Raw UB baseline | strategy=raw | k=all | attempts=1 | best_epoch=14
+  TOP 10: REC_T=0.10600, NDCG_T=0.10449
+  TOP 20: REC_T=0.15035, NDCG_T=0.12243
+  TOP 40: REC_T=0.20400, NDCG_T=0.14130
+  TOP 80: REC_T=0.26647, NDCG_T=0.15995
+  Log: outputs/module1_ablation/logs/M1Raw_attempt1_20260616_025421.log

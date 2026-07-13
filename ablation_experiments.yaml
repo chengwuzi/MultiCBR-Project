@@ -1,0 +1,39 @@
+# Ablation experiment list.
+#
+# Each experiment inherits the tuned defaults from config.yaml for its dataset.
+# Only put parameters that differ from config.yaml under overrides.
+#
+# Run examples:
+#   python run_ablation_experiments.py --dry-run
+#   python run_ablation_experiments.py --only topk_sensitivity --gpu 0
+
+experiments:
+  - name: Youshu_topk_1
+    dataset: Youshu
+    group: topk_sensitivity
+    enabled: false
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 1
+
+  - name: NetEase_topk_1
+    dataset: NetEase
+    group: topk_sensitivity
+    enabled: false
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 1
+
+  - name: Youshu_wo_prefusion_cl
+    dataset: Youshu
+    group: wo_table
+    enabled: false
+    overrides:
+      anchor_cl.enabled: false
+
+  - name: NetEase_wo_prefusion_cl
+    dataset: NetEase
+    group: wo_table
+    enabled: false
+    overrides:
+      anchor_cl.enabled: false

@@ -85,12 +85,36 @@ def set_by_path(config, dotted_path, value):
     target[parts[-1]] = value
 
 
+def deep_merge(base, updates):
+    for key, value in updates.items():
+        if isinstance(value, dict) and isinstance(base.get(key), dict):
+            deep_merge(base[key], value)
+        else:
+            base[key] = value
+
+
 def apply_overrides(config, overrides):
     for key, value in (overrides or {}).items():
         if "." in key:
             set_by_path(config, key, value)
+        elif isinstance(value, dict) and isinstance(config.get(key), dict):
+            deep_merge(config[key], value)
         else:
             config[key] = value
+
+
+def parse_enabled(value):
+    if isinstance(value, bool):
+        return value
+    if value is None:
+        return True
+    if isinstance(value, str):
+        lowered = value.strip().lower()
+        if lowered in ("true", "yes", "y", "1", "on"):
+            return True
+        if lowered in ("false", "no", "n", "0", "off"):
+            return False
+    return bool(value)
 
 
 def normalize_experiment(raw):
@@ -102,9 +126,21 @@ def normalize_experiment(raw):
         "name": str(raw["name"]),
         "dataset": str(raw["dataset"]),
         "group": str(raw.get("group", "default")),
-        "enabled": bool(raw.get("enabled", True)),
+        "enabled": parse_enabled(raw.get("enabled", True)),
         "overrides": dict(raw.get("overrides", {}) or {}),
     }
+
+
+def validate_experiments(experiments):
+    seen = {}
+    for idx, experiment in enumerate(experiments, start=1):
+        name = experiment["name"]
+        if name in seen:
+            raise ValueError(
+                f"Duplicate experiment name {name!r} at entries {seen[name]} and {idx}. "
+                "Experiment names must be unique because they are used for info/log/result tracking."
+            )
+        seen[name] = idx
 
 
 def resolve_experiment(base_configs, experiment, gpu, model):
@@ -415,6 +451,7 @@ def main():
     experiment_file = load_yaml(args.experiments)
     raw_experiments = experiment_file.get("experiments", [])
     experiments = [normalize_experiment(item) for item in raw_experiments]
+    validate_experiments(experiments)
 
     if not args.include_disabled:
         experiments = [item for item in experiments if item["enabled"]]

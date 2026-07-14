@@ -30,6 +30,7 @@ def parse_args():
     parser.add_argument("--config", default="config.yaml", help="Base tuned config file.")
     parser.add_argument("--experiments", default="ablation_experiments.yaml", help="Ablation experiment list.")
     parser.add_argument("--output-dir", default="ablation_runs", help="Directory for run logs and summaries.")
+    parser.add_argument("--run-dir", default=None, help="Use an existing/specific run directory, useful with --skip-completed.")
     parser.add_argument("--gpu", default="0", help="GPU id passed into the training config.")
     parser.add_argument("--model", default="AnchorViewBundleNet", help="Model name expected by the current project.")
     parser.add_argument("--max-retries", default=5, type=int, help="Maximum attempts for each experiment.")
@@ -300,6 +301,35 @@ def append_result(results_path, row):
         writer.writerow({field: row.get(field, "") for field in fieldnames})
 
 
+def append_text_result(summary_path, row, topks=DEFAULT_TOPKS):
+    with open(summary_path, "a", encoding="utf-8") as handle:
+        handle.write("=" * 100 + "\n")
+        handle.write(
+            f"{row.get('name', '')} | dataset={row.get('dataset', '')} | "
+            f"group={row.get('group', '')} | status={row.get('status', '')}\n"
+        )
+        handle.write(
+            f"attempts={row.get('attempts', '')} | best_epoch={row.get('best_epoch', '')} | "
+            f"elapsed={row.get('elapsed', '')}\n"
+        )
+        handle.write(f"start={row.get('start_time', '')} | end={row.get('end_time', '')}\n")
+        handle.write(f"log_path={row.get('log_path', '')}\n")
+        if row.get("error"):
+            handle.write(f"error={row.get('error')}\n")
+        if row.get("overrides"):
+            handle.write(f"overrides={row.get('overrides')}\n")
+
+        for split in ("val", "test"):
+            metric_parts = []
+            for topk in topks:
+                recall = row.get(f"{split}_recall@{topk}", "")
+                ndcg = row.get(f"{split}_ndcg@{topk}", "")
+                if recall != "" or ndcg != "":
+                    metric_parts.append(f"R@{topk}={recall}, N@{topk}={ndcg}")
+            handle.write(f"{split}: {' | '.join(metric_parts) if metric_parts else '<not parsed>'}\n")
+        handle.write("\n")
+
+
 def completed_names(results_path):
     if not os.path.exists(results_path):
         return set()
@@ -404,6 +434,7 @@ def run_one_experiment(index, total, experiment, resolved_conf, paths, args):
             )
             row = build_result_row(experiment, "success", attempt, start_time, end_time, log_path)
             append_result(paths["results"], row)
+            append_text_result(paths["summary"], row)
             print(f"[{index}/{total}] SUCCESS {experiment['name']} attempts={attempt} elapsed={row['elapsed']}")
             if row.get("test_recall@20") != "":
                 print(f"  Test R@20={row['test_recall@20']} N@20={row['test_ndcg@20']}")
@@ -431,6 +462,7 @@ def run_one_experiment(index, total, experiment, resolved_conf, paths, args):
     end_time = now_string()
     row = build_result_row(experiment, "failed", max_retries, start_time, end_time, last_log_path, final_error)
     append_result(paths["results"], row)
+    append_text_result(paths["summary"], row)
     write_status(
         paths["status"],
         {
@@ -461,13 +493,14 @@ def main():
             if item["name"] == args.only or item["group"] == args.only
         ]
 
-    run_dir = os.path.join(args.output_dir, stamp_string())
+    run_dir = args.run_dir if args.run_dir else os.path.join(args.output_dir, stamp_string())
     paths = {
         "run_dir": run_dir,
         "logs": os.path.join(run_dir, "logs"),
         "resolved": os.path.join(run_dir, "resolved_configs"),
         "status": os.path.join(run_dir, "status.jsonl"),
         "results": os.path.join(run_dir, "results.csv"),
+        "summary": os.path.join(run_dir, "results.txt"),
         "plan": os.path.join(run_dir, "run_plan.yaml"),
     }
     for key in ("run_dir", "logs", "resolved"):
@@ -531,6 +564,7 @@ def main():
     print(f"Ablation run finished. success={successes}, failed={failures}, total={total}")
     print(f"Run directory: {run_dir}")
     print(f"Results: {paths['results']}")
+    print(f"Text summary: {paths['summary']}")
     print("=" * 90)
 
 

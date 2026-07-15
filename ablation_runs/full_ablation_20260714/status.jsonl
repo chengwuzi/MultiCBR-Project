@@ -1,0 +1,116 @@
+{"event": "attempt_start", "name": "Youshu_wo_diffusion", "dataset": "Youshu", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 19:37:07"}
+{"event": "success", "name": "Youshu_wo_diffusion", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_wo_diffusion_attempt1.log", "time": "2026-07-14 19:44:31"}
+{"event": "attempt_start", "name": "Youshu_wo_dual_cl", "dataset": "Youshu", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 19:44:31"}
+{"event": "success", "name": "Youshu_wo_dual_cl", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_wo_dual_cl_attempt1.log", "time": "2026-07-14 19:51:40"}
+{"event": "attempt_start", "name": "Youshu_wo_prefusion_cl", "dataset": "Youshu", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 19:51:40"}
+{"event": "success", "name": "Youshu_wo_prefusion_cl", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_wo_prefusion_cl_attempt1.log", "time": "2026-07-14 19:59:14"}
+{"event": "attempt_start", "name": "Youshu_wo_postfusion_cl", "dataset": "Youshu", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 19:59:15"}
+{"event": "success", "name": "Youshu_wo_postfusion_cl", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_wo_postfusion_cl_attempt1.log", "time": "2026-07-14 20:06:53"}
+{"event": "attempt_start", "name": "NetEase_wo_diffusion", "dataset": "NetEase", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 20:06:53"}
+{"event": "success", "name": "NetEase_wo_diffusion", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_wo_diffusion_attempt1.log", "time": "2026-07-14 20:29:07"}
+{"event": "attempt_start", "name": "NetEase_wo_dual_cl", "dataset": "NetEase", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 20:29:07"}
+{"event": "success", "name": "NetEase_wo_dual_cl", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_wo_dual_cl_attempt1.log", "time": "2026-07-14 20:51:13"}
+{"event": "attempt_start", "name": "NetEase_wo_prefusion_cl", "dataset": "NetEase", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 20:51:13"}
+{"event": "success", "name": "NetEase_wo_prefusion_cl", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_wo_prefusion_cl_attempt1.log", "time": "2026-07-14 21:13:53"}
+{"event": "attempt_start", "name": "NetEase_wo_postfusion_cl", "dataset": "NetEase", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-14 21:13:53"}
+{"event": "success", "name": "NetEase_wo_postfusion_cl", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_wo_postfusion_cl_attempt1.log", "time": "2026-07-14 21:36:22"}
+{"event": "attempt_start", "name": "Youshu_topk_01", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 21:36:22"}
+{"event": "success", "name": "Youshu_topk_01", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_01_attempt1.log", "time": "2026-07-14 21:45:35"}
+{"event": "attempt_start", "name": "Youshu_topk_03", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 21:45:35"}
+{"event": "success", "name": "Youshu_topk_03", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_03_attempt1.log", "time": "2026-07-14 21:54:43"}
+{"event": "attempt_start", "name": "Youshu_topk_05", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 21:54:44"}
+{"event": "success", "name": "Youshu_topk_05", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_05_attempt1.log", "time": "2026-07-14 22:04:17"}
+{"event": "attempt_start", "name": "Youshu_topk_07", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 22:04:17"}
+{"event": "success", "name": "Youshu_topk_07", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_07_attempt1.log", "time": "2026-07-14 22:13:29"}
+{"event": "attempt_start", "name": "Youshu_topk_09", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 22:13:29"}
+{"event": "success", "name": "Youshu_topk_09", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_09_attempt1.log", "time": "2026-07-14 22:22:50"}
+{"event": "attempt_start", "name": "Youshu_topk_11", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 22:22:50"}
+{"event": "success", "name": "Youshu_topk_11", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_11_attempt1.log", "time": "2026-07-14 22:32:12"}
+{"event": "attempt_start", "name": "Youshu_topk_13", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 22:32:12"}
+{"event": "success", "name": "Youshu_topk_13", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_13_attempt1.log", "time": "2026-07-14 22:41:28"}
+{"event": "attempt_start", "name": "Youshu_topk_15", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 22:41:28"}
+{"event": "success", "name": "Youshu_topk_15", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_15_attempt1.log", "time": "2026-07-14 22:50:53"}
+{"event": "attempt_start", "name": "Youshu_topk_17", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 22:50:53"}
+{"event": "success", "name": "Youshu_topk_17", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_17_attempt1.log", "time": "2026-07-14 23:00:18"}
+{"event": "attempt_start", "name": "Youshu_topk_19", "dataset": "Youshu", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 23:00:18"}
+{"event": "success", "name": "Youshu_topk_19", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_topk_19_attempt1.log", "time": "2026-07-14 23:09:37"}
+{"event": "attempt_start", "name": "NetEase_topk_01", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 23:09:37"}
+{"event": "success", "name": "NetEase_topk_01", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_01_attempt1.log", "time": "2026-07-14 23:37:14"}
+{"event": "attempt_start", "name": "NetEase_topk_03", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-14 23:37:15"}
+{"event": "success", "name": "NetEase_topk_03", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_03_attempt1.log", "time": "2026-07-15 00:04:34"}
+{"event": "attempt_start", "name": "NetEase_topk_05", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 00:04:34"}
+{"event": "success", "name": "NetEase_topk_05", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_05_attempt1.log", "time": "2026-07-15 00:32:24"}
+{"event": "attempt_start", "name": "NetEase_topk_07", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 00:32:24"}
+{"event": "success", "name": "NetEase_topk_07", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_07_attempt1.log", "time": "2026-07-15 01:00:15"}
+{"event": "attempt_start", "name": "NetEase_topk_09", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 01:00:15"}
+{"event": "success", "name": "NetEase_topk_09", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_09_attempt1.log", "time": "2026-07-15 01:28:01"}
+{"event": "attempt_start", "name": "NetEase_topk_11", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 01:28:01"}
+{"event": "success", "name": "NetEase_topk_11", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_11_attempt1.log", "time": "2026-07-15 01:55:52"}
+{"event": "attempt_start", "name": "NetEase_topk_13", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 01:55:52"}
+{"event": "success", "name": "NetEase_topk_13", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_13_attempt1.log", "time": "2026-07-15 02:23:45"}
+{"event": "attempt_start", "name": "NetEase_topk_15", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 02:23:45"}
+{"event": "success", "name": "NetEase_topk_15", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_15_attempt1.log", "time": "2026-07-15 02:51:33"}
+{"event": "attempt_start", "name": "NetEase_topk_17", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 02:51:33"}
+{"event": "success", "name": "NetEase_topk_17", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_17_attempt1.log", "time": "2026-07-15 03:19:41"}
+{"event": "attempt_start", "name": "NetEase_topk_19", "dataset": "NetEase", "group": "topk_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 03:19:41"}
+{"event": "success", "name": "NetEase_topk_19", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_topk_19_attempt1.log", "time": "2026-07-15 03:47:35"}
+{"event": "attempt_start", "name": "Youshu_anchor_lambda_0p000", "dataset": "Youshu", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 03:47:35"}
+{"event": "success", "name": "Youshu_anchor_lambda_0p000", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_anchor_lambda_0p000_attempt1.log", "time": "2026-07-15 03:55:21"}
+{"event": "attempt_start", "name": "Youshu_anchor_lambda_0p001", "dataset": "Youshu", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 03:55:21"}
+{"event": "success", "name": "Youshu_anchor_lambda_0p001", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_anchor_lambda_0p001_attempt1.log", "time": "2026-07-15 04:03:02"}
+{"event": "attempt_start", "name": "Youshu_anchor_lambda_0p002", "dataset": "Youshu", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 04:03:02"}
+{"event": "success", "name": "Youshu_anchor_lambda_0p002", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_anchor_lambda_0p002_attempt1.log", "time": "2026-07-15 04:10:49"}
+{"event": "attempt_start", "name": "Youshu_anchor_lambda_0p004", "dataset": "Youshu", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 04:10:49"}
+{"event": "success", "name": "Youshu_anchor_lambda_0p004", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_anchor_lambda_0p004_attempt1.log", "time": "2026-07-15 04:18:31"}
+{"event": "attempt_start", "name": "Youshu_anchor_lambda_0p006", "dataset": "Youshu", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 04:18:31"}
+{"event": "success", "name": "Youshu_anchor_lambda_0p006", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_anchor_lambda_0p006_attempt1.log", "time": "2026-07-15 04:26:17"}
+{"event": "attempt_start", "name": "Youshu_anchor_lambda_0p008", "dataset": "Youshu", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 04:26:17"}
+{"event": "success", "name": "Youshu_anchor_lambda_0p008", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_anchor_lambda_0p008_attempt1.log", "time": "2026-07-15 04:34:02"}
+{"event": "attempt_start", "name": "NetEase_anchor_lambda_0p000", "dataset": "NetEase", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 04:34:02"}
+{"event": "success", "name": "NetEase_anchor_lambda_0p000", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_anchor_lambda_0p000_attempt1.log", "time": "2026-07-15 04:57:20"}
+{"event": "attempt_start", "name": "NetEase_anchor_lambda_0p001", "dataset": "NetEase", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 04:57:21"}
+{"event": "success", "name": "NetEase_anchor_lambda_0p001", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_anchor_lambda_0p001_attempt1.log", "time": "2026-07-15 05:20:37"}
+{"event": "attempt_start", "name": "NetEase_anchor_lambda_0p003", "dataset": "NetEase", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 05:20:37"}
+{"event": "success", "name": "NetEase_anchor_lambda_0p003", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_anchor_lambda_0p003_attempt1.log", "time": "2026-07-15 05:44:06"}
+{"event": "attempt_start", "name": "NetEase_anchor_lambda_0p005", "dataset": "NetEase", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 05:44:06"}
+{"event": "success", "name": "NetEase_anchor_lambda_0p005", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_anchor_lambda_0p005_attempt1.log", "time": "2026-07-15 06:07:26"}
+{"event": "attempt_start", "name": "NetEase_anchor_lambda_0p007", "dataset": "NetEase", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 06:07:26"}
+{"event": "success", "name": "NetEase_anchor_lambda_0p007", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_anchor_lambda_0p007_attempt1.log", "time": "2026-07-15 06:30:34"}
+{"event": "attempt_start", "name": "NetEase_anchor_lambda_0p009", "dataset": "NetEase", "group": "anchor_cl_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 06:30:34"}
+{"event": "success", "name": "NetEase_anchor_lambda_0p009", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_anchor_lambda_0p009_attempt1.log", "time": "2026-07-15 06:53:57"}
+{"event": "attempt_start", "name": "Youshu_diff_weight_0p000", "dataset": "Youshu", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 06:53:58"}
+{"event": "success", "name": "Youshu_diff_weight_0p000", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_diff_weight_0p000_attempt1.log", "time": "2026-07-15 07:03:10"}
+{"event": "attempt_start", "name": "Youshu_diff_weight_0p010", "dataset": "Youshu", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 07:03:10"}
+{"event": "success", "name": "Youshu_diff_weight_0p010", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_diff_weight_0p010_attempt1.log", "time": "2026-07-15 07:12:32"}
+{"event": "attempt_start", "name": "Youshu_diff_weight_0p030", "dataset": "Youshu", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 07:12:32"}
+{"event": "success", "name": "Youshu_diff_weight_0p030", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_diff_weight_0p030_attempt1.log", "time": "2026-07-15 07:21:52"}
+{"event": "attempt_start", "name": "Youshu_diff_weight_0p040", "dataset": "Youshu", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 07:21:52"}
+{"event": "success", "name": "Youshu_diff_weight_0p040", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_diff_weight_0p040_attempt1.log", "time": "2026-07-15 07:31:18"}
+{"event": "attempt_start", "name": "Youshu_diff_weight_0p050", "dataset": "Youshu", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 07:31:18"}
+{"event": "success", "name": "Youshu_diff_weight_0p050", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_diff_weight_0p050_attempt1.log", "time": "2026-07-15 07:40:43"}
+{"event": "attempt_start", "name": "Youshu_diff_weight_0p070", "dataset": "Youshu", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 07:40:43"}
+{"event": "success", "name": "Youshu_diff_weight_0p070", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\Youshu_diff_weight_0p070_attempt1.log", "time": "2026-07-15 07:50:01"}
+{"event": "attempt_start", "name": "NetEase_diff_weight_0p000", "dataset": "NetEase", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 07:50:01"}
+{"event": "success", "name": "NetEase_diff_weight_0p000", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_diff_weight_0p000_attempt1.log", "time": "2026-07-15 08:18:01"}
+{"event": "attempt_start", "name": "NetEase_diff_weight_0p010", "dataset": "NetEase", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 08:18:01"}
+{"event": "success", "name": "NetEase_diff_weight_0p010", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_diff_weight_0p010_attempt1.log", "time": "2026-07-15 08:45:52"}
+{"event": "attempt_start", "name": "NetEase_diff_weight_0p030", "dataset": "NetEase", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 08:45:52"}
+{"event": "success", "name": "NetEase_diff_weight_0p030", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_diff_weight_0p030_attempt1.log", "time": "2026-07-15 09:13:51"}
+{"event": "attempt_start", "name": "NetEase_diff_weight_0p050", "dataset": "NetEase", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 09:13:51"}
+{"event": "success", "name": "NetEase_diff_weight_0p050", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_diff_weight_0p050_attempt1.log", "time": "2026-07-15 09:41:44"}
+{"event": "attempt_start", "name": "NetEase_diff_weight_0p070", "dataset": "NetEase", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 09:41:44"}
+{"event": "success", "name": "NetEase_diff_weight_0p070", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_diff_weight_0p070_attempt1.log", "time": "2026-07-15 10:09:44"}
+{"event": "attempt_start", "name": "NetEase_diff_weight_0p100", "dataset": "NetEase", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 10:09:44"}
+{"event": "success", "name": "NetEase_diff_weight_0p100", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\NetEase_diff_weight_0p100_attempt1.log", "time": "2026-07-15 10:37:46"}
+{"event": "attempt_start", "name": "iFashion_diff_weight_0p000", "dataset": "iFashion", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 10:37:47"}
+{"event": "success", "name": "iFashion_diff_weight_0p000", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\iFashion_diff_weight_0p000_attempt1.log", "time": "2026-07-15 11:59:42"}
+{"event": "attempt_start", "name": "iFashion_diff_weight_0p010", "dataset": "iFashion", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 11:59:43"}
+{"event": "success", "name": "iFashion_diff_weight_0p010", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\iFashion_diff_weight_0p010_attempt1.log", "time": "2026-07-15 13:21:43"}
+{"event": "attempt_start", "name": "iFashion_diff_weight_0p030", "dataset": "iFashion", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 13:21:43"}
+{"event": "success", "name": "iFashion_diff_weight_0p030", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\iFashion_diff_weight_0p030_attempt1.log", "time": "2026-07-15 14:43:26"}
+{"event": "attempt_start", "name": "iFashion_diff_weight_0p050", "dataset": "iFashion", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 14:43:26"}
+{"event": "success", "name": "iFashion_diff_weight_0p050", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\iFashion_diff_weight_0p050_attempt1.log", "time": "2026-07-15 16:05:12"}
+{"event": "attempt_start", "name": "iFashion_diff_weight_0p070", "dataset": "iFashion", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 16:05:12"}
+{"event": "success", "name": "iFashion_diff_weight_0p070", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\iFashion_diff_weight_0p070_attempt1.log", "time": "2026-07-15 17:26:41"}
+{"event": "attempt_start", "name": "iFashion_diff_weight_0p100", "dataset": "iFashion", "group": "diffusion_weight_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-15 17:26:41"}
+{"event": "success", "name": "iFashion_diff_weight_0p100", "attempt": 1, "log_path": "ablation_runs\\full_ablation_20260714\\logs\\iFashion_diff_weight_0p100_attempt1.log", "time": "2026-07-15 18:49:15"}

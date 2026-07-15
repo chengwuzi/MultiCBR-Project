@@ -1,0 +1,522 @@
+====================================================================================================
+Youshu_wo_diffusion | dataset=Youshu | group=wo_table | status=success
+attempts=1 | best_epoch=109 | elapsed=00:07:24
+start=2026-07-14 19:37:07 | end=2026-07-14 19:44:31
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_wo_diffusion_attempt1.log
+overrides={"latent_rebuild.enabled": false}
+val: R@10=0.20906, N@10=0.122 | R@20=0.29817, N@20=0.14719 | R@40=0.39925, N@40=0.17045 | R@80=0.51264, N@80=0.19259
+test: R@10=0.20422, N@10=0.14844 | R@20=0.29195, N@20=0.17337 | R@40=0.39899, N@40=0.20233 | R@80=0.52304, N@80=0.23062
+
+====================================================================================================
+Youshu_wo_dual_cl | dataset=Youshu | group=wo_table | status=success
+attempts=1 | best_epoch=119 | elapsed=00:07:08
+start=2026-07-14 19:44:31 | end=2026-07-14 19:51:40
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_wo_dual_cl_attempt1.log
+overrides={"anchor_cl.enabled": false, "c_lambdas": [0.0]}
+val: R@10=0.15945, N@10=0.08839 | R@20=0.23714, N@20=0.11031 | R@40=0.33071, N@40=0.132 | R@80=0.43781, N@80=0.15265
+test: R@10=0.16763, N@10=0.11217 | R@20=0.23259, N@20=0.13074 | R@40=0.32905, N@40=0.15682 | R@80=0.44653, N@80=0.18359
+
+====================================================================================================
+Youshu_wo_prefusion_cl | dataset=Youshu | group=wo_table | status=success
+attempts=1 | best_epoch=119 | elapsed=00:07:34
+start=2026-07-14 19:51:40 | end=2026-07-14 19:59:14
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_wo_prefusion_cl_attempt1.log
+overrides={"anchor_cl.enabled": false}
+val: R@10=0.20441, N@10=0.12152 | R@20=0.29367, N@20=0.14685 | R@40=0.3934, N@40=0.16975 | R@80=0.51068, N@80=0.1925
+test: R@10=0.20446, N@10=0.14517 | R@20=0.29007, N@20=0.16921 | R@40=0.39771, N@40=0.19829 | R@80=0.51604, N@80=0.22547
+
+====================================================================================================
+Youshu_wo_postfusion_cl | dataset=Youshu | group=wo_table | status=success
+attempts=1 | best_epoch=114 | elapsed=00:07:38
+start=2026-07-14 19:59:15 | end=2026-07-14 20:06:53
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_wo_postfusion_cl_attempt1.log
+overrides={"c_lambdas": [0.0]}
+val: R@10=0.18343, N@10=0.10508 | R@20=0.26265, N@20=0.12726 | R@40=0.35993, N@40=0.14971 | R@80=0.47201, N@80=0.17154
+test: R@10=0.1881, N@10=0.12974 | R@20=0.25949, N@20=0.15023 | R@40=0.36409, N@40=0.17848 | R@80=0.48636, N@80=0.2063
+
+====================================================================================================
+NetEase_wo_diffusion | dataset=NetEase | group=wo_table | status=success
+attempts=1 | best_epoch=34 | elapsed=00:22:13
+start=2026-07-14 20:06:53 | end=2026-07-14 20:29:07
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_wo_diffusion_attempt1.log
+overrides={"latent_rebuild.enabled": false}
+val: R@10=0.05714, N@10=0.03139 | R@20=0.09194, N@20=0.04065 | R@40=0.13502, N@40=0.05004 | R@80=0.19299, N@80=0.06065
+test: R@10=0.06002, N@10=0.04013 | R@20=0.09475, N@20=0.05091 | R@40=0.13867, N@40=0.06261 | R@80=0.19445, N@80=0.07513
+
+====================================================================================================
+NetEase_wo_dual_cl | dataset=NetEase | group=wo_table | status=success
+attempts=1 | best_epoch=4 | elapsed=00:22:05
+start=2026-07-14 20:29:07 | end=2026-07-14 20:51:13
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_wo_dual_cl_attempt1.log
+overrides={"anchor_cl.enabled": false, "c_lambdas": [0.0]}
+val: R@10=0.02832, N@10=0.01504 | R@20=0.04885, N@20=0.02048 | R@40=0.07916, N@40=0.02702 | R@80=0.12744, N@80=0.0358
+test: R@10=0.03089, N@10=0.0195 | R@20=0.0512, N@20=0.02601 | R@40=0.08285, N@40=0.03424 | R@80=0.12964, N@80=0.04466
+
+====================================================================================================
+NetEase_wo_prefusion_cl | dataset=NetEase | group=wo_table | status=success
+attempts=1 | best_epoch=49 | elapsed=00:22:40
+start=2026-07-14 20:51:13 | end=2026-07-14 21:13:53
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_wo_prefusion_cl_attempt1.log
+overrides={"anchor_cl.enabled": false}
+val: R@10=0.0534, N@10=0.02928 | R@20=0.08784, N@20=0.03847 | R@40=0.13395, N@40=0.04849 | R@80=0.19258, N@80=0.05926
+test: R@10=0.05792, N@10=0.03856 | R@20=0.09057, N@20=0.04873 | R@40=0.13808, N@40=0.06125 | R@80=0.1988, N@80=0.07492
+
+====================================================================================================
+NetEase_wo_postfusion_cl | dataset=NetEase | group=wo_table | status=success
+attempts=1 | best_epoch=4 | elapsed=00:22:28
+start=2026-07-14 21:13:53 | end=2026-07-14 21:36:22
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_wo_postfusion_cl_attempt1.log
+overrides={"c_lambdas": [0.0]}
+val: R@10=0.03852, N@10=0.02079 | R@20=0.06319, N@20=0.02731 | R@40=0.10321, N@40=0.03594 | R@80=0.15748, N@80=0.04589
+test: R@10=0.04076, N@10=0.02641 | R@20=0.06824, N@20=0.035 | R@40=0.10755, N@40=0.04531 | R@80=0.16245, N@80=0.05749
+
+====================================================================================================
+Youshu_topk_01 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=114 | elapsed=00:09:13
+start=2026-07-14 21:36:22 | end=2026-07-14 21:45:35
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_01_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 1}
+val: R@10=0.20659, N@10=0.12319 | R@20=0.30066, N@20=0.14965 | R@40=0.39855, N@40=0.17221 | R@80=0.51127, N@80=0.1942
+test: R@10=0.20406, N@10=0.14779 | R@20=0.28915, N@20=0.17186 | R@40=0.39392, N@40=0.20046 | R@80=0.51865, N@80=0.22904
+
+====================================================================================================
+Youshu_topk_03 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=84 | elapsed=00:09:08
+start=2026-07-14 21:45:35 | end=2026-07-14 21:54:43
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_03_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 3}
+val: R@10=0.2021, N@10=0.1194 | R@20=0.29993, N@20=0.14673 | R@40=0.40095, N@40=0.17006 | R@80=0.51237, N@80=0.19165
+test: R@10=0.19925, N@10=0.14481 | R@20=0.2893, N@20=0.17041 | R@40=0.39079, N@40=0.19816 | R@80=0.5182, N@80=0.22726
+
+====================================================================================================
+Youshu_topk_05 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:33
+start=2026-07-14 21:54:44 | end=2026-07-14 22:04:17
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_05_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 5}
+val: R@10=0.20696, N@10=0.12166 | R@20=0.3017, N@20=0.14847 | R@40=0.39858, N@40=0.1711 | R@80=0.51604, N@80=0.19381
+test: R@10=0.20069, N@10=0.14535 | R@20=0.28712, N@20=0.17016 | R@40=0.39539, N@40=0.19943 | R@80=0.51908, N@80=0.22798
+
+====================================================================================================
+Youshu_topk_07 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=109 | elapsed=00:09:12
+start=2026-07-14 22:04:17 | end=2026-07-14 22:13:29
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_07_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20871, N@10=0.1213 | R@20=0.30069, N@20=0.14736 | R@40=0.40042, N@40=0.17062 | R@80=0.51306, N@80=0.19248
+test: R@10=0.20393, N@10=0.14668 | R@20=0.28946, N@20=0.17112 | R@40=0.39964, N@40=0.20073 | R@80=0.52039, N@80=0.22856
+
+====================================================================================================
+Youshu_topk_09 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:20
+start=2026-07-14 22:13:29 | end=2026-07-14 22:22:50
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_09_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 9}
+val: R@10=0.20528, N@10=0.12125 | R@20=0.30093, N@20=0.14816 | R@40=0.40076, N@40=0.17124 | R@80=0.51168, N@80=0.19281
+test: R@10=0.20172, N@10=0.14522 | R@20=0.28797, N@20=0.16994 | R@40=0.39787, N@40=0.19951 | R@80=0.51901, N@80=0.2276
+
+====================================================================================================
+Youshu_topk_11 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=114 | elapsed=00:09:22
+start=2026-07-14 22:22:50 | end=2026-07-14 22:32:12
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_11_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 11}
+val: R@10=0.20703, N@10=0.12103 | R@20=0.29918, N@20=0.14697 | R@40=0.40146, N@40=0.17067 | R@80=0.5148, N@80=0.19263
+test: R@10=0.20133, N@10=0.14513 | R@20=0.29023, N@20=0.17052 | R@40=0.397, N@40=0.1995 | R@80=0.51967, N@80=0.22775
+
+====================================================================================================
+Youshu_topk_13 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=99 | elapsed=00:09:15
+start=2026-07-14 22:32:12 | end=2026-07-14 22:41:28
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_13_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.20661, N@10=0.12043 | R@20=0.2991, N@20=0.14649 | R@40=0.39949, N@40=0.16978 | R@80=0.51599, N@80=0.19227
+test: R@10=0.20073, N@10=0.14511 | R@20=0.2908, N@20=0.17079 | R@40=0.3914, N@40=0.19841 | R@80=0.52134, N@80=0.22786
+
+====================================================================================================
+Youshu_topk_15 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=109 | elapsed=00:09:24
+start=2026-07-14 22:41:28 | end=2026-07-14 22:50:53
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_15_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 15}
+val: R@10=0.20678, N@10=0.12064 | R@20=0.29898, N@20=0.14664 | R@40=0.4009, N@40=0.17008 | R@80=0.51429, N@80=0.19208
+test: R@10=0.20263, N@10=0.14619 | R@20=0.28877, N@20=0.17068 | R@40=0.39619, N@40=0.19987 | R@80=0.5202, N@80=0.22835
+
+====================================================================================================
+Youshu_topk_17 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=89 | elapsed=00:09:25
+start=2026-07-14 22:50:53 | end=2026-07-14 23:00:18
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_17_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 17}
+val: R@10=0.20622, N@10=0.12082 | R@20=0.29624, N@20=0.14623 | R@40=0.39679, N@40=0.1695 | R@80=0.50995, N@80=0.19148
+test: R@10=0.20317, N@10=0.1462 | R@20=0.29036, N@20=0.17096 | R@40=0.39516, N@40=0.19965 | R@80=0.5203, N@80=0.22805
+
+====================================================================================================
+Youshu_topk_19 | dataset=Youshu | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=114 | elapsed=00:09:18
+start=2026-07-14 23:00:18 | end=2026-07-14 23:09:37
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_topk_19_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 19}
+val: R@10=0.20562, N@10=0.12022 | R@20=0.29794, N@20=0.14605 | R@40=0.4007, N@40=0.16986 | R@80=0.51456, N@80=0.19177
+test: R@10=0.20102, N@10=0.1448 | R@20=0.29244, N@20=0.17073 | R@40=0.39622, N@40=0.19906 | R@80=0.51774, N@80=0.22708
+
+====================================================================================================
+NetEase_topk_01 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:27:37
+start=2026-07-14 23:09:37 | end=2026-07-14 23:37:14
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_01_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 1}
+val: R@10=0.04463, N@10=0.0241 | R@20=0.07114, N@20=0.03118 | R@40=0.1083, N@40=0.03928 | R@80=0.15978, N@80=0.04871
+test: R@10=0.04523, N@10=0.03061 | R@20=0.07288, N@20=0.03923 | R@40=0.11077, N@40=0.04913 | R@80=0.16292, N@80=0.06076
+
+====================================================================================================
+NetEase_topk_03 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:27:18
+start=2026-07-14 23:37:15 | end=2026-07-15 00:04:34
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_03_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 3}
+val: R@10=0.05105, N@10=0.0279 | R@20=0.08212, N@20=0.0362 | R@40=0.12294, N@40=0.04514 | R@80=0.17659, N@80=0.05504
+test: R@10=0.05302, N@10=0.03536 | R@20=0.08386, N@20=0.04499 | R@40=0.12666, N@40=0.05625 | R@80=0.18223, N@80=0.0687
+
+====================================================================================================
+NetEase_topk_05 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=44 | elapsed=00:27:50
+start=2026-07-15 00:04:34 | end=2026-07-15 00:32:24
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_05_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 5}
+val: R@10=0.05366, N@10=0.02969 | R@20=0.08732, N@20=0.0386 | R@40=0.12932, N@40=0.04777 | R@80=0.18416, N@80=0.05782
+test: R@10=0.05663, N@10=0.03768 | R@20=0.08853, N@20=0.04761 | R@40=0.13203, N@40=0.05913 | R@80=0.18992, N@80=0.07205
+
+====================================================================================================
+NetEase_topk_07 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:27:50
+start=2026-07-15 00:32:24 | end=2026-07-15 01:00:15
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_07_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.05658, N@10=0.0308 | R@20=0.08995, N@20=0.03968 | R@40=0.13386, N@40=0.04924 | R@80=0.18861, N@80=0.05929
+test: R@10=0.05907, N@10=0.03926 | R@20=0.09238, N@20=0.04952 | R@40=0.13602, N@40=0.06108 | R@80=0.19137, N@80=0.07357
+
+====================================================================================================
+NetEase_topk_09 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:27:46
+start=2026-07-15 01:00:15 | end=2026-07-15 01:28:01
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_09_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 9}
+val: R@10=0.05644, N@10=0.03062 | R@20=0.08863, N@20=0.03914 | R@40=0.13362, N@40=0.04898 | R@80=0.18959, N@80=0.05925
+test: R@10=0.06008, N@10=0.03981 | R@20=0.09327, N@20=0.05006 | R@40=0.13672, N@40=0.06163 | R@80=0.19233, N@80=0.07417
+
+====================================================================================================
+NetEase_topk_11 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=34 | elapsed=00:27:50
+start=2026-07-15 01:28:01 | end=2026-07-15 01:55:52
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_11_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 11}
+val: R@10=0.05671, N@10=0.03089 | R@20=0.09054, N@20=0.03989 | R@40=0.13308, N@40=0.04915 | R@80=0.18813, N@80=0.05925
+test: R@10=0.0612, N@10=0.04055 | R@20=0.09341, N@20=0.05055 | R@40=0.13593, N@40=0.0618 | R@80=0.19212, N@80=0.07441
+
+====================================================================================================
+NetEase_topk_13 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:52
+start=2026-07-15 01:55:52 | end=2026-07-15 02:23:45
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_13_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05732, N@10=0.03089 | R@20=0.08983, N@20=0.03956 | R@40=0.13352, N@40=0.04911 | R@80=0.1887, N@80=0.05927
+test: R@10=0.06039, N@10=0.04028 | R@20=0.0946, N@20=0.05095 | R@40=0.13811, N@40=0.06245 | R@80=0.19205, N@80=0.07466
+
+====================================================================================================
+NetEase_topk_15 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:47
+start=2026-07-15 02:23:45 | end=2026-07-15 02:51:33
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_15_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 15}
+val: R@10=0.05791, N@10=0.03107 | R@20=0.09075, N@20=0.03978 | R@40=0.13479, N@40=0.04944 | R@80=0.1899, N@80=0.05956
+test: R@10=0.06129, N@10=0.04042 | R@20=0.09537, N@20=0.05101 | R@40=0.13795, N@40=0.06237 | R@80=0.19214, N@80=0.07461
+
+====================================================================================================
+NetEase_topk_17 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:28:07
+start=2026-07-15 02:51:33 | end=2026-07-15 03:19:41
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_17_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 17}
+val: R@10=0.05815, N@10=0.03124 | R@20=0.09078, N@20=0.03993 | R@40=0.13506, N@40=0.04958 | R@80=0.19088, N@80=0.05985
+test: R@10=0.06124, N@10=0.04056 | R@20=0.09358, N@20=0.05065 | R@40=0.13739, N@40=0.06231 | R@80=0.19218, N@80=0.07472
+
+====================================================================================================
+NetEase_topk_19 | dataset=NetEase | group=topk_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:54
+start=2026-07-15 03:19:41 | end=2026-07-15 03:47:35
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_topk_19_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.rebuild_k": 19}
+val: R@10=0.05828, N@10=0.03121 | R@20=0.09102, N@20=0.03992 | R@40=0.13527, N@40=0.04954 | R@80=0.1913, N@80=0.05983
+test: R@10=0.06102, N@10=0.04067 | R@20=0.09388, N@20=0.05092 | R@40=0.13844, N@40=0.06268 | R@80=0.1923, N@80=0.0749
+
+====================================================================================================
+Youshu_anchor_lambda_0p000 | dataset=Youshu | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:07:45
+start=2026-07-15 03:47:35 | end=2026-07-15 03:55:21
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_anchor_lambda_0p000_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.0, "anchor_cl.enabled": true}
+val: R@10=0.2043, N@10=0.12147 | R@20=0.29363, N@20=0.14682 | R@40=0.3939, N@40=0.16984 | R@80=0.51058, N@80=0.19246
+test: R@10=0.20468, N@10=0.14531 | R@20=0.29006, N@20=0.16928 | R@40=0.39738, N@40=0.19825 | R@80=0.51631, N@80=0.2256
+
+====================================================================================================
+Youshu_anchor_lambda_0p001 | dataset=Youshu | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:07:40
+start=2026-07-15 03:55:21 | end=2026-07-15 04:03:02
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_anchor_lambda_0p001_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.001, "anchor_cl.enabled": true}
+val: R@10=0.20642, N@10=0.12178 | R@20=0.29432, N@20=0.14675 | R@40=0.39392, N@40=0.16987 | R@80=0.51401, N@80=0.19307
+test: R@10=0.20487, N@10=0.14659 | R@20=0.29014, N@20=0.17101 | R@40=0.40039, N@40=0.20071 | R@80=0.51879, N@80=0.22793
+
+====================================================================================================
+Youshu_anchor_lambda_0p002 | dataset=Youshu | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:07:46
+start=2026-07-15 04:03:02 | end=2026-07-15 04:10:49
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_anchor_lambda_0p002_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.002, "anchor_cl.enabled": true}
+val: R@10=0.20884, N@10=0.12232 | R@20=0.29733, N@20=0.14736 | R@40=0.39631, N@40=0.1704 | R@80=0.51451, N@80=0.19329
+test: R@10=0.20469, N@10=0.14784 | R@20=0.29109, N@20=0.17267 | R@40=0.40166, N@40=0.20228 | R@80=0.52035, N@80=0.22966
+
+====================================================================================================
+Youshu_anchor_lambda_0p004 | dataset=Youshu | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=99 | elapsed=00:07:41
+start=2026-07-15 04:10:49 | end=2026-07-15 04:18:31
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_anchor_lambda_0p004_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.004, "anchor_cl.enabled": true}
+val: R@10=0.20716, N@10=0.12167 | R@20=0.29882, N@20=0.14753 | R@40=0.39813, N@40=0.17052 | R@80=0.51322, N@80=0.19284
+test: R@10=0.20435, N@10=0.14853 | R@20=0.29439, N@20=0.17414 | R@40=0.39582, N@40=0.20189 | R@80=0.52236, N@80=0.23067
+
+====================================================================================================
+Youshu_anchor_lambda_0p006 | dataset=Youshu | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:07:45
+start=2026-07-15 04:18:31 | end=2026-07-15 04:26:17
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_anchor_lambda_0p006_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.006, "anchor_cl.enabled": true}
+val: R@10=0.2073, N@10=0.12315 | R@20=0.29692, N@20=0.14853 | R@40=0.39831, N@40=0.17175 | R@80=0.51276, N@80=0.19415
+test: R@10=0.20213, N@10=0.14621 | R@20=0.29224, N@20=0.17189 | R@40=0.39793, N@40=0.20062 | R@80=0.52325, N@80=0.22928
+
+====================================================================================================
+Youshu_anchor_lambda_0p008 | dataset=Youshu | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=99 | elapsed=00:07:44
+start=2026-07-15 04:26:17 | end=2026-07-15 04:34:02
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_anchor_lambda_0p008_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.008, "anchor_cl.enabled": true}
+val: R@10=0.20029, N@10=0.12052 | R@20=0.29564, N@20=0.14739 | R@40=0.39841, N@40=0.17091 | R@80=0.51221, N@80=0.19311
+test: R@10=0.19888, N@10=0.14449 | R@20=0.28797, N@20=0.16991 | R@40=0.38927, N@40=0.19785 | R@80=0.51965, N@80=0.22751
+
+====================================================================================================
+NetEase_anchor_lambda_0p000 | dataset=NetEase | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:23:18
+start=2026-07-15 04:34:02 | end=2026-07-15 04:57:20
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_anchor_lambda_0p000_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.0, "anchor_cl.enabled": true}
+val: R@10=0.05355, N@10=0.02934 | R@20=0.08765, N@20=0.03845 | R@40=0.1341, N@40=0.04853 | R@80=0.19259, N@80=0.05928
+test: R@10=0.05786, N@10=0.03851 | R@20=0.09061, N@20=0.04872 | R@40=0.13786, N@40=0.06118 | R@80=0.19874, N@80=0.07488
+
+====================================================================================================
+NetEase_anchor_lambda_0p001 | dataset=NetEase | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:23:16
+start=2026-07-15 04:57:21 | end=2026-07-15 05:20:37
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_anchor_lambda_0p001_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.001, "anchor_cl.enabled": true}
+val: R@10=0.05518, N@10=0.02973 | R@20=0.09034, N@20=0.03914 | R@40=0.13514, N@40=0.04884 | R@80=0.19309, N@80=0.05949
+test: R@10=0.05815, N@10=0.03899 | R@20=0.09186, N@20=0.04947 | R@40=0.13961, N@40=0.06208 | R@80=0.19818, N@80=0.07528
+
+====================================================================================================
+NetEase_anchor_lambda_0p003 | dataset=NetEase | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=34 | elapsed=00:23:28
+start=2026-07-15 05:20:37 | end=2026-07-15 05:44:06
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_anchor_lambda_0p003_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.003, "anchor_cl.enabled": true}
+val: R@10=0.05689, N@10=0.03097 | R@20=0.09112, N@20=0.0401 | R@40=0.13544, N@40=0.04976 | R@80=0.19337, N@80=0.06036
+test: R@10=0.05972, N@10=0.03961 | R@20=0.09319, N@20=0.05006 | R@40=0.13949, N@40=0.06228 | R@80=0.19812, N@80=0.0754
+
+====================================================================================================
+NetEase_anchor_lambda_0p005 | dataset=NetEase | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:23:20
+start=2026-07-15 05:44:06 | end=2026-07-15 06:07:26
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_anchor_lambda_0p005_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.005, "anchor_cl.enabled": true}
+val: R@10=0.05682, N@10=0.03123 | R@20=0.0917, N@20=0.04053 | R@40=0.13542, N@40=0.05003 | R@80=0.19327, N@80=0.06068
+test: R@10=0.05961, N@10=0.03995 | R@20=0.09453, N@20=0.05078 | R@40=0.13934, N@40=0.06272 | R@80=0.19619, N@80=0.0755
+
+====================================================================================================
+NetEase_anchor_lambda_0p007 | dataset=NetEase | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:23:07
+start=2026-07-15 06:07:26 | end=2026-07-15 06:30:34
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_anchor_lambda_0p007_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.007, "anchor_cl.enabled": true}
+val: R@10=0.05808, N@10=0.03179 | R@20=0.09151, N@20=0.04064 | R@40=0.1346, N@40=0.05004 | R@80=0.18902, N@80=0.0601
+test: R@10=0.06016, N@10=0.04024 | R@20=0.09512, N@20=0.05111 | R@40=0.13736, N@40=0.06241 | R@80=0.19259, N@80=0.07482
+
+====================================================================================================
+NetEase_anchor_lambda_0p009 | dataset=NetEase | group=anchor_cl_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:23:23
+start=2026-07-15 06:30:34 | end=2026-07-15 06:53:57
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_anchor_lambda_0p009_attempt1.log
+overrides={"anchor_cl.anchor_cl_lambda": 0.009, "anchor_cl.enabled": true}
+val: R@10=0.0574, N@10=0.0317 | R@20=0.0897, N@20=0.04026 | R@40=0.13269, N@40=0.04967 | R@80=0.18761, N@80=0.05979
+test: R@10=0.06049, N@10=0.04035 | R@20=0.09369, N@20=0.05076 | R@40=0.13587, N@40=0.06199 | R@80=0.19023, N@80=0.07421
+
+====================================================================================================
+Youshu_diff_weight_0p000 | dataset=Youshu | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=114 | elapsed=00:09:12
+start=2026-07-15 06:53:58 | end=2026-07-15 07:03:10
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_diff_weight_0p000_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.0, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20794, N@10=0.12173 | R@20=0.30054, N@20=0.14779 | R@40=0.39897, N@40=0.17071 | R@80=0.5147, N@80=0.19312
+test: R@10=0.20144, N@10=0.14523 | R@20=0.2907, N@20=0.17109 | R@40=0.39669, N@40=0.1996 | R@80=0.52093, N@80=0.22826
+
+====================================================================================================
+Youshu_diff_weight_0p010 | dataset=Youshu | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:21
+start=2026-07-15 07:03:10 | end=2026-07-15 07:12:32
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_diff_weight_0p010_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.01, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20711, N@10=0.12039 | R@20=0.30142, N@20=0.14711 | R@40=0.39931, N@40=0.1699 | R@80=0.51392, N@80=0.19206
+test: R@10=0.20234, N@10=0.14614 | R@20=0.28819, N@20=0.17114 | R@40=0.39643, N@40=0.20013 | R@80=0.52041, N@80=0.22876
+
+====================================================================================================
+Youshu_diff_weight_0p030 | dataset=Youshu | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=104 | elapsed=00:09:20
+start=2026-07-15 07:12:32 | end=2026-07-15 07:21:52
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_diff_weight_0p030_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.03, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20796, N@10=0.12088 | R@20=0.29952, N@20=0.14687 | R@40=0.40134, N@40=0.17052 | R@80=0.51347, N@80=0.1923
+test: R@10=0.20241, N@10=0.14578 | R@20=0.28752, N@20=0.17024 | R@40=0.39562, N@40=0.19939 | R@80=0.52193, N@80=0.22824
+
+====================================================================================================
+Youshu_diff_weight_0p040 | dataset=Youshu | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=109 | elapsed=00:09:25
+start=2026-07-15 07:21:52 | end=2026-07-15 07:31:18
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_diff_weight_0p040_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.04, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20911, N@10=0.12145 | R@20=0.29993, N@20=0.14721 | R@40=0.40032, N@40=0.17062 | R@80=0.51323, N@80=0.19252
+test: R@10=0.20393, N@10=0.14663 | R@20=0.28957, N@20=0.1712 | R@40=0.39938, N@40=0.20066 | R@80=0.52016, N@80=0.22852
+
+====================================================================================================
+Youshu_diff_weight_0p050 | dataset=Youshu | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:25
+start=2026-07-15 07:31:18 | end=2026-07-15 07:40:43
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_diff_weight_0p050_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.05, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.2066, N@10=0.12051 | R@20=0.30171, N@20=0.14734 | R@40=0.39935, N@40=0.17002 | R@80=0.51445, N@80=0.19236
+test: R@10=0.202, N@10=0.14623 | R@20=0.28718, N@20=0.17078 | R@40=0.39826, N@40=0.20054 | R@80=0.52182, N@80=0.22909
+
+====================================================================================================
+Youshu_diff_weight_0p070 | dataset=Youshu | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:17
+start=2026-07-15 07:40:43 | end=2026-07-15 07:50:01
+log_path=ablation_runs\full_ablation_20260714\logs\Youshu_diff_weight_0p070_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.07, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.21034, N@10=0.12247 | R@20=0.30293, N@20=0.14857 | R@40=0.39992, N@40=0.17116 | R@80=0.51452, N@80=0.19339
+test: R@10=0.20312, N@10=0.1458 | R@20=0.28854, N@20=0.17051 | R@40=0.39607, N@40=0.1995 | R@80=0.52139, N@80=0.22839
+
+====================================================================================================
+NetEase_diff_weight_0p000 | dataset=NetEase | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:28:00
+start=2026-07-15 07:50:01 | end=2026-07-15 08:18:01
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_diff_weight_0p000_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.0, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05674, N@10=0.03046 | R@20=0.09026, N@20=0.03937 | R@40=0.13358, N@40=0.04884 | R@80=0.18931, N@80=0.05911
+test: R@10=0.05999, N@10=0.04025 | R@20=0.09432, N@20=0.05087 | R@40=0.13634, N@40=0.06216 | R@80=0.1933, N@80=0.07492
+
+====================================================================================================
+NetEase_diff_weight_0p010 | dataset=NetEase | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:50
+start=2026-07-15 08:18:01 | end=2026-07-15 08:45:52
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_diff_weight_0p010_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.01, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.0571, N@10=0.03088 | R@20=0.09003, N@20=0.03962 | R@40=0.13353, N@40=0.04916 | R@80=0.18929, N@80=0.05939
+test: R@10=0.05998, N@10=0.04007 | R@20=0.09348, N@20=0.0506 | R@40=0.13816, N@40=0.06239 | R@80=0.19245, N@80=0.07462
+
+====================================================================================================
+NetEase_diff_weight_0p030 | dataset=NetEase | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:27:59
+start=2026-07-15 08:45:52 | end=2026-07-15 09:13:51
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_diff_weight_0p030_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.03, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.0574, N@10=0.03069 | R@20=0.09033, N@20=0.03942 | R@40=0.13329, N@40=0.04885 | R@80=0.18916, N@80=0.05913
+test: R@10=0.06016, N@10=0.0403 | R@20=0.09487, N@20=0.05104 | R@40=0.13711, N@40=0.06238 | R@80=0.19378, N@80=0.07505
+
+====================================================================================================
+NetEase_diff_weight_0p050 | dataset=NetEase | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:52
+start=2026-07-15 09:13:51 | end=2026-07-15 09:41:44
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_diff_weight_0p050_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.05, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05735, N@10=0.0309 | R@20=0.08981, N@20=0.03954 | R@40=0.13363, N@40=0.04913 | R@80=0.18899, N@80=0.0593
+test: R@10=0.06031, N@10=0.04026 | R@20=0.09462, N@20=0.05096 | R@40=0.13826, N@40=0.06248 | R@80=0.19242, N@80=0.07474
+
+====================================================================================================
+NetEase_diff_weight_0p070 | dataset=NetEase | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=49 | elapsed=00:27:59
+start=2026-07-15 09:41:44 | end=2026-07-15 10:09:44
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_diff_weight_0p070_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.07, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05686, N@10=0.03031 | R@20=0.09028, N@20=0.03917 | R@40=0.13317, N@40=0.04852 | R@80=0.18923, N@80=0.05887
+test: R@10=0.06, N@10=0.04041 | R@20=0.09414, N@20=0.05098 | R@40=0.13772, N@40=0.06259 | R@80=0.19479, N@80=0.07536
+
+====================================================================================================
+NetEase_diff_weight_0p100 | dataset=NetEase | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=44 | elapsed=00:28:02
+start=2026-07-15 10:09:44 | end=2026-07-15 10:37:46
+log_path=ablation_runs\full_ablation_20260714\logs\NetEase_diff_weight_0p100_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_set_loss_weight": 0.1, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05689, N@10=0.03076 | R@20=0.0896, N@20=0.03948 | R@40=0.13417, N@40=0.04918 | R@80=0.18819, N@80=0.05915
+test: R@10=0.05997, N@10=0.04025 | R@20=0.09445, N@20=0.051 | R@40=0.13725, N@40=0.06242 | R@80=0.19394, N@80=0.07517
+
+====================================================================================================
+iFashion_diff_weight_0p000 | dataset=iFashion | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:21:55
+start=2026-07-15 10:37:47 | end=2026-07-15 11:59:42
+log_path=ablation_runs\full_ablation_20260714\logs\iFashion_diff_weight_0p000_attempt1.log
+overrides={"dwt.latent_diffusion_set_loss_weight": 0.0, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11354, N@10=0.08514 | R@20=0.15607, N@20=0.09921 | R@40=0.20581, N@40=0.11273 | R@80=0.26314, N@80=0.12578
+test: R@10=0.11418, N@10=0.11467 | R@20=0.15668, N@20=0.13173 | R@40=0.20682, N@40=0.14938 | R@80=0.26444, N@80=0.16658
+
+====================================================================================================
+iFashion_diff_weight_0p010 | dataset=iFashion | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:22:00
+start=2026-07-15 11:59:43 | end=2026-07-15 13:21:43
+log_path=ablation_runs\full_ablation_20260714\logs\iFashion_diff_weight_0p010_attempt1.log
+overrides={"dwt.latent_diffusion_set_loss_weight": 0.01, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.1136, N@10=0.08517 | R@20=0.1561, N@20=0.09922 | R@40=0.20591, N@40=0.11278 | R@80=0.26345, N@80=0.12588
+test: R@10=0.11424, N@10=0.11475 | R@20=0.15658, N@20=0.13175 | R@40=0.20666, N@40=0.14937 | R@80=0.26396, N@80=0.1665
+
+====================================================================================================
+iFashion_diff_weight_0p030 | dataset=iFashion | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=24 | elapsed=01:21:42
+start=2026-07-15 13:21:43 | end=2026-07-15 14:43:26
+log_path=ablation_runs\full_ablation_20260714\logs\iFashion_diff_weight_0p030_attempt1.log
+overrides={"dwt.latent_diffusion_set_loss_weight": 0.03, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.113, N@10=0.08518 | R@20=0.15537, N@20=0.09919 | R@40=0.20591, N@40=0.11288 | R@80=0.26186, N@80=0.12565
+test: R@10=0.11371, N@10=0.11438 | R@20=0.15621, N@20=0.13145 | R@40=0.20688, N@40=0.14925 | R@80=0.26316, N@80=0.16605
+
+====================================================================================================
+iFashion_diff_weight_0p050 | dataset=iFashion | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:21:45
+start=2026-07-15 14:43:26 | end=2026-07-15 16:05:12
+log_path=ablation_runs\full_ablation_20260714\logs\iFashion_diff_weight_0p050_attempt1.log
+overrides={"dwt.latent_diffusion_set_loss_weight": 0.05, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11304, N@10=0.08497 | R@20=0.15566, N@20=0.09907 | R@40=0.20612, N@40=0.11277 | R@80=0.26356, N@80=0.12587
+test: R@10=0.1142, N@10=0.11458 | R@20=0.15666, N@20=0.13164 | R@40=0.2068, N@40=0.14929 | R@80=0.26405, N@80=0.16639
+
+====================================================================================================
+iFashion_diff_weight_0p070 | dataset=iFashion | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:21:28
+start=2026-07-15 16:05:12 | end=2026-07-15 17:26:41
+log_path=ablation_runs\full_ablation_20260714\logs\iFashion_diff_weight_0p070_attempt1.log
+overrides={"dwt.latent_diffusion_set_loss_weight": 0.07, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11332, N@10=0.08527 | R@20=0.1558, N@20=0.09934 | R@40=0.20662, N@40=0.11313 | R@80=0.26355, N@80=0.12609
+test: R@10=0.11401, N@10=0.11427 | R@20=0.15607, N@20=0.13115 | R@40=0.20685, N@40=0.14904 | R@80=0.26473, N@80=0.1663
+
+====================================================================================================
+iFashion_diff_weight_0p100 | dataset=iFashion | group=diffusion_weight_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:22:33
+start=2026-07-15 17:26:41 | end=2026-07-15 18:49:15
+log_path=ablation_runs\full_ablation_20260714\logs\iFashion_diff_weight_0p100_attempt1.log
+overrides={"dwt.latent_diffusion_set_loss_weight": 0.1, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.1131, N@10=0.08526 | R@20=0.15516, N@20=0.0992 | R@40=0.20651, N@40=0.11311 | R@80=0.26472, N@80=0.12637
+test: R@10=0.11436, N@10=0.11457 | R@20=0.15645, N@20=0.13143 | R@40=0.20677, N@40=0.14915 | R@80=0.26489, N@80=0.1665
+

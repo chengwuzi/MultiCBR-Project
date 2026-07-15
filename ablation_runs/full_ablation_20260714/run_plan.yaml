@@ -1,0 +1,427 @@
+created_at: '2026-07-14 19:37:06'
+config: config.yaml
+experiments: ablation_experiments.yaml
+dry_run: false
+items:
+- name: Youshu_wo_diffusion
+  dataset: Youshu
+  group: wo_table
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: false
+- name: Youshu_wo_dual_cl
+  dataset: Youshu
+  group: wo_table
+  enabled: true
+  overrides:
+    anchor_cl.enabled: false
+    c_lambdas:
+    - 0.0
+- name: Youshu_wo_prefusion_cl
+  dataset: Youshu
+  group: wo_table
+  enabled: true
+  overrides:
+    anchor_cl.enabled: false
+- name: Youshu_wo_postfusion_cl
+  dataset: Youshu
+  group: wo_table
+  enabled: true
+  overrides:
+    c_lambdas:
+    - 0.0
+- name: NetEase_wo_diffusion
+  dataset: NetEase
+  group: wo_table
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: false
+- name: NetEase_wo_dual_cl
+  dataset: NetEase
+  group: wo_table
+  enabled: true
+  overrides:
+    anchor_cl.enabled: false
+    c_lambdas:
+    - 0.0
+- name: NetEase_wo_prefusion_cl
+  dataset: NetEase
+  group: wo_table
+  enabled: true
+  overrides:
+    anchor_cl.enabled: false
+- name: NetEase_wo_postfusion_cl
+  dataset: NetEase
+  group: wo_table
+  enabled: true
+  overrides:
+    c_lambdas:
+    - 0.0
+- name: Youshu_topk_01
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 1
+- name: Youshu_topk_03
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 3
+- name: Youshu_topk_05
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 5
+- name: Youshu_topk_07
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+- name: Youshu_topk_09
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 9
+- name: Youshu_topk_11
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 11
+- name: Youshu_topk_13
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+- name: Youshu_topk_15
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 15
+- name: Youshu_topk_17
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 17
+- name: Youshu_topk_19
+  dataset: Youshu
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 19
+- name: NetEase_topk_01
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 1
+- name: NetEase_topk_03
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 3
+- name: NetEase_topk_05
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 5
+- name: NetEase_topk_07
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+- name: NetEase_topk_09
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 9
+- name: NetEase_topk_11
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 11
+- name: NetEase_topk_13
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+- name: NetEase_topk_15
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 15
+- name: NetEase_topk_17
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 17
+- name: NetEase_topk_19
+  dataset: NetEase
+  group: topk_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 19
+- name: Youshu_anchor_lambda_0p000
+  dataset: Youshu
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.0
+- name: Youshu_anchor_lambda_0p001
+  dataset: Youshu
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.001
+- name: Youshu_anchor_lambda_0p002
+  dataset: Youshu
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.002
+- name: Youshu_anchor_lambda_0p004
+  dataset: Youshu
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.004
+- name: Youshu_anchor_lambda_0p006
+  dataset: Youshu
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.006
+- name: Youshu_anchor_lambda_0p008
+  dataset: Youshu
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.008
+- name: NetEase_anchor_lambda_0p000
+  dataset: NetEase
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.0
+- name: NetEase_anchor_lambda_0p001
+  dataset: NetEase
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.001
+- name: NetEase_anchor_lambda_0p003
+  dataset: NetEase
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.003
+- name: NetEase_anchor_lambda_0p005
+  dataset: NetEase
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.005
+- name: NetEase_anchor_lambda_0p007
+  dataset: NetEase
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.007
+- name: NetEase_anchor_lambda_0p009
+  dataset: NetEase
+  group: anchor_cl_weight_sensitivity
+  enabled: true
+  overrides:
+    anchor_cl.enabled: true
+    anchor_cl.anchor_cl_lambda: 0.009
+- name: Youshu_diff_weight_0p000
+  dataset: Youshu
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.0
+- name: Youshu_diff_weight_0p010
+  dataset: Youshu
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.01
+- name: Youshu_diff_weight_0p030
+  dataset: Youshu
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.03
+- name: Youshu_diff_weight_0p040
+  dataset: Youshu
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.04
+- name: Youshu_diff_weight_0p050
+  dataset: Youshu
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.05
+- name: Youshu_diff_weight_0p070
+  dataset: Youshu
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 7
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.07
+- name: NetEase_diff_weight_0p000
+  dataset: NetEase
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.0
+- name: NetEase_diff_weight_0p010
+  dataset: NetEase
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.01
+- name: NetEase_diff_weight_0p030
+  dataset: NetEase
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.03
+- name: NetEase_diff_weight_0p050
+  dataset: NetEase
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.05
+- name: NetEase_diff_weight_0p070
+  dataset: NetEase
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.07
+- name: NetEase_diff_weight_0p100
+  dataset: NetEase
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    latent_rebuild.enabled: true
+    latent_rebuild.rebuild_k: 13
+    latent_rebuild.latent_diffusion_set_loss_weight: 0.1
+- name: iFashion_diff_weight_0p000
+  dataset: iFashion
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    dwt.use_latent_diffusion_rebuild: true
+    dwt.rebuild_k: 3
+    dwt.latent_diffusion_set_loss_weight: 0.0
+- name: iFashion_diff_weight_0p010
+  dataset: iFashion
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    dwt.use_latent_diffusion_rebuild: true
+    dwt.rebuild_k: 3
+    dwt.latent_diffusion_set_loss_weight: 0.01
+- name: iFashion_diff_weight_0p030
+  dataset: iFashion
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    dwt.use_latent_diffusion_rebuild: true
+    dwt.rebuild_k: 3
+    dwt.latent_diffusion_set_loss_weight: 0.03
+- name: iFashion_diff_weight_0p050
+  dataset: iFashion
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    dwt.use_latent_diffusion_rebuild: true
+    dwt.rebuild_k: 3
+    dwt.latent_diffusion_set_loss_weight: 0.05
+- name: iFashion_diff_weight_0p070
+  dataset: iFashion
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    dwt.use_latent_diffusion_rebuild: true
+    dwt.rebuild_k: 3
+    dwt.latent_diffusion_set_loss_weight: 0.07
+- name: iFashion_diff_weight_0p100
+  dataset: iFashion
+  group: diffusion_weight_sensitivity
+  enabled: true
+  overrides:
+    dwt.use_latent_diffusion_rebuild: true
+    dwt.rebuild_k: 3
+    dwt.latent_diffusion_set_loss_weight: 0.1

@@ -1,0 +1,662 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ablation Sensitivity Charts</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --panel: #ffffff;
+      --ink: #20242a;
+      --muted: #667085;
+      --grid: #e5e7eb;
+      --axis: #6b7280;
+      --blue: #2563eb;
+      --green: #059669;
+      --red: #dc2626;
+      --amber: #d97706;
+      --purple: #7c3aed;
+      --border: #d7dce3;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      line-height: 1.45;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: rgba(246, 247, 249, 0.96);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .wrap {
+      max-width: 1220px;
+      margin: 0 auto;
+      padding: 18px 22px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    button {
+      height: 34px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+
+    button.active {
+      border-color: #111827;
+      background: #111827;
+      color: #fff;
+    }
+
+    main.wrap {
+      padding-top: 20px;
+      padding-bottom: 40px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 14px;
+    }
+
+    .section-title h2 {
+      margin: 0;
+      font-size: 19px;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 13px;
+      max-width: 650px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid.three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px;
+      min-width: 0;
+    }
+
+    .panel h3 {
+      margin: 0 0 4px;
+      font-size: 15px;
+      font-weight: 700;
+    }
+
+    .panel .caption {
+      margin: 0 0 10px;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 18px;
+    }
+
+    .chart {
+      width: 100%;
+      height: 310px;
+      display: block;
+      overflow: visible;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 3px;
+      border-radius: 2px;
+      display: inline-block;
+    }
+
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .stat {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .stat b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 980px) {
+      .grid,
+      .grid.three,
+      .summary {
+        grid-template-columns: 1fr;
+      }
+
+      .chart {
+        height: 300px;
+      }
+
+      .section-title {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <h1>消融敏感性实验折线图预览</h1>
+      <p class="sub">数据来源：ablation_runs/full_ablation_20260714/results.csv；Recall 与 NDCG 分开展示，纵轴按局部范围自适应缩放以突出波动。</p>
+      <div class="toolbar" aria-label="chart sections">
+        <button class="active" data-target="topk">TopK 敏感性</button>
+        <button data-target="anchor">融合前对比权重</button>
+        <button data-target="diffusion">扩散权重</button>
+        <button data-target="all">全部图</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="summary">
+      <div class="stat"><b>TopK</b><span>NetEase 呈上升后平台趋势；Youshu 波动较小，k=7 综合较稳。</span></div>
+      <div class="stat"><b>Anchor Weight</b><span>整体呈适中权重较优，过大后下降的趋势。</span></div>
+      <div class="stat"><b>Diffusion Weight</b><span>整体波动有限，更适合解释为鲁棒性实验。</span></div>
+      <div class="stat"><b>建议主指标</b><span>论文主图建议用 R@20 与 N@20，避免曲线过密。</span></div>
+    </div>
+
+    <section id="topk" class="section active">
+      <div class="section-title">
+        <h2>TopK 敏感性</h2>
+      <div class="note">横轴为重构 UB 图保留的 Top-K 边数。每个数据集和指标单独成图，纵轴不从 0 开始，便于观察局部变化。</div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <h3>Youshu: Recall@20</h3>
+          <p class="caption">整体波动较小，k=19 的 R@20 最高。</p>
+          <svg class="chart" id="topk-youshu-r20"></svg>
+          <div class="legend" id="topk-youshu-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>Youshu: NDCG@20</h3>
+          <p class="caption">N@20 在 k=1 附近最高，后续轻微波动。</p>
+          <svg class="chart" id="topk-youshu-n20"></svg>
+          <div class="legend" id="topk-youshu-n20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: Recall@20</h3>
+          <p class="caption">从 k=1 到 k=15 明显上升，之后小幅回落。</p>
+          <svg class="chart" id="topk-netease-r20"></svg>
+          <div class="legend" id="topk-netease-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: NDCG@20</h3>
+          <p class="caption">整体上升后趋于平台，k=15 略高。</p>
+          <svg class="chart" id="topk-netease-n20"></svg>
+          <div class="legend" id="topk-netease-n20-legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="anchor" class="section">
+      <div class="section-title">
+        <h2>融合前对比权重敏感性</h2>
+      <div class="note">横轴为 anchor_cl_lambda。Recall 与 NDCG 分开画，便于判断哪条曲线更适合论文呈现。</div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <h3>Youshu: Recall@20</h3>
+          <p class="caption">0.004 的 R@20/N@20 最好，0.002 综合也很稳。</p>
+          <svg class="chart" id="anchor-youshu-r20"></svg>
+          <div class="legend" id="anchor-youshu-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>Youshu: NDCG@20</h3>
+          <p class="caption">中等权重提升更明显，0.008 回落。</p>
+          <svg class="chart" id="anchor-youshu-n20"></svg>
+          <div class="legend" id="anchor-youshu-n20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: Recall@20</h3>
+          <p class="caption">0.005-0.007 区间表现较好，0.009 开始回落。</p>
+          <svg class="chart" id="anchor-netease-r20"></svg>
+          <div class="legend" id="anchor-netease-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: NDCG@20</h3>
+          <p class="caption">0.007 的 N@20 略高，0.005 综合更稳。</p>
+          <svg class="chart" id="anchor-netease-n20"></svg>
+          <div class="legend" id="anchor-netease-n20-legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="diffusion" class="section">
+      <div class="section-title">
+        <h2>扩散 Set Loss 权重敏感性</h2>
+      <div class="note">横轴为 latent_diffusion_set_loss_weight。这里重点观察细微波动和鲁棒性，不强行追求单调趋势。</div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <h3>Youshu: Recall@20</h3>
+          <p class="caption">0.04 综合较稳，对应当前配置。</p>
+          <svg class="chart" id="diff-youshu-r20"></svg>
+          <div class="legend" id="diff-youshu-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>Youshu: NDCG@20</h3>
+          <p class="caption">N@20 在 0.04 附近最高。</p>
+          <svg class="chart" id="diff-youshu-n20"></svg>
+          <div class="legend" id="diff-youshu-n20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: Recall@20</h3>
+          <p class="caption">0.03-0.05 区间较好，0.05 综合最佳。</p>
+          <svg class="chart" id="diff-netease-r20"></svg>
+          <div class="legend" id="diff-netease-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: NDCG@20</h3>
+          <p class="caption">整体很平，0.03-0.10 差距很小。</p>
+          <svg class="chart" id="diff-netease-n20"></svg>
+          <div class="legend" id="diff-netease-n20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>iFashion: Recall@20</h3>
+          <p class="caption">曲线很平，适合解释为鲁棒性。</p>
+          <svg class="chart" id="diff-ifashion-r20"></svg>
+          <div class="legend" id="diff-ifashion-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>iFashion: NDCG@20</h3>
+          <p class="caption">波动幅度极小，适合做鲁棒性说明。</p>
+          <svg class="chart" id="diff-ifashion-n20"></svg>
+          <div class="legend" id="diff-ifashion-n20-legend"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const COLORS = {
+      youshu: getCss("--blue"),
+      netease: getCss("--green"),
+      recall: getCss("--blue"),
+      ndcg: getCss("--amber"),
+      ifashion: getCss("--red")
+    };
+
+    const data = {
+      topk: {
+        x: [1, 3, 5, 7, 9, 11, 13, 15, 17, 19],
+        youshu: {
+          r20: [0.28915, 0.28930, 0.28712, 0.28946, 0.28797, 0.29023, 0.29080, 0.28877, 0.29036, 0.29244],
+          n20: [0.17186, 0.17041, 0.17016, 0.17112, 0.16994, 0.17052, 0.17079, 0.17068, 0.17096, 0.17073]
+        },
+        netease: {
+          r20: [0.07288, 0.08386, 0.08853, 0.09238, 0.09327, 0.09341, 0.09460, 0.09537, 0.09358, 0.09388],
+          n20: [0.03923, 0.04499, 0.04761, 0.04952, 0.05006, 0.05055, 0.05095, 0.05101, 0.05065, 0.05092]
+        }
+      },
+      anchor: {
+        youshu: {
+          x: [0, 0.001, 0.002, 0.004, 0.006, 0.008],
+          r20: [0.29006, 0.29014, 0.29109, 0.29439, 0.29224, 0.28797],
+          n20: [0.16928, 0.17101, 0.17267, 0.17414, 0.17189, 0.16991]
+        },
+        netease: {
+          x: [0, 0.001, 0.003, 0.005, 0.007, 0.009],
+          r20: [0.09061, 0.09186, 0.09319, 0.09453, 0.09512, 0.09369],
+          n20: [0.04872, 0.04947, 0.05006, 0.05078, 0.05111, 0.05076]
+        }
+      },
+      diffusion: {
+        youshu: {
+          x: [0, 0.01, 0.03, 0.04, 0.05, 0.07],
+          r20: [0.29070, 0.28819, 0.28752, 0.28957, 0.28718, 0.28854],
+          n20: [0.17109, 0.17114, 0.17024, 0.17120, 0.17078, 0.17051]
+        },
+        netease: {
+          x: [0, 0.01, 0.03, 0.05, 0.07, 0.10],
+          r20: [0.09432, 0.09348, 0.09487, 0.09462, 0.09414, 0.09445],
+          n20: [0.05087, 0.05060, 0.05104, 0.05096, 0.05098, 0.05100]
+        },
+        ifashion: {
+          x: [0, 0.01, 0.03, 0.05, 0.07, 0.10],
+          r20: [0.15668, 0.15658, 0.15621, 0.15666, 0.15607, 0.15645],
+          n20: [0.13173, 0.13175, 0.13145, 0.13164, 0.13115, 0.13143]
+        }
+      }
+    };
+
+    function getCss(name) {
+      return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    }
+
+    function fmtTick(value) {
+      if (Math.abs(value) >= 1) return String(value);
+      return Number(value).toFixed(3).replace(/0+$/, "").replace(/\.$/, "");
+    }
+
+    function drawLineChart(svgId, legendId, config) {
+      const svg = document.getElementById(svgId);
+      const legend = document.getElementById(legendId);
+      const width = svg.clientWidth || 560;
+      const height = svg.clientHeight || 310;
+      svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+      svg.innerHTML = "";
+      legend.innerHTML = "";
+
+      const margin = { top: 18, right: 20, bottom: 42, left: 56 };
+      const plotW = width - margin.left - margin.right;
+      const plotH = height - margin.top - margin.bottom;
+      const allX = config.series.flatMap(s => s.x);
+      const allY = config.series.flatMap(s => s.y);
+      const minX = Math.min(...allX);
+      const maxX = Math.max(...allX);
+      let minY = Math.min(...allY);
+      let maxY = Math.max(...allY);
+      const pad = Math.max((maxY - minY) * 0.15, 0.0008);
+      minY -= pad;
+      maxY += pad;
+
+      const xScale = x => margin.left + ((x - minX) / (maxX - minX || 1)) * plotW;
+      const yScale = y => margin.top + (1 - (y - minY) / (maxY - minY || 1)) * plotH;
+
+      addGrid(svg, width, height, margin, plotW, plotH, minY, maxY, xScale, yScale, config.xTicks || uniqueTicks(allX));
+      config.series.forEach(series => addSeries(svg, series, xScale, yScale));
+      addLabels(svg, width, height, config.xLabel || "", config.yLabel || "");
+      config.series.forEach(series => addLegend(legend, series.name, series.color));
+    }
+
+    function uniqueTicks(values) {
+      return Array.from(new Set(values)).sort((a, b) => a - b);
+    }
+
+    function el(name, attrs = {}) {
+      const node = document.createElementNS("http://www.w3.org/2000/svg", name);
+      Object.entries(attrs).forEach(([key, value]) => node.setAttribute(key, value));
+      return node;
+    }
+
+    function addGrid(svg, width, height, margin, plotW, plotH, minY, maxY, xScale, yScale, xTicks) {
+      const axisColor = getCss("--axis");
+      const gridColor = getCss("--grid");
+      for (let i = 0; i <= 4; i++) {
+        const value = minY + ((maxY - minY) * i) / 4;
+        const y = yScale(value);
+        svg.appendChild(el("line", { x1: margin.left, y1: y, x2: margin.left + plotW, y2: y, stroke: gridColor, "stroke-width": 1 }));
+        const label = el("text", { x: margin.left - 10, y: y + 4, "text-anchor": "end", "font-size": 11, fill: axisColor });
+        label.textContent = value.toFixed(3);
+        svg.appendChild(label);
+      }
+
+      xTicks.forEach(value => {
+        const x = xScale(value);
+        svg.appendChild(el("line", { x1: x, y1: margin.top, x2: x, y2: margin.top + plotH, stroke: gridColor, "stroke-width": 1 }));
+        const label = el("text", { x, y: height - 18, "text-anchor": "middle", "font-size": 11, fill: axisColor });
+        label.textContent = fmtTick(value);
+        svg.appendChild(label);
+      });
+
+      svg.appendChild(el("line", { x1: margin.left, y1: margin.top + plotH, x2: margin.left + plotW, y2: margin.top + plotH, stroke: axisColor, "stroke-width": 1.2 }));
+      svg.appendChild(el("line", { x1: margin.left, y1: margin.top, x2: margin.left, y2: margin.top + plotH, stroke: axisColor, "stroke-width": 1.2 }));
+    }
+
+    function addSeries(svg, series, xScale, yScale) {
+      const points = series.x.map((x, i) => `${xScale(x)},${yScale(series.y[i])}`).join(" ");
+      svg.appendChild(el("polyline", {
+        points,
+        fill: "none",
+        stroke: series.color,
+        "stroke-width": 2.4,
+        "stroke-linecap": "round",
+        "stroke-linejoin": "round"
+      }));
+      series.x.forEach((x, i) => {
+        const circle = el("circle", {
+          cx: xScale(x),
+          cy: yScale(series.y[i]),
+          r: 3.6,
+          fill: "#fff",
+          stroke: series.color,
+          "stroke-width": 2
+        });
+        circle.appendChild(el("title"));
+        circle.querySelector("title").textContent = `${series.name}: x=${fmtTick(x)}, y=${series.y[i].toFixed(5)}`;
+        svg.appendChild(circle);
+      });
+    }
+
+    function addLabels(svg, width, height, xLabel, yLabel) {
+      const axisColor = getCss("--axis");
+      const xText = el("text", { x: width / 2, y: height - 2, "text-anchor": "middle", "font-size": 12, fill: axisColor });
+      xText.textContent = xLabel;
+      svg.appendChild(xText);
+      const yText = el("text", {
+        x: 14,
+        y: height / 2,
+        transform: `rotate(-90 14 ${height / 2})`,
+        "text-anchor": "middle",
+        "font-size": 12,
+        fill: axisColor
+      });
+      yText.textContent = yLabel;
+      svg.appendChild(yText);
+    }
+
+    function addLegend(root, name, color) {
+      const item = document.createElement("span");
+      item.className = "legend-item";
+      item.innerHTML = `<span class="swatch" style="background:${color}"></span>${name}`;
+      root.appendChild(item);
+    }
+
+    function render() {
+      drawLineChart("topk-youshu-r20", "topk-youshu-r20-legend", {
+        xLabel: "Top-K",
+        yLabel: "Recall@20",
+        xTicks: data.topk.x,
+        series: [
+          { name: "Youshu Recall@20", color: COLORS.recall, x: data.topk.x, y: data.topk.youshu.r20 }
+        ]
+      });
+      drawLineChart("topk-youshu-n20", "topk-youshu-n20-legend", {
+        xLabel: "Top-K",
+        yLabel: "NDCG@20",
+        xTicks: data.topk.x,
+        series: [
+          { name: "Youshu NDCG@20", color: COLORS.ndcg, x: data.topk.x, y: data.topk.youshu.n20 }
+        ]
+      });
+      drawLineChart("topk-netease-r20", "topk-netease-r20-legend", {
+        xLabel: "Top-K",
+        yLabel: "Recall@20",
+        xTicks: data.topk.x,
+        series: [
+          { name: "NetEase Recall@20", color: COLORS.recall, x: data.topk.x, y: data.topk.netease.r20 }
+        ]
+      });
+      drawLineChart("topk-netease-n20", "topk-netease-n20-legend", {
+        xLabel: "Top-K",
+        yLabel: "NDCG@20",
+        xTicks: data.topk.x,
+        series: [
+          { name: "NetEase NDCG@20", color: COLORS.ndcg, x: data.topk.x, y: data.topk.netease.n20 }
+        ]
+      });
+      drawLineChart("anchor-youshu-r20", "anchor-youshu-r20-legend", {
+        xLabel: "anchor_cl_lambda",
+        yLabel: "Recall@20",
+        xTicks: data.anchor.youshu.x,
+        series: [
+          { name: "Youshu Recall@20", color: COLORS.recall, x: data.anchor.youshu.x, y: data.anchor.youshu.r20 }
+        ]
+      });
+      drawLineChart("anchor-youshu-n20", "anchor-youshu-n20-legend", {
+        xLabel: "anchor_cl_lambda",
+        yLabel: "NDCG@20",
+        xTicks: data.anchor.youshu.x,
+        series: [
+          { name: "Youshu NDCG@20", color: COLORS.ndcg, x: data.anchor.youshu.x, y: data.anchor.youshu.n20 }
+        ]
+      });
+      drawLineChart("anchor-netease-r20", "anchor-netease-r20-legend", {
+        xLabel: "anchor_cl_lambda",
+        yLabel: "Recall@20",
+        xTicks: data.anchor.netease.x,
+        series: [
+          { name: "NetEase Recall@20", color: COLORS.recall, x: data.anchor.netease.x, y: data.anchor.netease.r20 }
+        ]
+      });
+      drawLineChart("anchor-netease-n20", "anchor-netease-n20-legend", {
+        xLabel: "anchor_cl_lambda",
+        yLabel: "NDCG@20",
+        xTicks: data.anchor.netease.x,
+        series: [
+          { name: "NetEase NDCG@20", color: COLORS.ndcg, x: data.anchor.netease.x, y: data.anchor.netease.n20 }
+        ]
+      });
+      drawLineChart("diff-youshu-r20", "diff-youshu-r20-legend", {
+        xLabel: "set_loss_weight",
+        yLabel: "Recall@20",
+        xTicks: data.diffusion.youshu.x,
+        series: [
+          { name: "Youshu Recall@20", color: COLORS.recall, x: data.diffusion.youshu.x, y: data.diffusion.youshu.r20 }
+        ]
+      });
+      drawLineChart("diff-youshu-n20", "diff-youshu-n20-legend", {
+        xLabel: "set_loss_weight",
+        yLabel: "NDCG@20",
+        xTicks: data.diffusion.youshu.x,
+        series: [
+          { name: "Youshu NDCG@20", color: COLORS.ndcg, x: data.diffusion.youshu.x, y: data.diffusion.youshu.n20 }
+        ]
+      });
+      drawLineChart("diff-netease-r20", "diff-netease-r20-legend", {
+        xLabel: "set_loss_weight",
+        yLabel: "Recall@20",
+        xTicks: data.diffusion.netease.x,
+        series: [
+          { name: "NetEase Recall@20", color: COLORS.recall, x: data.diffusion.netease.x, y: data.diffusion.netease.r20 }
+        ]
+      });
+      drawLineChart("diff-netease-n20", "diff-netease-n20-legend", {
+        xLabel: "set_loss_weight",
+        yLabel: "NDCG@20",
+        xTicks: data.diffusion.netease.x,
+        series: [
+          { name: "NetEase NDCG@20", color: COLORS.ndcg, x: data.diffusion.netease.x, y: data.diffusion.netease.n20 }
+        ]
+      });
+      drawLineChart("diff-ifashion-r20", "diff-ifashion-r20-legend", {
+        xLabel: "set_loss_weight",
+        yLabel: "Recall@20",
+        xTicks: data.diffusion.ifashion.x,
+        series: [
+          { name: "iFashion Recall@20", color: COLORS.recall, x: data.diffusion.ifashion.x, y: data.diffusion.ifashion.r20 }
+        ]
+      });
+      drawLineChart("diff-ifashion-n20", "diff-ifashion-n20-legend", {
+        xLabel: "set_loss_weight",
+        yLabel: "NDCG@20",
+        xTicks: data.diffusion.ifashion.x,
+        series: [
+          { name: "iFashion NDCG@20", color: COLORS.ndcg, x: data.diffusion.ifashion.x, y: data.diffusion.ifashion.n20 }
+        ]
+      });
+    }
+
+    function setSection(target) {
+      const sections = Array.from(document.querySelectorAll(".section"));
+      const buttons = Array.from(document.querySelectorAll("button[data-target]"));
+      buttons.forEach(button => button.classList.toggle("active", button.dataset.target === target));
+      sections.forEach(section => section.classList.toggle("active", target === "all" || section.id === target));
+      requestAnimationFrame(render);
+    }
+
+    document.querySelectorAll("button[data-target]").forEach(button => {
+      button.addEventListener("click", () => setSection(button.dataset.target));
+    });
+
+    window.addEventListener("resize", () => requestAnimationFrame(render));
+    render();
+  </script>
+</body>
+</html>

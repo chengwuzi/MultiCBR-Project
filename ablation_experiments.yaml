@@ -501,3 +501,171 @@ experiments:
       dwt.use_latent_diffusion_rebuild: true
       dwt.rebuild_k: 3
       dwt.latent_diffusion_set_loss_weight: 0.1
+
+  # ---------------------------------------------------------------------------
+  # 5. Diffusion noise strength sensitivity
+  # Sweep latent_diffusion_beta_end for all three datasets.
+  # beta_start, num_steps, rebuild_k, and other tuned parameters keep their
+  # dataset-specific best config values.
+  # ---------------------------------------------------------------------------
+  - name: Youshu_beta_end_0p005
+    dataset: Youshu
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 7
+      latent_rebuild.latent_diffusion_beta_end: 0.005
+
+  - name: Youshu_beta_end_0p010
+    dataset: Youshu
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 7
+      latent_rebuild.latent_diffusion_beta_end: 0.01
+
+  - name: Youshu_beta_end_0p020
+    dataset: Youshu
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 7
+      latent_rebuild.latent_diffusion_beta_end: 0.02
+
+  - name: Youshu_beta_end_0p040
+    dataset: Youshu
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 7
+      latent_rebuild.latent_diffusion_beta_end: 0.04
+
+  - name: Youshu_beta_end_0p060
+    dataset: Youshu
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 7
+      latent_rebuild.latent_diffusion_beta_end: 0.06
+
+  - name: Youshu_beta_end_0p080
+    dataset: Youshu
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 7
+      latent_rebuild.latent_diffusion_beta_end: 0.08
+
+  - name: NetEase_beta_end_0p005
+    dataset: NetEase
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 13
+      latent_rebuild.latent_diffusion_beta_end: 0.005
+
+  - name: NetEase_beta_end_0p010
+    dataset: NetEase
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 13
+      latent_rebuild.latent_diffusion_beta_end: 0.01
+
+  - name: NetEase_beta_end_0p020
+    dataset: NetEase
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 13
+      latent_rebuild.latent_diffusion_beta_end: 0.02
+
+  - name: NetEase_beta_end_0p040
+    dataset: NetEase
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 13
+      latent_rebuild.latent_diffusion_beta_end: 0.04
+
+  - name: NetEase_beta_end_0p060
+    dataset: NetEase
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 13
+      latent_rebuild.latent_diffusion_beta_end: 0.06
+
+  - name: NetEase_beta_end_0p080
+    dataset: NetEase
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      latent_rebuild.enabled: true
+      latent_rebuild.rebuild_k: 13
+      latent_rebuild.latent_diffusion_beta_end: 0.08
+
+  - name: iFashion_beta_end_0p005
+    dataset: iFashion
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.rebuild_k: 3
+      dwt.latent_diffusion_beta_end: 0.005
+
+  - name: iFashion_beta_end_0p010
+    dataset: iFashion
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.rebuild_k: 3
+      dwt.latent_diffusion_beta_end: 0.01
+
+  - name: iFashion_beta_end_0p020
+    dataset: iFashion
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.rebuild_k: 3
+      dwt.latent_diffusion_beta_end: 0.02
+
+  - name: iFashion_beta_end_0p040
+    dataset: iFashion
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.rebuild_k: 3
+      dwt.latent_diffusion_beta_end: 0.04
+
+  - name: iFashion_beta_end_0p060
+    dataset: iFashion
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.rebuild_k: 3
+      dwt.latent_diffusion_beta_end: 0.06
+
+  - name: iFashion_beta_end_0p080
+    dataset: iFashion
+    group: diffusion_noise_sensitivity
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.rebuild_k: 3
+      dwt.latent_diffusion_beta_end: 0.08

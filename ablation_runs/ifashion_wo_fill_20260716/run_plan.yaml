@@ -1,0 +1,11 @@
+created_at: '2026-07-16 18:32:36'
+config: config.yaml
+experiments: ablation_experiments.yaml
+dry_run: false
+items:
+- name: iFashion_wo_dual_cl
+  dataset: iFashion
+  group: wo_table
+  enabled: true
+  overrides:
+    dwt.lambda_1: 0.0

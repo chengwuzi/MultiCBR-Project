@@ -1,0 +1,4 @@
+{"event": "attempt_start", "name": "iFashion_wo_diffusion", "dataset": "iFashion", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-16 17:13:44"}
+{"event": "success", "name": "iFashion_wo_diffusion", "attempt": 1, "log_path": "ablation_runs\\ifashion_wo_fill_20260716\\logs\\iFashion_wo_diffusion_attempt1.log", "time": "2026-07-16 18:32:32"}
+{"event": "attempt_start", "name": "iFashion_wo_dual_cl", "dataset": "iFashion", "group": "wo_table", "attempt": 1, "max_retries": 5, "time": "2026-07-16 18:32:36"}
+{"event": "success", "name": "iFashion_wo_dual_cl", "attempt": 1, "log_path": "ablation_runs\\ifashion_wo_fill_20260716\\logs\\iFashion_wo_dual_cl_attempt1.log", "time": "2026-07-16 19:47:39"}

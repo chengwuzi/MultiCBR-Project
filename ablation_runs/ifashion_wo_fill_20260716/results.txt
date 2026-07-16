@@ -1,0 +1,18 @@
+====================================================================================================
+iFashion_wo_diffusion | dataset=iFashion | group=wo_table | status=success
+attempts=1 | best_epoch=9 | elapsed=01:18:47
+start=2026-07-16 17:13:44 | end=2026-07-16 18:32:32
+log_path=ablation_runs\ifashion_wo_fill_20260716\logs\iFashion_wo_diffusion_attempt1.log
+overrides={"dwt.use_latent_diffusion_rebuild": false}
+val: R@10=0.10741, N@10=0.08032 | R@20=0.14982, N@20=0.09435 | R@40=0.19983, N@40=0.1079 | R@80=0.25802, N@80=0.12117
+test: R@10=0.10787, N@10=0.10738 | R@20=0.14999, N@20=0.12446 | R@40=0.2002, N@40=0.14215 | R@80=0.25903, N@80=0.15971
+
+====================================================================================================
+iFashion_wo_dual_cl | dataset=iFashion | group=wo_table | status=success
+attempts=1 | best_epoch=19 | elapsed=01:15:03
+start=2026-07-16 18:32:36 | end=2026-07-16 19:47:39
+log_path=ablation_runs\ifashion_wo_fill_20260716\logs\iFashion_wo_dual_cl_attempt1.log
+overrides={"dwt.lambda_1": 0.0}
+val: R@10=0.02369, N@10=0.01552 | R@20=0.03936, N@20=0.02073 | R@40=0.06483, N@40=0.02764 | R@80=0.102, N@80=0.03609
+test: R@10=0.02468, N@10=0.02182 | R@20=0.04004, N@20=0.02814 | R@40=0.06577, N@40=0.03722 | R@80=0.10336, N@80=0.04841
+

@@ -11,8 +11,10 @@
 experiments:
   # ---------------------------------------------------------------------------
   # 1. Component ablation table
-  # Full results are taken from existing best records. These rows run only
-  # the w/o variants for Youshu and NetEase.
+  # Full results are taken from existing best records. iFashion uses the DWT
+  # path, so it keeps only the comparable diffusion-removal row and the
+  # dataset-specific counterpart of w/o dual CL, implemented by removing the
+  # whole DWT CL loss.
   # ---------------------------------------------------------------------------
   - name: Youshu_wo_diffusion
     dataset: Youshu
@@ -71,6 +73,20 @@ experiments:
     enabled: true
     overrides:
       c_lambdas: [0.0]
+
+  - name: iFashion_wo_diffusion
+    dataset: iFashion
+    group: wo_table
+    enabled: true
+    overrides:
+      dwt.use_latent_diffusion_rebuild: false
+
+  - name: iFashion_wo_dual_cl
+    dataset: iFashion
+    group: wo_table
+    enabled: true
+    overrides:
+      dwt.lambda_1: 0.0
 
   # ---------------------------------------------------------------------------
   # 2. TopK sensitivity for the diffusion-based UB rebuild module

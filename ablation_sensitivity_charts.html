@@ -67,6 +67,16 @@
       margin-top: 14px;
     }
 
+    .cutoff-control {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
     button {
       height: 34px;
       border: 1px solid var(--border);
@@ -178,7 +188,7 @@
 
     .summary {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
       gap: 12px;
       margin-bottom: 18px;
     }
@@ -223,12 +233,19 @@
   <header>
     <div class="wrap">
       <h1>消融敏感性实验折线图预览</h1>
-      <p class="sub">数据来源：ablation_runs/full_ablation_20260714/results.csv；Recall 与 NDCG 分开展示，纵轴按局部范围自适应缩放以突出波动。</p>
+      <p class="sub">数据来源：ablation_runs/full_ablation_20260714/results.csv 与 ablation_runs/beta_end_sensitivity_20260716/results.csv；Recall 与 NDCG 分开展示，纵轴按局部范围自适应缩放以突出波动。</p>
       <div class="toolbar" aria-label="chart sections">
         <button class="active" data-target="topk">TopK 敏感性</button>
         <button data-target="anchor">融合前对比权重</button>
         <button data-target="diffusion">扩散权重</button>
+        <button data-target="noise">扩散噪声强度</button>
         <button data-target="all">全部图</button>
+      </div>
+      <div class="cutoff-control" aria-label="metric cutoff">
+        <span>指标截断：</span>
+        <button data-cutoff="10">@10</button>
+        <button class="active" data-cutoff="20">@20</button>
+        <button data-cutoff="40">@40</button>
       </div>
     </div>
   </header>
@@ -238,7 +255,8 @@
       <div class="stat"><b>TopK</b><span>NetEase 呈上升后平台趋势；Youshu 波动较小，k=7 综合较稳。</span></div>
       <div class="stat"><b>Anchor Weight</b><span>整体呈适中权重较优，过大后下降的趋势。</span></div>
       <div class="stat"><b>Diffusion Weight</b><span>整体波动有限，更适合解释为鲁棒性实验。</span></div>
-      <div class="stat"><b>建议主指标</b><span>论文主图建议用 R@20 与 N@20，避免曲线过密。</span></div>
+      <div class="stat"><b>Beta End</b><span>Youshu/NetEase 存在轻微最优点，iFashion 更接近噪声强度鲁棒性。</span></div>
+      <div class="stat"><b>指标切换</b><span>支持 @10、@20、@40 全局切换，图题、图例与纵轴会同步更新。</span></div>
     </div>
 
     <section id="topk" class="section active">
@@ -249,25 +267,25 @@
       <div class="grid">
         <div class="panel">
           <h3>Youshu: Recall@20</h3>
-          <p class="caption">整体波动较小，k=19 的 R@20 最高。</p>
+          <p class="caption">观察不同保留边数下的 Recall 变化。</p>
           <svg class="chart" id="topk-youshu-r20"></svg>
           <div class="legend" id="topk-youshu-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>Youshu: NDCG@20</h3>
-          <p class="caption">N@20 在 k=1 附近最高，后续轻微波动。</p>
+          <p class="caption">观察不同保留边数下的 NDCG 变化。</p>
           <svg class="chart" id="topk-youshu-n20"></svg>
           <div class="legend" id="topk-youshu-n20-legend"></div>
         </div>
         <div class="panel">
           <h3>NetEase: Recall@20</h3>
-          <p class="caption">从 k=1 到 k=15 明显上升，之后小幅回落。</p>
+          <p class="caption">观察 Top-K 增大后的 Recall 趋势。</p>
           <svg class="chart" id="topk-netease-r20"></svg>
           <div class="legend" id="topk-netease-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>NetEase: NDCG@20</h3>
-          <p class="caption">整体上升后趋于平台，k=15 略高。</p>
+          <p class="caption">观察 Top-K 增大后的 NDCG 趋势。</p>
           <svg class="chart" id="topk-netease-n20"></svg>
           <div class="legend" id="topk-netease-n20-legend"></div>
         </div>
@@ -282,25 +300,25 @@
       <div class="grid">
         <div class="panel">
           <h3>Youshu: Recall@20</h3>
-          <p class="caption">0.004 的 R@20/N@20 最好，0.002 综合也很稳。</p>
+          <p class="caption">观察融合前对比权重对 Recall 的影响。</p>
           <svg class="chart" id="anchor-youshu-r20"></svg>
           <div class="legend" id="anchor-youshu-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>Youshu: NDCG@20</h3>
-          <p class="caption">中等权重提升更明显，0.008 回落。</p>
+          <p class="caption">观察融合前对比权重对 NDCG 的影响。</p>
           <svg class="chart" id="anchor-youshu-n20"></svg>
           <div class="legend" id="anchor-youshu-n20-legend"></div>
         </div>
         <div class="panel">
           <h3>NetEase: Recall@20</h3>
-          <p class="caption">0.005-0.007 区间表现较好，0.009 开始回落。</p>
+          <p class="caption">观察中等权重区间的 Recall 表现。</p>
           <svg class="chart" id="anchor-netease-r20"></svg>
           <div class="legend" id="anchor-netease-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>NetEase: NDCG@20</h3>
-          <p class="caption">0.007 的 N@20 略高，0.005 综合更稳。</p>
+          <p class="caption">观察中等权重区间的 NDCG 表现。</p>
           <svg class="chart" id="anchor-netease-n20"></svg>
           <div class="legend" id="anchor-netease-n20-legend"></div>
         </div>
@@ -315,39 +333,84 @@
       <div class="grid">
         <div class="panel">
           <h3>Youshu: Recall@20</h3>
-          <p class="caption">0.04 综合较稳，对应当前配置。</p>
+          <p class="caption">观察 set loss 权重对 Recall 的影响。</p>
           <svg class="chart" id="diff-youshu-r20"></svg>
           <div class="legend" id="diff-youshu-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>Youshu: NDCG@20</h3>
-          <p class="caption">N@20 在 0.04 附近最高。</p>
+          <p class="caption">观察 set loss 权重对 NDCG 的影响。</p>
           <svg class="chart" id="diff-youshu-n20"></svg>
           <div class="legend" id="diff-youshu-n20-legend"></div>
         </div>
         <div class="panel">
           <h3>NetEase: Recall@20</h3>
-          <p class="caption">0.03-0.05 区间较好，0.05 综合最佳。</p>
+          <p class="caption">观察 set loss 权重区间内的 Recall 波动。</p>
           <svg class="chart" id="diff-netease-r20"></svg>
           <div class="legend" id="diff-netease-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>NetEase: NDCG@20</h3>
-          <p class="caption">整体很平，0.03-0.10 差距很小。</p>
+          <p class="caption">观察 set loss 权重区间内的 NDCG 波动。</p>
           <svg class="chart" id="diff-netease-n20"></svg>
           <div class="legend" id="diff-netease-n20-legend"></div>
         </div>
         <div class="panel">
           <h3>iFashion: Recall@20</h3>
-          <p class="caption">曲线很平，适合解释为鲁棒性。</p>
+          <p class="caption">观察 iFashion 上 Recall 的鲁棒性。</p>
           <svg class="chart" id="diff-ifashion-r20"></svg>
           <div class="legend" id="diff-ifashion-r20-legend"></div>
         </div>
         <div class="panel">
           <h3>iFashion: NDCG@20</h3>
-          <p class="caption">波动幅度极小，适合做鲁棒性说明。</p>
+          <p class="caption">观察 iFashion 上 NDCG 的鲁棒性。</p>
           <svg class="chart" id="diff-ifashion-n20"></svg>
           <div class="legend" id="diff-ifashion-n20-legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="noise" class="section">
+      <div class="section-title">
+        <h2>扩散噪声强度敏感性</h2>
+      <div class="note">横轴为 beta_end，即扩散过程的末端噪声强度。该组实验来自 beta_end_sensitivity_20260716，用于观察噪声日程变化对推荐指标的影响。</div>
+      </div>
+      <div class="grid">
+        <div class="panel">
+          <h3>Youshu: Recall@20</h3>
+          <p class="caption">观察 beta_end 对 Recall 的影响。</p>
+          <svg class="chart" id="noise-youshu-r20"></svg>
+          <div class="legend" id="noise-youshu-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>Youshu: NDCG@20</h3>
+          <p class="caption">观察 beta_end 对 NDCG 的影响。</p>
+          <svg class="chart" id="noise-youshu-n20"></svg>
+          <div class="legend" id="noise-youshu-n20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: Recall@20</h3>
+          <p class="caption">观察 beta_end 区间内的 Recall 波动。</p>
+          <svg class="chart" id="noise-netease-r20"></svg>
+          <div class="legend" id="noise-netease-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>NetEase: NDCG@20</h3>
+          <p class="caption">观察 beta_end 区间内的 NDCG 波动。</p>
+          <svg class="chart" id="noise-netease-n20"></svg>
+          <div class="legend" id="noise-netease-n20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>iFashion: Recall@20</h3>
+          <p class="caption">观察 iFashion 上 Recall 的噪声强度鲁棒性。</p>
+          <svg class="chart" id="noise-ifashion-r20"></svg>
+          <div class="legend" id="noise-ifashion-r20-legend"></div>
+        </div>
+        <div class="panel">
+          <h3>iFashion: NDCG@20</h3>
+          <p class="caption">观察 iFashion 上 NDCG 的噪声强度鲁棒性。</p>
+          <svg class="chart" id="noise-ifashion-n20"></svg>
+          <div class="legend" id="noise-ifashion-n20-legend"></div>
         </div>
       </div>
     </section>
@@ -402,8 +465,54 @@
           r20: [0.15668, 0.15658, 0.15621, 0.15666, 0.15607, 0.15645],
           n20: [0.13173, 0.13175, 0.13145, 0.13164, 0.13115, 0.13143]
         }
+      },
+      noise: {
+        youshu: {
+          x: [0.005, 0.01, 0.02, 0.04, 0.06, 0.08],
+          r20: [0.28568, 0.28609, 0.28926, 0.28833, 0.28631, 0.28783],
+          n20: [0.17045, 0.17048, 0.17110, 0.17009, 0.16915, 0.16953]
+        },
+        netease: {
+          x: [0.005, 0.01, 0.02, 0.04, 0.06, 0.08],
+          r20: [0.09513, 0.09423, 0.09455, 0.09537, 0.09482, 0.09438],
+          n20: [0.05096, 0.05075, 0.05088, 0.05108, 0.05095, 0.05074]
+        },
+        ifashion: {
+          x: [0.005, 0.01, 0.02, 0.04, 0.06, 0.08],
+          r20: [0.15667, 0.15650, 0.15657, 0.15648, 0.15640, 0.15629],
+          n20: [0.13113, 0.13135, 0.13159, 0.13143, 0.13161, 0.13169]
+        }
       }
     };
+
+    const metricSlices = {"topk":{"youshu":{"r10":[0.20406,0.19925,0.20069,0.20393,0.20172,0.20133,0.20073,0.20263,0.20317,0.20102],"n10":[0.14779,0.14481,0.14535,0.14668,0.14522,0.14513,0.14511,0.14619,0.1462,0.1448],"r40":[0.39392,0.39079,0.39539,0.39964,0.39787,0.397,0.3914,0.39619,0.39516,0.39622],"n40":[0.20046,0.19816,0.19943,0.20073,0.19951,0.1995,0.19841,0.19987,0.19965,0.19906]},"netease":{"r10":[0.04523,0.05302,0.05663,0.05907,0.06008,0.0612,0.06039,0.06129,0.06124,0.06102],"n10":[0.03061,0.03536,0.03768,0.03926,0.03981,0.04055,0.04028,0.04042,0.04056,0.04067],"r40":[0.11077,0.12666,0.13203,0.13602,0.13672,0.13593,0.13811,0.13795,0.13739,0.13844],"n40":[0.04913,0.05625,0.05913,0.06108,0.06163,0.0618,0.06245,0.06237,0.06231,0.06268]}},"anchor":{"youshu":{"r10":[0.20468,0.20487,0.20469,0.20435,0.20213,0.19888],"n10":[0.14531,0.14659,0.14784,0.14853,0.14621,0.14449],"r40":[0.39738,0.40039,0.40166,0.39582,0.39793,0.38927],"n40":[0.19825,0.20071,0.20228,0.20189,0.20062,0.19785]},"netease":{"r10":[0.05786,0.05815,0.05972,0.05961,0.06016,0.06049],"n10":[0.03851,0.03899,0.03961,0.03995,0.04024,0.04035],"r40":[0.13786,0.13961,0.13949,0.13934,0.13736,0.13587],"n40":[0.06118,0.06208,0.06228,0.06272,0.06241,0.06199]}},"diffusion":{"youshu":{"r10":[0.20144,0.20234,0.20241,0.20393,0.202,0.20312],"n10":[0.14523,0.14614,0.14578,0.14663,0.14623,0.1458],"r40":[0.39669,0.39643,0.39562,0.39938,0.39826,0.39607],"n40":[0.1996,0.20013,0.19939,0.20066,0.20054,0.1995]},"netease":{"r10":[0.05999,0.05998,0.06016,0.06031,0.06,0.05997],"n10":[0.04025,0.04007,0.0403,0.04026,0.04041,0.04025],"r40":[0.13634,0.13816,0.13711,0.13826,0.13772,0.13725],"n40":[0.06216,0.06239,0.06238,0.06248,0.06259,0.06242]},"ifashion":{"r10":[0.11418,0.11424,0.11371,0.1142,0.11401,0.11436],"n10":[0.11467,0.11475,0.11438,0.11458,0.11427,0.11457],"r40":[0.20682,0.20666,0.20688,0.2068,0.20685,0.20677],"n40":[0.14938,0.14937,0.14925,0.14929,0.14904,0.14915]}},"noise":{"youshu":{"r10":[0.20287,0.20212,0.2036,0.1991,0.20234,0.20345],"n10":[0.14626,0.14605,0.1466,0.14436,0.14494,0.14515],"r40":[0.39833,0.3974,0.39964,0.39788,0.3935,0.39709],"n40":[0.20055,0.20027,0.20077,0.19946,0.19818,0.19893]},"netease":{"r10":[0.06045,0.06068,0.06014,0.06052,0.06068,0.06023],"n10":[0.04016,0.04026,0.04015,0.04021,0.04031,0.04008],"r40":[0.13809,0.13719,0.13819,0.13908,0.13773,0.13809],"n40":[0.06239,0.06219,0.06242,0.06266,0.0624,0.06231]},"ifashion":{"r10":[0.11349,0.11432,0.11434,0.11422,0.11418,0.11456],"n10":[0.11379,0.11446,0.11464,0.11447,0.11467,0.11501],"r40":[0.20702,0.20632,0.20696,0.20683,0.20658,0.20699],"n40":[0.14884,0.14889,0.14933,0.14914,0.14925,0.14953]}}};
+
+    let selectedCutoff = "20";
+
+    function hydrateMetricData() {
+      Object.entries(metricSlices).forEach(([groupKey, group]) => {
+        Object.entries(group).forEach(([datasetKey, slices]) => {
+          const current = data[groupKey][datasetKey];
+          const x = current.x || data[groupKey].x;
+          data[groupKey][datasetKey] = {
+            x,
+            recall: {
+              "10": slices.r10,
+              "20": current.r20,
+              "40": slices.r40
+            },
+            ndcg: {
+              "10": slices.n10,
+              "20": current.n20,
+              "40": slices.n40
+            }
+          };
+        });
+      });
+      delete data.topk.x;
+    }
+
+    hydrateMetricData();
 
     function getCss(name) {
       return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
@@ -528,119 +637,58 @@
       root.appendChild(item);
     }
 
+    function metricName(metric) {
+      return metric === "recall" ? "Recall" : "NDCG";
+    }
+
+    function updatePanelTitle(svgId, datasetName, metric) {
+      const panel = document.getElementById(svgId).closest(".panel");
+      panel.querySelector("h3").textContent = `${datasetName}: ${metricName(metric)}@${selectedCutoff}`;
+    }
+
+    function drawSensitivityChart(svgId, legendId, group, dataset, datasetName, metric, xLabel) {
+      const source = data[group][dataset];
+      const label = `${datasetName} ${metricName(metric)}@${selectedCutoff}`;
+      updatePanelTitle(svgId, datasetName, metric);
+      drawLineChart(svgId, legendId, {
+        xLabel,
+        yLabel: `${metricName(metric)}@${selectedCutoff}`,
+        xTicks: source.x,
+        series: [
+          {
+            name: label,
+            color: metric === "recall" ? COLORS.recall : COLORS.ndcg,
+            x: source.x,
+            y: source[metric][selectedCutoff]
+          }
+        ]
+      });
+    }
+
     function render() {
-      drawLineChart("topk-youshu-r20", "topk-youshu-r20-legend", {
-        xLabel: "Top-K",
-        yLabel: "Recall@20",
-        xTicks: data.topk.x,
-        series: [
-          { name: "Youshu Recall@20", color: COLORS.recall, x: data.topk.x, y: data.topk.youshu.r20 }
-        ]
-      });
-      drawLineChart("topk-youshu-n20", "topk-youshu-n20-legend", {
-        xLabel: "Top-K",
-        yLabel: "NDCG@20",
-        xTicks: data.topk.x,
-        series: [
-          { name: "Youshu NDCG@20", color: COLORS.ndcg, x: data.topk.x, y: data.topk.youshu.n20 }
-        ]
-      });
-      drawLineChart("topk-netease-r20", "topk-netease-r20-legend", {
-        xLabel: "Top-K",
-        yLabel: "Recall@20",
-        xTicks: data.topk.x,
-        series: [
-          { name: "NetEase Recall@20", color: COLORS.recall, x: data.topk.x, y: data.topk.netease.r20 }
-        ]
-      });
-      drawLineChart("topk-netease-n20", "topk-netease-n20-legend", {
-        xLabel: "Top-K",
-        yLabel: "NDCG@20",
-        xTicks: data.topk.x,
-        series: [
-          { name: "NetEase NDCG@20", color: COLORS.ndcg, x: data.topk.x, y: data.topk.netease.n20 }
-        ]
-      });
-      drawLineChart("anchor-youshu-r20", "anchor-youshu-r20-legend", {
-        xLabel: "anchor_cl_lambda",
-        yLabel: "Recall@20",
-        xTicks: data.anchor.youshu.x,
-        series: [
-          { name: "Youshu Recall@20", color: COLORS.recall, x: data.anchor.youshu.x, y: data.anchor.youshu.r20 }
-        ]
-      });
-      drawLineChart("anchor-youshu-n20", "anchor-youshu-n20-legend", {
-        xLabel: "anchor_cl_lambda",
-        yLabel: "NDCG@20",
-        xTicks: data.anchor.youshu.x,
-        series: [
-          { name: "Youshu NDCG@20", color: COLORS.ndcg, x: data.anchor.youshu.x, y: data.anchor.youshu.n20 }
-        ]
-      });
-      drawLineChart("anchor-netease-r20", "anchor-netease-r20-legend", {
-        xLabel: "anchor_cl_lambda",
-        yLabel: "Recall@20",
-        xTicks: data.anchor.netease.x,
-        series: [
-          { name: "NetEase Recall@20", color: COLORS.recall, x: data.anchor.netease.x, y: data.anchor.netease.r20 }
-        ]
-      });
-      drawLineChart("anchor-netease-n20", "anchor-netease-n20-legend", {
-        xLabel: "anchor_cl_lambda",
-        yLabel: "NDCG@20",
-        xTicks: data.anchor.netease.x,
-        series: [
-          { name: "NetEase NDCG@20", color: COLORS.ndcg, x: data.anchor.netease.x, y: data.anchor.netease.n20 }
-        ]
-      });
-      drawLineChart("diff-youshu-r20", "diff-youshu-r20-legend", {
-        xLabel: "set_loss_weight",
-        yLabel: "Recall@20",
-        xTicks: data.diffusion.youshu.x,
-        series: [
-          { name: "Youshu Recall@20", color: COLORS.recall, x: data.diffusion.youshu.x, y: data.diffusion.youshu.r20 }
-        ]
-      });
-      drawLineChart("diff-youshu-n20", "diff-youshu-n20-legend", {
-        xLabel: "set_loss_weight",
-        yLabel: "NDCG@20",
-        xTicks: data.diffusion.youshu.x,
-        series: [
-          { name: "Youshu NDCG@20", color: COLORS.ndcg, x: data.diffusion.youshu.x, y: data.diffusion.youshu.n20 }
-        ]
-      });
-      drawLineChart("diff-netease-r20", "diff-netease-r20-legend", {
-        xLabel: "set_loss_weight",
-        yLabel: "Recall@20",
-        xTicks: data.diffusion.netease.x,
-        series: [
-          { name: "NetEase Recall@20", color: COLORS.recall, x: data.diffusion.netease.x, y: data.diffusion.netease.r20 }
-        ]
-      });
-      drawLineChart("diff-netease-n20", "diff-netease-n20-legend", {
-        xLabel: "set_loss_weight",
-        yLabel: "NDCG@20",
-        xTicks: data.diffusion.netease.x,
-        series: [
-          { name: "NetEase NDCG@20", color: COLORS.ndcg, x: data.diffusion.netease.x, y: data.diffusion.netease.n20 }
-        ]
-      });
-      drawLineChart("diff-ifashion-r20", "diff-ifashion-r20-legend", {
-        xLabel: "set_loss_weight",
-        yLabel: "Recall@20",
-        xTicks: data.diffusion.ifashion.x,
-        series: [
-          { name: "iFashion Recall@20", color: COLORS.recall, x: data.diffusion.ifashion.x, y: data.diffusion.ifashion.r20 }
-        ]
-      });
-      drawLineChart("diff-ifashion-n20", "diff-ifashion-n20-legend", {
-        xLabel: "set_loss_weight",
-        yLabel: "NDCG@20",
-        xTicks: data.diffusion.ifashion.x,
-        series: [
-          { name: "iFashion NDCG@20", color: COLORS.ndcg, x: data.diffusion.ifashion.x, y: data.diffusion.ifashion.n20 }
-        ]
-      });
+      drawSensitivityChart("topk-youshu-r20", "topk-youshu-r20-legend", "topk", "youshu", "Youshu", "recall", "Top-K");
+      drawSensitivityChart("topk-youshu-n20", "topk-youshu-n20-legend", "topk", "youshu", "Youshu", "ndcg", "Top-K");
+      drawSensitivityChart("topk-netease-r20", "topk-netease-r20-legend", "topk", "netease", "NetEase", "recall", "Top-K");
+      drawSensitivityChart("topk-netease-n20", "topk-netease-n20-legend", "topk", "netease", "NetEase", "ndcg", "Top-K");
+
+      drawSensitivityChart("anchor-youshu-r20", "anchor-youshu-r20-legend", "anchor", "youshu", "Youshu", "recall", "anchor_cl_lambda");
+      drawSensitivityChart("anchor-youshu-n20", "anchor-youshu-n20-legend", "anchor", "youshu", "Youshu", "ndcg", "anchor_cl_lambda");
+      drawSensitivityChart("anchor-netease-r20", "anchor-netease-r20-legend", "anchor", "netease", "NetEase", "recall", "anchor_cl_lambda");
+      drawSensitivityChart("anchor-netease-n20", "anchor-netease-n20-legend", "anchor", "netease", "NetEase", "ndcg", "anchor_cl_lambda");
+
+      drawSensitivityChart("diff-youshu-r20", "diff-youshu-r20-legend", "diffusion", "youshu", "Youshu", "recall", "set_loss_weight");
+      drawSensitivityChart("diff-youshu-n20", "diff-youshu-n20-legend", "diffusion", "youshu", "Youshu", "ndcg", "set_loss_weight");
+      drawSensitivityChart("diff-netease-r20", "diff-netease-r20-legend", "diffusion", "netease", "NetEase", "recall", "set_loss_weight");
+      drawSensitivityChart("diff-netease-n20", "diff-netease-n20-legend", "diffusion", "netease", "NetEase", "ndcg", "set_loss_weight");
+      drawSensitivityChart("diff-ifashion-r20", "diff-ifashion-r20-legend", "diffusion", "ifashion", "iFashion", "recall", "set_loss_weight");
+      drawSensitivityChart("diff-ifashion-n20", "diff-ifashion-n20-legend", "diffusion", "ifashion", "iFashion", "ndcg", "set_loss_weight");
+
+      drawSensitivityChart("noise-youshu-r20", "noise-youshu-r20-legend", "noise", "youshu", "Youshu", "recall", "beta_end");
+      drawSensitivityChart("noise-youshu-n20", "noise-youshu-n20-legend", "noise", "youshu", "Youshu", "ndcg", "beta_end");
+      drawSensitivityChart("noise-netease-r20", "noise-netease-r20-legend", "noise", "netease", "NetEase", "recall", "beta_end");
+      drawSensitivityChart("noise-netease-n20", "noise-netease-n20-legend", "noise", "netease", "NetEase", "ndcg", "beta_end");
+      drawSensitivityChart("noise-ifashion-r20", "noise-ifashion-r20-legend", "noise", "ifashion", "iFashion", "recall", "beta_end");
+      drawSensitivityChart("noise-ifashion-n20", "noise-ifashion-n20-legend", "noise", "ifashion", "iFashion", "ndcg", "beta_end");
     }
 
     function setSection(target) {
@@ -653,6 +701,16 @@
 
     document.querySelectorAll("button[data-target]").forEach(button => {
       button.addEventListener("click", () => setSection(button.dataset.target));
+    });
+
+    document.querySelectorAll("button[data-cutoff]").forEach(button => {
+      button.addEventListener("click", () => {
+        selectedCutoff = button.dataset.cutoff;
+        document.querySelectorAll("button[data-cutoff]").forEach(item => {
+          item.classList.toggle("active", item.dataset.cutoff === selectedCutoff);
+        });
+        requestAnimationFrame(render);
+      });
     });
 
     window.addEventListener("resize", () => requestAnimationFrame(render));

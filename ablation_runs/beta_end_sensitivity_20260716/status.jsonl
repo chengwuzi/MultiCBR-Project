@@ -1,0 +1,36 @@
+{"event": "attempt_start", "name": "Youshu_beta_end_0p005", "dataset": "Youshu", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 02:28:44"}
+{"event": "success", "name": "Youshu_beta_end_0p005", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\Youshu_beta_end_0p005_attempt1.log", "time": "2026-07-16 02:38:06"}
+{"event": "attempt_start", "name": "Youshu_beta_end_0p010", "dataset": "Youshu", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 02:38:06"}
+{"event": "success", "name": "Youshu_beta_end_0p010", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\Youshu_beta_end_0p010_attempt1.log", "time": "2026-07-16 02:47:25"}
+{"event": "attempt_start", "name": "Youshu_beta_end_0p020", "dataset": "Youshu", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 02:47:25"}
+{"event": "success", "name": "Youshu_beta_end_0p020", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\Youshu_beta_end_0p020_attempt1.log", "time": "2026-07-16 02:56:40"}
+{"event": "attempt_start", "name": "Youshu_beta_end_0p040", "dataset": "Youshu", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 02:56:40"}
+{"event": "success", "name": "Youshu_beta_end_0p040", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\Youshu_beta_end_0p040_attempt1.log", "time": "2026-07-16 03:06:02"}
+{"event": "attempt_start", "name": "Youshu_beta_end_0p060", "dataset": "Youshu", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 03:06:02"}
+{"event": "success", "name": "Youshu_beta_end_0p060", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\Youshu_beta_end_0p060_attempt1.log", "time": "2026-07-16 03:15:17"}
+{"event": "attempt_start", "name": "Youshu_beta_end_0p080", "dataset": "Youshu", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 03:15:17"}
+{"event": "success", "name": "Youshu_beta_end_0p080", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\Youshu_beta_end_0p080_attempt1.log", "time": "2026-07-16 03:24:22"}
+{"event": "attempt_start", "name": "NetEase_beta_end_0p005", "dataset": "NetEase", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 03:24:22"}
+{"event": "success", "name": "NetEase_beta_end_0p005", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\NetEase_beta_end_0p005_attempt1.log", "time": "2026-07-16 03:52:31"}
+{"event": "attempt_start", "name": "NetEase_beta_end_0p010", "dataset": "NetEase", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 03:52:31"}
+{"event": "success", "name": "NetEase_beta_end_0p010", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\NetEase_beta_end_0p010_attempt1.log", "time": "2026-07-16 04:20:48"}
+{"event": "attempt_start", "name": "NetEase_beta_end_0p020", "dataset": "NetEase", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 04:20:48"}
+{"event": "success", "name": "NetEase_beta_end_0p020", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\NetEase_beta_end_0p020_attempt1.log", "time": "2026-07-16 04:48:18"}
+{"event": "attempt_start", "name": "NetEase_beta_end_0p040", "dataset": "NetEase", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 04:48:18"}
+{"event": "success", "name": "NetEase_beta_end_0p040", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\NetEase_beta_end_0p040_attempt1.log", "time": "2026-07-16 05:16:23"}
+{"event": "attempt_start", "name": "NetEase_beta_end_0p060", "dataset": "NetEase", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 05:16:24"}
+{"event": "success", "name": "NetEase_beta_end_0p060", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\NetEase_beta_end_0p060_attempt1.log", "time": "2026-07-16 05:45:00"}
+{"event": "attempt_start", "name": "NetEase_beta_end_0p080", "dataset": "NetEase", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 05:45:01"}
+{"event": "success", "name": "NetEase_beta_end_0p080", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\NetEase_beta_end_0p080_attempt1.log", "time": "2026-07-16 06:12:22"}
+{"event": "attempt_start", "name": "iFashion_beta_end_0p005", "dataset": "iFashion", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 06:12:22"}
+{"event": "success", "name": "iFashion_beta_end_0p005", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\iFashion_beta_end_0p005_attempt1.log", "time": "2026-07-16 07:34:37"}
+{"event": "attempt_start", "name": "iFashion_beta_end_0p010", "dataset": "iFashion", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 07:34:38"}
+{"event": "success", "name": "iFashion_beta_end_0p010", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\iFashion_beta_end_0p010_attempt1.log", "time": "2026-07-16 08:59:13"}
+{"event": "attempt_start", "name": "iFashion_beta_end_0p020", "dataset": "iFashion", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 08:59:13"}
+{"event": "success", "name": "iFashion_beta_end_0p020", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\iFashion_beta_end_0p020_attempt1.log", "time": "2026-07-16 10:24:00"}
+{"event": "attempt_start", "name": "iFashion_beta_end_0p040", "dataset": "iFashion", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 10:24:00"}
+{"event": "success", "name": "iFashion_beta_end_0p040", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\iFashion_beta_end_0p040_attempt1.log", "time": "2026-07-16 11:49:33"}
+{"event": "attempt_start", "name": "iFashion_beta_end_0p060", "dataset": "iFashion", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 11:49:33"}
+{"event": "success", "name": "iFashion_beta_end_0p060", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\iFashion_beta_end_0p060_attempt1.log", "time": "2026-07-16 13:16:34"}
+{"event": "attempt_start", "name": "iFashion_beta_end_0p080", "dataset": "iFashion", "group": "diffusion_noise_sensitivity", "attempt": 1, "max_retries": 5, "time": "2026-07-16 13:16:34"}
+{"event": "success", "name": "iFashion_beta_end_0p080", "attempt": 1, "log_path": "ablation_runs/beta_end_sensitivity_20260716\\logs\\iFashion_beta_end_0p080_attempt1.log", "time": "2026-07-16 14:42:37"}

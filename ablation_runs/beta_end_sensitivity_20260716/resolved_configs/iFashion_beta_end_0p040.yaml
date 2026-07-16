@@ -1,0 +1,90 @@
+data_path: ./datasets
+train_style: dwt
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.1
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+dwt:
+  use_latent_diffusion_rebuild: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.04
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+  gamma_1: 0.3
+  gamma_2: 0.2
+  tau: 0.08
+  lambda_1: 0.3
+  lambda_2: 1.0e-06
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: iFashion_beta_end_0p040

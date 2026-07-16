@@ -1,0 +1,162 @@
+====================================================================================================
+Youshu_beta_end_0p005 | dataset=Youshu | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:21
+start=2026-07-16 02:28:44 | end=2026-07-16 02:38:06
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\Youshu_beta_end_0p005_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.005, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20606, N@10=0.12111 | R@20=0.30187, N@20=0.14817 | R@40=0.3992, N@40=0.17082 | R@80=0.51518, N@80=0.19331
+test: R@10=0.20287, N@10=0.14626 | R@20=0.28568, N@20=0.17045 | R@40=0.39833, N@40=0.20055 | R@80=0.52255, N@80=0.22916
+
+====================================================================================================
+Youshu_beta_end_0p010 | dataset=Youshu | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=119 | elapsed=00:09:18
+start=2026-07-16 02:38:06 | end=2026-07-16 02:47:25
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\Youshu_beta_end_0p010_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.01, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20632, N@10=0.12078 | R@20=0.30271, N@20=0.14802 | R@40=0.39921, N@40=0.1705 | R@80=0.51508, N@80=0.19294
+test: R@10=0.20212, N@10=0.14605 | R@20=0.28609, N@20=0.17048 | R@40=0.3974, N@40=0.20027 | R@80=0.52128, N@80=0.22893
+
+====================================================================================================
+Youshu_beta_end_0p020 | dataset=Youshu | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=109 | elapsed=00:09:15
+start=2026-07-16 02:47:25 | end=2026-07-16 02:56:40
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\Youshu_beta_end_0p020_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.02, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20907, N@10=0.12146 | R@20=0.3001, N@20=0.14729 | R@40=0.40035, N@40=0.17064 | R@80=0.5134, N@80=0.19258
+test: R@10=0.2036, N@10=0.1466 | R@20=0.28926, N@20=0.1711 | R@40=0.39964, N@40=0.20077 | R@80=0.52033, N@80=0.22856
+
+====================================================================================================
+Youshu_beta_end_0p040 | dataset=Youshu | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=99 | elapsed=00:09:21
+start=2026-07-16 02:56:40 | end=2026-07-16 03:06:02
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\Youshu_beta_end_0p040_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.04, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.2065, N@10=0.12091 | R@20=0.2992, N@20=0.14721 | R@40=0.40224, N@40=0.17109 | R@80=0.5122, N@80=0.1924
+test: R@10=0.1991, N@10=0.14436 | R@20=0.28833, N@20=0.17009 | R@40=0.39788, N@40=0.19946 | R@80=0.5217, N@80=0.22791
+
+====================================================================================================
+Youshu_beta_end_0p060 | dataset=Youshu | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=104 | elapsed=00:09:14
+start=2026-07-16 03:06:02 | end=2026-07-16 03:15:17
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\Youshu_beta_end_0p060_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.06, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.20731, N@10=0.12173 | R@20=0.29821, N@20=0.14756 | R@40=0.39964, N@40=0.17118 | R@80=0.51446, N@80=0.19346
+test: R@10=0.20234, N@10=0.14494 | R@20=0.28631, N@20=0.16915 | R@40=0.3935, N@40=0.19818 | R@80=0.52113, N@80=0.22719
+
+====================================================================================================
+Youshu_beta_end_0p080 | dataset=Youshu | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=109 | elapsed=00:09:05
+start=2026-07-16 03:15:17 | end=2026-07-16 03:24:22
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\Youshu_beta_end_0p080_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.08, "latent_rebuild.rebuild_k": 7}
+val: R@10=0.207, N@10=0.12096 | R@20=0.29842, N@20=0.14693 | R@40=0.40028, N@40=0.17059 | R@80=0.51479, N@80=0.19277
+test: R@10=0.20345, N@10=0.14515 | R@20=0.28783, N@20=0.16953 | R@40=0.39709, N@40=0.19893 | R@80=0.52125, N@80=0.22743
+
+====================================================================================================
+NetEase_beta_end_0p005 | dataset=NetEase | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=44 | elapsed=00:28:08
+start=2026-07-16 03:24:22 | end=2026-07-16 03:52:31
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\NetEase_beta_end_0p005_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.005, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05812, N@10=0.03117 | R@20=0.08976, N@20=0.03954 | R@40=0.13407, N@40=0.04921 | R@80=0.18852, N@80=0.05924
+test: R@10=0.06045, N@10=0.04016 | R@20=0.09513, N@20=0.05096 | R@40=0.13809, N@40=0.06239 | R@80=0.19412, N@80=0.07493
+
+====================================================================================================
+NetEase_beta_end_0p010 | dataset=NetEase | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:28:17
+start=2026-07-16 03:52:31 | end=2026-07-16 04:20:48
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\NetEase_beta_end_0p010_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.01, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05754, N@10=0.03093 | R@20=0.08917, N@20=0.03933 | R@40=0.13371, N@40=0.04907 | R@80=0.18922, N@80=0.05927
+test: R@10=0.06068, N@10=0.04026 | R@20=0.09423, N@20=0.05075 | R@40=0.13719, N@40=0.06219 | R@80=0.19217, N@80=0.07454
+
+====================================================================================================
+NetEase_beta_end_0p020 | dataset=NetEase | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:29
+start=2026-07-16 04:20:48 | end=2026-07-16 04:48:18
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\NetEase_beta_end_0p020_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.02, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05724, N@10=0.03087 | R@20=0.08995, N@20=0.03959 | R@40=0.13342, N@40=0.0491 | R@80=0.18905, N@80=0.05933
+test: R@10=0.06014, N@10=0.04015 | R@20=0.09455, N@20=0.05088 | R@40=0.13819, N@40=0.06242 | R@80=0.19228, N@80=0.07466
+
+====================================================================================================
+NetEase_beta_end_0p040 | dataset=NetEase | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=44 | elapsed=00:28:05
+start=2026-07-16 04:48:18 | end=2026-07-16 05:16:23
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\NetEase_beta_end_0p040_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.04, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05612, N@10=0.03035 | R@20=0.09095, N@20=0.03965 | R@40=0.13289, N@40=0.0488 | R@80=0.18981, N@80=0.05925
+test: R@10=0.06052, N@10=0.04021 | R@20=0.09537, N@20=0.05108 | R@40=0.13908, N@40=0.06266 | R@80=0.19396, N@80=0.07504
+
+====================================================================================================
+NetEase_beta_end_0p060 | dataset=NetEase | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:28:36
+start=2026-07-16 05:16:24 | end=2026-07-16 05:45:00
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\NetEase_beta_end_0p060_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.06, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.0569, N@10=0.0307 | R@20=0.09084, N@20=0.03971 | R@40=0.13373, N@40=0.04913 | R@80=0.18887, N@80=0.05925
+test: R@10=0.06068, N@10=0.04031 | R@20=0.09482, N@20=0.05095 | R@40=0.13773, N@40=0.0624 | R@80=0.1923, N@80=0.07469
+
+====================================================================================================
+NetEase_beta_end_0p080 | dataset=NetEase | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=39 | elapsed=00:27:21
+start=2026-07-16 05:45:01 | end=2026-07-16 06:12:22
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\NetEase_beta_end_0p080_attempt1.log
+overrides={"latent_rebuild.enabled": true, "latent_rebuild.latent_diffusion_beta_end": 0.08, "latent_rebuild.rebuild_k": 13}
+val: R@10=0.05689, N@10=0.03085 | R@20=0.09037, N@20=0.03973 | R@40=0.13377, N@40=0.04922 | R@80=0.18948, N@80=0.05943
+test: R@10=0.06023, N@10=0.04008 | R@20=0.09438, N@20=0.05074 | R@40=0.13809, N@40=0.06231 | R@80=0.19234, N@80=0.07457
+
+====================================================================================================
+iFashion_beta_end_0p005 | dataset=iFashion | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:22:15
+start=2026-07-16 06:12:22 | end=2026-07-16 07:34:37
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\iFashion_beta_end_0p005_attempt1.log
+overrides={"dwt.latent_diffusion_beta_end": 0.005, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11238, N@10=0.08447 | R@20=0.15511, N@20=0.09861 | R@40=0.20628, N@40=0.11249 | R@80=0.26362, N@80=0.12559
+test: R@10=0.11349, N@10=0.11379 | R@20=0.15667, N@20=0.13113 | R@40=0.20702, N@40=0.14884 | R@80=0.2638, N@80=0.16585
+
+====================================================================================================
+iFashion_beta_end_0p010 | dataset=iFashion | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:24:35
+start=2026-07-16 07:34:38 | end=2026-07-16 08:59:13
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\iFashion_beta_end_0p010_attempt1.log
+overrides={"dwt.latent_diffusion_beta_end": 0.01, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11275, N@10=0.08487 | R@20=0.15589, N@20=0.09915 | R@40=0.20658, N@40=0.11291 | R@80=0.26402, N@80=0.12601
+test: R@10=0.11432, N@10=0.11446 | R@20=0.1565, N@20=0.13135 | R@40=0.20632, N@40=0.14889 | R@80=0.26427, N@80=0.16621
+
+====================================================================================================
+iFashion_beta_end_0p020 | dataset=iFashion | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:24:47
+start=2026-07-16 08:59:13 | end=2026-07-16 10:24:00
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\iFashion_beta_end_0p020_attempt1.log
+overrides={"dwt.latent_diffusion_beta_end": 0.02, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11297, N@10=0.08493 | R@20=0.15551, N@20=0.09901 | R@40=0.20614, N@40=0.11277 | R@80=0.26318, N@80=0.12579
+test: R@10=0.11434, N@10=0.11464 | R@20=0.15657, N@20=0.13159 | R@40=0.20696, N@40=0.14933 | R@80=0.26411, N@80=0.16639
+
+====================================================================================================
+iFashion_beta_end_0p040 | dataset=iFashion | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:25:32
+start=2026-07-16 10:24:00 | end=2026-07-16 11:49:33
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\iFashion_beta_end_0p040_attempt1.log
+overrides={"dwt.latent_diffusion_beta_end": 0.04, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11317, N@10=0.08496 | R@20=0.15551, N@20=0.09898 | R@40=0.20618, N@40=0.11274 | R@80=0.26318, N@80=0.12572
+test: R@10=0.11422, N@10=0.11447 | R@20=0.15648, N@20=0.13143 | R@40=0.20683, N@40=0.14914 | R@80=0.26376, N@80=0.16616
+
+====================================================================================================
+iFashion_beta_end_0p060 | dataset=iFashion | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:27:00
+start=2026-07-16 11:49:33 | end=2026-07-16 13:16:34
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\iFashion_beta_end_0p060_attempt1.log
+overrides={"dwt.latent_diffusion_beta_end": 0.06, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11334, N@10=0.08511 | R@20=0.15552, N@20=0.09912 | R@40=0.2067, N@40=0.11299 | R@80=0.26353, N@80=0.12597
+test: R@10=0.11418, N@10=0.11467 | R@20=0.1564, N@20=0.13161 | R@40=0.20658, N@40=0.14925 | R@80=0.26426, N@80=0.1665
+
+====================================================================================================
+iFashion_beta_end_0p080 | dataset=iFashion | group=diffusion_noise_sensitivity | status=success
+attempts=1 | best_epoch=29 | elapsed=01:26:03
+start=2026-07-16 13:16:34 | end=2026-07-16 14:42:37
+log_path=ablation_runs/beta_end_sensitivity_20260716\logs\iFashion_beta_end_0p080_attempt1.log
+overrides={"dwt.latent_diffusion_beta_end": 0.08, "dwt.rebuild_k": 3, "dwt.use_latent_diffusion_rebuild": true}
+val: R@10=0.11373, N@10=0.08508 | R@20=0.15658, N@20=0.09927 | R@40=0.20553, N@40=0.1126 | R@80=0.26351, N@80=0.12583
+test: R@10=0.11456, N@10=0.11501 | R@20=0.15629, N@20=0.13169 | R@40=0.20699, N@40=0.14953 | R@80=0.26406, N@80=0.16662
+

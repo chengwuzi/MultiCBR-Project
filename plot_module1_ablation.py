@@ -97,6 +97,12 @@ METRICS = {
         "ylabel": "NDCG@20",
         "output_stem": "module1_ablation_ndcg_at_20",
         "legend_loc": "lower right",
+        "broken_yaxis": {
+            "top_ylim": (0.112, 0.136),
+            "top_yticks": [0.115, 0.120, 0.125, 0.130, 0.135],
+            "bottom_ylim": (0.054, 0.062),
+            "bottom_yticks": [0.056, 0.060],
+        },
         "values": {
             "RawUB": [0.12243, 0.12243, 0.12243, 0.12243, 0.12243],
             "Diffusion": [0.12727, 0.13160, 0.13213, 0.13056, 0.12878],
@@ -152,6 +158,9 @@ def metric_ylim(metric_conf: dict) -> tuple[float, float]:
 def build_figure(metric_conf: dict) -> tuple[plt.Figure, plt.Axes]:
     validate_metric(metric_conf)
 
+    if "broken_yaxis" in metric_conf:
+        return build_broken_yaxis_figure(metric_conf)
+
     fig, ax = plt.subplots(figsize=(8, 5), dpi=100)
 
     for method in METHODS:
@@ -195,6 +204,77 @@ def build_figure(metric_conf: dict) -> tuple[plt.Figure, plt.Axes]:
 
     fig.subplots_adjust(left=0.19, right=0.978, bottom=0.16, top=0.97)
     return fig, ax
+
+
+def plot_methods(ax: plt.Axes, metric_conf: dict) -> None:
+    for method in METHODS:
+        label = method["label"]
+        ax.plot(
+            X,
+            np.array(metric_conf["values"][label]),
+            color=method["color"],
+            linestyle=method["linestyle"],
+            linewidth=3,
+            marker=method["marker"],
+            markersize=9,
+            label=method.get("plot_label", label),
+        )
+
+
+def build_broken_yaxis_figure(metric_conf: dict) -> tuple[plt.Figure, plt.Axes]:
+    break_conf = metric_conf["broken_yaxis"]
+    fig, (ax_top, ax_bottom) = plt.subplots(
+        2,
+        1,
+        sharex=True,
+        figsize=(8, 5),
+        dpi=100,
+        gridspec_kw={"height_ratios": [3.2, 1.0], "hspace": 0.06},
+    )
+
+    plot_methods(ax_top, metric_conf)
+    plot_methods(ax_bottom, metric_conf)
+
+    ax_top.set_ylim(*break_conf["top_ylim"])
+    ax_top.set_yticks(break_conf["top_yticks"])
+    ax_bottom.set_ylim(*break_conf["bottom_ylim"])
+    ax_bottom.set_yticks(break_conf["bottom_yticks"])
+
+    ax_bottom.set_xticks(X)
+    ax_bottom.set_xticklabels(X_TICK_LABELS)
+    ax_bottom.set_xlabel("Retention Number κ")
+    fig.text(0.04, 0.52, metric_conf["ylabel"], va="center", rotation="vertical", fontsize=24)
+
+    for ax in (ax_top, ax_bottom):
+        ax.yaxis.set_major_formatter(FormatStrFormatter("%.3f"))
+        ax.grid(True, color="#b0b0b0", linewidth=0.8, alpha=1.0)
+        ax.set_axisbelow(True)
+        for spine in ax.spines.values():
+            spine.set_visible(True)
+            spine.set_linewidth(0.8)
+
+    ax_top.spines["bottom"].set_visible(False)
+    ax_bottom.spines["top"].set_visible(False)
+    ax_top.tick_params(labelbottom=False, bottom=False)
+
+    diagonal_kwargs = dict(marker=[(-1, -0.5), (1, 0.5)], markersize=10, linestyle="none", color="black", mec="black", mew=1.0, clip_on=False)
+    ax_top.plot([0, 1], [0, 0], transform=ax_top.transAxes, **diagonal_kwargs)
+    ax_bottom.plot([0, 1], [1, 1], transform=ax_bottom.transAxes, **diagonal_kwargs)
+
+    ax_top.legend(
+        loc=metric_conf["legend_loc"],
+        ncol=2,
+        frameon=True,
+        fancybox=True,
+        shadow=True,
+        framealpha=0.95,
+        columnspacing=0.8,
+        handlelength=2.0,
+        handletextpad=0.5,
+    )
+
+    fig.subplots_adjust(left=0.19, right=0.978, bottom=0.16, top=0.97)
+    return fig, ax_top
 
 
 def save_metric_figure(metric_conf: dict, output_dir: Path) -> None:

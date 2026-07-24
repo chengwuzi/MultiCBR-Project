@@ -82,7 +82,7 @@ def build_figure(chart_conf: dict) -> tuple[plt.Figure, plt.Axes]:
         chart_conf["baseline"],
         width=BAR_WIDTH,
         color=BASELINE_COLOR,
-        label="MultiCBR",
+        label="w/o Pre-fusion CL",
         zorder=3,
     )
     bars_module2 = ax.bar(
@@ -111,7 +111,6 @@ def build_figure(chart_conf: dict) -> tuple[plt.Figure, plt.Axes]:
     ax.set_ylim(*chart_conf["left_ylim"])
     ax.set_yticks(chart_conf["left_yticks"])
     ax.yaxis.set_major_formatter(FormatStrFormatter("%.2f"))
-
     ax2.set_ylabel("Percentage Difference (%)")
     ax2.set_ylim(*chart_conf["right_ylim"])
     ax2.set_yticks(chart_conf["right_yticks"])
@@ -141,6 +140,7 @@ def build_figure(chart_conf: dict) -> tuple[plt.Figure, plt.Axes]:
     legend1 = ax.legend(
         handles=[bars_baseline, bars_module2],
         loc="upper left",
+        fontsize=20,
         frameon=True,
         fancybox=True,
         framealpha=0.9,
@@ -148,8 +148,8 @@ def build_figure(chart_conf: dict) -> tuple[plt.Figure, plt.Axes]:
     ax.add_artist(legend1)
     ax2.legend(
         handles=[line],
-        loc="upper center",
-        bbox_to_anchor=(0.59, 1.0),
+        loc="upper right",
+        fontsize=20,
         frameon=True,
         fancybox=True,
         framealpha=0.9,

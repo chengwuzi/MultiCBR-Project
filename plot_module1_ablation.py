@@ -21,23 +21,23 @@ X_TICK_LABELS = ["1", "3", "5", "7", "9"]
 METHODS = [
     {
         "label": "RawUB",
-        "plot_label": "Raw UB",
+        "plot_label": "Original UB",
         "color": "#7f7f7f",
-        "marker": "s",
-        "linestyle": "--",
-    },
-    {
-        "label": "Diffusion",
-        "plot_label": "DiGO",
-        "color": "#1f77b4",
-        "marker": "^",
+        "marker": None,
         "linestyle": "--",
     },
     {
         "label": "Random",
-        "plot_label": "Random-K",
+        "plot_label": "Random-κ",
         "color": "#ff7f0e",
         "marker": "v",
+        "linestyle": "--",
+    },
+    {
+        "label": "Popularity",
+        "plot_label": "Popularity-κ",
+        "color": "#d62728",
+        "marker": "D",
         "linestyle": "--",
     },
     {
@@ -48,10 +48,10 @@ METHODS = [
         "linestyle": "--",
     },
     {
-        "label": "Popularity",
-        "plot_label": "Popularity-K",
-        "color": "#d62728",
-        "marker": "D",
+        "label": "Diffusion",
+        "plot_label": "DiGO",
+        "color": "#1f77b4",
+        "marker": "^",
         "linestyle": "--",
     },
 ]
@@ -169,7 +169,7 @@ def build_figure(metric_conf: dict) -> tuple[plt.Figure, plt.Axes]:
 
     ax.set_xticks(X)
     ax.set_xticklabels(X_TICK_LABELS)
-    ax.set_xlabel("Top-K")
+    ax.set_xlabel("Retention Number κ")
     ax.set_ylabel(metric_conf["ylabel"])
     ax.set_ylim(*metric_ylim(metric_conf))
     ax.yaxis.set_major_formatter(FormatStrFormatter("%.3f"))

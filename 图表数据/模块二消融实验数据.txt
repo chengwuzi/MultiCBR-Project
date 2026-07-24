@@ -1,0 +1,885 @@
+模块2采纳实验产出规划
+更新时间：2026-05-19
+
+说明：
+本文档记录当前决定采纳进入下一步论文流程的实验，以及每个实验预计产出的图表、图表指标定义、绘图所需数据。
+
+目前确定采纳：
+实验一：用户稀疏性分组实验
+实验二：表示一致性提升及补充分析中的部分结果，后续再单独整理
+实验六：BI 视图扰动鲁棒性实验
+
+目前暂不采纳：
+实验三：UB-UI vs UB-BI 路径贡献实验
+实验四：长尾 bundle 分组实验
+实验五：user-side CL vs bundle-side CL 贡献实验
+
+
+一、实验一：用户稀疏性分组实验
+
+1. 实验目的
+
+实验一用于说明模块2是否更帮助训练交互少的稀疏用户。
+
+本实验采用 4 组用户稀疏性分组结果。分组方式是根据训练集 user-bundle 交互次数，即 train_ub_degree，将用户按数量近似均分为 4 组。每组用户数量基本一致，但训练交互密度不同。
+
+本实验主要希望展示：
+1. 最稀疏用户组的 Recall@20 和 NDCG@20 提升最大。
+2. 从整体提升贡献角度看，最稀疏用户组贡献了最大比例的模型增益。
+
+使用 run：
+Run A Baseline
+Run B Full Module2
+
+数据来源：
+analysis_outputs/NetEase/summary/experiment1_user_sparsity_4groups.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment1_4group_bar_data.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment1_4group_contribution_data.csv
+
+
+2. 预计产出图表
+
+图 1：不同用户稀疏组的 Recall@20 相对提升柱状图
+
+图表目的：
+展示 Full Module2 相比 Baseline 在不同用户稀疏组上的 Recall@20 提升幅度。该图用于直观看出最低交互用户组 G1 的提升最大。
+
+纵轴：
+Relative improvement of Recall@20，建议以百分比展示。
+
+横轴：
+四个用户组：
+G1 (degree 0-7)
+G2 (degree 7-8)
+G3 (degree 8-12)
+G4 (degree 12-660)
+
+指标定义：
+Recall@20 相对提升 = (Module2 Recall@20 - Baseline Recall@20) / Baseline Recall@20
+
+绘图数据：
+
+| group | train_ub_degree_range | number_of_users | number_of_eval_users | baseline_recall@20 | module2_recall@20 | relative_gain_recall@20 |
+|---|---:|---:|---:|---:|---:|---:|
+| G1 | 0-7 | 4632 | 4618 | 0.097661 | 0.110004 | +12.64% |
+| G2 | 7-8 | 4632 | 4632 | 0.096718 | 0.095531 | -1.23% |
+| G3 | 8-12 | 4632 | 4632 | 0.086572 | 0.090008 | +3.97% |
+| G4 | 12-660 | 4632 | 4632 | 0.080803 | 0.083627 | +3.50% |
+
+图表预期结论：
+G1 的 Recall@20 提升为 +12.64%，显著高于其他三组，说明模块2对训练交互最少的稀疏用户更有效。G2 的 Recall@20 有轻微下降，因此论文表述时不要写成四组全部 Recall 提升，而应强调最低交互组提升最显著、整体稀疏用户受益更明显。
+
+
+图 2：不同用户稀疏组的 NDCG@20 相对提升柱状图
+
+图表目的：
+展示 Full Module2 相比 Baseline 在不同用户稀疏组上的 NDCG@20 提升幅度。该图用于说明不仅 Recall@20，排序质量指标 NDCG@20 也在最低交互组上提升最大。
+
+纵轴：
+Relative improvement of NDCG@20，建议以百分比展示。
+
+横轴：
+四个用户组：
+G1 (degree 0-7)
+G2 (degree 7-8)
+G3 (degree 8-12)
+G4 (degree 12-660)
+
+指标定义：
+NDCG@20 相对提升 = (Module2 NDCG@20 - Baseline NDCG@20) / Baseline NDCG@20
+
+绘图数据：
+
+| group | train_ub_degree_range | number_of_users | number_of_eval_users | baseline_ndcg@20 | module2_ndcg@20 | relative_gain_ndcg@20 |
+|---|---:|---:|---:|---:|---:|---:|
+| G1 | 0-7 | 4632 | 4618 | 0.043600 | 0.047664 | +9.32% |
+| G2 | 7-8 | 4632 | 4632 | 0.045538 | 0.045780 | +0.53% |
+| G3 | 8-12 | 4632 | 4632 | 0.046702 | 0.048415 | +3.67% |
+| G4 | 12-660 | 4632 | 4632 | 0.060717 | 0.061845 | +1.86% |
+
+图表预期结论：
+G1 的 NDCG@20 提升为 +9.32%，同样是四组中最高。该结果与 Recall@20 柱状图一致，说明模块2不仅提升稀疏用户的命中能力，也提升其排序质量。
+
+
+图 3：不同用户稀疏组对 Recall@20 总体提升的贡献占比饼图
+
+图表目的：
+展示从 Baseline 到 Full Module2 的总体 Recall@20 提升中，各用户组贡献了多少比例。该图用于强调最低交互用户组不仅相对提升最大，而且对整体 Recall@20 增益贡献最大。
+
+贡献程度定义：
+某一组对总体指标提升的贡献，按该组评估用户数加权计算。
+
+group_contribution_i =
+number_of_eval_users_i * (module2_metric_i - baseline_metric_i)
+
+净贡献占比 =
+group_contribution_i / sum_j group_contribution_j
+
+注意：
+Recall@20 中 G2 的绝对提升为负，因此 G2 的净贡献占比为负。普通饼图不适合直接展示负值。建议绘制“正向贡献占比饼图”，即负贡献组按 0 处理，只展示正向增益由哪些组贡献。
+
+正向贡献占比 =
+max(group_contribution_i, 0) / sum_j max(group_contribution_j, 0)
+
+绘图建议：
+主图建议使用“正向贡献占比饼图”。
+图注中说明：G2 对 Recall@20 存在轻微负向贡献，因此在正向贡献饼图中记为 0。
+
+绘图数据：
+
+| group | train_ub_degree_range | number_of_eval_users | weighted_gain_recall@20 | net_contribution_recall@20 | positive_contribution_recall@20 |
+|---|---:|---:|---:|---:|---:|
+| G1 | 0-7 | 4618 | 57.0000 | 70.81% | 66.28% |
+| G2 | 7-8 | 4632 | -5.5000 | -6.83% | 0.00% |
+| G3 | 8-12 | 4632 | 15.9167 | 19.77% | 18.51% |
+| G4 | 12-660 | 4632 | 13.0820 | 16.25% | 15.21% |
+
+图表预期结论：
+在 Recall@20 的正向贡献中，G1 独自贡献 66.28%，远高于其他组。这说明总体 Recall@20 增益主要来自最低交互用户组。
+
+
+图 4：不同用户稀疏组对 NDCG@20 总体提升的贡献占比饼图
+
+图表目的：
+展示从 Baseline 到 Full Module2 的总体 NDCG@20 提升中，各用户组贡献了多少比例。该图用于说明最低交互用户组同样是排序质量提升的主要来源。
+
+贡献程度定义：
+某一组对总体 NDCG@20 提升的贡献，按该组评估用户数加权计算。
+
+group_contribution_i =
+number_of_eval_users_i * (module2_ndcg@20_i - baseline_ndcg@20_i)
+
+贡献占比 =
+group_contribution_i / sum_j group_contribution_j
+
+注意：
+NDCG@20 四组均为正贡献，因此可以直接画普通饼图。
+
+绘图数据：
+
+| group | train_ub_degree_range | number_of_eval_users | weighted_gain_ndcg@20 | contribution_ndcg@20 |
+|---|---:|---:|---:|---:|
+| G1 | 0-7 | 4618 | 18.7668 | 56.79% |
+| G2 | 7-8 | 4632 | 1.1200 | 3.39% |
+| G3 | 8-12 | 4632 | 7.9377 | 24.02% |
+| G4 | 12-660 | 4632 | 5.2228 | 15.80% |
+
+图表预期结论：
+G1 对总体 NDCG@20 提升贡献 56.79%，是最大贡献来源。结合 Recall@20 贡献图，可以说明模块2的整体收益主要来自低交互用户。
+
+
+3. 实验一推荐论文表述
+
+模块2在最低交互用户组上带来最显著的性能提升。具体而言，在按照训练 UB degree 近似均分为四组后，最低交互组 G1 的 Recall@20 和 NDCG@20 分别提升 12.64% 和 9.32%，显著高于最高交互组 G4 的 3.50% 和 1.86%。进一步地，贡献度分析显示，G1 分别贡献了 Recall@20 正向提升的 66.28% 和 NDCG@20 总提升的 56.79%。这表明模块2的整体收益主要来自训练交互较少的稀疏用户，说明其跨视图对齐和 beta 补充聚合能够缓解 user-side sparse supervision。
+
+
+二、实验六：BI 视图扰动鲁棒性实验
+
+1. 实验目的
+
+实验六用于说明当 BI 视图受到结构扰动时，模块2是否仍然保持稳定优势。
+
+本实验通过在读取 bundle_item.txt 后真实随机删除一部分 bundle-item 边，构造不同强度的 BI 图扰动。注意这里不是使用 BI_ratio，而是真实静态删边。
+
+使用 run：
+drop 0.0：Run A Baseline vs Run B Full Module2
+drop 0.1：Run H Baseline vs Run I Full Module2
+drop 0.2：Run J Baseline vs Run K Full Module2
+drop 0.3：Run L Baseline vs Run M Full Module2
+drop 0.4：Run N Baseline vs Run O Full Module2
+
+数据来源：
+analysis_outputs/NetEase/summary/experiment6_bi_drop_robustness.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment6_bi_drop_line_data.csv
+
+
+2. 预计产出图表
+
+图 5：BI drop ratio 下 Baseline 与 Full Module2 的 Recall@20 折线图
+
+图表目的：
+展示随着 BI 图扰动比例增加，Baseline 和 Full Module2 的 Recall@20 变化趋势。该图用于说明在不同 BI drop ratio 下，Full Module2 始终高于 Baseline。
+
+横轴：
+BI drop ratio：
+0.0、0.1、0.2、0.3、0.4
+
+纵轴：
+Recall@20
+
+折线：
+Baseline
+Full Module2
+
+绘图数据：
+
+| bi_drop_ratio | baseline_recall@20 | module2_recall@20 | absolute_gap_recall@20 | relative_gap_recall@20 |
+|---:|---:|---:|---:|---:|
+| 0.0 | 0.090433 | 0.094781 | 0.004348 | +4.81% |
+| 0.1 | 0.089920 | 0.093816 | 0.003896 | +4.33% |
+| 0.2 | 0.088801 | 0.092470 | 0.003669 | +4.13% |
+| 0.3 | 0.089950 | 0.092343 | 0.002393 | +2.66% |
+| 0.4 | 0.087096 | 0.091087 | 0.003991 | +4.58% |
+
+图表预期结论：
+Full Module2 在所有 BI drop ratio 下均高于 Baseline，说明模块2在 BI 结构受到扰动时仍能保持稳定优势。
+
+注意：
+两条线之间的差距并不是随 drop ratio 单调变大，因此论文中不要写“扰动越强模块2优势越大”。推荐表述为：在不同扰动强度下，模块2均保持稳定的性能优势。
+
+
+3. 可选补充数据：NDCG@20
+
+如果后续需要，也可以额外画 NDCG@20 折线图，或把 NDCG@20 放进附录。
+
+绘图数据：
+
+| bi_drop_ratio | baseline_ndcg@20 | module2_ndcg@20 | absolute_gap_ndcg@20 | relative_gap_ndcg@20 |
+|---:|---:|---:|---:|---:|
+| 0.0 | 0.049143 | 0.050928 | 0.001785 | +3.63% |
+| 0.1 | 0.048795 | 0.050493 | 0.001699 | +3.48% |
+| 0.2 | 0.048475 | 0.049825 | 0.001350 | +2.78% |
+| 0.3 | 0.048618 | 0.049946 | 0.001327 | +2.73% |
+| 0.4 | 0.047846 | 0.049047 | 0.001202 | +2.51% |
+
+
+4. 实验六推荐论文表述
+
+为了验证模块2在结构扰动下的稳定性，我们对 BI 图中的 bundle-item 边进行随机删除，并比较 Baseline 与 Full Module2 在不同 drop ratio 下的表现。结果显示，在 drop ratio 从 0.0 增加到 0.4 的过程中，Full Module2 的 Recall@20 始终高于 Baseline，相对提升保持在 2.66% 到 4.81% 之间。这说明模块2在 BI 结构信息不完整时仍能保持稳定优势，体现出一定的多视图鲁棒性。
+
+
+三、实验二：表示一致性提升及补充分析
+
+1. 实验目的
+
+实验二用于说明模块2是否显著改变 UB、UI、BI 三个视图之间的表示关系，并进一步解释“表示一致性提升到底意味着什么”。
+
+本实验的论文叙事建议分两层：
+
+第一层：
+先证明模块2显著提升跨视图表示一致性，尤其是 user-side UB-BI 表示被大幅拉近。
+
+第二层：
+再解释这种表示拉近意味着什么：不同视图推荐出的候选更一致，视图之间对候选的打分冲突更低，BI 组成视图本身变成更可用的推荐信号。
+
+使用 run：
+Run A Baseline
+Run B Full Module2
+
+数据来源：
+analysis_outputs/NetEase/summary/experiment2_view_similarity.csv
+analysis_outputs/NetEase/summary/view_decision_followup/view_topk_overlap_delta.csv
+analysis_outputs/NetEase/summary/view_decision_followup/view_score_conflict_delta.csv
+analysis_outputs/NetEase/summary/view_decision_followup/view_fusion_effect_delta.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment2_user_similarity_bar_data.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment2_prediction_consistency_top20_data.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment2_view_conflict_data.csv
+analysis_outputs/NetEase/summary/selected_for_paper/experiment2_fusion_gain_data.csv
+
+
+2. 预计产出图表
+
+图 6：User-side 跨视图表示一致性柱状图
+
+图表形式：
+分组柱状图。横轴为三组 view pair：UB-UI、UB-BI、UI-BI；每组两根柱，分别表示 Baseline 和 Full Module2。
+
+图表目的：
+展示模块2对 user-side 三个视图表示一致性的影响。该图的核心视觉重点是 UB-BI 从 0.437 提升到 0.796，提升幅度远大于另外两组，能非常直观地体现 UB-BI 表示被大幅拉近。
+
+纵轴：
+Average cosine similarity
+
+横轴：
+UB-UI
+UB-BI
+UI-BI
+
+指标定义：
+对每个 user，分别计算其在两个视图下 pre-fusion 表示的 cosine similarity，然后对所有 user 求平均。
+
+绘图数据：
+
+| view_pair | baseline_similarity | module2_similarity | absolute_gain | relative_gain |
+|---|---:|---:|---:|---:|
+| UB-UI | 0.910378 | 0.952827 | 0.042448 | +4.66% |
+| UB-BI | 0.436983 | 0.796139 | 0.359155 | +82.19% |
+| UI-BI | 0.578330 | 0.806273 | 0.227944 | +39.41% |
+
+图表预期结论：
+模块2显著提升 user-side 跨视图表示一致性，其中 UB-BI 的提升最明显。该结果说明模块2有效缩小了 UB 行为交互视图和 BI bundle 组成语义视图之间的表示鸿沟。
+
+
+图 7：视图预测一致性图
+
+图表形式：
+分组柱状图，使用 top20 Jaccard overlap。横轴为三组 view pair：UB-UI、UB-BI、UI-BI；每组两根柱，分别表示 Baseline 和 Full Module2。
+
+我选择这个图形的原因：
+它最直接回答“表示拉近意味着什么”的第一个问题：如果不同视图的表示真的更一致，那么它们各自推荐出的 top20 bundle 是否也更一致？Jaccard overlap 能把这个问题表达得非常直观。
+
+图表目的：
+展示模块2是否让不同单视图推荐出的 top20 候选 bundle 更一致。该图尤其突出 UB-BI 的预测候选重合度大幅提升。
+
+纵轴：
+Mean Jaccard overlap of top20 recommendations
+
+横轴：
+UB-UI
+UB-BI
+UI-BI
+
+指标定义：
+先分别使用 UB-only、UI-only、BI-only 三个单视图表示生成每个用户的 top20 推荐列表。然后对每个用户计算两个视图 top20 集合的 Jaccard overlap：
+
+Jaccard(A, B) = |A ∩ B| / |A ∪ B|
+
+最后对所有用户求平均。
+
+绘图数据：
+
+| view_pair | baseline_top20_jaccard | module2_top20_jaccard | absolute_gain | relative_gain |
+|---|---:|---:|---:|---:|
+| UB-UI | 0.044995 | 0.062446 | 0.017451 | +38.78% |
+| UB-BI | 0.106782 | 0.267630 | 0.160848 | +150.63% |
+| UI-BI | 0.031175 | 0.047949 | 0.016774 | +53.80% |
+
+图表预期结论：
+模块2不仅让不同视图的 embedding 更接近，也让不同视图实际推荐出的候选 bundle 更一致。尤其 UB-BI top20 推荐重合度相对提升 150.63%，说明 BI 视图的推荐判断被显著拉向 UB 推荐目标。
+
+
+图 8：视图冲突度图
+
+图表形式：
+分组柱状图。横轴为两个 candidate scope：test positive 和 full top20；每组两根柱，分别表示 Baseline 和 Full Module2。纵轴为三视图打分标准差，越低越好。
+
+我选择这个图形的原因：
+这个图能回答“表示拉近意味着什么”的第二个问题：表示更一致以后，三个视图对同一个候选 bundle 的判断是否更少冲突。柱状图中 Module2 的柱子更低，视觉上很容易读出“冲突下降”。
+
+图表目的：
+展示模块2是否降低 UB、UI、BI 三个视图对同一个候选 bundle 的打分分歧。
+
+纵轴：
+Mean standard deviation of normalized view scores
+
+横轴：
+test positive
+full top20
+
+指标定义：
+对同一个候选 bundle，分别计算 UB、UI、BI 三个视图下的预测分数。为了避免不同视图分数尺度不同，先对每个视图分数做 z-score 标准化，然后计算三个视图标准化分数之间的标准差。标准差越大，说明三个视图对该候选的判断越冲突；标准差越小，说明三个视图判断越一致。
+
+候选范围说明：
+test positive：测试集真实正例 bundle。
+full top20：最终 Full fusion 推荐出的 top20 bundle。
+
+绘图数据：
+
+| candidate_scope | baseline_mean_zstd | module2_mean_zstd | absolute_reduction | relative_reduction |
+|---|---:|---:|---:|---:|
+| test positive | 0.743333 | 0.609539 | 0.133794 | -18.00% |
+| full top20 | 1.139997 | 0.992241 | 0.147755 | -12.96% |
+
+可选补充数据：
+
+| candidate_scope | baseline_median_zstd | module2_median_zstd | relative_reduction |
+|---|---:|---:|---:|
+| test positive | 0.646499 | 0.519035 | -19.72% |
+| full top20 | 1.043233 | 0.887793 | -14.90% |
+
+图表预期结论：
+模块2显著降低了三个视图对候选 bundle 的打分冲突。在 test positive 上，平均冲突度下降 18.00%；在 full top20 上，平均冲突度下降 12.96%。这说明表示一致性提升对应到预测层面，就是多视图信号更加协同，而不是互相拉扯。
+
+
+图 9：视图融合增益图
+
+图表形式：
+横向柱状图。横轴为 Recall@20 相对提升百分比，纵轴为不同视图或融合策略。建议按提升幅度从高到低排序，并重点标出 BI-only。
+
+我选择这个图形的原因：
+这个图能回答“表示拉近意味着什么”的第三个问题：模块2是否让某些视图本身变得更有推荐能力。结果中 BI-only 的 Recall@20 提升达到 40.84%，远高于其他视图，因此横向柱状图非常适合突出 BI 组成视图被转化成更可用的推荐信号。
+
+图表目的：
+展示模块2对不同单视图和视图融合策略的推荐能力提升情况，重点说明 BI-only 和包含 BI 的组合收益明显。
+
+纵轴：
+不同视图或融合策略：
+BI-only
+UI-BI
+UI-only
+UB-only
+UB-UI
+Full
+UB-BI
+
+横轴：
+Relative improvement of Recall@20，建议以百分比展示。
+
+指标定义：
+对同一组 pre-fusion 表示，按照指定视图或视图组合进行 embedding-level fusion：
+
+fused_user = sum(weight_i * user_i)
+fused_bundle = sum(weight_i * bundle_i)
+score = fused_user @ fused_bundle.T
+
+然后计算该视图或组合下的 Recall@20。相对提升计算方式为：
+
+(Module2 Recall@20 - Baseline Recall@20) / Baseline Recall@20
+
+绘图数据：
+
+| variant | baseline_recall@20 | module2_recall@20 | relative_gain_recall@20 |
+|---|---:|---:|---:|
+| BI-only | 0.056655 | 0.079795 | +40.84% |
+| UI-BI | 0.074964 | 0.085383 | +13.90% |
+| UI-only | 0.030271 | 0.032681 | +7.96% |
+| UB-only | 0.083886 | 0.090391 | +7.75% |
+| UB-UI | 0.086659 | 0.090901 | +4.90% |
+| Full | 0.090433 | 0.094781 | +4.81% |
+| UB-BI | 0.091309 | 0.094436 | +3.42% |
+
+可选补充数据：
+
+| variant | baseline_ndcg@20 | module2_ndcg@20 | relative_gain_ndcg@20 |
+|---|---:|---:|---:|
+| BI-only | 0.029723 | 0.041503 | +39.63% |
+| UI-BI | 0.040978 | 0.046795 | +14.20% |
+| UB-only | 0.045909 | 0.049286 | +7.36% |
+| UI-only | 0.015829 | 0.016783 | +6.03% |
+| UB-UI | 0.047563 | 0.049957 | +5.03% |
+| Full | 0.049143 | 0.050928 | +3.63% |
+| UB-BI | 0.049055 | 0.050391 | +2.72% |
+
+图表预期结论：
+模块2对 BI-only 的提升最显著，Recall@20 和 NDCG@20 分别提升 40.84% 和 39.63%。这说明实验二中 UB-BI 表示拉近不是抽象的向量现象，而是让 BI 组成视图本身获得了更强的推荐能力。换句话说，模块2把 BI 组成语义转化成了更接近 UB 推荐目标的可用推荐信号。
+
+
+3. 实验二推荐论文表述
+
+首先，user-side 跨视图表示相似度结果显示，模块2显著提升了 UB、UI、BI 三个视图之间的表示一致性，尤其是 UB-BI similarity 从 0.437 提升到 0.796，相对提升 82.19%。这说明模块2有效缩小了 UB 行为交互视图和 BI bundle 组成语义视图之间的表示鸿沟。
+
+进一步地，补充分析表明这种表示拉近具有明确的预测层含义。第一，单视图 top20 推荐候选重合度明显提升，其中 UB-BI overlap 相对提升 150.63%，说明不同视图推荐出的候选更一致。第二，三视图对候选 bundle 的打分冲突显著下降，在 test positive 上平均冲突度下降 18.00%，在 full top20 上下降 12.96%，说明多视图信号更容易协同。第三，BI-only 推荐能力显著增强，Recall@20 提升 40.84%，NDCG@20 提升 39.63%，说明 BI 组成语义被转化成更可用的推荐信号。
+
+因此，实验二最终可以解释为：模块2不仅提升了跨视图 embedding similarity，更重要的是降低了多视图预测冲突，使 BI 组成视图与 UB 推荐目标更加一致，从而改善多视图融合质量。
+
+
+四、最终数据检查与逐图详细说明
+
+1. 数据检查结论
+
+已新增并运行数据检查脚本：
+check_selected_experiment_outputs.py
+
+检查结果：
+All selected experiment output checks passed.
+
+检查范围：
+
+1. 实验一四组柱状图数据
+   检查 baseline、module2、absolute gain、relative gain 是否一致。
+
+2. 实验一贡献占比数据
+   检查 weighted gain 是否等于 number_of_eval_users * absolute gain。
+   检查净贡献占比和正向贡献占比是否按公式正确计算。
+
+3. 实验二 user-side similarity 数据
+   检查 absolute gain 和 relative gain 是否由 baseline similarity 与 module2 similarity 正确计算。
+
+4. 实验二预测一致性数据
+   检查 top20 Jaccard overlap 的 absolute gain 和 relative gain 是否正确。
+
+5. 实验二视图冲突度数据
+   检查 absolute reduction 和 relative reduction 是否正确。
+
+6. 实验二视图融合增益数据
+   检查不同视图或融合策略下 Recall@20 / NDCG@20 的相对提升是否正确。
+
+7. 实验六鲁棒性折线图数据
+   检查 module2-baseline 的 gap 和 relative gap 是否正确。
+
+因此，当前 `实验产出.txt` 中记录的所有图表数据与 `analysis_outputs/NetEase/summary/selected_for_paper/` 中的导出数据一致，公式计算也通过脚本校验。
+
+
+2. 图 1 详细说明：不同用户稀疏组的 Recall@20 相对提升柱状图
+
+图表定位：
+这是实验一的第一张核心图，用于回答“模块2是否更帮助稀疏用户”。它关注命中能力，即测试集中真实相关 bundle 是否出现在推荐列表前 20 名中。
+
+图表形式：
+建议使用单组柱状图，每个用户组一根柱。柱高表示 Full Module2 相比 Baseline 的 Recall@20 相对提升百分比。
+
+横轴：
+四个用户组，按照 train_ub_degree 从低到高排列：
+G1 (0-7)
+G2 (7-8)
+G3 (8-12)
+G4 (12-660)
+
+纵轴：
+Relative improvement of Recall@20 (%)
+
+核心数据：
+G1：+12.64%
+G2：-1.23%
+G3：+3.97%
+G4：+3.50%
+
+读图方式：
+读者应先看到 G1 的柱子显著高于其他组。G1 是训练 UB 交互最少的用户组，平均 train_ub_degree 仅为 4.88，而它的 Recall@20 提升达到 12.64%。G4 是训练交互最多的用户组，平均 train_ub_degree 为 24.87，Recall@20 提升只有 3.50%。这形成了清楚对比。
+
+图中需要保留的信息：
+建议在横轴标签或图注中标明每组 degree 范围，也可以在图注中说明每组用户数约为 4632。G1 的评估用户数为 4618，其他三组为 4632。
+
+需要注意的地方：
+G2 的 Recall@20 为 -1.23%，是轻微负提升。因此不能把该图解读为“所有稀疏分组都提升”。更准确的说法是“最低交互组提升最显著，整体趋势说明模块2对稀疏用户更友好”。如果画图时想强调主结论，可以用不同颜色突出 G1，但不要隐藏 G2 的负值。
+
+推荐图注：
+Relative improvement of Recall@20 across user sparsity groups. Users are split into four groups by training UB degree. The lowest-degree group obtains the largest gain, indicating that Module2 is especially beneficial for sparse users.
+
+论文中可写的结论：
+按照训练交互数分组后，最低交互用户组 G1 的 Recall@20 提升达到 12.64%，明显高于高交互组 G4 的 3.50%。这表明模块2能够更有效地缓解稀疏用户直接 UB 监督不足的问题。
+
+
+3. 图 2 详细说明：不同用户稀疏组的 NDCG@20 相对提升柱状图
+
+图表定位：
+这是实验一的第二张核心图，用于补充 Recall@20 图。Recall@20 反映命中能力，NDCG@20 进一步反映排序质量，即正例是否排在更靠前的位置。
+
+图表形式：
+建议使用单组柱状图，每个用户组一根柱。柱高表示 Full Module2 相比 Baseline 的 NDCG@20 相对提升百分比。
+
+横轴：
+G1 (0-7)
+G2 (7-8)
+G3 (8-12)
+G4 (12-660)
+
+纵轴：
+Relative improvement of NDCG@20 (%)
+
+核心数据：
+G1：+9.32%
+G2：+0.53%
+G3：+3.67%
+G4：+1.86%
+
+读图方式：
+这张图的重点是：所有组的 NDCG@20 都是正提升，并且 G1 最高。G1 的提升为 9.32%，显著高于 G2、G3、G4。它与图 1 形成互证：模块2不仅让稀疏用户更容易命中相关 bundle，也让相关 bundle 的排序位置更靠前。
+
+图中需要保留的信息：
+建议和图 1 使用相同的横轴顺序、颜色逻辑和用户组标签，便于读者对比 Recall 和 NDCG。
+
+需要注意的地方：
+G3 的 NDCG@20 提升为 3.67%，高于 G4 的 1.86%，但 G2 很低。也就是说该图不是严格单调递减，但“最低交互组最大”这一核心结论非常清楚。
+
+推荐图注：
+Relative improvement of NDCG@20 across user sparsity groups. Module2 achieves the largest ranking-quality gain on the lowest-degree users.
+
+论文中可写的结论：
+最低交互组的 NDCG@20 提升达到 9.32%，说明模块2不仅提升稀疏用户的召回能力，也改善其推荐排序质量。
+
+
+4. 图 3 详细说明：不同用户稀疏组对 Recall@20 总体提升的贡献占比饼图
+
+图表定位：
+这张图不是展示“每组提升多少”，而是展示“整体 Recall@20 提升主要来自哪一组”。它回答的是贡献来源问题。
+
+图表形式：
+建议使用饼图或环形图。由于 G2 对 Recall@20 是负贡献，主图建议使用“正向贡献占比”。即只看对总体 Recall@20 提升有正向贡献的部分，负贡献组按 0 处理。
+
+贡献定义：
+先计算每组对总体 Recall@20 的加权提升：
+weighted_gain_i = number_of_eval_users_i * (module2_recall@20_i - baseline_recall@20_i)
+
+然后计算正向贡献占比：
+positive_share_i = max(weighted_gain_i, 0) / sum_j max(weighted_gain_j, 0)
+
+为什么要乘以 number_of_eval_users：
+整体指标本质上是对用户求平均。如果某一组用户更多，它对整体平均指标的影响就更大。因此贡献程度不能只看相对提升百分比，还必须考虑该组评估用户数。
+
+核心数据：
+G1 weighted gain：57.0000，正向贡献 66.28%
+G2 weighted gain：-5.5000，正向贡献 0.00%
+G3 weighted gain：15.9167，正向贡献 18.51%
+G4 weighted gain：13.0820，正向贡献 15.21%
+
+读图方式：
+读者应看到 G1 占据饼图的大多数区域，贡献了 Recall@20 正向提升的 66.28%。这比单纯说 G1 相对提升最高更进一步：它说明最终模型整体提升，主要就是由最低交互用户组贡献出来的。
+
+需要注意的地方：
+G2 是负贡献，不能硬塞进普通饼图。文档中同时保留净贡献占比：
+G1：70.81%
+G2：-6.83%
+G3：19.77%
+G4：16.25%
+
+如果论文图使用正向贡献饼图，图注必须说明 G2 的 Recall@20 weighted gain 为负，因此在正向贡献图中记为 0。这样表达既美观，也严谨。
+
+推荐图注：
+Positive contribution share to the overall Recall@20 improvement. Contributions are weighted by the number of evaluated users in each group. G2 has a slight negative Recall@20 gain and is counted as zero in the positive-share pie chart.
+
+论文中可写的结论：
+贡献度分析显示，最低交互组 G1 贡献了 Recall@20 正向提升的 66.28%，说明模块2的整体 Recall 增益主要来自稀疏用户。
+
+
+5. 图 4 详细说明：不同用户稀疏组对 NDCG@20 总体提升的贡献占比饼图
+
+图表定位：
+这张图与图 3 对应，但关注排序质量 NDCG@20 的总体增益来源。
+
+图表形式：
+建议使用饼图或环形图。由于四组 NDCG@20 weighted gain 都为正，因此可以直接使用普通贡献占比。
+
+贡献定义：
+weighted_gain_i = number_of_eval_users_i * (module2_ndcg@20_i - baseline_ndcg@20_i)
+
+contribution_share_i = weighted_gain_i / sum_j weighted_gain_j
+
+核心数据：
+G1 weighted gain：18.7668，贡献 56.79%
+G2 weighted gain：1.1200，贡献 3.39%
+G3 weighted gain：7.9377，贡献 24.02%
+G4 weighted gain：5.2228，贡献 15.80%
+
+读图方式：
+G1 仍然是最大贡献来源，贡献了总体 NDCG@20 提升的 56.79%。G3 是第二大贡献来源，贡献 24.02%。G2 的贡献很小，仅 3.39%。
+
+图 3 和图 4 的组合意义：
+图 3 说明最低交互用户是 Recall 增益的主要来源，图 4 说明最低交互用户也是 NDCG 增益的主要来源。二者共同支撑“模块2的整体收益主要来自稀疏用户”这一强结论。
+
+推荐图注：
+Contribution share to the overall NDCG@20 improvement. Contributions are weighted by the number of evaluated users in each group.
+
+论文中可写的结论：
+在排序质量方面，最低交互组 G1 贡献了总体 NDCG@20 提升的 56.79%，进一步证明模块2的收益主要集中在稀疏用户群体。
+
+
+6. 图 5 详细说明：BI drop ratio 下 Baseline 与 Full Module2 的 Recall@20 折线图
+
+图表定位：
+这是实验六的核心图，用于说明模块2在 BI 图结构被扰动时的鲁棒性。
+
+图表形式：
+建议使用双折线图。横轴是 BI drop ratio，纵轴是 Recall@20。两条线分别代表 Baseline 和 Full Module2。
+
+横轴：
+0.0、0.1、0.2、0.3、0.4
+
+纵轴：
+Recall@20
+
+核心数据：
+drop 0.0：Baseline 0.090433，Module2 0.094781，相对提升 +4.81%
+drop 0.1：Baseline 0.089920，Module2 0.093816，相对提升 +4.33%
+drop 0.2：Baseline 0.088801，Module2 0.092470，相对提升 +4.13%
+drop 0.3：Baseline 0.089950，Module2 0.092343，相对提升 +2.66%
+drop 0.4：Baseline 0.087096，Module2 0.091087，相对提升 +4.58%
+
+读图方式：
+读者应看到在每个 BI drop ratio 下，Module2 这条线都位于 Baseline 之上。该图的关键不是两条线差距越来越大，而是 Module2 在所有扰动强度下始终保持优势。
+
+图中可以添加的信息：
+可以在每个 drop ratio 处标注相对提升百分比，也可以只在图注中写明提升范围为 2.66% 到 4.81%。如果图面过拥挤，建议不标每个点，只保持双线清晰。
+
+需要注意的地方：
+Baseline 在 drop 0.3 时略高于 drop 0.2，这说明扰动实验存在训练随机性和数据扰动后的非严格单调现象。因此论文中不要写“drop 越大，性能越低”或“drop 越大，模块2优势越大”。最稳妥的结论是：在不同扰动强度下，Module2 始终优于 Baseline。
+
+推荐图注：
+Recall@20 under different BI edge drop ratios. Full Module2 consistently outperforms Baseline across all perturbation levels, indicating stable robustness to BI-view structural noise.
+
+论文中可写的结论：
+当 BI 图被随机删边扰动时，Full Module2 在所有 drop ratio 下均保持高于 Baseline 的 Recall@20，说明模块2在 BI 结构信息不完整时仍具有稳定优势。
+
+
+7. 图 6 详细说明：User-side 跨视图表示一致性柱状图
+
+图表定位：
+这是实验二的第一张图，也是实验二的入口图。它先证明“模块2确实改变了表示空间”，再为后续三个补充图铺垫。
+
+图表形式：
+建议使用分组柱状图。每个 view pair 一组，每组两根柱：Baseline 和 Full Module2。
+
+横轴：
+UB-UI
+UB-BI
+UI-BI
+
+纵轴：
+Average cosine similarity
+
+核心数据：
+UB-UI：0.910378 -> 0.952827，相对提升 +4.66%
+UB-BI：0.436983 -> 0.796139，相对提升 +82.19%
+UI-BI：0.578330 -> 0.806273，相对提升 +39.41%
+
+读图方式：
+这张图要重点引导读者看 UB-BI。Baseline 下 user-side UB-BI similarity 只有 0.437，说明 UB 行为交互视图和 BI 组成语义视图之间原本存在明显表示鸿沟。加入模块2后，UB-BI similarity 提升到 0.796，接近 UI-BI 的水平，说明模块2显著增强了 UB 与 BI 的表示兼容性。
+
+为什么只画 user-side：
+user-side 的 UB-BI 提升最明显，视觉冲击最强，也最适合服务论文叙事。bundle-side 可以作为文字补充，不一定进入主图。
+
+需要注意的地方：
+这张图只能直接证明表示一致性提升，不能单独证明一致性提升导致性能提升。因此后面必须接图 7、图 8、图 9，解释“表示拉近意味着什么”。
+
+推荐图注：
+User-side pre-fusion cross-view representation similarity. Module2 substantially increases UB-BI similarity, indicating that the gap between interaction supervision and bundle composition semantics is reduced.
+
+论文中可写的结论：
+模块2显著提升 user-side 跨视图表示一致性，尤其将 UB-BI similarity 从 0.437 提升至 0.796。这表明模块2有效弥合了 UB 交互监督视图与 BI 组成语义视图之间的表示鸿沟。
+
+
+8. 图 7 详细说明：视图预测一致性图
+
+图表定位：
+这是实验二的第一个解释性补充图，用于说明“表示一致性提升”在推荐预测层面意味着不同视图给出的候选更一致。
+
+图表形式：
+建议使用分组柱状图。每个 view pair 一组，每组两根柱：Baseline 和 Full Module2。指标为 top20 Jaccard overlap。
+
+横轴：
+UB-UI
+UB-BI
+UI-BI
+
+纵轴：
+Mean Jaccard overlap of top20 recommendations
+
+核心数据：
+UB-UI：0.044995 -> 0.062446，相对提升 +38.78%
+UB-BI：0.106782 -> 0.267630，相对提升 +150.63%
+UI-BI：0.031175 -> 0.047949，相对提升 +53.80%
+
+指标解释：
+对同一个用户，分别用 UB-only、UI-only、BI-only 生成 top20 推荐集合。然后计算两个集合之间的 Jaccard overlap。Jaccard 越高，说明两个视图推荐出的候选 bundle 越相似。
+
+读图方式：
+读者应看到 UB-BI 的 top20 overlap 从 0.1068 提升到 0.2676，相对提升 150.63%。这说明模块2不仅让 UB 和 BI 的表示更接近，还让两个视图实际推荐出的候选集合大幅接近。
+
+图 6 与图 7 的关系：
+图 6 说明 UB-BI 表示拉近；图 7 说明这种拉近在推荐候选层面表现为 UB-BI 预测更一致。二者连起来，就能避免实验二停留在抽象的 embedding similarity。
+
+需要注意的地方：
+Jaccard overlap 的绝对值不高，这是推荐系统中 top-k 集合重合度的常见现象。论文中重点强调相对变化和 UB-BI 的显著提升，而不是要求 overlap 接近 1。
+
+推荐图注：
+Top-20 recommendation overlap between single-view predictors. Module2 greatly increases UB-BI overlap, suggesting that the BI view produces candidates more consistent with the UB interaction view.
+
+论文中可写的结论：
+UB-BI top20 推荐重合度相对提升 150.63%，说明模块2让 BI 视图的推荐候选更接近 UB 交互视图，从预测结果层面解释了表示一致性提升的实际意义。
+
+
+9. 图 8 详细说明：视图冲突度图
+
+图表定位：
+这是实验二的第二个解释性补充图，用于说明“表示一致性提升”意味着不同视图对同一候选的判断冲突降低。
+
+图表形式：
+建议使用分组柱状图。横轴为 candidate scope，每组两根柱：Baseline 和 Full Module2。纵轴为 mean view score zstd，越低越好。
+
+横轴：
+test positive
+full top20
+
+纵轴：
+Mean standard deviation of normalized view scores
+
+核心数据：
+test positive：0.743333 -> 0.609539，下降 18.00%
+full top20：1.139997 -> 0.992241，下降 12.96%
+
+指标解释：
+对同一个候选 bundle，分别计算 UB、UI、BI 三个视图的预测分数。由于三个视图的分数尺度可能不同，所以先对每个视图分数做 z-score 标准化，再计算三个视图标准化分数之间的标准差。标准差越大，说明视图之间越分歧；标准差越小，说明视图判断越一致。
+
+候选范围解释：
+test positive 表示测试集真实正例 bundle。这个范围说明模型对真实相关对象的多视图判断是否一致。
+full top20 表示最终融合模型推荐出的 top20 bundle。这个范围说明模型最终推荐结果内部是否存在视图冲突。
+
+读图方式：
+读者应看到 Module2 的柱子在两个候选范围上都更低。test positive 上下降 18.00%，full top20 上下降 12.96%。这表示模块2降低了多视图之间的打分冲突。
+
+图 7 与图 8 的区别：
+图 7 看的是“推荐集合是否重合”，图 8 看的是“对同一个候选的分数判断是否冲突”。一个从候选集合层面解释一致性，一个从打分层面解释一致性，二者互补。
+
+需要注意的地方：
+这个图的指标是“越低越好”，与其他提升类图不同。绘图时建议在纵轴或图注中明确写 Lower is better，避免读者误读。
+
+推荐图注：
+Cross-view score conflict measured by the standard deviation of z-normalized UB/UI/BI scores. Lower values indicate less disagreement among views. Module2 reduces view conflict on both test positives and final top20 candidates.
+
+论文中可写的结论：
+模块2使 test positive 上的三视图打分冲突下降 18.00%，使 final top20 候选上的冲突下降 12.96%。这说明跨视图表示一致性提升对应到预测层面，是多视图信号冲突减少、协同增强。
+
+
+10. 图 9 详细说明：视图融合增益图
+
+图表定位：
+这是实验二的第三个解释性补充图，用于说明“表示一致性提升”还意味着 BI 组成视图本身变得更有推荐能力。
+
+图表形式：
+建议使用横向柱状图。纵轴为不同视图或融合策略，横轴为 Recall@20 相对提升百分比。建议按提升幅度从高到低排序，并用特殊颜色突出 BI-only。
+
+横轴：
+Relative improvement of Recall@20 (%)
+
+纵轴：
+BI-only
+UI-BI
+UI-only
+UB-only
+UB-UI
+Full
+UB-BI
+
+核心数据：
+BI-only：+40.84%
+UI-BI：+13.90%
+UI-only：+7.96%
+UB-only：+7.75%
+UB-UI：+4.90%
+Full：+4.81%
+UB-BI：+3.42%
+
+指标解释：
+每一种 variant 都表示一种视图使用方式。比如 BI-only 表示只使用 BI 视图表示进行推荐，UB-BI 表示只融合 UB 和 BI 表示，Full 表示按模型原始比例融合 UB、UI、BI。相对提升表示模块2训练后的该视图或组合，相比 Baseline 对应视图或组合的 Recall@20 提升。
+
+融合方式说明：
+该图使用 embedding-level fusion，而不是简单的 score-level fusion。即先融合 user 和 bundle 的多视图表示，再计算打分：
+fused_user = sum(weight_i * user_i)
+fused_bundle = sum(weight_i * bundle_i)
+score = fused_user @ fused_bundle.T
+
+读图方式：
+最重要的是 BI-only。BI-only 的 Recall@20 提升 40.84%，远高于其他视图或组合。这说明模块2对 BI 组成视图的改造最强，使原本偏结构组成语义的 BI 视图变得更接近推荐任务目标。
+
+图 6 与图 9 的关系：
+图 6 说明 UB-BI 表示被拉近；图 9 说明这种拉近使 BI-only 推荐能力大幅增强。也就是说，BI 视图不是只在向量空间里“变近了”，而是真的变成了更可用的推荐信号。
+
+需要注意的地方：
+Full 的相对提升不是最高，因为 Full 本身在 Baseline 下已经较强，提升空间较小。BI-only 的相对提升最高，并不代表 BI-only 的绝对性能超过 Full。论文中要强调“BI 视图能力提升最大”，不要误写成“BI-only 最终效果最好”。
+
+推荐图注：
+Relative Recall@20 gains of different single-view and fused-view predictors. BI-only receives the largest improvement, indicating that Module2 turns BI composition semantics into a more recommendation-aligned signal.
+
+论文中可写的结论：
+BI-only 的 Recall@20 和 NDCG@20 分别提升 40.84% 和 39.63%，说明模块2显著增强了 BI 组成视图的独立推荐能力。这进一步解释了 UB-BI 表示一致性提升的含义：BI 语义被转化为更接近 UB 推荐目标的有效信号。
+
+
+11. 9 张图的整体论文叙事顺序建议
+
+建议正文采用以下顺序：
+
+第一组：用户稀疏性
+图 1 和图 2 先说明最低交互用户的 Recall@20 / NDCG@20 提升最大。
+图 3 和图 4 再说明最低交互用户对整体提升贡献最大。
+
+第二组：表示一致性及其含义
+图 6 先展示 user-side 表示一致性大幅提升，尤其 UB-BI。
+图 7 说明表示拉近带来推荐候选一致性提升。
+图 8 说明表示拉近带来视图打分冲突下降。
+图 9 说明表示拉近让 BI 视图本身变得更可用。
+
+第三组：鲁棒性
+图 5 展示不同 BI drop ratio 下 Module2 始终优于 Baseline。
+
+整体推荐叙事：
+模块2首先在稀疏用户上产生更明显收益；机制上，它显著提升跨视图表示一致性，并使这种一致性体现在推荐候选、视图打分和 BI 视图能力上；最后，在 BI 图结构被扰动时，模块2仍保持稳定优势，说明其多视图协同机制具备一定鲁棒性。

@@ -1,0 +1,377 @@
+模块一消融实验研究
+====================
+
+一、工作背景
+------------
+
+本项目是毕业论文中的捆绑推荐项目，当前主要围绕两个模块展开：
+
+1. 模块一：扩散净化 UB 图。
+2. 模块二：融合前对比学习 + 融合后对比学习。
+
+模块二相关实验已经完成，本阶段工作只围绕模块一展开。模块一实验只在 iFashion 数据集上进行，当前 iFashion 使用 DWT 分支：
+
+train_style: dwt
+
+当前 iFashion 的原始最佳配置已经经过反复调参确定，因此本阶段实验只改变 UB 图重构策略和 Top-K 的 K 值，不改动 DWT 主干、UI 图、BI 图、负采样、loss、优化器、评估方式、batch size、epoch 等核心训练逻辑。
+
+
+二、模块一原始逻辑
+------------------
+
+模块一的完整 Diffusion Top-K 逻辑如下：
+
+1. 使用预训练 user embedding 和 bundle embedding。
+2. 对每个用户的 train UB 历史交互 bundle embedding 做池化，得到 z0。
+3. 对 z0 进行加噪和降噪，得到 z*。
+4. 使用 z* 只对该用户历史交互过的 bundle 打分。
+5. 在历史交互集合内部取 Top-K。
+6. 用选中的边重构新的 UB 训练图。
+7. 将新的 UB 训练图送入 DWT 主干训练。
+
+注意：模块一所有 Top-K 策略都只能在 train UB 历史交互集合内选边，不能从全量 bundle 库选边，也不能使用 tune/test 数据。
+
+
+三、本阶段新增的 26 组实验
+--------------------------
+
+本阶段实现并运行了 iFashion 模块一消融实验，共 26 组：
+
+1. Raw UB baseline：1 组。
+2. A. Diffusion Top-K：5 组。
+3. B. Random Top-K：5 组。
+4. C. Pretrain Similarity Top-K：5 组。
+5. D. Popularity Top-K：5 组。
+6. E. Pooled z0 Top-K：5 组。
+
+Top-K 的 K 取值固定为：
+
+K = 1, 3, 5, 7, 9
+
+
+四、各实验组含义
+----------------
+
+Raw UB baseline：
+
+直接使用原始 train UB 图，不做 Top-K，不启用 diffusion rebuild。
+
+
+A. Diffusion Top-K：
+
+当前模块一的完整扩散净化逻辑。每个 epoch 训练 diffusion rebuilder，并用降噪后的 z* 对用户历史交互 bundle 打分，取 Top-K 重构 UB 图。
+
+实验组：
+
+M1A_diff_k1
+M1A_diff_k3
+M1A_diff_k5
+M1A_diff_k7
+M1A_diff_k9
+
+
+B. Random Top-K：
+
+每个 epoch 对每个 active user，从其 train UB 历史交互集合中随机采样 K 条边，动态重构 UB 图。
+
+该组不训练 diffusion，不加载预训练 embedding。
+
+实验组：
+
+M1B_rand_k1
+M1B_rand_k3
+M1B_rand_k5
+M1B_rand_k7
+M1B_rand_k9
+
+
+C. Pretrain Similarity Top-K：
+
+训练开始前静态生成一次 UB 图。对每个 user，只在其 train UB 历史交互 bundle 内排序：
+
+score(u, b) = cosine(pretrained_user_embedding[u], pretrained_bundle_embedding[b])
+
+取 Top-K。
+
+该组加载预训练 user embedding 和 bundle embedding，但不训练 diffusion。
+
+实验组：
+
+M1C_pre_k1
+M1C_pre_k3
+M1C_pre_k5
+M1C_pre_k7
+M1C_pre_k9
+
+
+D. Popularity Top-K：
+
+训练开始前静态生成一次 UB 图。bundle popularity 只用 train UB 图统计：
+
+popularity(b) = train UB 中与 bundle b 交互过的 user 数。
+
+对每个 user，只在其 train UB 历史交互 bundle 内按 popularity 从高到低排序，取 Top-K。
+
+该组不加载预训练 embedding，不训练 diffusion。
+
+实验组：
+
+M1D_pop_k1
+M1D_pop_k3
+M1D_pop_k5
+M1D_pop_k7
+M1D_pop_k9
+
+
+E. Pooled z0 Top-K：
+
+训练开始前静态生成一次 UB 图。对每个 user，先对其 train UB 历史交互 bundle 的预训练 embedding 做平均池化：
+
+z0(u) = mean(pretrained_bundle_embedding[b] for b in observed_bundles(u))
+
+然后只在 observed bundles 内排序：
+
+score(u, b) = cosine(z0(u), pretrained_bundle_embedding[b])
+
+取 Top-K。
+
+该组只加载预训练 bundle embedding，不加载 user embedding，不训练 diffusion。
+
+实验组：
+
+M1E_z0_k1
+M1E_z0_k3
+M1E_z0_k5
+M1E_z0_k7
+M1E_z0_k9
+
+
+五、代码实现情况
+----------------
+
+本阶段主要修改了以下文件：
+
+1. train.py
+2. config.yaml
+3. scripts/run_ifashion_module1_ablation.sh
+4. scripts/collect_ifashion_module1_results.py
+
+config.yaml 中 iFashion.dwt 新增字段：
+
+rebuild_strategy: "diffusion"
+
+train.py 中新增命令行参数：
+
+--dwt_rebuild_strategy
+--dwt_rebuild_k
+
+支持的策略包括：
+
+raw
+diffusion
+random
+pretrain_sim
+popularity
+pooled_z0
+
+新增的 UB 图重构函数包括：
+
+build_ub_graph_from_user_selected_bundles
+rebuild_ub_graph_random_topk
+rebuild_ub_graph_pretrain_similarity_topk
+rebuild_ub_graph_popularity_topk
+rebuild_ub_graph_pooled_z0_topk
+
+run_dwt_training 中根据 rebuild_strategy 分流：
+
+1. raw：直接使用原始 train UB 图。
+2. diffusion：沿用原完整 diffusion 训练和重构流程。
+3. random：每个 epoch 动态随机 Top-K 重构。
+4. pretrain_sim：训练前静态生成一次 Top-K UB 图。
+5. popularity：训练前静态生成一次 Top-K UB 图。
+6. pooled_z0：训练前静态生成一次 Top-K UB 图。
+
+为了避免非 diffusion 策略误跑扩散模型，代码中使用：
+
+use_latent_diffusion_rebuild = rebuild_strategy == "diffusion"
+
+因此只有 strategy=diffusion 时才会创建和训练 LatentDiffusionRebuilder。
+
+
+六、运行脚本和容错机制
+----------------------
+
+新增脚本：
+
+scripts/run_ifashion_module1_ablation.sh
+
+运行方式：
+
+MAX_ATTEMPTS=5 bash scripts/run_ifashion_module1_ablation.sh 0
+
+其中 0 是 GPU 编号。
+
+脚本包含 26 组实验命令，并支持：
+
+1. 每组实验最多尝试 5 次。
+2. 成功实验写入 experiment_status.json。
+3. 如果中断或断连，重新运行脚本会自动跳过已成功实验。
+4. 如果训练进程退出但日志中没有完整 test metrics，也会视为失败并重试。
+5. 控制台会显示当前正在运行的实验名、策略、K 和尝试次数。
+
+新增汇总脚本：
+
+scripts/collect_ifashion_module1_results.py
+
+该脚本从实验日志中提取 test 指标 REC_T 和 NDCG_T，生成 summary.txt 和 summary.csv。
+
+
+七、实验完成状态
+----------------
+
+26 组 iFashion 模块一消融实验已经全部跑完，并已保存到当前项目目录下：
+
+module1_ablation/
+
+该目录包含：
+
+1. detail/
+   每组实验的详情日志。
+
+2. summary.txt
+   人可读的汇总日志。
+
+3. summary.csv
+   CSV 格式的汇总结果。
+
+4. experiment_status.json
+   每组实验的运行状态、重试次数、日志路径和更新时间。
+
+5. diffusion_topk_edges/
+   A 组 Diffusion Top-K 中 K=3 的每个 epoch 选中交互记录。
+
+
+八、Diffusion Top-K=3 逐 epoch 选边保存
+---------------------------------------
+
+为后续分析模块一扩散净化机制，已额外保存 A 组 Diffusion Top-K 且 K=3 时每个 epoch 选中的 UB 交互。
+
+保存目录：
+
+module1_ablation/diffusion_topk_edges/
+
+其中每个 epoch 文件格式为：
+
+user_id    bundle_id
+
+同时保存 manifest.tsv，用于记录每个 epoch 的图统计信息，包括：
+
+rebuilt_edges
+avg_user_edges
+user_coverage
+bundle_coverage
+density
+
+
+九、交接说明
+------------
+
+截至本文档记录时，模块一 26 组消融实验已经完成，结果文件已经保存到 module1_ablation 目录。
+
+本文档只记录实验设计、实现方式、运行方式、完成状态和结果保存位置。后续关于结果优劣、机制解释、是否新增实验、论文表格如何组织等分析工作，尚未在本文档中展开，需要后续继续研究。
+
+
+十、组会汇报图表数据整理
+------------------------
+
+后续组会汇报可以将模块一消融结果整理为四张候选折线图：
+
+1. Recall@10 折线图。
+2. NDCG@10 折线图。
+3. Recall@20 折线图。
+4. NDCG@20 折线图。
+
+其中 @20 指标建议作为组会汇报主图，@10 指标可作为补充图或备选图。暂不展示 @40、@80，避免图表过多、信息过杂。
+
+所有折线图的横轴均为 Top-K：
+
+K = 1, 3, 5, 7, 9
+
+所有折线图均画 6 条线：
+
+1. RawUB
+2. A. Diffusion Top-K
+3. B. Random Top-K
+4. C. Pretrain Similarity Top-K
+5. D. Popularity Top-K
+6. E. Pooled z0 Top-K
+
+其中 RawUB 不随 K 变化，在折线图中画成一条水平基准线。RawUB 的数值来自 M1Raw，对所有 K 位置重复填充。
+
+
+Recall@10 折线图数据
+--------------------
+
+| Method | K=1 | K=3 | K=5 | K=7 | K=9 |
+|---|---:|---:|---:|---:|---:|
+| RawUB | 0.10600 | 0.10600 | 0.10600 | 0.10600 | 0.10600 |
+| A. Diffusion Top-K | 0.11079 | 0.11451 | 0.11469 | 0.11347 | 0.11163 |
+| B. Random Top-K | 0.10678 | 0.10966 | 0.10901 | 0.10830 | 0.10787 |
+| C. Pretrain Similarity Top-K | 0.09827 | 0.10297 | 0.10543 | 0.10547 | 0.10696 |
+| D. Popularity Top-K | 0.11448 | 0.11661 | 0.11730 | 0.11619 | 0.11363 |
+| E. Pooled z0 Top-K | 0.11143 | 0.11413 | 0.11390 | 0.11299 | 0.11121 |
+
+
+NDCG@10 折线图数据
+------------------
+
+| Method | K=1 | K=3 | K=5 | K=7 | K=9 |
+|---|---:|---:|---:|---:|---:|
+| RawUB | 0.10449 | 0.10449 | 0.10449 | 0.10449 | 0.10449 |
+| A. Diffusion Top-K | 0.10899 | 0.11461 | 0.11509 | 0.11328 | 0.11120 |
+| B. Random Top-K | 0.10365 | 0.10762 | 0.10735 | 0.10652 | 0.10613 |
+| C. Pretrain Similarity Top-K | 0.09545 | 0.10043 | 0.10315 | 0.10378 | 0.10492 |
+| D. Popularity Top-K | 0.11534 | 0.11867 | 0.11941 | 0.11724 | 0.11385 |
+| E. Pooled z0 Top-K | 0.10984 | 0.11448 | 0.11452 | 0.11329 | 0.11071 |
+
+
+Recall@20 折线图数据
+--------------------
+
+| Method | K=1 | K=3 | K=5 | K=7 | K=9 |
+|---|---:|---:|---:|---:|---:|
+| RawUB | 0.15035 | 0.15035 | 0.15035 | 0.15035 | 0.15035 |
+| A. Diffusion Top-K | 0.15600 | 0.15691 | 0.15716 | 0.15651 | 0.15528 |
+| B. Random Top-K | 0.15091 | 0.15311 | 0.15306 | 0.15234 | 0.15305 |
+| C. Pretrain Similarity Top-K | 0.14217 | 0.14662 | 0.14897 | 0.14897 | 0.14963 |
+| D. Popularity Top-K | 0.15790 | 0.15788 | 0.15824 | 0.15860 | 0.15637 |
+| E. Pooled z0 Top-K | 0.15537 | 0.15653 | 0.15630 | 0.15586 | 0.15444 |
+
+
+NDCG@20 折线图数据
+------------------
+
+| Method | K=1 | K=3 | K=5 | K=7 | K=9 |
+|---|---:|---:|---:|---:|---:|
+| RawUB | 0.12243 | 0.12243 | 0.12243 | 0.12243 | 0.12243 |
+| A. Diffusion Top-K | 0.12727 | 0.13160 | 0.13213 | 0.13056 | 0.12878 |
+| B. Random Top-K | 0.12161 | 0.12524 | 0.12512 | 0.12431 | 0.12441 |
+| C. Pretrain Similarity Top-K | 0.11333 | 0.11812 | 0.12080 | 0.12142 | 0.12220 |
+| D. Popularity Top-K | 0.13285 | 0.13517 | 0.13576 | 0.13425 | 0.13099 |
+| E. Pooled z0 Top-K | 0.12757 | 0.13150 | 0.13153 | 0.13051 | 0.12810 |
+
+
+图表解读要点
+------------
+
+1. RawUB 作为水平基准线，用于观察各类 Top-K 筛边策略是否超过原始 UB 图。
+
+2. Random Top-K 略高于 RawUB，说明仅减少 UB 训练边、进行一定程度筛选，已经可能带来部分收益。
+
+3. Pretrain Similarity Top-K 整体偏弱，尤其在小 K 下低于 RawUB，说明直接使用 pretrained user-bundle 相似度筛边并不稳定。
+
+4. Diffusion Top-K 和 Pooled z0 Top-K 曲线非常接近，二者在 K=3 和 K=5 附近表现较好。这说明 observed bundle set 的中心原型筛边本身已经贡献了主要收益，当前 diffusion denoiser 的独立增益相对有限。
+
+5. Popularity Top-K 在 Recall@20 和 NDCG@20 上整体最强，尤其 K=5 或 K=7 附近达到较高结果。组会汇报时需要谨慎解释：该结果说明 iFashion 数据集中热门 bundle 的训练边保留具有很强效果，也提示当前模块一需要进一步证明其扩散机制优势，而不能只强调 Top-K 筛边带来的收益。
+
+6. 从 K 的趋势看，多数方法在 K=3 到 K=5 附近较优，K 过小可能丢失有效监督，K 过大可能重新引入较多弱偏好或噪声边。因此后续图表中可以重点强调“适中的 Top-K 是结构净化和监督保留之间的折中”。

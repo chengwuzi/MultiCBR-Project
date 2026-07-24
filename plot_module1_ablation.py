@@ -193,7 +193,7 @@ def build_figure(metric_conf: dict) -> tuple[plt.Figure, plt.Axes]:
         handletextpad=0.5,
     )
 
-    fig.subplots_adjust(left=0.15, right=0.978, bottom=0.16, top=0.97)
+    fig.subplots_adjust(left=0.19, right=0.978, bottom=0.16, top=0.97)
     return fig, ax
 
 

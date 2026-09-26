@@ -133,6 +133,8 @@ The main contributions of this work are summarized as follows:
     and further analyses also validate the effectiveness of the
     two key designs.
 \end{itemize}
+
+
 \section{Related Work}
 
 \subsection{Bundle Recommendation}
@@ -184,7 +186,6 @@ bundle preference. The resulting preference representation is
 then used to evaluate observed user--bundle interactions and
 reconstruct the user--bundle graph for subsequent multi-view
 representation learning.
-
 
 
 \section{Methodology}
@@ -723,7 +724,16 @@ and avoids scoring all $M\times N$ user--bundle pairs. Its
 trainable parameter complexity is
 $\mathcal O((M+N+O)d+P_f)$, where $P_f$ denotes the number
 of parameters in the denoising network.
+
+
 \section{Experiments}
+
+We evaluate DiGO on three bundle recommendation benchmarks.
+The experiments examine its overall ranking performance, the
+contributions of graph reconstruction and pre-fusion cross-view
+learning, and their behavior under different interaction
+selection strategies and levels of user feedback. We also
+analyze sensitivity to the key hyperparameters.
 
 % =========================================================
 % Table 2: Overall results, double-column table
@@ -826,9 +836,11 @@ of parameters in the denoising network.
     \end{tabular}
     }
 
-    \caption{Overall performance comparison on three datasets.
-    The best and second-best results are highlighted in bold and
-    underlined, respectively.}
+    \caption{Overall performance on three datasets. R and N denote
+    Recall and NDCG. Bold and underlined entries mark the best
+    and second-best reported results, respectively. Improv. is
+    DiGO's relative improvement over the strongest baseline for
+    each metric; dashes indicate unreported results.}
     \label{tab:overall}
 \end{table*}
 
@@ -878,7 +890,9 @@ of parameters in the denoising network.
     \end{tabular}
     }
 
-    \caption{Statistics of the datasets.}
+    \caption{Dataset statistics. U--I and U--B count user--item
+    and user--bundle interactions; Avg. I/B is the average
+    number of items per bundle.}
     \label{tab:datasets}
 \end{table}
 
@@ -938,126 +952,175 @@ of parameters in the denoising network.
     \end{tabular}
     }
 
-    \caption{Component ablation results of DiGO. The complete
-    model is highlighted in bold.}
+    \caption{Component ablations on three datasets, evaluated by
+    Recall@20 (R@20) and NDCG@20 (N@20). Bold entries identify
+    the complete DiGO model.}
     \label{tab:ablation}
 \end{table}
 
 
 \subsection{Experimental Settings}
 
-\paragraph{Datasets and Evaluation Metrics.}
-We conduct experiments on three public bundle recommendation
-datasets: Youshu, NetEase, and iFashion, which correspond to
-book lists, music playlists, and fashion outfits, respectively.
-For a fair comparison, we adopt the same preprocessed datasets
-and data splits as CrossCBR and MultiCBR
-\cite{crosscbr,ma2024multicbr}, where user--bundle interactions
-are divided into training, validation, and test sets with a ratio
-of 70\%, 10\%, and 20\%, respectively. The dataset statistics
-are summarized in Table~\ref{tab:datasets}.
+\paragraph{Datasets and Evaluation.}
+We use Youshu, NetEase, and iFashion for book-list, music-playlist,
+and outfit recommendation, respectively. Each dataset contains
+U-B interactions, U-I interactions, and B-I affiliations.
+Table~\ref{tab:datasets} summarizes their statistics. We adopt
+the preprocessed datasets and splits used by CrossCBR and
+MultiCBR~\cite{crosscbr,ma2024multicbr}, with 70\%, 10\%, and
+20\% of U-B interactions assigned to training, validation, and
+testing. Pretraining, historical preference construction, and
+U-B graph reconstruction use only the training interactions.
 
-We adopt Recall@$K$ and NDCG@$K$ as evaluation metrics, where
-$K\in\{10,20\}$. Following the full-ranking evaluation protocol,
-all candidate bundles are ranked for each user after masking the
-bundles observed in the training set. We select the model
-achieving the best Top-20 performance on the validation set and
-report its performance on the test set.
+We report Recall@$K$ and NDCG@$K$ for $K\in\{10,20\}$ under
+full-ranking evaluation. For each user, we rank all candidate
+bundles after excluding those observed in training. The
+checkpoint with the best Top-20 validation performance is
+selected for test evaluation.
 
 \paragraph{Baselines.}
-We compare DiGO with seven representative bundle recommendation
-methods, including BGCN, MIDGN, CrossCBR, BundleGT, MultiCBR,
-EBRec, and EpicCBR
-\cite{bgcn,midgn,crosscbr,bundlegt,ma2024multicbr,ebrec,epiccbr}.
-These methods cover representative techniques such as
-graph-based collaborative modeling, intent disentanglement,
-cross-view contrastive learning, graph Transformers, and
-multi-view representation learning. For MultiCBR, EBRec, and
-EpicCBR, we rerun their publicly released implementations under
-the same data splits and evaluation protocol and report the
-average results over three independent runs. DiGO is evaluated
-in the same manner. For the remaining baselines, we use the
-results reported in their original papers.
+We compare DiGO with seven bundle recommendation methods.
+BGCN~\cite{bgcn} models bundle-level and item-level collaborative
+information through graph propagation, while MIDGN~\cite{midgn}
+disentangles user intents across global and local views.
+CrossCBR~\cite{crosscbr} connects bundle-view and item-view
+representations through contrastive learning, and
+BundleGT~\cite{bundlegt} uses a hierarchical graph Transformer
+to model bundling strategies. MultiCBR~\cite{ma2024multicbr}
+encodes all three relations and applies contrastive learning
+after view fusion. EBRec~\cite{ebrec} enhances item-level bundle
+representations through bundle--user--item correlations.
+EpicCBR~\cite{epiccbr} combines item-relation enhancement with
+contrastive learning across warm-start and cold-start scenarios.
+
+For MultiCBR, EBRec, and EpicCBR, we run their released
+implementations on the same splits and evaluation protocol as
+DiGO and report averages over three independent runs. DiGO is
+evaluated in the same manner. The BGCN, MIDGN, and CrossCBR
+results are taken from the comparisons reported in
+MultiCBR~\cite{ma2024multicbr}; the BundleGT results are taken
+from its published evaluation. Missing results are left
+unreported in Table~\ref{tab:overall}.
 
 \paragraph{Implementation Details.}
 We implement DiGO in PyTorch and train it on a single NVIDIA
-GeForce RTX 3090 GPU. User, bundle, and item embeddings are
-initialized with Xavier initialization. The embedding dimension
-and the number of graph propagation layers are set to 64 and 2,
-respectively. We optimize the model using Adam with a learning
-rate of $10^{-3}$ and a batch size of 2048, and sample one
-negative bundle for each positive interaction. The diffusion
-step $T$ is set to 9, 12, and 12 on Youshu, NetEase, and
-iFashion, respectively, while the maximum number of retained
-interactions $\kappa$ is set to 7, 13, and 3. The remaining
-hyperparameters are tuned according to validation performance.
+GeForce RTX 3090 GPU. The recommendation embeddings use Xavier
+initialization, dimension 64, and two graph propagation layers.
+We use Adam with a learning rate of $10^{-3}$, a recommendation
+batch size of 2048, and one negative bundle per positive
+interaction. Ranking examples are drawn from the original
+training interactions; the reconstructed U-B graph determines
+the propagation connections.
+
+The denoiser is a two-layer MLP with hidden dimension 128,
+timestep embedding dimension 16, and dropout rate 0.1. Its
+separate optimizer uses a learning rate of $10^{-3}$, weight
+decay $10^{-5}$, and batch size 1024. We use a linear noise
+schedule from $\beta_1=10^{-4}$ to $\beta_T=0.02$. In the order
+Youshu, NetEase, and iFashion, the diffusion steps $T$ are
+$(9,12,12)$, the retention limits $\kappa$ are $(7,13,3)$, and
+the SetLoss weights $\lambda_{\mathrm{set}}$ are
+$(0.04,0.05,0.05)$.
+
+The fixed fusion coefficients $(\omega_1,\omega_2,\omega_3)$,
+corresponding to U-B, U-I, and B-I, are $(0.35,0.15,0.50)$
+for Youshu, $(0.50,0.20,0.30)$ for NetEase, and
+$(0.00,0.50,0.50)$ for iFashion. A zero U-B fusion coefficient
+removes its direct contribution to the final weighted sum;
+the U-B view still participates in pre-fusion contrastive
+learning. In the same dataset order, the pre-fusion loss
+weights $\lambda_a$ are $(0.004,0.005,0.07)$, and the
+post-fusion loss weights $\lambda_c$ are $(0.04,0.05,0.10)$.
+Both contrastive temperatures are 0.23 on Youshu and 0.20 on
+NetEase and iFashion. The embedding regularization coefficient
+$\lambda_r$ is $10^{-5}$. Hyperparameters are selected using
+validation performance.
 
 
 \subsection{Overall Performance}
 
-Table~\ref{tab:overall} presents the overall performance of DiGO
-and the baseline methods on the three datasets.
+Table~\ref{tab:overall} compares DiGO with the seven baselines.
+DiGO obtains the highest reported Recall and NDCG at both
+cutoffs on all three datasets. The strongest baseline varies:
+EpicCBR leads at Top-10 on Youshu and on all four metrics on
+NetEase, BundleGT leads at Top-20 on Youshu, and MultiCBR leads
+on iFashion. DiGO improves over each of these methods in its
+respective strongest setting.
 
-As shown in Table~\ref{tab:overall}, DiGO achieves the best
-performance on all evaluation metrics across the three datasets,
-demonstrating its effectiveness in different bundle
-recommendation scenarios. On Youshu, DiGO further improves both
-Recall and NDCG despite the strong performance of BundleGT and
-EpicCBR. On NetEase, DiGO consistently outperforms all baselines
-on the four metrics. The improvements are particularly pronounced
-on iFashion, where DiGO surpasses the strongest baselines by
-8.23\%, 11.48\%, 4.95\%, and 9.31\% in R@10, N@10, R@20, and
-N@20, respectively.
+The gains are largest on iFashion, with relative improvements
+of 8.23\%, 11.48\%, 4.95\%, and 9.31\% in R@10, N@10, R@20,
+and N@20, respectively. At both cutoffs, the larger gains in
+NDCG than in Recall indicate that the improvement includes
+placing relevant bundles higher in the recommendation list.
+On Youshu and NetEase, the margins are smaller but remain
+positive across all four metrics.
 
-Moreover, DiGO consistently outperforms MultiCBR on all three
-datasets. MultiCBR already exploits multi-view information
-through three-view graph propagation, representation fusion, and
-post-fusion contrastive learning. The consistent improvements
-achieved by DiGO demonstrate the benefit of further optimizing
-the user--bundle graph and aligning the two auxiliary views with
-the reconstructed user--bundle view before view fusion.
+The comparison with MultiCBR is particularly informative
+because it already uses the three relation views, representation
+fusion, and post-fusion contrastive learning. DiGO improves
+over this baseline across all datasets and metrics. This
+motivates examining the additional graph reconstruction and
+pre-fusion objectives separately, as we do next, to understand
+their contributions beyond the multi-view backbone.
 
 
 \subsection{Ablation Study}
 
-To investigate the contribution of each component, we compare
-DiGO with four variants. \textbf{w/o Graph Opt.} removes
-diffusion-driven graph optimization and directly uses the
-original user--bundle graph. \textbf{w/o All CL} removes both the
-pre-fusion and post-fusion contrastive objectives.
-\textbf{w/o Pre-fusion CL} removes the cross-view contrastive
-learning that uses the reconstructed UB view as the anchor.
-\textbf{w/o Post-fusion CL} removes the self-supervised
-contrastive learning applied after view fusion. The results are
-presented in Table~\ref{tab:ablation}.
+Table~\ref{tab:ablation} compares DiGO with four variants.
+\textbf{w/o Graph Opt.} replaces the reconstructed U-B graph
+with the original observed graph while retaining the
+recommendation objectives. \textbf{w/o Pre-fusion CL} removes
+the U-B-anchored cross-view objective but retains graph
+reconstruction. \textbf{w/o Post-fusion CL} removes the
+contrastive regularizer in the fused representation space,
+and \textbf{w/o All CL} removes both contrastive objectives.
 
-The contribution of graph optimization varies across datasets.
-Removing this component reduces R@20 and N@20 on iFashion from
-0.15680 and 0.13150 to 0.14999 and 0.12446, respectively,
-resulting in the most noticeable degradation. It also causes
-performance drops on NetEase. On Youshu, R@20 remains nearly
-unchanged, whereas N@20 decreases. These results indicate that
-graph optimization provides dataset-dependent benefits and
-contributes most prominently on iFashion.
+\paragraph{Diffusion-Driven Graph Reconstruction.}
+Removing graph optimization reduces R@20 and N@20 on iFashion
+from 0.1568 and 0.1315 to 0.1500 and 0.1245, respectively.
+Both metrics also decrease on NetEase. On Youshu, R@20 is
+essentially unchanged (0.2919 versus 0.2920), whereas N@20
+drops from 0.1759 to 0.1734. Thus, the benefit of reconstruction
+varies across datasets and metrics, with the clearest gains on
+iFashion. These results support refining the U-B connections
+used for propagation through the complete pretraining,
+conditional denoising, and interaction-selection pipeline.
 
-Removing pre-fusion cross-view contrastive learning also leads
-to performance degradation, with more evident changes on Youshu
-and NetEase. For example, R@20 and N@20 on NetEase decrease from
-0.09550 and 0.05110 to 0.09057 and 0.04873, respectively. This
-demonstrates that aligning the UI and BI representations with the
-reconstructed UB view before fusion enables the auxiliary
-relations to more effectively supplement user--bundle
-supervision.
+\paragraph{Bundle-Set Consistency.}
+We additionally examine \textbf{w/o SetLoss}, which removes
+the bundle-set consistency term from denoiser training while
+retaining the reconstruction objective and both DiGO modules.
+Removing this term yields a modest performance decrease
+across all three datasets. This supports its role as an
+auxiliary task-specific constraint: maintaining agreement
+with historical bundle representations helps the recovered
+preference serve subsequent interaction scoring.
+% The author will add the existing w/o SetLoss results to
+% Table~\ref{tab:ablation}; no per-dataset values are inferred here.
 
-Removing post-fusion contrastive learning causes substantial
-performance degradation, while removing both contrastive
-objectives leads to a further severe decline. This observation
-confirms that post-fusion contrastive learning remains an
-important component of the multi-view recommendation backbone.
-Meanwhile, the pre-fusion and post-fusion contrastive objectives
-operate at different stages---cross-view alignment and
-fused-representation optimization---and jointly contribute to
-effective multi-view representation learning.
+\paragraph{Pre-Fusion Cross-View Learning.}
+Removing the pre-fusion objective lowers both metrics on all
+three datasets. On NetEase, R@20 and N@20 decrease from
+0.0955 and 0.0511 to 0.0906 and 0.0487, respectively; on
+Youshu, N@20 falls from 0.1759 to 0.1692. These comparisons
+show that explicit U-B--U-I and U-B--B-I associations provide
+value beyond representation fusion and its existing
+regularizer. Using the reconstructed U-B view as a common
+reference allows auxiliary behavioral and compositional
+information to contribute to bundle-preference learning
+before the views are combined.
+
+\paragraph{Backbone Contrastive Regularization.}
+Removing post-fusion contrastive learning causes larger
+decreases, and removing both contrastive objectives further
+reduces performance on every dataset. The fused-space
+regularizer therefore remains important to the inherited
+recommendation backbone. Meanwhile, the full model's gains
+over \textbf{w/o Pre-fusion CL} show that this regularizer does
+not make the proposed cross-view objective redundant. The
+two objectives constrain different representations:
+relation-specific pairs before fusion and the combined
+representations used for prediction.
 
 
 \subsection{In-depth Analysis}
@@ -1102,52 +1165,52 @@ effective multi-view representation learning.
     \end{minipage}
 
     \caption{\textbf{In-depth analysis of DiGO.}
-    (a)--(b) compare different interaction selection strategies
-    on iFashion under varying retention numbers.
-    (c)--(d) compare the performance with and without pre-fusion
-    cross-view contrastive learning across four user groups on
-    NetEase. Users are sorted by their training UB degrees, and
-    G1--G4 correspond to $[0,7)$, $[7,8)$, $[8,12)$, and
-    $[12,660]$, respectively. Graph optimization is disabled in
-    (c)--(d), and the line reports the relative improvement
-    introduced by pre-fusion contrastive learning.}
+    (a)--(b) Recall@20 and NDCG@20 of interaction selection
+    strategies on iFashion, with retention limit $\kappa$
+    plotted as $K$.
+    (c)--(d) Recall@20 and NDCG@20 of complete DiGO and
+    w/o Pre-fusion CL on NetEase. Both retain graph
+    optimization. G1--G4 are ordered by training U-B degree,
+    with ranges $[0,7)$, $[7,8)$, $[8,12)$, and $[12,660]$.
+    Lines show DiGO's relative gains over w/o Pre-fusion CL.}
     \label{fig:in-depth-analysis}
 \end{figure}
 
 
 \paragraph{Interaction Selection Strategies.}
-To further examine whether diffusion-driven graph optimization
-can effectively identify reliable user--bundle interactions, we
-compare five graph construction strategies on iFashion.
-\textbf{Original UB} directly uses the observed user--bundle
-graph without interaction filtering. \textbf{Random-$K$}
-randomly retains at most $K$ observed interactions for each user,
-while \textbf{Popularity-$K$} selects interactions according to
-the global popularity of the corresponding bundles.
-\textbf{Pretrain-Sim} ranks observed interactions using the
-cosine similarity between pretrained user and bundle
-representations. In contrast, \textbf{DiGO} scores each observed
-interaction using the overall bundle preference representation
-produced by conditional diffusion. All strategies select
-connections only from the observed interaction history, and the
-results are averaged over multiple independent runs.
+To examine how the choice of retained interactions affects
+recommendation, we compare five U-B graph construction
+strategies on iFashion. \textbf{Original UB} keeps the observed
+graph. \textbf{Random-$K$} retains randomly selected observed
+interactions, whereas \textbf{Popularity-$K$} selects those
+associated with the most popular bundles.
+\textbf{Pretrain-Sim} scores interactions by the cosine
+similarity of pretrained user and bundle embeddings.
+\textbf{DiGO} instead scores them against the user's refined
+historical bundle-preference vector. Each filtering strategy
+retains at most $\kappa$ interactions per user, where $\kappa$
+is denoted by $K$ in the figure, and selects only from the
+user's training history. Results are averaged over multiple
+independent runs.
 
-As shown in Figure~\ref{fig:in-depth-analysis}(a)--(b), DiGO
-consistently achieves the best Recall@20 and NDCG@20 under all
-retention settings. Although Random-$K$ occasionally improves
-over Original UB, it remains consistently inferior to DiGO,
-indicating that the gains cannot be attributed merely to reducing
-the number of graph edges. Pretrain-Sim also performs worse than
-DiGO, suggesting that directly measuring the similarity between
-pretrained user and bundle representations is insufficient to
-characterize the overall preference reflected by a user's
-interaction history. By modeling historical bundles through
-user-conditioned diffusion, DiGO provides a more effective
-criterion for re-evaluating observed interactions. Its
-performance generally first increases and then decreases as the
-retention number grows, reflecting the trade-off between
-preserving informative supervision and filtering potentially
-unreliable interactions.
+Figure~\ref{fig:in-depth-analysis}(a)--(b) shows that DiGO
+achieves the highest Recall@20 and NDCG@20 among the compared
+strategies at every tested retention limit. Random selection
+can improve over the original graph, but consistently trails
+DiGO at matched retention limits. Thus, the choice of
+connections matters beyond reducing their number.
+Popularity-based selection is especially weak in NDCG,
+indicating that globally popular bundles are not necessarily
+the most useful propagation neighbors for an individual user.
+
+Pretrain-Sim also underperforms DiGO. This comparison favors
+the complete history-based refinement and scoring pipeline
+over direct pretrained user--bundle similarity. DiGO's
+performance initially improves as more interactions are
+retained and then declines at larger limits. Together, these
+observations support selecting connections according to
+personalized bundle-preference context while balancing
+neighborhood coverage and selectivity.
 
 
 \begin{figure*}[t]
@@ -1174,90 +1237,105 @@ unreliable interactions.
         \centerline{\small (c)}
     \end{minipage}
 
-    \caption{Hyperparameter sensitivity of DiGO on three datasets
-    in terms of Recall@20. (a) Diffusion noise strength $\beta_T$,
-    which denotes the maximum noise level in the diffusion
-    schedule. (b) Retention number $\kappa$ for user--bundle graph
-    reconstruction. (c) Weight $\beta_2$ of the pre-fusion
-    cross-view contrastive loss. Broken $y$-axes are used to
-    accommodate the different performance scales across datasets.}
+    \caption{Hyperparameter sensitivity measured by Recall@20
+    on three datasets. (a) Maximum per-step noise variance
+    $\beta_T$ in the linear diffusion schedule.
+    (b) Retention limit $\kappa$ for U-B graph reconstruction.
+    (c) Pre-fusion contrastive weight $\lambda_a$, labeled
+    $\beta_2$ in the plot. Broken $y$-axes separate the
+    performance scales of the three datasets.}
     \label{fig:hyperparameter}
 \end{figure*}
 
 
 \paragraph{Performance on Sparse Users.}
-To investigate whether pre-fusion cross-view contrastive learning
-alleviates the limited supervision caused by sparse user--bundle
-feedback, we sort users according to their numbers of training
-UB interactions and divide them into four equally sized groups.
-G1 represents the sparsest users, whereas G4 represents the
-densest users. To isolate the effect of pre-fusion contrastive
-learning, diffusion-driven graph optimization is disabled in
-both compared settings. In
-Figure~\ref{fig:in-depth-analysis}(c)--(d),
-\textbf{w/o Pre-fusion CL} denotes the multi-view recommendation
-backbone without either of the two proposed components, while
-\textbf{DiGO} denotes the same setting augmented only with
-pre-fusion cross-view contrastive learning. Therefore, the
-performance difference between the two variants is solely
-attributable to the pre-fusion alignment objective.
+To evaluate the pre-fusion objective under limited bundle
+feedback, we group NetEase users by their numbers of training
+U-B interactions, from the lowest-degree group G1 to the
+highest-degree group G4. The degree ranges are given in
+Figure~\ref{fig:in-depth-analysis}. We compare complete DiGO
+with \textbf{w/o Pre-fusion CL}. Both settings retain
+diffusion-driven graph reconstruction and the recommendation
+backbone; they differ in whether the U-B-anchored cross-view
+objective is included.
 
-Introducing pre-fusion cross-view contrastive learning improves
-Recall@20 and NDCG@20 across all four user groups. The largest
-gains are observed for the sparsest group G1, where Recall@20
-and NDCG@20 increase by 12.64\% and 9.32\%, respectively. The
-improvements in the remaining groups are comparatively smaller,
-although they do not follow a strictly monotonic pattern. These
-results demonstrate that aligning the UI and BI representations
-with the UB view is particularly beneficial when direct
-bundle-level feedback is severely limited. By transferring
-complementary supervision from the two auxiliary relations
-before view fusion, the proposed cross-view alignment improves
-preference learning for sparse users.
-
-
-
+As shown in Figure~\ref{fig:in-depth-analysis}(c)--(d), DiGO
+improves Recall@20 and NDCG@20 in all four groups. The largest
+relative gains occur in G1: 12.64\% in Recall@20 and 9.32\%
+in NDCG@20. Gains in the other groups are smaller and do not
+decrease monotonically with interaction count. This result
+directly supports the role of pre-fusion cross-view learning
+under sparse U-B feedback. By associating U-B representations
+with representations derived from U-I behavior and B-I
+composition, the objective provides additional learning
+signals for users with limited bundle histories. The gains
+for G2--G4 further indicate that its benefit is not restricted
+to the lowest-interaction users.
 
 
 \subsection{Hyperparameter Sensitivity}
 
-We investigate the effects of the diffusion noise strength
-$\beta_T$, the retention number $\kappa$, and the pre-fusion
-contrastive loss weight $\beta_2$, while varying one
-hyperparameter at a time and keeping the others fixed. The
-results are shown in Figure~\ref{fig:hyperparameter}.
+We vary the maximum diffusion noise variance $\beta_T$, the
+retention limit $\kappa$, and the pre-fusion contrastive weight
+$\lambda_a$ one at a time while keeping the other settings
+fixed. Figure~\ref{fig:hyperparameter} reports Recall@20.
 
-Moderate values of $\beta_T$ generally yield better
-performance, as insufficient noise may provide limited
-denoising supervision, whereas excessive noise may obscure
-useful preference information. For $\kappa$, retaining too few
-interactions removes informative supervision, while retaining
-too many may preserve unreliable connections. Similarly, an
-appropriate $\beta_2$ improves cross-view alignment, whereas
-an overly large value may overemphasize view consistency.
-Overall, DiGO maintains stable performance within reasonable
-hyperparameter ranges.
+\paragraph{Diffusion Noise.}
+Figure~\ref{fig:hyperparameter}(a) shows that intermediate
+noise levels perform better than the ends of the tested range.
+Youshu and NetEase exhibit clearer changes, whereas iFashion
+varies within a narrower absolute range. Increasing $\beta_T$
+makes the recovery task harder by perturbing the historical
+preference more strongly. The observed curves are consistent
+with balancing this training perturbation against preservation
+of personalized information; stronger corruption does not
+consistently improve recommendation.
 
+\paragraph{Retention Limit.}
+Figure~\ref{fig:hyperparameter}(b) reveals different responses
+to $\kappa$. NetEase benefits markedly from increasing a very
+small retained neighborhood, then levels off and slightly
+declines. iFashion favors smaller limits and loses accuracy
+as more connections are included. Youshu fluctuates within a
+narrower range. These differences show that aggressive
+filtering can discard useful propagation connections, while
+retaining more observed edges is not always beneficial.
+The retention limit should therefore account for the
+dataset's balance between neighborhood coverage and
+preference relevance.
 
+\paragraph{Pre-Fusion Contrastive Weight.}
+In Figure~\ref{fig:hyperparameter}(c), moderate nonzero weights
+improve over omitting the cross-view objective, especially
+on NetEase. Larger weights eventually reduce performance;
+on Youshu, the largest tested weight also underperforms
+zero weight. This behavior highlights the need to balance
+cross-view agreement with the ranking objective, rather than
+maximizing alignment strength. The scale of these changes
+differs across datasets, as indicated by the broken axes.
 
 
 \section{Conclusion}
 
-In this paper, we proposed DiGO, a diffusion-driven graph
-optimization framework for bundle recommendation. To mitigate
-the misleading propagation caused by unreliable interactions in
-the user--bundle graph, DiGO models each user's overall bundle
-preference through conditional diffusion and uses the resulting
-representation to re-evaluate observed interactions and
-reconstruct the user--bundle graph for subsequent multi-view
-learning. To address the limited supervision caused by sparse
-user--bundle feedback, DiGO further uses the reconstructed
-user--bundle view as the anchor and aligns the user--item and
-bundle--item views before view fusion, thereby supplementing
-bundle-level supervision with auxiliary relations. Experiments
-on three public datasets demonstrate that DiGO outperforms
-existing methods across all evaluation metrics. Ablation studies,
-in-depth analyses, and hyperparameter experiments further
-validate the effectiveness and robustness of the two key designs.
-\end{document}
+We presented DiGO for bundle recommendation with noisy and
+sparse U-B feedback. Its central design connects pretraining,
+user-conditioned latent diffusion, and interaction selection
+to reconstruct the graph used for recommendation. Within this
+pipeline, bundle-set consistency adapts preference recovery
+to the historical bundles used for subsequent scoring.
+Pre-fusion cross-view contrastive learning then connects
+representations from the reconstructed U-B graph with the
+U-I and B-I views on both the user and bundle sides.
 
+Experiments on three public benchmarks show improvements over
+the compared baselines. Component ablations and interaction
+selection analyses support the graph reconstruction pipeline
+and the additional cross-view objective. The user-group
+analysis further shows that pre-fusion learning yields its
+largest relative gains for users with the fewest bundle
+interactions. Together, these findings support refining the
+U-B propagation graph and using its representations to guide
+auxiliary-view learning as a way to improve bundle
+recommendation under noisy and limited feedback.
+
+\end{document}

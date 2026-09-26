@@ -30,7 +30,7 @@
 \setcounter{secnumdepth}{2}
 
 % Paper title
-\title{Diffusion-Driven Graph Optimization Framework for Bundle Recommendation}
+\title{DiGO: Diffusion-Driven Graph Optimization for Bundle Recommendation}
 
 % Anonymous author information
 \author{
@@ -46,92 +46,32 @@ Anonymous Submission
 
 
 \begin{abstract}
-Existing bundle recommendation methods typically use multi-view information from user--bundle, user--item, and bundle--item graphs to accurately model users' bundle preferences. However, such multi-view methods still face two key challenges when learning from these graphs: (1) unreliable user--bundle interactions may propagate misleading signals and impair preference learning; (2) the sparsity of user--bundle implicit feedback limits the available supervision. We therefore propose a diffusion-driven graph optimization framework for bundle recommendation (DiGO). First, we aggregate pretrained representations of the bundles in each user's interaction history and condition a diffusion process on the pretrained user representation to model the user's overall bundle preference. We then use this preference representation to score observed user--bundle interactions, retain more reliable user--bundle interactions, and reconstruct the user--bundle graph for subsequent multi-view representation learning. Second, to address the sparsity of user--bundle implicit feedback, we use representations learned from the reconstructed user--bundle graph as anchors and align user--item and bundle--item representations through cross-view contrastive learning before fusing the three views. This allows the auxiliary relations to supplement the limited supervision from user--bundle feedback. Experiments on three public datasets show that our framework outperforms state-of-the-art methods on all evaluation metrics, achieving a maximum relative improvement of 10\% over the strongest baseline.
+Bundle recommendation integrates bundle-level feedback and item-level information to model users' preferences for sets of items. Despite advances in multi-view modeling, two challenges remain: (1) noisy user-bundle (U-B) interactions can introduce misleading signals into graph propagation, distorting the representations used to learn bundle preferences; (2) sparse U-B feedback provides limited evidence for personalized preference learning, making it difficult to characterize users with few historical bundle interactions. To address these challenges, we propose DiGO, a diffusion-driven graph optimization framework for bundle recommendation. First, we develop a U-B graph denoising pipeline that integrates pretraining, user-conditioned latent diffusion, and graph reconstruction. Starting from pretrained user and bundle embeddings, we refine each user's aggregated historical bundle representation through conditional diffusion denoising and use it to re-score observed interactions and reconstruct the U-B graph. Within this pipeline, we tailor the denoising objective to bundle recommendation through a bundle-set consistency loss that encourages the recovered preferences to retain the semantics of the user's historical bundle set. Second, we introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view. User-side and bundle-side objectives connect this view to the user-item and bundle-item views before representation fusion, enabling auxiliary information to strengthen preference learning under sparse U-B feedback. Experiments on three public benchmarks show that DiGO outperforms the compared baselines. Ablation and interaction-selection analyses support the proposed designs, while the user-group analysis shows the largest relative gains from the cross-view objective for users with the fewest bundle interactions.
 \end{abstract}
 
 
 \section{Introduction}
 
-Bundle recommendation aims to identify bundles that match users'
-interests from a set of predefined item collections. Existing
-methods typically model user--bundle, user--item, and bundle--item
-relations jointly and learn complementary user and bundle
-representations through graph neural networks, multi-view fusion,
-and contrastive
-learning~\cite{bgcn,midgn,crosscbr,bundlegt,ma2024multicbr}.
-Among these relations, user--item and bundle--item relations
-provide auxiliary information, whereas the user--bundle graph
-directly carries users' implicit feedback on bundles. Its
-structural and supervisory quality therefore affects subsequent
-multi-view learning. Despite the progress of existing methods,
-multi-view bundle recommendation still faces two key challenges.
+Users often seek a coherent collection of items rather than a single product. A coordinated outfit or a themed playlist, for example, can satisfy a need that would otherwise require users to assemble suitable items themselves. Bundle recommendation addresses this demand by matching users with sets of related items \cite{ma2022crosscbr,sun2024intent}. Unlike individual-item recommendation, it must capture preferences for a bundle as a whole while accounting for its constituent items. We focus on ranking predefined bundles using historical interactions and bundle composition information.
 
-\textbf{Challenge 1: Unreliable interactions in the user--bundle
-graph.}
-User--bundle relations are typically constructed from implicit
-feedback and may contain interactions that do not reliably
-reflect users' preferences. For example, accidental clicks,
-exploratory choices, and interactions caused by short-term
-interests or exposure bias may fail to consistently represent
-users' actual bundle preferences. Existing graph-based methods
-propagate information directly along observed edges, allowing
-unreliable interactions to participate in representation updates
-and introduce misleading signals. Therefore, identifying more
-reliable connections from users' interaction histories and
-constructing a high-quality user--bundle graph remain key
-challenges.
+This setting involves three relations with distinct roles. User-bundle (U-B) interactions record users' choices of complete bundles and provide direct evidence of bundle preferences. User-item (U-I) interactions reflect preferences for individual items, whereas bundle-item (B-I) affiliations describe how items constitute bundles. Representations learned from these relations offer complementary views of users and bundles: the U-B view captures bundle-level collaborative behavior, while the U-I and B-I views contribute item-level behavioral and compositional information \cite{chen2019dam,chang2020bgcn,ma2024multicbr}. Learning across these views allows a recommender to exploit information beyond users' observed bundle choices.
 
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.98\textwidth]
-    {Figures/digo_framework.png}
-    \caption{Overall framework of DiGO, comprising (1) user–bundle pretraining, (2) diffusion-driven graph optimization for reconstructing the observed user–bundle graph, and (3) multi-view recommendation using the reconstructed user–bundle view as the anchor for pre-fusion cross-view contrastive learning.}
-    \label{fig:framework}
-\end{figure*}
+Early approaches use attention to aggregate constituent items and jointly learn from bundle and item interactions \cite{chen2019dam}. Graph neural networks (GNNs) extend this modeling to higher-order connectivity among users, bundles, and items \cite{chang2020bgcn}. More recently, contrastive learning (CL) has provided a mechanism for connecting different views. CrossCBR encourages agreement between bundle-level and item-level representations through cross-view objectives \cite{ma2022crosscbr}. MultiCBR separately models all three relations, fuses their representations, and applies contrastive learning after fusion \cite{ma2024multicbr}. These approaches demonstrate the value of multi-view information. Nevertheless, learning bundle preferences still faces two challenges arising from noise in observed U-B interactions and limited feedback from individual users.
 
-\textbf{Challenge 2: Sparse user--bundle implicit feedback.}
-User--bundle feedback is substantially sparser than user--item
-interactions, providing limited bundle-level supervision.
-Although user--item and bundle--item relations offer rich
-auxiliary signals, final-stage fusion alone may not fully align
-them with user--bundle preference learning. Therefore, effectively
-leveraging auxiliary views while preserving consistency with
-direct bundle preferences remains challenging.
+\textbf{Challenge 1: Noise in user-bundle interactions.} Implicit feedback can include observations that do not faithfully reflect user preferences \cite{wang2021adt}. When such interactions enter the U-B graph, their influence may spread through neighborhood aggregation and affect the representations used for bundle ranking \cite{wu2021sgl}. The difficulty lies in reassessing individual connections in the context of a user's historical bundle set. Each edge records an interaction with one bundle, whereas the representations of multiple interacted bundles jointly provide evidence about the user's bundle preferences. Simply reducing the number of edges does not determine which connections should be retained. The challenge is to exploit this personalized historical context to suppress noisy connections while preserving relevant bundle-preference information.
 
-To address these challenges, we propose DiGO, a diffusion-driven
-graph optimization framework for bundle recommendation. DiGO
-first aggregates pretrained representations of each user's
-historical bundles and conditions a diffusion process on the
-pretrained user representation to model the user's overall bundle
-preference. The resulting preference representation is then used
-to score observed user--bundle interactions, retain more reliable
-connections, and reconstruct the graph without introducing new
-edges. Finally, DiGO uses representations from the reconstructed
-user--bundle graph as anchors to align the user--item and
-bundle--item views before fusion, thereby supplementing sparse
-supervision. Figure~\ref{fig:framework} illustrates the overall
-framework.
+\textbf{Challenge 2: Sparse user-bundle feedback.} Users with few bundle interactions provide limited evidence for learning personalized bundle preferences. U-I behavior and B-I composition offer complementary information, but their relevance to bundle choice must be learned: liking individual items is not equivalent to preferring a complete bundle, and bundle composition alone does not establish a user's interest. CrossCBR aligns bundle-view and item-view representations through cross-view contrastive objectives, whereas DGMAE transfers first- and higher-order U-B knowledge to item-view representation learning through distillation \cite{ma2022crosscbr,ren2023dgmae}. Their reported effectiveness demonstrates the value of linking bundle-level evidence with item-level behavioral and compositional information. The challenge is therefore to establish explicit associations between bundle-level and auxiliary-view representations, allowing item-level information to support preference learning when direct U-B feedback is limited.
 
+To address these challenges, we propose \textbf{DiGO}, a diffusion-driven graph optimization framework for bundle recommendation. \textbf{First, we develop a U-B graph denoising framework that integrates pretraining, user-conditioned latent diffusion, and graph reconstruction.} We pretrain user and bundle embeddings on observed U-B interactions, then aggregate each user's historical bundle embeddings into a latent preference vector. Following the diffusion denoising formulation \cite{ho2020ddpm,wang2023diffrec}, we perturb this vector with progressively increasing noise and learn to recover it using the pretrained user embedding as a personalized condition. Within this framework, we adapt the denoising objective to bundle recommendation by introducing a bundle-set consistency loss (SetLoss). This constraint encourages the recovered preference vector to remain semantically consistent with the user's historical bundle representations. By limiting drift from this bundle-level preference context during recovery, SetLoss helps preserve preference-relevant information for subsequent interaction re-scoring and graph reconstruction. We then use the refined preference vector to re-score observed interactions and select connections for reconstructing the U-B bipartite graph. The complete pipeline thus turns personalized preference denoising into a refinement of the graph used for recommendation.
 
+\textbf{Second, we introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view to address sparse bundle feedback.} The recommendation backbone learns user and bundle representations from the reconstructed U-B graph and the U-I and B-I relations, then fuses the view-specific representations for prediction. Before fusion, we construct U-B--U-I and U-B--B-I contrastive pairs on both the user and bundle sides, using the reconstructed U-B view as their common anchor. These objectives encourage agreement between representations of the same entity across paired views while distinguishing different entities. By explicitly connecting auxiliary information to bundle-level representations, they provide additional learning signals beyond each user's limited U-B history. The two modules therefore have distinct but connected roles: the first refines the U-B connections used for propagation, and the second uses representations learned from that graph to support preference learning across views.
 
-The main contributions of this work are summarized as follows:
+Our main contributions are as follows:
 
 \begin{itemize}
-    \item We propose DiGO, a diffusion-driven graph optimization
-    framework that models users' overall bundle preferences
-    through conditional diffusion and uses them to re-evaluate
-    observed interactions and reconstruct the user--bundle graph.
-
-    \item We use representations learned from the reconstructed
-    user--bundle graph as anchors to align the two auxiliary views
-    before view fusion, thereby supplementing sparse user--bundle
-    supervision.
-
-    \item Experiments on three public datasets show that DiGO
-    outperforms existing methods across all evaluation metrics,
-    achieving a maximum relative improvement of 10\%. Ablation
-    and further analyses also validate the effectiveness of the
-    two key designs.
+\item We propose a diffusion-driven U-B graph denoising framework that integrates pretraining, user-conditioned latent diffusion, and interaction selection to reconstruct the graph used for recommendation. Within this framework, we adapt the denoising objective to bundle recommendation through a bundle-set consistency loss that encourages semantic consistency with historical bundle preferences.
+\item We introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view on both the user and bundle sides. By connecting U-B representations with U-I and B-I representations, this design exploits auxiliary information to alleviate the learning difficulties caused by sparse bundle feedback.
+\item Experiments on three public benchmarks demonstrate DiGO's effectiveness through baseline comparisons, ablations, and interaction-selection analyses. A user-group analysis further shows that the proposed cross-view objective yields the largest relative gains for the lowest-interaction group.
 \end{itemize}
 
 
@@ -139,591 +79,320 @@ The main contributions of this work are summarized as follows:
 
 \subsection{Bundle Recommendation}
 
-Early bundle recommendation methods primarily relied on
-user--bundle interactions and employed collaborative filtering,
-matrix factorization, or neural models to learn user and bundle
-representations~\cite{earlybundle1,earlybundle2}. Subsequent
-graph-based methods further modeled user--bundle, user--item, and
-bundle--item relations to capture high-order collaborative
-information at both the bundle and item
-levels~\cite{bgcn,graphbundle1}.
+Bundle recommendation includes both ranking existing bundles and generating new item combinations \cite{sun2024survey}. For predefined-bundle ranking, a central issue is how to combine bundle-level interaction evidence with information about constituent items. DAM addresses this issue through attentive item aggregation and joint learning of U-B and U-I interactions \cite{chen2019dam}. BGCN uses graph propagation to capture bundle-level and item-level collaborative information \cite{chang2020bgcn}. In the broader collaborative filtering setting, LightGCN demonstrates the effectiveness of simplified neighborhood aggregation \cite{he2020lightgcn}. Subsequent bundle models enrich the preferences and composition patterns captured by graph representations. MIDGN disentangles user intents across global and local views \cite{zhao2022midgn}, and BundleGT uses a hierarchical graph transformer to model bundling strategies \cite{wei2023bundlegt}.
 
-Recent studies have increasingly focused on multi-view
-representation learning and cross-view collaboration. For
-example, MIDGN introduces intent disentanglement, CrossCBR
-employs cross-view contrastive learning, BundleGT uses graph
-Transformers to model structural information, and MultiCBR
-learns unified representations through three-view fusion and
-contrastive learning~\cite{midgn,crosscbr,bundlegt,ma2024multicbr}.
-These methods mainly improve the encoding, fusion, or alignment
-of multiple views, while typically using the observed
-user--bundle graph directly. In contrast, DiGO re-evaluates
-observed user--bundle interactions before multi-view learning and
-reconstructs the user--bundle graph accordingly.
+Beyond representation construction, another line of research focuses on cooperation across views. CrossCBR contrasts bundle-view and item-view representations to encourage mutual enhancement \cite{ma2022crosscbr}. MultiCBR explicitly models B-I relations alongside U-B and U-I relations, and combines representation fusion with post-fusion contrastive learning \cite{ma2024multicbr}. DGMAE instead distills first- and higher-order U-B knowledge into an item-view graph masked autoencoder \cite{ren2023dgmae}. These studies establish several ways to exploit auxiliary information for bundle preference learning. DiGO builds on this multi-view setting by refining the U-B graph through conditional latent diffusion and using the reconstructed view to anchor cross-view learning before fusion.
+
+\subsection{Denoising and Diffusion for Recommendation}
+
+Interaction denoising seeks to reduce the influence of observed feedback that does not accurately reflect user preferences. Adaptive Denoising Training identifies potentially noisy feedback through training losses and reduces its influence using loss truncation or reweighting \cite{wang2021adt}. Diffusion models provide another way to learn from corrupted inputs by reversing controlled perturbations \cite{ho2020ddpm}. DiffRec applies this formulation to interaction-vector reconstruction and introduces a latent-space variant for efficiency \cite{wang2023diffrec}. DiffuRec operates on target-item embeddings and uses interaction sequences to condition their recovery for next-item prediction \cite{li2023diffurec}. These methods illustrate that the denoising object and conditioning information must be chosen to suit the recommendation task.
+
+Diffusion has also been applied to bundle recommendation. DCBR combines conditional U-B interaction denoising with disentangled contrastive learning \cite{li2025dcbr}. RDiffBR uses residual diffusion on item-level bundle embeddings to accommodate changes in bundle composition \cite{zhang2026rdiffbr}. DiGO instead focuses on the connection between historical bundle-preference modeling and U-B graph reconstruction. It uses pretrained user representations to condition the denoising of aggregated historical bundle embeddings, and translates the refined preferences into observed-edge selection. Within this pipeline, the bundle-set consistency loss adapts the denoising objective to historical bundle semantics, supporting the reconstruction of the graph used for downstream learning.
+
+\subsection{Contrastive Learning for Recommendation}
+
+Contrastive learning derives learning signals by encouraging agreement between related representations while distinguishing unrelated ones. SimCLR demonstrates the importance of view construction and contrastive objectives for representation learning \cite{chen2020simclr}. For graph-based recommendation, SGL creates perturbed graph views through operations such as edge and node dropout, then contrasts representations of the same node across views \cite{wu2021sgl}. Knowledge-aware methods extend this principle to structured auxiliary information. KGCL uses consistency under knowledge-graph perturbations to guide interaction augmentation \cite{yang2022kgcl}, while MCCLK connects collaborative, semantic, and structural representations through multi-level cross-view objectives \cite{zou2022mcclk}.
+
+The bundle-specific methods discussed above apply contrastive learning to views defined by different user, bundle, and item relations \cite{ma2022crosscbr,ma2024multicbr}. DiGO follows this approach with a targeted choice of contrastive pairs: U-B--U-I and U-B--B-I for both users and bundles, formed before representation fusion. The reconstructed U-B view provides a common reference for jointly optimizing the paired representations. This links item-level behavioral and compositional information to bundle-level preference learning, helping the model exploit auxiliary evidence under sparse U-B feedback.
 
 
-\subsection{Diffusion Models for Recommendation}
+\section{Methodology}\label{sec:methodology}
 
-Diffusion models exhibit strong distribution modeling
-capabilities by progressively perturbing data and learning the
-corresponding reverse process. In recent years, they have been
-applied to collaborative filtering, sequential recommendation,
-and knowledge graph recommendation to model user preferences,
-recover interaction signals, or enhance recommendation
-representations~\cite{diffrec,diffurec,diffkg}.
+\subsection{Task Definition and Framework Overview}
 
-Diffusion models have also been introduced into bundle
-recommendation. RDiffBR addresses dynamic bundle--item relations
-by applying residual diffusion to item-level bundle
-representations, enabling the model to adapt to changes in bundle
-composition~\cite{rdiffbr}. DCBR applies conditional diffusion to
-user--bundle interaction data and combines it with multi-view
-contrastive learning~\cite{dcbr}. Unlike these methods, DiGO
-aggregates the pretrained representations of bundles in each
-user's interaction history and conditions the diffusion process
-on the pretrained user representation to model the user's overall
-bundle preference. The resulting preference representation is
-then used to evaluate observed user--bundle interactions and
-reconstruct the user--bundle graph for subsequent multi-view
-representation learning.
+Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. An entry equal to one indicates an observed interaction or an item belonging to a bundle. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
 
+Figure~\ref{fig:framework} outlines DiGO. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we then use the reconstructed U-B view as a common anchor for cross-view contrastive learning before representation fusion. The fused user and bundle representations produce the final recommendation scores.
 
-\section{Methodology}
+\begin{figure*}[t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
+    \caption{Overall framework of DiGO, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \label{fig:framework}
+\end{figure*}
 
-\subsection{Problem Formulation}
+We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation. Pretraining, preference construction, and graph reconstruction use only training interactions.
 
-Let
-$\mathcal U=\{u_1,u_2,\ldots,u_M\}$,
-$\mathcal B=\{b_1,b_2,\ldots,b_N\}$, and
-$\mathcal I=\{i_1,i_2,\ldots,i_O\}$
-denote the sets of users, bundles, and items, respectively, where
-$M$, $N$, and $O$ are the corresponding set sizes. We use a
-user--bundle interaction matrix
-$\mathbf X\in\{0,1\}^{M\times N}$, a user--item interaction
-matrix $\mathbf Y\in\{0,1\}^{M\times O}$, and a bundle--item
-affiliation matrix $\mathbf Z\in\{0,1\}^{N\times O}$.
-Specifically, $x_{ub}=1$ and $y_{ui}=1$ indicate that user $u$
-has interacted with bundle $b$ and item $i$, respectively, while
-$z_{bi}=1$ indicates that item $i$ belongs to bundle $b$.
+\subsection{Diffusion-Driven U-B Graph Denoising and Reconstruction}\label{sec:graph-reconstruction}
 
-Given $\mathbf X$, $\mathbf Y$, and $\mathbf Z$, the goal of
-bundle recommendation is to predict the preference score
-$y^*_{u,b}$ for each unobserved user--bundle pair.
+The purpose of this module is to evaluate an observed interaction in the context of the user's historical bundle preferences. We construct this context in a pretrained representation space, refine it through conditional denoising, and translate the resulting preference vector into a selection of graph connections.
 
+\subsubsection{Pretraining and Historical Preference Construction}
 
-\subsection{Framework Overview}
+We pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. The resulting user and bundle representations, denoted by $\bar{\mathbf e}_u,\bar{\mathbf e}_b\in\mathbb R^d$, remain fixed during graph reconstruction. Here, $d$ is the embedding dimension. These representations provide a common space for constructing historical preferences, conditioning the denoiser, and scoring interactions.
 
-As illustrated in Figure~\ref{fig:framework}, DiGO first models
-each user's overall bundle preference using pretrained
-representations and reconstructs the original user--bundle matrix
-$\mathbf X$ as $\widetilde{\mathbf X}$. It then learns user and
-bundle representations from three views based on
-$\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$. Before
-fusing the three views, DiGO performs cross-view alignment using
-the user--bundle view as the anchor and finally predicts user
-preferences from the fused representations.
-
-
-\subsection{Diffusion-Driven Graph Optimization}
-
-\subsubsection{Preference Representation Construction}
-
-We first pretrain LightGCN~\cite{he2020lightgcn} on the original
-user--bundle interactions to obtain pretrained representations
-$\bar{\mathbf e}_u$ and $\bar{\mathbf e}_b$ for user $u$ and
-bundle $b$, respectively. The pretraining model is optimized with
-the BPR objective, and the resulting representations remain fixed
-during subsequent graph optimization.
-
-Let
-$\mathcal N_u^{UB}
-=
-\{b\in\mathcal B\mid x_{ub}=1\}$
-denote the set of bundles historically interacted with by user
-$u$. We construct the historical bundle representation through
-mean pooling:
+For user $u$, let $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ be the set of historically interacted bundles. We summarize their representations by mean pooling:
 
 \begin{equation}
-\mathbf p_u^0
-=
-\frac{1}{|\mathcal N_u^{UB}|}
-\sum_{b\in\mathcal N_u^{UB}}
-\bar{\mathbf e}_b ,
+\mathbf p_{u,0}
+=\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}\bar{\mathbf e}_b.
 \tag{1}
 \end{equation}
 
-where $\mathbf p_u^0$ summarizes the overall characteristics of
-the bundles in the user's interaction history and serves as the
-modeling target of the subsequent diffusion process.
+The vector $\mathbf p_{u,0}$ represents the user's observed bundle-preference context. Mean pooling accommodates histories of different lengths while keeping the denoising input $d$-dimensional. We construct this vector for users in $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. The subscript $0$ denotes the state before artificial noise is added; it does not assume that the observed history is free of interaction noise.
 
+\subsubsection{User-Conditioned Diffusion Denoising}
 
-\subsubsection{Conditional Diffusion}
-
-Given the number of diffusion steps $T$ and a noise schedule
-$\{\beta_t\}_{t=1}^{T}$, we define
-$\alpha_t=1-\beta_t$ and
-$\bar{\alpha}_t=\prod_{s=1}^{t}\alpha_s$.
-At timestep $t$, the forward perturbation of $\mathbf p_u^0$ is
-defined as
+We train the denoiser to recover historical preference representations under different levels of perturbation. Following the Gaussian diffusion formulation \cite{ho2020ddpm,wang2023diffrec}, let $T$ be the number of diffusion steps and $\beta_t\in(0,1)$ the noise variance at step $t$. We use a linear variance schedule and define $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\prod_{s=1}^{t}\alpha_s$. A perturbed preference vector can be sampled directly as
 
 \begin{equation}
-\mathbf p_u^t
-=
-\sqrt{\bar{\alpha}_t}\mathbf p_u^0
-+
-\sqrt{1-\bar{\alpha}_t}\boldsymbol{\epsilon},
+\mathbf p_{u,t}
+=\sqrt{\bar\alpha_t}\,\mathbf p_{u,0}
++\sqrt{1-\bar\alpha_t}\,\boldsymbol\epsilon,
 \qquad
-\boldsymbol{\epsilon}
-\sim
-\mathcal N(\mathbf 0,\mathbf I).
+\boldsymbol\epsilon\sim\mathcal N(\mathbf 0,\mathbf I_d).
 \tag{2}
 \end{equation}
 
-We use the pretrained user representation
-$\bar{\mathbf e}_u$ as a personalized condition and employ a
-conditional denoising network to predict the unperturbed bundle
-preference representation:
+Here, $\mathbf I_d$ is the $d$-dimensional identity matrix. The cumulative coefficient $\bar\alpha_t$ controls how much historical information remains at each noise level.
+
+To make recovery personalized, we condition the denoiser on the pretrained user representation $\bar{\mathbf e}_u$. We implement the denoiser $f_\theta$ as a multilayer perceptron (MLP), with parameters $\theta$, that predicts the unperturbed preference vector:
 
 \begin{equation}
-\widehat{\mathbf p}_u^0
-=
-f_\theta
-\left(
-\mathbf p_u^t,
-\bar{\mathbf e}_u,
-t
-\right),
+\begin{aligned}
+\widehat{\mathbf p}_{u,0}
+&=f_\theta(\mathbf p_{u,t},\bar{\mathbf e}_u,t),\\
+f_\theta(\mathbf p,\mathbf c,t)
+&=\operatorname{MLP}_\theta
+\bigl([\mathbf p;\mathbf c;\mathbf p\odot\mathbf c;
+|\mathbf p-\mathbf c|;\boldsymbol\psi(t)]\bigr).
+\end{aligned}
 \tag{3}
 \end{equation}
 
-where $f_\theta$ is an MLP-based conditional denoising network
-that integrates the perturbed representation, the user condition,
-and the timestep embedding.
+In Eq. (3), $[\cdot;\cdot]$ denotes concatenation, $\odot$ is the element-wise product, and the absolute difference is also element-wise. The vector $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ is a sinusoidal timestep embedding. The product and difference expose coordinate-wise agreement and discrepancy between the current preference vector and the user condition. Together with the timestep embedding, they allow the MLP to adapt recovery to both the user and the perturbation level. The input dimension is $4d+d_t$, and the output dimension is $d$.
 
-During training, we uniformly sample $t$ from
-$\{1,\ldots,T\}$ and draw Gaussian noise
-$\boldsymbol{\epsilon}$ to construct $\mathbf p_u^t$. The
-diffusion module is optimized by reconstructing the
-unperturbed historical bundle representation:
+During training, we uniformly sample $u\in\mathcal U_+$ and $t\in\{1,\ldots,T\}$ and draw Gaussian noise as in Eq. (2). The reconstruction objective is
 
 \begin{equation}
-L^{D}
-=
-\mathbb E_{\substack{
-u\sim\mathcal U^{+},\,
-t\sim\operatorname{Unif}\{1,\ldots,T\},\\
-\boldsymbol{\epsilon}\sim\mathcal N(\mathbf 0,\mathbf I)
-}}
+\mathcal L_{\mathrm{rec}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
 \left[
-\left\|
-\widehat{\mathbf p}_u^0-\mathbf p_u^0
-\right\|_2^2
-\right],
+\frac{1}{d}
+\left\|\widehat{\mathbf p}_{u,0}-\mathbf p_{u,0}\right\|_2^2
+\right].
 \tag{4}
 \end{equation}
 
-where
-$\mathcal U^{+}
-=
-\{u\in\mathcal U\mid|\mathcal N_u^{UB}|>0\}$.
-This objective encourages the conditional denoising network
-to recover the overall representation of the bundles in the
-user's interaction history.
+This objective learns a shared recovery function from perturbed historical preferences. The original representation supplies the reconstruction target, while the pretrained user embedding provides personalized context.
 
+\subsubsection{Bundle-Set Consistency in Denoising}
 
-\subsubsection{Interaction Scoring and Graph Reconstruction}
+Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction.
 
-During graph reconstruction, we employ a deterministic iterative
-denoising procedure. The historical bundle representation is used
-as the initial state, and the conditional denoising network is
-repeatedly applied in reverse timestep order:
+Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages average directional agreement between the recovered preference and the user's historical bundle representations:
 
 \begin{equation}
-\begin{aligned}
-\widetilde{\mathbf p}_u^{T}
-&=
-\mathbf p_u^0,
-\\
-\widetilde{\mathbf p}_u^{t-1}
-&=
-f_\theta
-\left(
-\widetilde{\mathbf p}_u^{t},
-\bar{\mathbf e}_u,
-t
-\right),
-\\
-\mathbf p_u^{*}
-&=
-\widetilde{\mathbf p}_u^{0},
-\end{aligned}
-\qquad
-t=T,T-1,\ldots,1.
+\mathcal L_{\mathrm{set}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}
+\left(1-\operatorname{sim}
+\left(\widehat{\mathbf p}_{u,0},\bar{\mathbf e}_b\right)\right)
+\right].
 \tag{5}
 \end{equation}
 
-Here, $\mathbf p_u^{*}$ denotes the resulting overall bundle
-preference representation of user $u$.
+The two objectives emphasize different aspects of recovery. Equation (4) matches the coordinates of the pooled representation, whereas Eq. (5) measures agreement with each historical bundle after vector normalization. This keeps the recovered preference connected to the historical bundle set in the same similarity geometry used for interaction scoring. Averaging over each user's history also prevents the loss from increasing merely because that user has more observed interactions.
 
-We then compute preference-matching scores only for the user's
-observed interactions and retain at most the top-$\kappa$
-bundles:
+We optimize the denoiser with
 
 \begin{equation}
-\begin{aligned}
-s_{u,b}
-&=
-\cos
-\left(
-\mathbf p_u^{*},
-\bar{\mathbf e}_b
-\right),
-\qquad
-b\in\mathcal N_u^{UB},
-\\
-\widetilde{\mathcal N}_u^{UB}
-&=
-\operatorname{TopK}_{b\in\mathcal N_u^{UB}}
-\left(
-s_{u,b},
-\kappa
-\right),
-\\
-\widetilde{x}_{ub}
-&=
-\mathbb I
-\left[
-b\in\widetilde{\mathcal N}_u^{UB}
-\right].
-\end{aligned}
+\mathcal L_{\mathrm D}
+=\mathcal L_{\mathrm{rec}}
++\lambda_{\mathrm{set}}\mathcal L_{\mathrm{set}},
 \tag{6}
 \end{equation}
 
-Here, $\kappa$ is the maximum number of interactions retained for
-each user, and $\mathbb I[\cdot]$ is the indicator function. All
-$\widetilde{x}_{ub}$ form the reconstructed user--bundle matrix
-$\widetilde{\mathbf X}$. Since
-$\widetilde{\mathcal N}_u^{UB}
-\subseteq
-\mathcal N_u^{UB}$,
-DiGO only re-evaluates and filters observed user--bundle
-interactions without introducing unobserved connections.
+where $\lambda_{\mathrm{set}}\geq 0$ controls the consistency constraint. SetLoss serves as a task-specific regularizer within the denoising framework: it encourages preservation of bundle-preference context while the reconstruction term learns recovery from perturbations.
 
+\subsubsection{Preference Refinement and Graph Reconstruction}
 
-\subsection{Multi-View Representation Learning}
-
-Based on $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$,
-DiGO learns representations from the user--bundle interaction
-view, user--item interaction view, and bundle--item affiliation
-view. The three views share the initial trainable user, bundle,
-and item representations while employing independent propagation
-paths.
-
-Let $\operatorname{LG}(\cdot)$ denote a LightGCN encoder with
-neighborhood propagation and layer-wise aggregation. The
-representation learning process for the three views is written as
+After learning the denoiser, we use it to refine the historical preference vector for interaction scoring. This stage employs a deterministic refinement procedure initialized with $\mathbf p_{u,0}$. Specifically,
 
 \begin{equation}
 \begin{aligned}
-\left(
-\mathbf E_U^{UB},
-\mathbf E_B^{UB}
-\right)
-&=
-\operatorname{LG}
-\left(
-\widetilde{\mathbf X}
-\right),
-\\
-\left(
-\mathbf E_U^{UI},
-\mathbf E_I^{UI}
-\right)
-&=
-\operatorname{LG}
-\left(
-\mathbf Y
-\right),
-\\
-\mathbf e_b^{UI}
-&=
-\frac{1}{|\mathcal N_b^{BI}|}
-\sum_{i\in\mathcal N_b^{BI}}
-\mathbf e_i^{UI},
-\\
-\left(
-\mathbf E_B^{BI},
-\mathbf E_I^{BI}
-\right)
-&=
-\operatorname{LG}
-\left(
-\mathbf Z
-\right),
-\\
-\mathbf e_u^{BI}
-&=
-\frac{1}{|\mathcal N_u^{UI}|}
-\sum_{i\in\mathcal N_u^{UI}}
-\mathbf e_i^{BI}.
+\mathbf r_{u,T}&=\mathbf p_{u,0},\\
+\mathbf r_{u,t-1}
+&=f_\theta(\mathbf r_{u,t},\bar{\mathbf e}_u,t),
+\qquad t=T,T-1,\ldots,1,\\
+\mathbf p_u^\star&=\mathbf r_{u,0}.
 \end{aligned}
 \tag{7}
 \end{equation}
 
-Here, $\mathcal N_b^{BI}$ denotes the set of items contained in
-bundle $b$, while $\mathcal N_u^{UI}$ denotes the set of items
-interacted with by user $u$. The UB view directly produces the
-user representation $\mathbf e_u^{UB}$ and bundle representation
-$\mathbf e_b^{UB}$. In the UI view, item representations are
-aggregated according to bundle--item affiliations to obtain
-$\mathbf e_b^{UI}$. In the BI view, item representations are
-aggregated according to user--item interactions to obtain
-$\mathbf e_u^{BI}$. This three-view organization follows the
-standard multi-view modeling framework for bundle
-recommendation~\cite{ma2024multicbr}.
+The states $\mathbf r_{u,t}$ are refinement iterates, distinct from the forward-corrupted training states $\mathbf p_{u,t}$. Each iteration feeds the current estimate back into the denoiser with the next timestep condition. Thus, graph reconstruction applies the learned recovery network to an observed preference context, without sampling a Gaussian starting state.
 
-Consequently, user $u$ obtains three view-specific representations
-$\{\mathbf e_u^{UB},\mathbf e_u^{UI},\mathbf e_u^{BI}\}$, while
-bundle $b$ obtains
-$\{\mathbf e_b^{UB},\mathbf e_b^{UI},\mathbf e_b^{BI}\}$.
-
-
-\subsection{Cross-View Contrastive Learning}
-
-To exploit the two auxiliary views for supplementing sparse
-user--bundle supervision, DiGO uses the representations learned
-from the reconstructed user--bundle view as anchors and aligns
-them with the user--item and bundle--item representations before
-fusing the three views.
-
-For an entity set $\mathcal S$, the contrastive loss between an
-anchor view $a$ and an auxiliary view $v$ is defined as
+We measure how closely each observed bundle matches the refined preference:
 
 \begin{equation}
-\begin{aligned}
-\ell_{\tau}
-\left(
-\mathbf E^{a},
-\mathbf E^{v};
-\mathcal S
-\right)
-=
--\frac{1}{|\mathcal S|}
-\sum_{x\in\mathcal S}
-\log
-\frac{
-\exp
-\left(
-\cos(\mathbf e_x^{a},\mathbf e_x^{v})/\tau
-\right)
-}{
-\sum_{x'\in\mathcal S}
-\exp
-\left(
-\cos(\mathbf e_x^{a},\mathbf e_{x'}^{v})/\tau
-\right)
-}.
-\end{aligned}
+s_{ub}
+=\operatorname{sim}(\mathbf p_u^\star,\bar{\mathbf e}_b),
+\qquad b\in\mathcal N_u.
 \tag{8}
 \end{equation}
 
-Representations of the same entity across the two views form a
-positive pair, while representations of the remaining entities
-serve as in-batch negatives.
-
-The pre-fusion cross-view contrastive loss is defined as
+For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles, where the positive integer $\kappa$ controls the maximum retained degree:
 
 \begin{equation}
 \begin{aligned}
-L^{A}
-={}&
-\ell_{\tau_a}
-\left(
-\mathbf E_U^{UB},
-\mathbf E_U^{UI};
-\mathcal S_U
-\right)
-+
-\ell_{\tau_a}
-\left(
-\mathbf E_U^{UB},
-\mathbf E_U^{BI};
-\mathcal S_U
-\right)
-\\
-&+
-\ell_{\tau_a}
-\left(
-\mathbf E_B^{UB},
-\mathbf E_B^{UI};
-\mathcal S_B
-\right)
-+
-\ell_{\tau_a}
-\left(
-\mathbf E_B^{UB},
-\mathbf E_B^{BI};
-\mathcal S_B
-\right),
+\widetilde{\mathcal N}_u
+&=\underset{b\in\mathcal N_u}{\operatorname{TopK}}
+\left(s_{ub},\kappa_u\right),\\
+\widetilde x_{ub}
+&=\mathbf 1\!\left[b\in\widetilde{\mathcal N}_u\right].
 \end{aligned}
 \tag{9}
 \end{equation}
 
-where $\mathcal S_U$ and $\mathcal S_B$ denote the sets of
-unique users and positive bundles in the current batch,
-respectively, and $\tau_a$ is the temperature parameter. DiGO
-only constructs UB--UI and UB--BI alignment on both the user and
-bundle sides, without introducing an additional UI--BI
-constraint.
+Here, $\operatorname{TopK}$ returns bundle indices and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain their full histories; users outside $\mathcal U_+$ have no retained U-B edges. The binary matrix $\widetilde{\mathbf X}$ defines the reconstructed U-B graph. Selection is restricted to observed interactions, so this step changes the graph connections used for propagation rather than assigning new interaction labels. Through Eqs. (1)--(9), pretrained collaborative information, personalized denoising, and bundle-set consistency jointly support preference-based graph reconstruction.
 
+\subsection{Pre-Fusion Cross-View Contrastive Learning}
 
-\subsection{Prediction and Model Optimization}
+With the U-B graph reconstructed, we next learn representations from this graph together with user-item behavior and bundle composition. The auxiliary relations provide complementary evidence when a user's bundle feedback is limited. We first construct user and bundle representations in each view, and then connect them through U-B-anchored contrastive learning before fusion.
 
-The user and bundle representations from the three views are
-fused using view coefficients, and their inner product is used
-for preference prediction:
+\subsubsection{View-Specific Representations}
+
+Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. Each encoder applies $L$ layers of LightGCN-style neighborhood propagation \cite{he2020lightgcn} and aggregates the layer outputs. The encoders share trainable initial embeddings for the same entity; these are separate from the fixed pretrained embeddings in Section~\ref{sec:graph-reconstruction}.
+
+\textbf{U-B view.} Propagation on the reconstructed U-B graph directly produces user representations $\mathbf e_u^{\mathrm{UB}}$ and bundle representations $\mathbf e_b^{\mathrm{UB}}$, capturing collaborative information through the retained interactions.
+
+\textbf{U-I view.} Propagation on the U-I graph produces user representations $\mathbf e_u^{\mathrm{UI}}$ and item representations $\mathbf e_i^{\mathrm{UI}}$. To obtain a bundle representation $\mathbf e_b^{\mathrm{UI}}$ in this view, we average the representations of its constituent items according to $\mathbf Z$.
+
+\textbf{B-I view.} Propagation on the B-I graph produces bundle representations $\mathbf e_b^{\mathrm{BI}}$ and item representations $\mathbf e_i^{\mathrm{BI}}$. To obtain a user representation $\mathbf e_u^{\mathrm{BI}}$ in this view, we average the representations of the items that the user has interacted with according to $\mathbf Y$.
+
+The two item-pooling operations are
 
 \begin{equation}
-\begin{aligned}
-\mathbf e_u
-&=
-\lambda_1\mathbf e_u^{UB}
-+
-\lambda_2\mathbf e_u^{UI}
-+
-\lambda_3\mathbf e_u^{BI},
-\\
-\mathbf e_b
-&=
-\lambda_1\mathbf e_b^{UB}
-+
-\lambda_2\mathbf e_b^{UI}
-+
-\lambda_3\mathbf e_b^{BI},
-\\
-y^*_{u,b}
-&=
-\mathbf e_u^\top\mathbf e_b,
+\mathbf e_b^{\mathrm{UI}}
+=\frac{1}{|\mathcal I_b|}
+\sum_{i\in\mathcal I_b}\mathbf e_i^{\mathrm{UI}},
 \qquad
-\lambda_1+\lambda_2+\lambda_3=1.
-\end{aligned}
+\mathbf e_u^{\mathrm{BI}}
+=\frac{1}{|\mathcal I_u|}
+\sum_{i\in\mathcal I_u}\mathbf e_i^{\mathrm{BI}},
 \tag{10}
 \end{equation}
 
-DiGO also retains post-fusion self-supervised contrastive
-learning. Let $\mathbf E'_U,\mathbf E''_U$ and
-$\mathbf E'_B,\mathbf E''_B$ denote the user and bundle
-representations generated by two independent representation
-perturbations, respectively. The post-fusion contrastive loss is
+where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\mathcal I_u=\{i:y_{ui}=1\}$ contains the items interacted with by user $u$. An empty neighborhood contributes a zero vector.
+
+This step yields three representations for each user, $\{\mathbf e_u^{\mathrm{UB}},\mathbf e_u^{\mathrm{UI}},\mathbf e_u^{\mathrm{BI}}\}$, and each bundle, $\{\mathbf e_b^{\mathrm{UB}},\mathbf e_b^{\mathrm{UI}},\mathbf e_b^{\mathrm{BI}}\}$, all in $\mathbb R^d$. These unfused representations are used to construct the cross-view objective below and are later fused for prediction.
+
+\subsubsection{Cross-View Objectives Anchored in U-B}
+
+Using these view-specific representations, we pair each user's U-B representation with its U-I and B-I counterparts, and do the same for each bundle. The reconstructed U-B view thus serves as the common reference. Each same-entity pair is a positive pair, while other entities of the same type provide in-batch negatives.
+
+To express the objective compactly, consider two representation matrices $\mathbf A$ and $\mathbf B$ with $m$ corresponding rows $\mathbf a_j$ and $\mathbf b_j$. We use the InfoNCE objective \cite{oord2018cpc}:
 
 \begin{equation}
-L^{C}
-=
-\frac{1}{2}
-\left[
-\ell_{\tau_c}
-\left(
-\mathbf E'_U,
-\mathbf E''_U;
-\mathcal S_U
-\right)
-+
-\ell_{\tau_c}
-\left(
-\mathbf E'_B,
-\mathbf E''_B;
-\mathcal S_B
-\right)
-\right],
+\ell_\tau(\mathbf A,\mathbf B)
+=-\frac{1}{m}\sum_{j=1}^{m}
+\log
+\frac{\exp(\operatorname{sim}(\mathbf a_j,\mathbf b_j)/\tau)}
+{\sum_{k=1}^{m}
+\exp(\operatorname{sim}(\mathbf a_j,\mathbf b_k)/\tau)}.
 \tag{11}
 \end{equation}
 
-where $\tau_c$ is the temperature parameter for post-fusion
-contrastive learning.
+The temperature $\tau>0$ controls sensitivity to similarity differences. The corresponding row is the positive candidate; all other rows are negative candidates. The denominator includes the positive candidate.
 
-For each training triplet $(u,b,b')$, where $x_{ub}=1$ and
-$x_{ub'}=0$, the recommendation loss and the overall objective
-of the multi-view recommendation model are defined as
+Let $\mathcal S_U$ and $\mathcal S_B$ be the sets of unique users and unique positive bundles in a recommendation minibatch. For view $v\in\{\mathrm{UB},\mathrm{UI},\mathrm{BI}\}$, let $\mathbf E_U^v$ and $\mathbf E_B^v$ contain the representations of these users and bundles, respectively, with a consistent entity order across views. The pre-fusion objective is
 
 \begin{equation}
 \begin{aligned}
-L^{BPR}
-&=
-\sum_{(u,b,b')}
--\ln
-\sigma
-\left(
-y^*_{u,b}
--
-y^*_{u,b'}
-\right),
-\\
-L^{R}
-&=
-L^{BPR}
-+
-\beta_1L^{C}
-+
-\beta_2L^{A}
-+
-\beta_3
-\left\|
-\Theta
-\right\|_2^2,
+\mathcal L_{\mathrm A}
+={}&\ell_{\tau_a}(\mathbf E_U^{\mathrm{UB}},\mathbf E_U^{\mathrm{UI}})
++\ell_{\tau_a}(\mathbf E_U^{\mathrm{UB}},\mathbf E_U^{\mathrm{BI}})\\
+&+\ell_{\tau_a}(\mathbf E_B^{\mathrm{UB}},\mathbf E_B^{\mathrm{UI}})
++\ell_{\tau_a}(\mathbf E_B^{\mathrm{UB}},\mathbf E_B^{\mathrm{BI}}).
 \end{aligned}
 \tag{12}
 \end{equation}
 
-where $\Theta$ denotes the trainable parameters of the multi-view
-recommendation model, and $\beta_1$, $\beta_2$, and $\beta_3$
-control the contributions of the post-fusion contrastive loss,
-the pre-fusion cross-view contrastive loss, and the regularization
-term, respectively.
+Here, $\tau_a$ is the cross-view temperature. Deduplication prevents repeated occurrences of the same entity from being treated as negatives in this objective. A term is skipped if its entity set contains fewer than two members.
 
-During training, DiGO first optimizes the diffusion module with
-$L^D$ and reconstructs $\widetilde{\mathbf X}$. It then uses
-$\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$ as inputs
-and optimizes the multi-view recommendation model with $L^R$.
+Equation (12) encourages agreement for the same user or bundle across U-B--U-I and U-B--B-I pairs while preserving discrimination between entities. The U-B view is the common anchor in constructing the objective, and gradients update both representations in each pair. These constraints allow item-level behavioral and compositional evidence to participate directly in bundle-preference learning, providing additional training signals beyond an individual user's limited U-B history.
 
+\subsection{Prediction and Model Optimization}
 
-\subsection{Complexity Analysis}
+\textbf{View fusion and prediction.} We combine the three view-specific representations into a single user representation and a single bundle representation. Their inner product gives the preference score:
 
-Let $d$, $K$, and $Q$ denote the embedding dimension, the
-number of graph propagation layers, and the number of
-recommendation mini-batches per epoch, respectively. Let
-$C_f=\mathcal O(d^2)$ denote the cost of one forward pass
-through the fixed-depth denoising MLP. We use
-$\mathcal E_{UB}$, $\mathcal E_{UI}$, and $\mathcal E_{BI}$
-to denote the edge sets of the three original graphs, and
-$\widetilde{\mathcal E}_{UB}$ for the reconstructed UB graph.
-The graph propagation in offline LightGCN pretraining requires
-$\mathcal O(K|\mathcal E_{UB}|d)$ per pass. During each
-training epoch, the time complexity of DiGO is
-\[
+\begin{equation}
 \begin{aligned}
-\mathcal O\big(&
-(T+1)|\mathcal U^+|C_f
-+|\mathcal E_{UB}|(d+\log\kappa) \\
-&+QKd\big(
-|\widetilde{\mathcal E}_{UB}|
-+|\mathcal E_{UI}|
-+|\mathcal E_{BI}|
-\big) \\
-&+Q(B_U^2+B_B^2)d
-\big),
+\mathbf e_u
+&=\omega_1\mathbf e_u^{\mathrm{UB}}
++\omega_2\mathbf e_u^{\mathrm{UI}}
++\omega_3\mathbf e_u^{\mathrm{BI}},\\
+\mathbf e_b
+&=\omega_1\mathbf e_b^{\mathrm{UB}}
++\omega_2\mathbf e_b^{\mathrm{UI}}
++\omega_3\mathbf e_b^{\mathrm{BI}},\\
+\hat y_{ub}&=\mathbf e_u^\top\mathbf e_b.
 \end{aligned}
-\]
-where $B_U$ and $B_B$ are the numbers of unique users and
-bundles in a mini-batch. The first two terms jointly account
-for diffusion learning and graph reconstruction, while the
-remaining terms correspond to multi-view graph propagation
-and contrastive learning. Since
-$|\widetilde{\mathcal E}_{UB}|\leq|\mathcal E_{UB}|$, DiGO
-does not increase propagation costs through graph densification
-and avoids scoring all $M\times N$ user--bundle pairs. Its
-trainable parameter complexity is
-$\mathcal O((M+N+O)d+P_f)$, where $P_f$ denotes the number
-of parameters in the denoising network.
+\tag{13}
+\end{equation}
+
+Here, $\omega_1$, $\omega_2$, and $\omega_3$ control the contributions of the U-B, U-I, and B-I views, respectively. They are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$. The same coefficients are used for users and bundles. They are dataset-specific hyperparameters held fixed during training, rather than learnable parameters.
+
+\textbf{Recommendation objectives.} Representation fusion and the fused-space contrastive regularizer are components of the recommendation backbone \cite{ma2024multicbr}. Let $\mathbf H_U$ and $\mathbf H_B$ contain the fused user and positive-bundle representations in minibatch order. The backbone self-contrastive regularizer used here is
+
+\begin{equation}
+\mathcal L_{\mathrm C}
+=\frac{1}{2}
+\left[
+\ell_{\tau_c}(\mathbf H_U,\mathbf H_U)
++\ell_{\tau_c}(\mathbf H_B,\mathbf H_B)
+\right],
+\tag{14}
+\end{equation}
+
+where $\tau_c$ is its temperature. Each row is paired with itself in the numerator, and the denominator contains all rows of the corresponding minibatch matrix. This term regularizes separation in the fused representation space; $\mathcal L_{\mathrm A}$ explicitly connects the different relation views before fusion.
+
+For a minibatch $\mathcal Q$ of ranking triplets $(u,b^+,b^-)$, the positive bundle satisfies $x_{ub^+}=1$ and the negative bundle is sampled from $\mathcal B\setminus\mathcal N_u$. We optimize BPR \cite{rendle2009bpr} together with the two regularization objectives:
+
+\begin{equation}
+\begin{aligned}
+\mathcal L_{\mathrm{BPR}}
+&=-\frac{1}{|\mathcal Q|}
+\sum_{(u,b^+,b^-)\in\mathcal Q}
+\log\sigma\!\left(\hat y_{ub^+}-\hat y_{ub^-}\right),\\
+\mathcal L_{\mathrm R}
+&=\mathcal L_{\mathrm{BPR}}
++\lambda_a\mathcal L_{\mathrm A}
++\lambda_c\mathcal L_{\mathrm C}
++\lambda_r\|\Theta\|_2^2.
+\end{aligned}
+\tag{15}
+\end{equation}
+
+Here, $\sigma$ is the sigmoid function, $\Theta$ comprises the trainable initial user, bundle, and item embeddings of the recommendation backbone, and $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. Ranking examples continue to come from $\mathbf X$, even when their edges are not selected for $\widetilde{\mathbf X}$. Graph reconstruction therefore filters propagation connections while preserving the observed feedback used for ranking.
+
+\textbf{Training and inference.} In implementing the graph encoders, we use symmetrically normalized propagation and fixed, view-specific layer coefficients to combine the initial embeddings with row-normalized propagated outputs. Following the backbone's noise augmentation setting \cite{ma2024multicbr}, we apply small representation perturbations during propagation and auxiliary item pooling in training, and disable them at evaluation.
+
+Training alternates between graph reconstruction and recommendation learning. After offline pretraining, each epoch first updates the denoiser using $\mathcal L_{\mathrm D}$ over the active users. We then reconstruct $\widetilde{\mathbf X}$ with the updated denoiser and optimize the recommendation backbone using $\mathcal L_{\mathrm R}$ over ranking minibatches. The denoiser and backbone have separate optimizers; the reconstructed graph is held fixed during the recommendation updates within an epoch. Discrete edge selection does not propagate ranking gradients back into the denoiser.
+
+For recommendation, we compute and cache the final fused embeddings using the reconstructed graph associated with the selected model. Candidate bundles are ranked by Eq. (13), with training-observed bundles excluded. The denoiser is used for graph reconstruction and is not evaluated separately for each candidate bundle.
+
+\subsection{Computational Complexity}
+
+Let $M=|\mathcal E_{\mathrm{UB}}|$ be the number of observed U-B edges, and let $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ be the total number of edges used by the three propagation graphs. Let $Q$ be the number of recommendation minibatches per epoch, $m$ their maximum size, and $C_f$ the cost of a denoiser evaluation for one user. For a fixed-depth MLP whose hidden and timestep dimensions are proportional to $d$, $C_f=O(d^2)$.
+
+With one denoiser-training pass and one graph refresh per epoch, the main time cost is
+
+\begin{equation}
+O\!\left(
+(T+1)|\mathcal U_+|C_f
++M\bigl(d+\log(1+\kappa)\bigr)
++Q\bigl(LEd+m^2d\bigr)
+\right).
+\tag{16}
+\end{equation}
+
+The first term accounts for denoiser training and iterative preference refinement. The second includes history pooling, SetLoss evaluation, observed-edge scoring, and bounded top-$\kappa$ selection. The remaining terms cover graph propagation and minibatch contrastive computations. Offline LightGCN pretraining adds a graph-propagation cost of $O(LMd)$ per propagation pass. Since $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$, graph reconstruction does not densify the propagation graph or require scoring all $|\mathcal U||\mathcal B|$ pairs.
+
+The trainable parameters occupy $O((|\mathcal U|+|\mathcal B|+|\mathcal I|)d+P_\theta)$ space, where $P_\theta$ is the denoiser parameter count. Fixed pretrained user and bundle embeddings additionally require $O((|\mathcal U|+|\mathcal B|)d)$ storage. Training also stores sparse graphs, intermediate graph representations, and temporary minibatch buffers. Once fused embeddings are cached, scoring one user-bundle pair costs $O(d)$.
 
 
 \section{Experiments}
@@ -967,7 +636,7 @@ and outfit recommendation, respectively. Each dataset contains
 U-B interactions, U-I interactions, and B-I affiliations.
 Table~\ref{tab:datasets} summarizes their statistics. We adopt
 the preprocessed datasets and splits used by CrossCBR and
-MultiCBR~\cite{crosscbr,ma2024multicbr}, with 70\%, 10\%, and
+MultiCBR~\cite{ma2022crosscbr,ma2024multicbr}, with 70\%, 10\%, and
 20\% of U-B interactions assigned to training, validation, and
 testing. Pretraining, historical preference construction, and
 U-B graph reconstruction use only the training interactions.
@@ -980,17 +649,17 @@ selected for test evaluation.
 
 \paragraph{Baselines.}
 We compare DiGO with seven bundle recommendation methods.
-BGCN~\cite{bgcn} models bundle-level and item-level collaborative
-information through graph propagation, while MIDGN~\cite{midgn}
+BGCN~\cite{chang2020bgcn} models bundle-level and item-level collaborative
+information through graph propagation, while MIDGN~\cite{zhao2022midgn}
 disentangles user intents across global and local views.
-CrossCBR~\cite{crosscbr} connects bundle-view and item-view
+CrossCBR~\cite{ma2022crosscbr} connects bundle-view and item-view
 representations through contrastive learning, and
-BundleGT~\cite{bundlegt} uses a hierarchical graph Transformer
+BundleGT~\cite{wei2023bundlegt} uses a hierarchical graph Transformer
 to model bundling strategies. MultiCBR~\cite{ma2024multicbr}
 encodes all three relations and applies contrastive learning
-after view fusion. EBRec~\cite{ebrec} enhances item-level bundle
+after view fusion. EBRec~\cite{du2025ebrec} enhances item-level bundle
 representations through bundle--user--item correlations.
-EpicCBR~\cite{epiccbr} combines item-relation enhancement with
+EpicCBR~\cite{li2026epiccbr} combines item-relation enhancement with
 contrastive learning across warm-start and cold-start scenarios.
 
 For MultiCBR, EBRec, and EpicCBR, we run their released
@@ -1337,5 +1006,7 @@ interactions. Together, these findings support refining the
 U-B propagation graph and using its representations to guide
 auxiliary-view learning as a way to improve bundle
 recommendation under noisy and limited feedback.
+
+\bibliography{aaai2027}
 
 \end{document}

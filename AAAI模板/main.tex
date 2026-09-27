@@ -30,7 +30,7 @@
 \setcounter{secnumdepth}{2}
 
 % Paper title
-\title{DiGO: Diffusion-Driven Graph Optimization for Bundle Recommendation}
+\title{Diffusion-Driven Graph Reconstruction and Cross-View Contrastive Learning for Bundle Recommendation}
 
 % Anonymous author information
 \author{
@@ -46,7 +46,7 @@ Anonymous Submission
 
 
 \begin{abstract}
-Bundle recommendation integrates bundle-level feedback and item-level information to model users' preferences for sets of items. Despite advances in multi-view modeling, two challenges remain: (1) noisy user-bundle (U-B) interactions can introduce misleading signals into graph propagation, distorting the representations used to learn bundle preferences; (2) sparse U-B feedback provides limited evidence for personalized preference learning, making it difficult to characterize users with few historical bundle interactions. To address these challenges, we propose DiGO, a diffusion-driven graph optimization framework for bundle recommendation. First, we develop a U-B graph denoising pipeline that integrates pretraining, user-conditioned latent diffusion, and graph reconstruction. Starting from pretrained user and bundle embeddings, we refine each user's aggregated historical bundle representation through conditional diffusion denoising and use it to re-score observed interactions and reconstruct the U-B graph. Within this pipeline, we tailor the denoising objective to bundle recommendation through a bundle-set consistency loss that encourages the recovered preferences to retain the semantics of the user's historical bundle set. Second, we introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view. User-side and bundle-side objectives connect this view to the user-item and bundle-item views before representation fusion, enabling auxiliary information to strengthen preference learning under sparse U-B feedback. Experiments on three public benchmarks show that DiGO outperforms the compared baselines. Ablation and interaction-selection analyses support the proposed designs, while the user-group analysis shows the largest relative gains from the cross-view objective for users with the fewest bundle interactions.
+Bundle recommendation integrates bundle-level feedback and item-level information to model users' preferences for sets of items. Despite advances in multi-view modeling, two challenges remain: (1) noisy user-bundle (U-B) interactions can introduce misleading signals into graph propagation, distorting the representations used to learn bundle preferences; (2) sparse U-B feedback provides limited evidence for personalized preference learning, making it difficult to characterize users with few historical bundle interactions. To address these challenges, we propose a diffusion-driven graph reconstruction and cross-view contrastive learning framework for bundle recommendation. First, we develop a U-B graph denoising pipeline that integrates pretraining, user-conditioned latent diffusion, and graph reconstruction. Starting from pretrained user and bundle embeddings, we refine each user's aggregated historical bundle representation through conditional diffusion denoising and use it to re-score observed interactions and reconstruct the U-B graph. Within this pipeline, we tailor the denoising objective to bundle recommendation through a bundle-set consistency loss that encourages the recovered preferences to retain the semantics of the user's historical bundle set. Second, we introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view. User-side and bundle-side objectives connect this view to the user-item and bundle-item views before representation fusion, enabling auxiliary information to strengthen preference learning under sparse U-B feedback. Experiments on three public benchmarks show that the proposed framework outperforms the compared baselines. Ablation and interaction-selection analyses support the proposed designs, while the user-group analysis shows the largest relative gains from the cross-view objective for users with the fewest bundle interactions.
 \end{abstract}
 
 
@@ -62,7 +62,7 @@ Early approaches use attention to aggregate constituent items and jointly learn 
 
 \textbf{Challenge 2: Sparse user-bundle feedback.} Users with few bundle interactions provide limited evidence for learning personalized bundle preferences. U-I behavior and B-I composition offer complementary information, but their relevance to bundle choice must be learned: liking individual items is not equivalent to preferring a complete bundle, and bundle composition alone does not establish a user's interest. CrossCBR aligns bundle-view and item-view representations through cross-view contrastive objectives, whereas DGMAE transfers first- and higher-order U-B knowledge to item-view representation learning through distillation \cite{ma2022crosscbr,ren2023dgmae}. Their reported effectiveness demonstrates the value of linking bundle-level evidence with item-level behavioral and compositional information. The challenge is therefore to establish explicit associations between bundle-level and auxiliary-view representations, allowing item-level information to support preference learning when direct U-B feedback is limited.
 
-To address these challenges, we propose \textbf{DiGO}, a diffusion-driven graph optimization framework for bundle recommendation. \textbf{First, we develop a U-B graph denoising framework that integrates pretraining, user-conditioned latent diffusion, and graph reconstruction.} We pretrain user and bundle embeddings on observed U-B interactions, then aggregate each user's historical bundle embeddings into a latent preference vector. Following the diffusion denoising formulation \cite{ho2020ddpm,wang2023diffrec}, we perturb this vector with progressively increasing noise and learn to recover it using the pretrained user embedding as a personalized condition. Within this framework, we adapt the denoising objective to bundle recommendation by introducing a bundle-set consistency loss (SetLoss). This constraint encourages the recovered preference vector to remain semantically consistent with the user's historical bundle representations. By limiting drift from this bundle-level preference context during recovery, SetLoss helps preserve preference-relevant information for subsequent interaction re-scoring and graph reconstruction. We then use the refined preference vector to re-score observed interactions and select connections for reconstructing the U-B bipartite graph. The complete pipeline thus turns personalized preference denoising into a refinement of the graph used for recommendation.
+To address these challenges, we propose \textbf{ReCoBR} (Reconstruction and Contrastive Learning for Bundle Recommendation), a unified framework that combines diffusion-driven graph reconstruction with cross-view contrastive learning. \textbf{First, we develop a U-B graph denoising framework that integrates pretraining, user-conditioned latent diffusion, and graph reconstruction.} We pretrain user and bundle embeddings on observed U-B interactions, then aggregate each user's historical bundle embeddings into a latent preference vector. Following the diffusion denoising formulation \cite{ho2020ddpm,wang2023diffrec}, we perturb this vector with progressively increasing noise and learn to recover it using the pretrained user embedding as a personalized condition. Within this framework, we adapt the denoising objective to bundle recommendation by introducing a bundle-set consistency loss (SetLoss). This constraint encourages the recovered preference vector to remain semantically consistent with the user's historical bundle representations. By limiting drift from this bundle-level preference context during recovery, SetLoss helps preserve preference-relevant information for subsequent interaction re-scoring and graph reconstruction. We then use the refined preference vector to re-score observed interactions and select connections for reconstructing the U-B bipartite graph. The complete pipeline thus turns personalized preference denoising into a refinement of the graph used for recommendation.
 
 \textbf{Second, we introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view to address sparse bundle feedback.} The recommendation backbone learns user and bundle representations from the reconstructed U-B graph and the U-I and B-I relations, then fuses the view-specific representations for prediction. Before fusion, we construct U-B--U-I and U-B--B-I contrastive pairs on both the user and bundle sides, using the reconstructed U-B view as their common anchor. These objectives encourage agreement between representations of the same entity across paired views while distinguishing different entities. By explicitly connecting auxiliary information to bundle-level representations, they provide additional learning signals beyond each user's limited U-B history. The two modules therefore have distinct but connected roles: the first refines the U-B connections used for propagation, and the second uses representations learned from that graph to support preference learning across views.
 
@@ -71,7 +71,7 @@ Our main contributions are as follows:
 \begin{itemize}
 \item We propose a diffusion-driven U-B graph denoising framework that integrates pretraining, user-conditioned latent diffusion, and interaction selection to reconstruct the graph used for recommendation. Within this framework, we adapt the denoising objective to bundle recommendation through a bundle-set consistency loss that encourages semantic consistency with historical bundle preferences.
 \item We introduce pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view on both the user and bundle sides. By connecting U-B representations with U-I and B-I representations, this design exploits auxiliary information to alleviate the learning difficulties caused by sparse bundle feedback.
-\item Experiments on three public benchmarks demonstrate DiGO's effectiveness through baseline comparisons, ablations, and interaction-selection analyses. A user-group analysis further shows that the proposed cross-view objective yields the largest relative gains for the lowest-interaction group.
+\item Experiments on three public benchmarks demonstrate ReCoBR's effectiveness through baseline comparisons, ablations, and interaction-selection analyses. A user-group analysis further shows that the proposed cross-view objective yields the largest relative gains for the lowest-interaction group.
 \end{itemize}
 
 
@@ -81,19 +81,19 @@ Our main contributions are as follows:
 
 Bundle recommendation includes both ranking existing bundles and generating new item combinations \cite{sun2024survey}. For predefined-bundle ranking, a central issue is how to combine bundle-level interaction evidence with information about constituent items. DAM addresses this issue through attentive item aggregation and joint learning of U-B and U-I interactions \cite{chen2019dam}. BGCN uses graph propagation to capture bundle-level and item-level collaborative information \cite{chang2020bgcn}. In the broader collaborative filtering setting, LightGCN demonstrates the effectiveness of simplified neighborhood aggregation \cite{he2020lightgcn}. Subsequent bundle models enrich the preferences and composition patterns captured by graph representations. MIDGN disentangles user intents across global and local views \cite{zhao2022midgn}, and BundleGT uses a hierarchical graph transformer to model bundling strategies \cite{wei2023bundlegt}.
 
-Beyond representation construction, another line of research focuses on cooperation across views. CrossCBR contrasts bundle-view and item-view representations to encourage mutual enhancement \cite{ma2022crosscbr}. MultiCBR explicitly models B-I relations alongside U-B and U-I relations, and combines representation fusion with post-fusion contrastive learning \cite{ma2024multicbr}. DGMAE instead distills first- and higher-order U-B knowledge into an item-view graph masked autoencoder \cite{ren2023dgmae}. These studies establish several ways to exploit auxiliary information for bundle preference learning. DiGO builds on this multi-view setting by refining the U-B graph through conditional latent diffusion and using the reconstructed view to anchor cross-view learning before fusion.
+Beyond representation construction, another line of research focuses on cooperation across views. CrossCBR contrasts bundle-view and item-view representations to encourage mutual enhancement \cite{ma2022crosscbr}. MultiCBR explicitly models B-I relations alongside U-B and U-I relations, and combines representation fusion with post-fusion contrastive learning \cite{ma2024multicbr}. DGMAE instead distills first- and higher-order U-B knowledge into an item-view graph masked autoencoder \cite{ren2023dgmae}. These studies establish several ways to exploit auxiliary information for bundle preference learning. ReCoBR builds on this multi-view setting by refining the U-B graph through conditional latent diffusion and using the reconstructed view to anchor cross-view learning before fusion.
 
 \subsection{Denoising and Diffusion for Recommendation}
 
 Interaction denoising seeks to reduce the influence of observed feedback that does not accurately reflect user preferences. Adaptive Denoising Training identifies potentially noisy feedback through training losses and reduces its influence using loss truncation or reweighting \cite{wang2021adt}. Diffusion models provide another way to learn from corrupted inputs by reversing controlled perturbations \cite{ho2020ddpm}. DiffRec applies this formulation to interaction-vector reconstruction and introduces a latent-space variant for efficiency \cite{wang2023diffrec}. DiffuRec operates on target-item embeddings and uses interaction sequences to condition their recovery for next-item prediction \cite{li2023diffurec}. These methods illustrate that the denoising object and conditioning information must be chosen to suit the recommendation task.
 
-Diffusion has also been applied to bundle recommendation. DCBR combines conditional U-B interaction denoising with disentangled contrastive learning \cite{li2025dcbr}. RDiffBR uses residual diffusion on item-level bundle embeddings to accommodate changes in bundle composition \cite{zhang2026rdiffbr}. DiGO instead focuses on the connection between historical bundle-preference modeling and U-B graph reconstruction. It uses pretrained user representations to condition the denoising of aggregated historical bundle embeddings, and translates the refined preferences into observed-edge selection. Within this pipeline, the bundle-set consistency loss adapts the denoising objective to historical bundle semantics, supporting the reconstruction of the graph used for downstream learning.
+Diffusion has also been applied to bundle recommendation. DCBR combines conditional U-B interaction denoising with disentangled contrastive learning \cite{li2025dcbr}. RDiffBR uses residual diffusion on item-level bundle embeddings to accommodate changes in bundle composition \cite{zhang2026rdiffbr}. ReCoBR instead focuses on the connection between historical bundle-preference modeling and U-B graph reconstruction. It uses pretrained user representations to condition the denoising of aggregated historical bundle embeddings, and translates the refined preferences into observed-edge selection. Within this pipeline, the bundle-set consistency loss adapts the denoising objective to historical bundle semantics, supporting the reconstruction of the graph used for downstream learning.
 
 \subsection{Contrastive Learning for Recommendation}
 
 Contrastive learning derives learning signals by encouraging agreement between related representations while distinguishing unrelated ones. SimCLR demonstrates the importance of view construction and contrastive objectives for representation learning \cite{chen2020simclr}. For graph-based recommendation, SGL creates perturbed graph views through operations such as edge and node dropout, then contrasts representations of the same node across views \cite{wu2021sgl}. Knowledge-aware methods extend this principle to structured auxiliary information. KGCL uses consistency under knowledge-graph perturbations to guide interaction augmentation \cite{yang2022kgcl}, while MCCLK connects collaborative, semantic, and structural representations through multi-level cross-view objectives \cite{zou2022mcclk}.
 
-The bundle-specific methods discussed above apply contrastive learning to views defined by different user, bundle, and item relations \cite{ma2022crosscbr,ma2024multicbr}. DiGO follows this approach with a targeted choice of contrastive pairs: U-B--U-I and U-B--B-I for both users and bundles, formed before representation fusion. The reconstructed U-B view provides a common reference for jointly optimizing the paired representations. This links item-level behavioral and compositional information to bundle-level preference learning, helping the model exploit auxiliary evidence under sparse U-B feedback.
+The bundle-specific methods discussed above apply contrastive learning to views defined by different user, bundle, and item relations \cite{ma2022crosscbr,ma2024multicbr}. ReCoBR follows this approach with a targeted choice of contrastive pairs: U-B--U-I and U-B--B-I for both users and bundles, formed before representation fusion. The reconstructed U-B view provides a common reference for jointly optimizing the paired representations. This links item-level behavioral and compositional information to bundle-level preference learning, helping the model exploit auxiliary evidence under sparse U-B feedback.
 
 
 \section{Methodology}\label{sec:methodology}
@@ -102,12 +102,12 @@ The bundle-specific methods discussed above apply contrastive learning to views 
 
 Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. An entry equal to one indicates an observed interaction or an item belonging to a bundle. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
 
-Figure~\ref{fig:framework} outlines DiGO. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we then use the reconstructed U-B view as a common anchor for cross-view contrastive learning before representation fusion. The fused user and bundle representations produce the final recommendation scores.
+Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we then use the reconstructed U-B view as a common anchor for cross-view contrastive learning before representation fusion. The fused user and bundle representations produce the final recommendation scores.
 
 \begin{figure*}[t]
     \centering
     \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
-    \caption{Overall framework of DiGO, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
     \label{fig:framework}
 \end{figure*}
 
@@ -397,12 +397,64 @@ The trainable parameters occupy $O((|\mathcal U|+|\mathcal B|+|\mathcal I|)d+P_\
 
 \section{Experiments}
 
-We evaluate DiGO on three bundle recommendation benchmarks.
+We evaluate ReCoBR on three bundle recommendation benchmarks.
 The experiments examine its overall ranking performance, the
 contributions of graph reconstruction and pre-fusion cross-view
 learning, and their behavior under different interaction
 selection strategies and levels of user feedback. We also
 analyze sensitivity to the key hyperparameters.
+
+% =========================================================
+% Table 1: Dataset statistics, single-column table
+% =========================================================
+\begin{table}[t]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{1.7pt}
+    \renewcommand{\arraystretch}{1.05}
+
+    \resizebox{\columnwidth}{!}{
+    \begin{tabular}{lrrrrrr}
+        \toprule
+        Dataset
+        & \#Users
+        & \#Items
+        & \#Bundles
+        & \#U--I
+        & \#U--B
+        & \#Avg. I/B \\
+        \midrule
+        Youshu
+        & 8,039
+        & 32,770
+        & 4,771
+        & 138,515
+        & 51,377
+        & 37.03 \\
+        NetEase
+        & 18,528
+        & 123,628
+        & 22,864
+        & 1,128,065
+        & 302,303
+        & 77.80 \\
+        iFashion
+        & 53,897
+        & 42,563
+        & 27,694
+        & 2,290,645
+        & 1,679,708
+        & 3.86 \\
+        \bottomrule
+    \end{tabular}
+    }
+
+    \caption{Dataset statistics. U--I and U--B count user--item
+    and user--bundle interactions; Avg. I/B is the average
+    number of items per bundle.}
+    \label{tab:datasets}
+\end{table}
+
 
 % =========================================================
 % Table 2: Overall results, double-column table
@@ -473,7 +525,7 @@ analyze sensitivity to the key hyperparameters.
         & \underline{0.0503}
         & 0.1049 & 0.1022 & 0.1467 & 0.1190 \\
 
-        \textbf{DiGO}
+        \textbf{ReCoBR}
         & \textbf{0.2053}
         & \textbf{0.1482}
         & \textbf{0.2919}
@@ -508,65 +560,12 @@ analyze sensitivity to the key hyperparameters.
     \caption{Overall performance on three datasets. R and N denote
     Recall and NDCG. Bold and underlined entries mark the best
     and second-best reported results, respectively. Improv. is
-    DiGO's relative improvement over the strongest baseline for
+    ReCoBR's relative improvement over the strongest baseline for
     each metric; dashes indicate unreported results.}
     \label{tab:overall}
 \end{table*}
 
 
-% =========================================================
-% Table 1: Dataset statistics, single-column table
-% =========================================================
-\begin{table}[t]
-    \centering
-    \scriptsize
-    \setlength{\tabcolsep}{1.7pt}
-    \renewcommand{\arraystretch}{1.05}
-
-    \resizebox{\columnwidth}{!}{
-    \begin{tabular}{lrrrrrr}
-        \toprule
-        Dataset
-        & \#Users
-        & \#Items
-        & \#Bundles
-        & \#U--I
-        & \#U--B
-        & \#Avg. I/B \\
-        \midrule
-        Youshu
-        & 8,039
-        & 32,770
-        & 4,771
-        & 138,515
-        & 51,377
-        & 37.03 \\
-        NetEase
-        & 18,528
-        & 123,628
-        & 22,864
-        & 1,128,065
-        & 302,303
-        & 77.80 \\
-        iFashion
-        & 53,897
-        & 42,563
-        & 27,694
-        & 2,290,645
-        & 1,679,708
-        & 3.86 \\
-        \bottomrule
-    \end{tabular}
-    }
-
-    \caption{Dataset statistics. U--I and U--B count user--item
-    and user--bundle interactions; Avg. I/B is the average
-    number of items per bundle.}
-    \label{tab:datasets}
-\end{table}
-
-
-% =========================================================
 % Table 3: Ablation study, single-column table
 % =========================================================
 \begin{table}[t]
@@ -590,7 +589,7 @@ analyze sensitivity to the key hyperparameters.
         & R@20 & N@20 \\
         \midrule
 
-        \textbf{DiGO}
+        \textbf{ReCoBR}
         & \textbf{0.2919}
         & \textbf{0.1759}
         & \textbf{0.0955}
@@ -598,10 +597,15 @@ analyze sensitivity to the key hyperparameters.
         & \textbf{0.1568}
         & \textbf{0.1315} \\
 
-        w/o Graph Opt.
+        w/o Graph Recon.
         & 0.2920 & 0.1734
         & 0.0948 & 0.0509
         & 0.1500 & 0.1245 \\
+
+        w/o SetLoss
+        & 0.2913 & 0.1749
+        & 0.0951 & 0.0506
+        & 0.1559 & 0.1301 \\
 
         w/o All CL
         & 0.2326 & 0.1307
@@ -623,7 +627,7 @@ analyze sensitivity to the key hyperparameters.
 
     \caption{Component ablations on three datasets, evaluated by
     Recall@20 (R@20) and NDCG@20 (N@20). Bold entries identify
-    the complete DiGO model.}
+    the complete ReCoBR model.}
     \label{tab:ablation}
 \end{table}
 
@@ -648,7 +652,7 @@ checkpoint with the best Top-20 validation performance is
 selected for test evaluation.
 
 \paragraph{Baselines.}
-We compare DiGO with seven bundle recommendation methods.
+We compare ReCoBR with seven bundle recommendation methods.
 BGCN~\cite{chang2020bgcn} models bundle-level and item-level collaborative
 information through graph propagation, while MIDGN~\cite{zhao2022midgn}
 disentangles user intents across global and local views.
@@ -664,7 +668,7 @@ contrastive learning across warm-start and cold-start scenarios.
 
 For MultiCBR, EBRec, and EpicCBR, we run their released
 implementations on the same splits and evaluation protocol as
-DiGO and report averages over three independent runs. DiGO is
+ReCoBR and report averages over three independent runs. ReCoBR is
 evaluated in the same manner. The BGCN, MIDGN, and CrossCBR
 results are taken from the comparisons reported in
 MultiCBR~\cite{ma2024multicbr}; the BundleGT results are taken
@@ -672,7 +676,7 @@ from its published evaluation. Missing results are left
 unreported in Table~\ref{tab:overall}.
 
 \paragraph{Implementation Details.}
-We implement DiGO in PyTorch and train it on a single NVIDIA
+We implement ReCoBR in PyTorch and train it on a single NVIDIA
 GeForce RTX 3090 GPU. The recommendation embeddings use Xavier
 initialization, dimension 64, and two graph propagation layers.
 We use Adam with a learning rate of $10^{-3}$, a recommendation
@@ -708,12 +712,12 @@ validation performance.
 
 \subsection{Overall Performance}
 
-Table~\ref{tab:overall} compares DiGO with the seven baselines.
-DiGO obtains the highest reported Recall and NDCG at both
+Table~\ref{tab:overall} compares ReCoBR with the seven baselines.
+ReCoBR obtains the highest reported Recall and NDCG at both
 cutoffs on all three datasets. The strongest baseline varies:
 EpicCBR leads at Top-10 on Youshu and on all four metrics on
 NetEase, BundleGT leads at Top-20 on Youshu, and MultiCBR leads
-on iFashion. DiGO improves over each of these methods in its
+on iFashion. ReCoBR improves over each of these methods in its
 respective strongest setting.
 
 The gains are largest on iFashion, with relative improvements
@@ -726,7 +730,7 @@ positive across all four metrics.
 
 The comparison with MultiCBR is particularly informative
 because it already uses the three relation views, representation
-fusion, and post-fusion contrastive learning. DiGO improves
+fusion, and post-fusion contrastive learning. ReCoBR improves
 over this baseline across all datasets and metrics. This
 motivates examining the additional graph reconstruction and
 pre-fusion objectives separately, as we do next, to understand
@@ -735,8 +739,8 @@ their contributions beyond the multi-view backbone.
 
 \subsection{Ablation Study}
 
-Table~\ref{tab:ablation} compares DiGO with four variants.
-\textbf{w/o Graph Opt.} replaces the reconstructed U-B graph
+Table~\ref{tab:ablation} compares ReCoBR with five variants.
+\textbf{w/o Graph Recon.} replaces the reconstructed U-B graph
 with the original observed graph while retaining the
 recommendation objectives. \textbf{w/o Pre-fusion CL} removes
 the U-B-anchored cross-view objective but retains graph
@@ -745,7 +749,7 @@ contrastive regularizer in the fused representation space,
 and \textbf{w/o All CL} removes both contrastive objectives.
 
 \paragraph{Diffusion-Driven Graph Reconstruction.}
-Removing graph optimization reduces R@20 and N@20 on iFashion
+Removing graph reconstruction reduces R@20 and N@20 on iFashion
 from 0.1568 and 0.1315 to 0.1500 and 0.1245, respectively.
 Both metrics also decrease on NetEase. On Youshu, R@20 is
 essentially unchanged (0.2919 versus 0.2920), whereas N@20
@@ -758,14 +762,12 @@ conditional denoising, and interaction-selection pipeline.
 \paragraph{Bundle-Set Consistency.}
 We additionally examine \textbf{w/o SetLoss}, which removes
 the bundle-set consistency term from denoiser training while
-retaining the reconstruction objective and both DiGO modules.
+retaining the reconstruction objective and both ReCoBR modules.
 Removing this term yields a modest performance decrease
 across all three datasets. This supports its role as an
 auxiliary task-specific constraint: maintaining agreement
 with historical bundle representations helps the recovered
 preference serve subsequent interaction scoring.
-% The author will add the existing w/o SetLoss results to
-% Table~\ref{tab:ablation}; no per-dataset values are inferred here.
 
 \paragraph{Pre-Fusion Cross-View Learning.}
 Removing the pre-fusion objective lowers both metrics on all
@@ -833,15 +835,15 @@ representations used for prediction.
         \centerline{\small (d)}
     \end{minipage}
 
-    \caption{\textbf{In-depth analysis of DiGO.}
+    \caption{\textbf{In-depth analysis of ReCoBR.}
     (a)--(b) Recall@20 and NDCG@20 of interaction selection
     strategies on iFashion, with retention limit $\kappa$
     plotted as $K$.
-    (c)--(d) Recall@20 and NDCG@20 of complete DiGO and
+    (c)--(d) Recall@20 and NDCG@20 of complete ReCoBR and
     w/o Pre-fusion CL on NetEase. Both retain graph
-    optimization. G1--G4 are ordered by training U-B degree,
+    reconstruction. G1--G4 are ordered by training U-B degree,
     with ranges $[0,7)$, $[7,8)$, $[8,12)$, and $[12,660]$.
-    Lines show DiGO's relative gains over w/o Pre-fusion CL.}
+    Lines show ReCoBR's relative gains over w/o Pre-fusion CL.}
     \label{fig:in-depth-analysis}
 \end{figure}
 
@@ -855,26 +857,26 @@ interactions, whereas \textbf{Popularity-$K$} selects those
 associated with the most popular bundles.
 \textbf{Pretrain-Sim} scores interactions by the cosine
 similarity of pretrained user and bundle embeddings.
-\textbf{DiGO} instead scores them against the user's refined
+\textbf{ReCoBR} instead scores them against the user's refined
 historical bundle-preference vector. Each filtering strategy
 retains at most $\kappa$ interactions per user, where $\kappa$
 is denoted by $K$ in the figure, and selects only from the
 user's training history. Results are averaged over multiple
 independent runs.
 
-Figure~\ref{fig:in-depth-analysis}(a)--(b) shows that DiGO
+Figure~\ref{fig:in-depth-analysis}(a)--(b) shows that ReCoBR
 achieves the highest Recall@20 and NDCG@20 among the compared
 strategies at every tested retention limit. Random selection
 can improve over the original graph, but consistently trails
-DiGO at matched retention limits. Thus, the choice of
+ReCoBR at matched retention limits. Thus, the choice of
 connections matters beyond reducing their number.
 Popularity-based selection is especially weak in NDCG,
 indicating that globally popular bundles are not necessarily
 the most useful propagation neighbors for an individual user.
 
-Pretrain-Sim also underperforms DiGO. This comparison favors
+Pretrain-Sim also underperforms ReCoBR. This comparison favors
 the complete history-based refinement and scoring pipeline
-over direct pretrained user--bundle similarity. DiGO's
+over direct pretrained user--bundle similarity. ReCoBR's
 performance initially improves as more interactions are
 retained and then declines at larger limits. Together, these
 observations support selecting connections according to
@@ -922,13 +924,13 @@ To evaluate the pre-fusion objective under limited bundle
 feedback, we group NetEase users by their numbers of training
 U-B interactions, from the lowest-degree group G1 to the
 highest-degree group G4. The degree ranges are given in
-Figure~\ref{fig:in-depth-analysis}. We compare complete DiGO
+Figure~\ref{fig:in-depth-analysis}. We compare complete ReCoBR
 with \textbf{w/o Pre-fusion CL}. Both settings retain
 diffusion-driven graph reconstruction and the recommendation
 backbone; they differ in whether the U-B-anchored cross-view
 objective is included.
 
-As shown in Figure~\ref{fig:in-depth-analysis}(c)--(d), DiGO
+As shown in Figure~\ref{fig:in-depth-analysis}(c)--(d), ReCoBR
 improves Recall@20 and NDCG@20 in all four groups. The largest
 relative gains occur in G1: 12.64\% in Recall@20 and 9.32\%
 in NDCG@20. Gains in the other groups are smaller and do not
@@ -986,7 +988,7 @@ differs across datasets, as indicated by the broken axes.
 
 \section{Conclusion}
 
-We presented DiGO for bundle recommendation with noisy and
+We presented ReCoBR for bundle recommendation with noisy and
 sparse U-B feedback. Its central design connects pretraining,
 user-conditioned latent diffusion, and interaction selection
 to reconstruct the graph used for recommendation. Within this

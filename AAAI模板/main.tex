@@ -179,7 +179,7 @@ This objective learns a shared recovery function from perturbed historical prefe
 
 \subsubsection{Bundle-Set Consistency in Denoising}
 
-Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction.
+Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:setloss} illustrates how SetLoss complements the reconstruction objective in denoiser training.
 
 Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages average directional agreement between the recovered preference and the user's historical bundle representations:
 
@@ -207,6 +207,13 @@ We optimize the denoiser with
 \end{equation}
 
 where $\lambda_{\mathrm{set}}\geq 0$ controls the consistency constraint. SetLoss serves as a task-specific regularizer within the denoising framework: it encourages preservation of bundle-preference context while the reconstruction term learns recovery from perturbations.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=\columnwidth]{Figures/setloss.png}
+    \caption{SetLoss in user-conditioned denoising. The recovered preference is compared with the pooled history by MSE and with individual historical bundles by cosine distance, averaged over the history. The joint loss trains the denoiser; subsequent iterative denoising starts from $\mathbf p_{u,0}$ to obtain $\mathbf p_u^\star$. The figure uses $e_u^0,e_b^0$ for the fixed pretrained embeddings $\bar{\mathbf e}_u,\bar{\mathbf e}_b$.}
+    \label{fig:setloss}
+\end{figure}
 
 \subsubsection{Preference Refinement and Graph Reconstruction}
 

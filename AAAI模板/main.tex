@@ -74,6 +74,15 @@ Our main contributions are as follows:
 \item Experiments on three public benchmarks demonstrate ReCoBR's effectiveness through baseline comparisons, ablations, and interaction-selection analyses. A user-group analysis further shows that the proposed cross-view objective yields the largest relative gains for the lowest-interaction group.
 \end{itemize}
 
+% Declare the wide framework figure on page 2 so that it can float to
+% the top of page 3. Keep the explanatory reference in Methodology.
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
+    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \label{fig:framework}
+\end{figure*}
+
 
 \section{Related Work}
 
@@ -103,13 +112,6 @@ The bundle-specific methods discussed above apply contrastive learning to views 
 Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. An entry equal to one indicates an observed interaction or an item belonging to a bundle. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
 
 Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we then use the reconstructed U-B view as a common anchor for cross-view contrastive learning before representation fusion. The fused user and bundle representations produce the final recommendation scores.
-
-\begin{figure*}[t]
-    \centering
-    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
-    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
-    \label{fig:framework}
-\end{figure*}
 
 We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation. Pretraining, preference construction, and graph reconstruction use only training interactions.
 
@@ -416,7 +418,8 @@ analyze sensitivity to the key hyperparameters.
 % =========================================================
 % Table 1: Dataset statistics, single-column table
 % =========================================================
-\begin{table}[t]
+% Prefer placement here, within Experiments, before allowing a top float.
+\begin{table}[!ht]
     \centering
     \scriptsize
     \setlength{\tabcolsep}{1.7pt}

@@ -90,7 +90,7 @@ def build_figure(chart_conf: dict) -> tuple[plt.Figure, plt.Axes]:
         chart_conf["module2"],
         width=BAR_WIDTH,
         color=MODULE2_COLOR,
-        label="DiGO",
+        label="ReCoBR",
         zorder=3,
     )
 

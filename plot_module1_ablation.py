@@ -49,7 +49,7 @@ METHODS = [
     },
     {
         "label": "Diffusion",
-        "plot_label": "DiGO",
+        "plot_label": "ReCoBR",
         "color": "#1f77b4",
         "marker": "^",
         "linestyle": "--",

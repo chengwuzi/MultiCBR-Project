@@ -17,7 +17,7 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models.model import AnchorViewBundleNet, DWT, LatentDiffusionRebuilder, resolve_dwt_graph_config
+from 模型代码配置文件.model import AnchorViewBundleNet, DWT, LatentDiffusionRebuilder, resolve_dwt_graph_config
 from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 
@@ -684,7 +684,7 @@ def run_dwt_training(conf, dataset, device):
 
 
 def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml", encoding="utf-8"))
+    conf = yaml.safe_load(open("config.yaml", encoding="utf-8"))
     print("load config file done!")
 
     if args is None:

@@ -1,0 +1,124 @@
+Diffusion-Driven Graph Reconstruction and Cross-View Contrastive Learning for Bundle Recommendation
+
+Abstract
+
+Bundle recommendation aims to identify collections of items that match users' preferences. Recent multi-view methods combine graph representations of user behavior and bundle composition through fusion and contrastive learning, allowing bundle ranking to benefit from both bundle-level choices and item-level interests. However, observed user-bundle (U-B) interactions still determine the bundle-view graph and provide direct ranking supervision. Learning from this feedback presents two challenges: (1) noisy U-B interactions can spread misleading signals through graph propagation; (2) sparse U-B feedback limits preference learning for users with few bundle interactions. To address these challenges, we propose ReCoBR, a framework that combines diffusion-driven graph reconstruction with cross-view contrastive learning. ReCoBR pretrains user and bundle embeddings, learns a user-conditioned latent diffusion model to refine aggregated historical bundle representations, and uses the refined preferences to re-score observed interactions and reconstruct the U-B graph. A bundle-set consistency loss complements preference reconstruction by encouraging agreement with historical bundle embeddings. The reconstructed U-B view then anchors cross-view contrastive learning before representation fusion. User-side and bundle-side objectives connect U-B representations with their user-item and bundle-item counterparts, allowing behavioral and compositional information to support preference learning under sparse U-B feedback. Experiments on three public benchmarks show that ReCoBR outperforms the compared baselines.
+
+
+1 Introduction
+
+Bundle recommendation (BR) aims to match users with collections of related items, such as music playlists and fashion outfits [1,2]. To rank such collections, a recommender can draw on users' previous choices of complete bundles as well as their interactions with individual items. These observations provide complementary evidence: bundle choices reflect interests at the collection level, whereas item interactions indicate which components may appeal to the user. Bundle composition links these sources by identifying which items belong to each predefined bundle, allowing item-level interests to inform bundle preference estimation.
+
+Early approaches integrate the two types of behavior through joint learning. DAM jointly models user-bundle (U-B) and user-item (U-I) interactions, using attention to aggregate constituent-item representations into bundle representations [1]. Graph-based approaches further exploit the collaborative structure formed by these interactions. BGCN, for example, propagates information on the U-B and U-I graphs to learn bundle-view and item-view representations, respectively, and uses bundle-item (B-I) affiliations to connect items to bundles [3]. This graph formulation captures higher-order collaborative information while retaining two perspectives on users' bundle preferences.
+
+Learning separate views also raises the question of how they can inform one another. CrossCBR addresses this question through cross-view contrastive learning, encouraging agreement between the representations of the same user or bundle across the bundle and item views [2]. MultiCBR extends the formulation to three views by encoding U-B interactions, U-I interactions, and B-I affiliations separately [4]. It combines these representations before prediction, allowing information from different views to interact in bundle scoring, and applies contrastive learning to the fused representation.
+
+Cross-view learning enriches the information available for bundle recommendation, but observed U-B interactions still determine the bundle-view graph and provide ranking supervision. This dependence presents two challenges when the feedback is unreliable or scarce.
+
+Challenge 1: Noise in user-bundle interactions. Implicit feedback can include interactions that do not faithfully reflect users' preferences [5]. When these interactions become edges in the U-B graph, neighborhood aggregation can spread their influence into the representations used for bundle ranking [6]. Graph refinement therefore calls for a personalized criterion for deciding which observed interactions to retain for propagation. The user's historical bundles provide a context for this decision: each interaction can be evaluated in relation to a representation of the user's overall bundle preferences. The challenge is to construct such a representation and use it to select propagation connections that support preference learning.
+
+Challenge 2: Sparse user-bundle feedback. Even reliable feedback can provide limited evidence when a user has interacted with only a few bundles. U-I behavior and B-I composition offer additional information about the user's item-level interests and the contents of candidate bundles. However, interest in a constituent item does not necessarily imply preference for the complete bundle [7]. The value of this auxiliary information therefore depends on how it is related to bundle-level choices. In the three-view formulation above, contrastive learning regularizes the fused representation. We examine whether additional constraints between the U-B view and each auxiliary view before fusion can strengthen preference learning for users with limited bundle feedback.
+
+To address these challenges, we propose ReCoBR (Reconstruction and Contrastive Learning for Bundle Recommendation), which couples diffusion-driven U-B graph reconstruction with cross-view contrastive learning. For graph reconstruction, we first pretrain user and bundle embeddings on the U-B graph [8] and aggregate each user's historical bundle embeddings into a preference representation. A latent diffusion model learns to recover this representation from a perturbed version, using the pretrained user embedding as a personalized condition [9,10]. To support subsequent scoring against individual bundles, a bundle-set consistency loss encourages directional agreement between the recovered preference and historical bundle embeddings. We then apply the trained denoiser to iteratively refine the historical preference representation, re-score observed interactions, and retain the highest-scoring connections for graph propagation. The original U-B interactions continue to provide ranking supervision.
+
+The reconstructed graph forms the U-B view of a three-view recommender, alongside the U-I and B-I views [4]. To connect the auxiliary information directly to bundle-level learning, we introduce U-B–U-I and U-B–B-I contrastive objectives on both the user and bundle sides before representation fusion. These objectives jointly optimize the paired representations, using the reconstructed U-B view as their common reference. They complement the backbone's representation fusion and post-fusion contrastive learning, providing additional learning signals for users with limited bundle histories. ReCoBR thus combines preference-based selection of propagation connections with cross-view learning from behavioral and compositional evidence.
+
+Our main contributions are as follows:
+
+• We develop a diffusion-driven U-B graph reconstruction framework that integrates pretraining, user-conditioned historical preference refinement, and observed-interaction selection, supplemented by a bundle-set consistency objective.
+• We introduce cross-view contrastive objectives that use the reconstructed U-B view as a common anchor for user-side and bundle-side learning from auxiliary views before fusion.
+• Experiments on three public datasets demonstrate ReCoBR's recommendation improvements and examine the contributions of graph reconstruction and cross-view learning through ablations, interaction-selection comparisons, and user-group analysis.
+
+
+============================================================
+引用与核验说明（供讨论和整合使用，不进入论文正文）
+============================================================
+
+一、引用方式
+
+正文沿用前两版的 [1]—[10] 文献编号，便于对照审阅；正式迁入 main.tex 时应转换为现有 AAAI 作者—年份引用格式。本稿摘要不放引用。下面列出文献信息、对应的现有 BibTeX 键及其在本稿中承担的具体作用；本轮未修改 main.tex 或 aaai2027.bib。
+
+[1] Liang Chen, Yang Liu, Xiangnan He, Lianli Gao, and Zibin Zheng. Matching User with Item Set: Collaborative Bundle Recommendation with Deep Attention Network. IJCAI 2019, pp. 2095–2101.
+现有引用键：chen2019dam。
+原始出处：https://www.ijcai.org/proceedings/2019/290
+DOI：https://doi.org/10.24963/ijcai.2019/290
+用于：捆绑推荐任务、整包与组成物品的关系、注意力聚合及 U-B/U-I 联合学习。已核对 IJCAI 官方摘要和论文。本文的应用例子用于说明整包选择，不附加“必然提高销量”等未经本研究验证的结论。
+
+[2] Yunshan Ma, Yingzhi He, An Zhang, Xiang Wang, and Tat-Seng Chua. CrossCBR: Cross-View Contrastive Learning for Bundle Recommendation. KDD 2022, pp. 1233–1241.
+现有引用键：ma2022crosscbr。
+作者版本：https://arxiv.org/abs/2206.00242
+DOI：https://doi.org/10.1145/3534678.3539229
+用于：预定义捆绑推荐、多视图信息互补及 bundle/item 两视图的跨视图对比。新稿明确承认其已有跨视图关联，不将“采用跨视图对比”本身写成 ReCoBR 首创。
+
+[3] Jianxin Chang, Chen Gao, Xiangnan He, Depeng Jin, and Yong Li. Bundle Recommendation with Graph Convolutional Networks. SIGIR 2020, pp. 1673–1676.
+现有引用键：chang2020bgcn。
+DOI：https://doi.org/10.1145/3397271.3401198
+用于：图传播在捆绑级与物品级协同建模中的作用；不把三张关系图分别编码的具体设计归给 BGCN。
+
+[4] Yunshan Ma, Yingzhi He, Xiang Wang, Yinwei Wei, Xiaoyu Du, Yuyangzi Fu, and Tat-Seng Chua. MultiCBR: Multi-View Contrastive Learning for Bundle Recommendation. ACM Transactions on Information Systems, 42(4), Article 100, 2024.
+现有引用键：ma2024multicbr。
+作者版本：https://arxiv.org/abs/2311.16751
+DOI：https://doi.org/10.1145/3640810
+用于：三视图分解、表示融合及融合后对比的具体来源。第二段研究发展说明 MultiCBR 的三视图和融合后对比；方法概述交代本研究保留骨干并增加融合前配对约束，不将其扩大成“融合无法学习跨视图偏好”或“现有方法没有视图协同”。MultiCBR 原文还表明，更强的视图对齐未必带来更好的推荐，故新稿把模块二写为保留骨干基础上的补充约束；这种补充是否有效，需要本项目实验支持。
+
+[5] Wenjie Wang, Fuli Feng, Xiangnan He, Liqiang Nie, and Tat-Seng Chua. Denoising Implicit Feedback for Recommendation. WSDM 2021, pp. 373–381.
+现有引用键：wang2021adt。
+作者版本：https://arxiv.org/abs/2006.04153
+DOI：https://doi.org/10.1145/3437963.3441800
+用于：隐式反馈未必反映真实偏好以及拟合不可靠反馈的风险。已补查原始文献；该来源不提供 ReCoBR 三个数据集的真实噪声比例，也不证明本模型识别出了真实噪声边。
+
+[6] Jiancan Wu, Xiang Wang, Fuli Feng, Xiangnan He, Liang Chen, Jianxun Lian, and Xing Xie. Self-Supervised Graph Learning for Recommendation. SIGIR 2021, pp. 726–735.
+现有引用键：wu2021sgl。
+作者版本：https://arxiv.org/abs/2010.10783
+DOI：https://doi.org/10.1145/3404835.3462862
+用于：邻域聚合可能放大观测噪声交互的影响。已核对作者论文；这是一般图推荐机制的依据，不能写成捆绑推荐独有的噪声性质。
+
+[7] Yuyang Ren, Haonan Zhang, Luoyi Fu, Xinbing Wang, and Chenghu Zhou. Distillation-Enhanced Graph Masked Autoencoders for Bundle Recommendation. SIGIR 2023, pp. 1660–1669.
+现有引用键：ren2023dgmae。
+DOI：https://doi.org/10.1145/3539618.3591666
+用于：挑战二中物品级兴趣与完整捆绑偏好并不等价的依据。第三版不再在发展段重复介绍 DGMAE，以集中说明从两视图建模到跨视图协作、再到三视图融合的主线。ReCoBR 的双侧梯度对比不表述为教师蒸馏。
+
+[8] Xiangnan He, Kuan Deng, Xiang Wang, Yan Li, Yongdong Zhang, and Meng Wang. LightGCN: Simplifying and Powering Graph Convolution Network for Recommendation. SIGIR 2020, pp. 639–648.
+现有引用键：he2020lightgcn。
+DOI：https://doi.org/10.1145/3397271.3401063
+用于：U-B 预训练的骨干来源。历史偏好构建、恢复后边重评分与图重构属于本稿要说明的组合设计，LightGCN 本身不作为新增贡献。
+
+[9] Wenjie Wang, Yiyan Xu, Fuli Feng, Xinyu Lin, Xiangnan He, and Tat-Seng Chua. Diffusion Recommender Model. SIGIR 2023, pp. 832–841.
+现有引用键：wang2023diffrec。
+DOI：https://doi.org/10.1145/3539618.3591663
+用于：推荐中的扩散恢复思路。该文与本项目恢复对象和后续用途不同，本稿不借其理论或推断公式证明当前实现等同标准 DDPM 采样。
+
+[10] Jujia Zhao, Wenjie Wang, Yiyan Xu, Teng Sun, Fuli Feng, and Tat-Seng Chua. Denoising Diffusion Recommender Model. SIGIR 2024, pp. 1370–1379.
+建议新增引用键：zhao2024ddrm。
+作者全文：https://arxiv.org/html/2401.06982v4
+DOI：https://doi.org/10.1145/3626772.3657825
+用于：表示空间中的扩散恢复与协同条件引导。这是准备第一版时从项目外补查的直接相关原始论文。DDRM 已采用预训练表示、协同条件，并以历史物品均值作为推断起点；这些一般思路不宜单独宣称首创。ReCoBR 的本稿表述落在历史捆绑聚合表示的恢复、观测边重评分及传播图重构这一具体流程。已核对作者全文的训练与推断部分。
+
+对应的新增 BibTeX 条目可在正式整合时使用：
+
+@inproceedings{zhao2024ddrm,
+  author    = {Jujia Zhao and Wenjie Wang and Yiyan Xu and Teng Sun and Fuli Feng and Tat-Seng Chua},
+  title     = {Denoising Diffusion Recommender Model},
+  booktitle = {Proceedings of the 47th International ACM SIGIR Conference on Research and Development in Information Retrieval},
+  pages     = {1370--1379},
+  year      = {2024},
+  doi       = {10.1145/3626772.3657825}
+}
+
+二、本版的文献使用说明
+
+本版从 ReCoBR 自身的任务、数据关系、学习困难和方法流程组织论述，没有按参照论文的句式或段落模板套写。已核对的文献继续承担任务背景、已有方法及具体事实的来源作用。现有十项引用不是整篇论文的封闭文献集；下列直接相关工作的后续核验事项仍保留。
+
+三、需要在后续全文整合时处理的引用事项
+
+1. DCBR 已在现有相关工作中引用。官方出处为 https://ojs.aaai.org/index.php/AAAI/article/view/33314 。新稿没有围绕 DCBR 展开比较，但也没有声称首次将扩散、图处理与对比学习用于捆绑推荐；其必要的客观介绍应在后续相关工作中保留。RDiffBR 的本地文件已标明结果不可信，本次未用其数值支持任何结论。
+
+2. 外部检索还发现以下与研究定位有关的工作，后续应结合全文判断是否补入 Related Work：
+   • Towards Better Utilization of Multiple Views for Bundle Recommendation（PET，CIKM 2024）。作者版本：https://dmlab.kaist.ac.kr/~kijungs/papers/petCIKM2024.pdf ；DOI：https://doi.org/10.1145/3627673.3680003 。该文研究视图角色、个性化权重及视图间/视图内对比，提醒我们不能把主辅视图安排或联合对比泛称为首次提出。
+   • Multi-view denoising contrastive learning for bundle recommendation（MDCLBR，Applied Intelligence 2024）。出版页面：https://link.springer.com/article/10.1007/s10489-024-05825-z 。已核对出版摘要中的表示引导增强和多视图去噪设计；尚不据摘要比较双方所有实现细节。
+   • A diffusion-driven multi-view mixed contrastive learning framework for bundle recommendation（DDMMCL，Expert Systems with Applications 304，130690，2026）。出版页面：https://www.sciencedirect.com/science/article/abs/pii/S0957417425043052 ；DOI：https://doi.org/10.1016/j.eswa.2025.130690 。已核对出版摘要及可见引言；图扩散与跨视图目标已有结合，不能把这一宽泛组合当作 ReCoBR 的独占新意。
+   上述文献尚未成为本文现有实验的比较对象，因此摘要采用“the compared baselines”，不扩大为全面超越所有最新方法。新稿中关于本模型的结果均沿用现有确认实验，不由外部论文代为证明。
+
+3. 本稿把历史上下文作为传播连接重评的依据，把融合前约束作为多视图骨干的补充设计；相关机制有实现依据，其有效性应由本项目的消融和分析支撑。最低交互用户组收益最大的结论来自 NetEase 分组实验，本稿未将其扩大成所有数据集的冷启动结论，也未重新放回被师兄要求删去的摘要末尾分析清单。
+
+4. 摘要、引言的最终引用应随文字定稿再逐句核对，尤其区分已有方法的技术事实、本研究对反馈条件的分析，以及具体设计动机。新增 DDRM 引用可同时补到后续相关工作，以使引言中的来源说明与全文保持一致。

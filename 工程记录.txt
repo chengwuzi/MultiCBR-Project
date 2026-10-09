@@ -844,3 +844,45 @@ and evaluation protocol as ReCoBR.
 （2）latexmk 编译成功，生成 11 页 PDF；最终日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，仅保留原有四条 underfull hbox。本轮未出现上一版的 underfull vbox 警告。PDF 提取文本核对新来源段与平均说明均位于第 7 页；已目视检查第 7 页及相邻第 6、8 页，无越栏、遮挡、重叠或错列。
 
 （3）git diff --check 通过；最终审阅 PDF 与本轮编译 PDF 的 SHA256 一致。未运行模型训练、未提交 Git。EpicCBR iFashion 的 Top-20/Top-40 四个结果仍待用户提供，后续补齐时继续核对最强基线、提升比例与总体分析。
+
+
+第十四项：补齐 EpicCBR 的 iFashion 结果并完成实验总表
+记录日期：2026-10-09
+
+一、用户提供的结果与数据集承接
+
+（1）用户提供 EpicCBR 的 R@20、N@20、R@40、N@40，依次为 0.1474、0.1189、0.20000、0.13738。结合前文已经补齐 Youshu、NetEase，当前仅有 iFashion 的四个结果待补，本轮将该组结果归入 iFashion，并在修改前的进度说明中明确这一承接。
+
+（2）沿用四位小数及四舍五入（ROUND_HALF_UP）规则，表内依次为 0.1474、0.1189、0.2000、0.1374。保留用户原始数值用于回溯。
+
+二、实际修改文件与具体内容
+
+（1）AAAI文件/main.tex：将总表 EpicCBR 行中 iFashion 的四个横杠补为上述数值，保持数据集 Youshu、iFashion、NetEase 的顺序。至此八个方法、三个数据集、四个指标的 96 个结果全部齐全，其他 92 个数值保持不变。
+
+（2）重新核对十二个指标的最优/次优标记和最强基线。iFashion 四项最强基线仍为 MultiCBR；其他数据集的归属也不变，全部排名标记保持原值。ReCoBR 十二项仍为本表最优。
+
+（3）重新计算十二项 Improv.，均保持不变。依总表 R@20、N@20、R@40、N@40 顺序，Youshu 为 0.52%、1.27%、1.22%、0.60%；iFashion 为 4.53%、9.31%、1.67%、7.27%；NetEase 为 4.60%、1.79%、0.07%、1.95%。继续按表内四位结果计算提升比例。
+
+（4）总表表注删除横杠表示未报告结果的说明，并将“best and second-best reported results”“strongest reported baseline”改为完整结果的排名与基线表述。Overall Performance 删除开头的缺失结果/横杠说明以及末尾“EpicCBR's iFashion results remain to be reported.”，对应去掉“highest reported”“strongest reported”中的临时限定。已有比较结论、最强基线归属、十二个提升比例与 MultiCBR 分析保持原意。
+
+（5）tmp/pdfs/overall-top20-top40-20261009/published-results.json：补入 EpicCBR iFashion 四位结果及用户原始四个数值；更新当前来源说明、核对说明和剩余待补状态，追加本轮数据补充事件。保留既有 corrections、此前 updates 与原始 Youshu/NetEase 数据；旧更新条目中的待补状态作为当时的历史记录保留，当前 remaining_pending_datasets 为空。
+
+（6）工程记录.txt：追加本第十四项，追加前的 115724 字节原文保持不变。第十二、十三项中的 iFashion 待补状态由本项覆盖，当前总表没有缺失结果。
+
+三、生成的检查文件与完整审阅稿
+
+（1）tmp/pdfs/overall-epiccbr-ifashion-20261009/：保存本轮 source-before.tex、audit-before.json、record-before.txt 三份修改前快照，以及 main.pdf、LaTeX/BibTeX 构建文件、build-run.txt、verification.json 和第 6、7、8、9 页 PNG 排版检查图。
+
+（2）output/pdf/ReCoBR_AAAI_overall_complete_20261009.pdf：保存总表数据全部补齐后的 11 页完整审阅稿；此前各版审阅稿及历史中间文件继续保留供追溯。
+
+四、实际验证与后续承接
+
+（1）逐项核对全部 96 个结果、十二列最优/次优标记和十二个提升比例，全部通过。与修改前核对文件比较，仅 EpicCBR iFashion 四个数值发生补充，其他方法和数据集数值未变；此前更新历史完整保留。
+
+（2）源码逐字节比较确认总表与 Overall Performance 之外的内容均未改动，包括摘要、引言、相关工作、方法章、基线结果来源段、实现设置、数据统计表、消融表及消融小节之后的正文。原 CRLF 换行保留，未新增或修改任何超参实验。
+
+（3）latexmk 编译成功，生成 11 页 PDF。最终日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示；保留原有四条 underfull hbox，本轮另有一条 underfull vbox（badness 3735）。已目视检查改动页第 7、8 页及相邻第 6、9 页，无越栏、遮挡、重叠或错列，未调整模板、字号、页边距或间距参数。
+
+（4）从编译 PDF 提取的 EpicCBR 十二项数据与核对文件完全一致，缺失结果及待补表述已从总表与总体分析移除。最终审阅 PDF 与编译 PDF 的 SHA256 一致；git diff --check 通过。未运行模型训练，未修改代码、配置、数据集、正式图片或参考文献库，未提交 Git。
+
+（5）总表数据补充已完成。此前确定的 lambda_a 图中符号统一，以及 lambda_set、lambda_c 超参实验及相关论文内容补充仍为后续工作；本轮只处理 EpicCBR 数据与关联说明。

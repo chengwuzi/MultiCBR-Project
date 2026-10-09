@@ -498,7 +498,7 @@ analyze sensitivity to the key hyperparameters.
 
         EpicCBR
         & 0.2852 & 0.1691 & \underline{0.3949} & 0.1985
-        & -- & -- & -- & --
+        & 0.1474 & 0.1189 & 0.2000 & 0.1374
         & \underline{0.0913} & \underline{0.0502} & 0.1345 & \underline{0.0615} \\
 
         \textbf{ReCoBR}
@@ -517,10 +517,9 @@ analyze sensitivity to the key hyperparameters.
 
     \caption{Overall performance at Top-20 and Top-40 on three
     datasets. R and N denote Recall and NDCG. Bold and underlined
-    entries mark the best and second-best reported results,
-    respectively. Improv. is ReCoBR's relative improvement over
-    the strongest reported baseline for each metric; dashes
-    indicate results not yet reported.}
+    entries mark the best and second-best results, respectively.
+    Improv. is ReCoBR's relative improvement over the strongest
+    baseline for each metric.}
     \label{tab:overall}
 \end{table*}
 
@@ -668,23 +667,21 @@ over three independent runs.
 \subsection{Overall Performance}
 
 Table~\ref{tab:overall} reports Top-20 and Top-40 results for
-ReCoBR and seven baselines, with unavailable results marked by
-dashes. ReCoBR obtains the highest reported Recall and NDCG
-at both cutoffs on all three datasets. The strongest baseline
-varies by dataset and metric. At Top-20, it is BundleGT on
+ReCoBR and seven baselines. ReCoBR obtains the highest Recall
+and NDCG at both cutoffs on all three datasets. The strongest
+baseline varies by dataset and metric. At Top-20, it is BundleGT on
 Youshu, MultiCBR on iFashion, and EpicCBR on NetEase. At
 Top-40, EpicCBR leads in Recall on Youshu and NDCG on NetEase,
 BundleGT leads in NDCG on Youshu and Recall on NetEase,
 and MultiCBR leads in both metrics on iFashion.
 
-Compared with the strongest reported baseline for each metric,
+Compared with the strongest baseline for each metric,
 ReCoBR improves R@20 and N@20 by 0.52\% and 1.27\% on Youshu,
 4.53\% and 9.31\% on iFashion, and 4.60\% and 1.79\% on
 NetEase, respectively. At Top-40, the corresponding improvements
 are 1.22\% and 0.60\% on Youshu, 1.67\% and 7.27\% on
 iFashion, and 0.07\% and 1.95\% on NetEase. The gain in
 Recall@40 on NetEase is small, whereas the NDCG gain is larger.
-EpicCBR's iFashion results remain to be reported.
 
 The comparison with MultiCBR is particularly informative
 because it already uses the three relation views, representation

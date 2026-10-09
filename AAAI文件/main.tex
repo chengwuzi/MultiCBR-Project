@@ -456,98 +456,71 @@ analyze sensitivity to the key hyperparameters.
         \toprule
         \multirow{2}{*}{Method}
         & \multicolumn{4}{c}{Youshu}
-        & \multicolumn{4}{c}{NetEase}
-        & \multicolumn{4}{c}{iFashion} \\
+        & \multicolumn{4}{c}{iFashion}
+        & \multicolumn{4}{c}{NetEase} \\
         \cmidrule(lr){2-5}
         \cmidrule(lr){6-9}
         \cmidrule(lr){10-13}
-        & R@10 & N@10 & R@20 & N@20
-        & R@10 & N@10 & R@20 & N@20
-        & R@10 & N@10 & R@20 & N@20 \\
+        & R@20 & N@20 & R@40 & N@40
+        & R@20 & N@20 & R@40 & N@40
+        & R@20 & N@20 & R@40 & N@40 \\
         \midrule
 
         BGCN
-        & -- & -- & 0.2436 & 0.1329
-        & -- & -- & 0.0626 & 0.0328
-        & -- & -- & 0.0802 & 0.0582 \\
+        & 0.2436 & 0.1329 & 0.3379 & 0.1589
+        & 0.0802 & 0.0582 & 0.1239 & 0.0736
+        & 0.0626 & 0.0328 & 0.0988 & 0.0424 \\
 
         MIDGN
-        & -- & -- & 0.2682 & 0.1527
-        & -- & -- & 0.0678 & 0.0343
-        & -- & -- & 0.0856 & 0.0473 \\
+        & 0.2682 & 0.1527 & 0.3712 & 0.1808
+        & 0.0856 & 0.0473 & 0.1299 & 0.0593
+        & 0.0678 & 0.0343 & 0.1085 & 0.0451 \\
 
         CrossCBR
-        & -- & -- & 0.2823 & 0.1670
-        & -- & -- & 0.0844 & 0.0458
-        & -- & -- & 0.1132 & 0.0872 \\
+        & 0.2823 & 0.1670 & 0.3787 & 0.1939
+        & 0.1132 & 0.0872 & 0.1623 & 0.1045
+        & 0.0844 & 0.0458 & 0.1255 & 0.0567 \\
 
         BundleGT
-        & -- & --
-        & \underline{0.2905}
-        & \underline{0.1737}
-        & -- & -- & 0.0903 & 0.0478
-        & -- & -- & 0.1263 & 0.0969 \\
+        & \underline{0.2905} & \underline{0.1737} & 0.3909 & \underline{0.2011}
+        & 0.1263 & 0.0969 & 0.1819 & 0.1164
+        & 0.0903 & 0.0478 & \underline{0.1389} & 0.0606 \\
 
         MultiCBR
-        & 0.1995 & 0.1439 & 0.2847 & 0.1681
-        & 0.0578 & 0.0389 & 0.0901 & 0.0491
-        & \underline{0.1057}
-        & \underline{0.1028}
-        & \underline{0.1494}
-        & \underline{0.1203} \\
+        & 0.2842 & 0.1693 & 0.3946 & 0.1994
+        & \underline{0.1500} & \underline{0.1203} & \underline{0.2033} & \underline{0.1390}
+        & 0.0907 & 0.0494 & 0.1355 & 0.0612 \\
 
         EBRec
-        & 0.1984 & 0.1425 & 0.2797 & 0.1659
-        & 0.0559 & 0.0376 & 0.0881 & 0.0477
-        & 0.0909 & 0.0874 & 0.1327 & 0.1044 \\
+        & 0.2858 & 0.1701 & 0.3871 & 0.1979
+        & 0.1329 & 0.1047 & 0.1873 & 0.1238
+        & 0.0899 & 0.0487 & 0.1359 & 0.0604 \\
 
         EpicCBR
-        & \underline{0.1999}
-        & \underline{0.1443}
-        & 0.2835 & 0.1682
-        & \underline{0.0601}
-        & \underline{0.0397}
-        & \underline{0.0926}
-        & \underline{0.0503}
-        & 0.1049 & 0.1022 & 0.1467 & 0.1190 \\
+        & 0.2852 & 0.1691 & \underline{0.3949} & 0.1985
+        & -- & -- & -- & --
+        & \underline{0.0913} & \underline{0.0502} & 0.1345 & \underline{0.0615} \\
 
         \textbf{ReCoBR}
-        & \textbf{0.2053}
-        & \textbf{0.1482}
-        & \textbf{0.2920}
-        & \textbf{0.1759}
-        & \textbf{0.0617}
-        & \textbf{0.0411}
-        & \textbf{0.0955}
-        & \textbf{0.0511}
-        & \textbf{0.1144}
-        & \textbf{0.1146}
-        & \textbf{0.1568}
-        & \textbf{0.1315} \\
+        & \textbf{0.2920} & \textbf{0.1759} & \textbf{0.3997} & \textbf{0.2023}
+        & \textbf{0.1568} & \textbf{0.1315} & \textbf{0.2067} & \textbf{0.1491}
+        & \textbf{0.0955} & \textbf{0.0511} & \textbf{0.1390} & \textbf{0.0627} \\
 
         \midrule
         \textbf{Improv.}
-        & \textbf{2.70\%}
-        & \textbf{2.70\%}
-        & \textbf{0.52\%}
-        & \textbf{1.27\%}
-        & \textbf{2.66\%}
-        & \textbf{3.53\%}
-        & \textbf{3.13\%}
-        & \textbf{1.59\%}
-        & \textbf{8.23\%}
-        & \textbf{11.48\%}
-        & \textbf{4.95\%}
-        & \textbf{9.31\%} \\
+        & \textbf{0.52\%} & \textbf{1.27\%} & \textbf{1.22\%} & \textbf{0.60\%}
+        & \textbf{4.53\%} & \textbf{9.31\%} & \textbf{1.67\%} & \textbf{7.27\%}
+        & \textbf{4.60\%} & \textbf{1.79\%} & \textbf{0.07\%} & \textbf{1.95\%} \\
         \bottomrule
     \end{tabular}
     }
 
-    \caption{Overall performance on three datasets. R and N denote
-    Recall and NDCG. Bold and underlined entries mark the best
-    and second-best reported results, respectively. Improv. is
-    ReCoBR's relative improvement over the strongest baseline for
-    each metric; dashes indicate unreported results.}
+    \caption{Overall performance at Top-20 and Top-40 on three
+    datasets. R and N denote Recall and NDCG. Bold and underlined
+    entries mark the best and second-best reported results,
+    respectively. Improv. is ReCoBR's relative improvement over
+    the strongest reported baseline for each metric; dashes
+    indicate results not yet reported.}
     \label{tab:overall}
 \end{table*}
 
@@ -628,7 +601,7 @@ MultiCBR~\cite{ma2022crosscbr,ma2024multicbr}, with 70\%, 10\%, and
 testing. Pretraining, historical preference construction, and
 U-B graph reconstruction use only the training interactions.
 
-We report Recall@$K$ and NDCG@$K$ for $K\in\{10,20\}$ under
+We report Recall@$K$ and NDCG@$K$ for $K\in\{20,40\}$ under
 full-ranking evaluation. For each user, we rank all candidate
 bundles after excluding those observed in training. The
 checkpoint with the best Top-20 validation performance is
@@ -649,14 +622,12 @@ representations through bundle--user--item correlations.
 EpicCBR~\cite{li2026epiccbr} combines item-relation enhancement with
 contrastive learning across warm-start and cold-start scenarios.
 
-For MultiCBR, EBRec, and EpicCBR, we run their released
-implementations on the same splits and evaluation protocol as
-ReCoBR and report averages over three independent runs. ReCoBR is
-evaluated in the same manner. The BGCN, MIDGN, and CrossCBR
-results are taken from the comparisons reported in
-MultiCBR~\cite{ma2024multicbr}; the BundleGT results are taken
-from its published evaluation. Missing results are left
-unreported in Table~\ref{tab:overall}.
+The results of BGCN, MIDGN, CrossCBR, and MultiCBR are taken
+from MultiCBR~\cite{ma2024multicbr}. For BundleGT and EBRec,
+we use the results reported in their respective
+papers~\cite{wei2023bundlegt,du2025ebrec}. We reproduce EpicCBR
+using its released implementation under the same data splits
+and evaluation protocol as ReCoBR.
 
 \paragraph{Implementation Details.}
 We implement ReCoBR in PyTorch and train it on a single NVIDIA
@@ -690,31 +661,35 @@ post-fusion loss weights $\lambda_c$ are $(0.04,0.05,0.10)$.
 The shared contrastive temperature is $\tau=0.20$ on all three
 datasets. The embedding regularization coefficient
 $\lambda_r$ is $10^{-5}$. Hyperparameters are selected using
-validation performance.
+validation performance. We report the average ReCoBR performance
+over three independent runs.
 
 
 \subsection{Overall Performance}
 
-Table~\ref{tab:overall} compares ReCoBR with the seven baselines.
-ReCoBR obtains the highest reported Recall and NDCG at both
-cutoffs on all three datasets. The strongest baseline varies:
-EpicCBR leads at Top-10 on Youshu and on all four metrics on
-NetEase, BundleGT leads at Top-20 on Youshu, and MultiCBR leads
-on iFashion. ReCoBR improves over each of these methods in its
-respective strongest setting.
+Table~\ref{tab:overall} reports Top-20 and Top-40 results for
+ReCoBR and seven baselines, with unavailable results marked by
+dashes. ReCoBR obtains the highest reported Recall and NDCG
+at both cutoffs on all three datasets. The strongest baseline
+varies by dataset and metric. At Top-20, it is BundleGT on
+Youshu, MultiCBR on iFashion, and EpicCBR on NetEase. At
+Top-40, EpicCBR leads in Recall on Youshu and NDCG on NetEase,
+BundleGT leads in NDCG on Youshu and Recall on NetEase,
+and MultiCBR leads in both metrics on iFashion.
 
-The gains are largest on iFashion, with relative improvements
-of 8.23\%, 11.48\%, 4.95\%, and 9.31\% in R@10, N@10, R@20,
-and N@20, respectively. At both cutoffs, the larger gains in
-NDCG than in Recall indicate that the improvement includes
-placing relevant bundles higher in the recommendation list.
-On Youshu and NetEase, the margins are smaller but remain
-positive across all four metrics.
+Compared with the strongest reported baseline for each metric,
+ReCoBR improves R@20 and N@20 by 0.52\% and 1.27\% on Youshu,
+4.53\% and 9.31\% on iFashion, and 4.60\% and 1.79\% on
+NetEase, respectively. At Top-40, the corresponding improvements
+are 1.22\% and 0.60\% on Youshu, 1.67\% and 7.27\% on
+iFashion, and 0.07\% and 1.95\% on NetEase. The gain in
+Recall@40 on NetEase is small, whereas the NDCG gain is larger.
+EpicCBR's iFashion results remain to be reported.
 
 The comparison with MultiCBR is particularly informative
 because it already uses the three relation views, representation
 fusion, and post-fusion contrastive learning. ReCoBR improves
-over this baseline across all datasets and metrics. This
+over this baseline at both cutoffs on all three datasets. This
 motivates examining the additional graph reconstruction and
 pre-fusion objectives separately, as we do next, to understand
 their contributions beyond the multi-view backbone.

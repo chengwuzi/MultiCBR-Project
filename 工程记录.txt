@@ -640,3 +640,207 @@ DiffRec 的交互向量恢复和 DiffuRec 的序列目标物品扩散，均须�
 （1）本次实际修改文件只有“工程记录.txt”：在既有内容末尾追加本第八项，明确新的文件修改记录要求，并记录本次对工程记录本身的修改。该项同时承担本次修改的追溯记录，无需为同一次记录追加无限递归的记录。
 
 （2）本轮接下来只读研读当前“AAAI文件/main.tex”中的实验章及对应图表，并对照“ReCoBR-师兄批注.pdf”逐条理解实验相关批注。正文、参考文献、图表、代码、配置和实验结果的具体修改尚未开始；不将研读计划写成已经完成的论文修改。
+
+
+第九项：总实验表采用 Top-20/Top-40，并按用户截图更新论文结果来源
+记录日期：2026-10-09
+
+一、用户最终决定与本轮依据
+
+（1）用户已手动回滚此前“总表仅保留 Top-20”的修改。本次以回滚后的当前 main.tex 为基线，将总实验表改为 Top-20 与 Top-40；数据集列顺序为 Youshu、iFashion、NetEase，每个数据集的指标顺序为 R@20、N@20、R@40、N@40。
+
+（2）用户提供三张原论文总实验表截图：第一张为 MultiCBR 的 Table 2，第二张为 EBRec 的 Top-20 和 Top-40 总表，第三张为 BundleGT 总表。BGCN、MIDGN、CrossCBR、MultiCBR 四个方法统一采用第一张 MultiCBR 论文中的结果；BundleGT、EBRec 分别采用各自论文截图中的结果。不得从 EBRec 或 BundleGT 截图中改取 BGCN、CrossCBR 等其他方法的数值。
+
+（3）EpicCBR 由用户自行复现，结果待后续提供，本轮整行十二个指标暂用横杠占位，不沿用此前主表的历史 EpicCBR 数值。ReCoBR 保留当前已确认的六个 Top-20 数值，三个数据集的六个 Top-40 数值待用户补充；相应 Top-40 提升比例也保持未报告。
+
+二、实际修改文件与具体内容
+
+（1）AAAI文件/main.tex：修改 tab:overall 表头为 Top-20/Top-40，调整 iFashion 与 NetEase 的列位置，并按三张截图录入六个已发表基线的共 72 个数值。MultiCBR、EBRec 的旧复现口径数值替换为用户指定的原论文数值。表格继续采用现有双栏 table*、small 字号和十二个数值列，未调整 AAAI 模板、字体、页边距或全局排版间距。
+
+（2）重要数值核对：BundleGT 截图的 iFashion R@20 明确为 0.1623，覆盖旧主表的 0.1263。MultiCBR 的 Top-20 结果按新的总表顺序为 Youshu 0.2842/0.1693、iFashion 0.1500/0.1203、NetEase 0.0907/0.0494；EBRec 为 Youshu 0.2858/0.1701、iFashion 0.1329/0.1047、NetEase 0.0899/0.0487。ReCoBR 保留 Youshu 0.2920/0.1759、iFashion 0.1568/0.1315、NetEase 0.0955/0.0511。
+
+（3）逐指标重新设置已报告结果中的最优加粗、次优下划线。由于 EpicCBR 与 ReCoBR 的部分结果尚缺，Top-40 标记只依据当前已提供的基线结果，不预判后续数据的排名。iFashion R@20 当前 BundleGT 最优、ReCoBR 次优；其余五个 Top-20 指标目前 ReCoBR 最优。
+
+（4）Improv. 按“(ReCoBR/该指标已报告最强基线－1)×100%”重新计算，保留两位小数。按 Youshu、iFashion、NetEase 的 R@20/N@20 顺序，结果为 0.52%/1.27%、-3.39%/9.31%、5.29%/3.44%。缺失 ReCoBR Top-40 数据的六个提升比例用横杠占位。初步核对中曾漏读 BundleGT 的 iFashion R@20，复核截图后已更正数据、标记、提升和正文，不采用该项早期计算的 4.53%。
+
+（5）评价指标定义改为 K 属于 {20,40}，继续保留已有 Top-20 验证选模协议。Baselines 末尾明确 BGCN、MIDGN、CrossCBR、MultiCBR 的结果来自 MultiCBR 论文，BundleGT、EBRec 的结果来自各自原论文；仅将 EpicCBR 描述为后续复现结果，取消原文“三个基线均自行复现并取三次平均”的陈述。ReCoBR 的三次独立运行平均口径沿用现稿。
+
+（6）表注明确 Top-20/Top-40、已报告结果的强调规则、提升定义及尚未报告结果的横杠含义。Overall Performance 同步按现有 Top-20 数据撰写：ReCoBR 在三数据集的 NDCG@20 及 Youshu、NetEase 的 Recall@20 领先，iFashion Recall@20 比最强基线低 3.39%；明确 EpicCBR 及 ReCoBR Top-40 数据尚未补齐，不保留“两种截断位置全部指标均领先”等超出当前数据的结论。
+
+（7）工程记录.txt：在当前第八项后新增本第九项，记录本轮修改、数据来源、验证及待补项。新增前的 92861 字节原文保持不变。本项同时记录工程记录自身的修改。
+
+三、生成的核对文件与审阅稿
+
+（1）tmp/pdfs/overall-top20-top40-20261009/published-results.json：保存三张截图的结果转录、每个方法的来源、数据集/指标顺序、缺失值、提升比例及本轮基线源码哈希，便于后续回溯核对完整数值。
+
+（2）tmp/pdfs/overall-top20-top40-20261009/：保存 main.pdf、LaTeX/BibTeX 构建文件、build-run.txt 和第 7、8、9 页的 PNG 排版检查图。保留这些检查文件供追溯，不覆盖既有历史稿。
+
+（3）output/pdf/ReCoBR_AAAI_top20_top40_20261009.pdf：保存通过最终检查的 11 页完整论文审阅稿。
+
+四、实际验证与后续承接
+
+（1）按截图独立逐行核对 72 个已发表基线数值、六个保留的 ReCoBR 数值和十八个待补结果占位；检查十二个指标列的最优/次优标记，重新计算六个已有提升比例并核对六个 Top-40 提升占位，全部通过。
+
+（2）核对 main.tex 及编译 PDF 中没有 R@10、N@10、Top-10 残留；相关 MultiCBR、BundleGT、EBRec、EpicCBR 引用键均存在。与本轮修改前源码比对，摘要、引言、相关工作、方法章、数据统计表、消融表、实现参数以及消融小节开始后的正文均未改变。数据集换位本轮仅针对总实验表，其他表格及参数元组仍按其原有的显式顺序解释。
+
+（3）使用项目 TinyTeX 的 latexmk 完成最终编译，生成 11 页 PDF。最终日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示；保留原有四条 underfull hbox 和一条 underfull vbox（badness 3735）。已目视检查总表所在第 8 页及相邻第 7、9 页，未见越栏、遮挡、重叠、错列或异常字形。
+
+（4）git diff --check 通过。未运行模型训练、未修改参考文献文件、正式图片、代码、配置、数据集、预训练嵌入和历史实验结果，未提交 Git。待用户提供 EpicCBR 复现数据及 ReCoBR Top-40 数据后，继续补齐数值并重新计算标记、提升比例与总体分析；lambda_a 图中符号统一及 lambda_set/lambda_c 超参实验补充仍为后续待办。
+
+
+第十项：根据用户核对更正 BundleGT 的 iFashion R@20 及关联分析
+记录日期：2026-10-09
+
+一、用户反馈与更正依据
+
+（1）用户核对三张论文总表截图后明确指出，BundleGT 在 iFashion 的 R@20 为 0.1263，并表示其他提取数据没有发现问题。以用户本次核对为最终依据，将上一轮助手误读的 0.1623 更正为 0.1263。
+
+（2）第九项二（2）中“截图明确为 0.1623”的判断、二（3）中 iFashion R@20 的最优/次优结论、二（4）中 -3.39% 的提升比例、二（6）中 ReCoBR 在该项落后的分析，均已由本项覆盖。保留第九项原文以记录误读与修正过程，后续不得再次采用这些旧结论。
+
+二、实际修改文件与具体内容
+
+（1）AAAI文件/main.tex：仅更正 BundleGT 的 iFashion R@20 数值为 0.1263；按当前已报告结果，将 ReCoBR 的 0.1568 标为最优加粗，MultiCBR 的 0.1500 标为次优下划线，BundleGT 的 0.1263 恢复普通格式。该指标的 Improv. 从 -3.39% 更正为 4.53%，计算为 (0.1568/0.1500－1)×100%，保留两位小数。
+
+（2）同步修改 Overall Performance 的两处关联表述：当前已报告 Top-20 结果中，ReCoBR 在三个数据集的 Recall 与 NDCG 均领先；Youshu 的最强基线为 BundleGT，iFashion 和 NetEase 为 MultiCBR。提升比例按总表顺序为 Youshu 0.52%/1.27%、iFashion 4.53%/9.31%、NetEase 5.29%/3.44%。继续明确 EpicCBR 及 ReCoBR 的 Top-40 结果待补。
+
+（3）tmp/pdfs/overall-top20-top40-20261009/published-results.json：更正同一数值和提升比例，替换错误的截图解释，并增加用户核对来源及 corrections 字段，记录误读值、正确值、指标和日期。保留其余转录数据和来源映射。
+
+（4）工程记录.txt：在末尾追加本第十项，记录本次修正，并明确第九项中已被覆盖的错误结论。新增前的 98937 字节原文保持不变。
+
+三、生成的检查文件与更新审阅稿
+
+（1）tmp/pdfs/overall-top20-top40-corrected-20261009/：保存重新编译的 main.pdf、LaTeX/BibTeX 构建辅助文件、build-run.txt 及第 7、8、9 页 PNG 检查图。
+
+（2）output/pdf/ReCoBR_AAAI_top20_top40_corrected_20261009.pdf：保存修正后的 11 页完整论文审阅稿。第九项输出的未修正审阅稿继续保留供追溯，当前内容以本次修正版为准。
+
+四、实际验证与承接
+
+（1）将当前六个已发表基线的全部结果与上一轮保存的 PDF 逐行比较，确认只有 BundleGT 的 iFashion R@20 一个数值发生变化。重新核对十二个指标列的最优/次优标记及六个现有提升比例，全部通过；EpicCBR 的十二个结果、ReCoBR 的六个 Top-40 结果及六个 Top-40 提升比例继续保持占位。
+
+（2）latexmk 最终编译成功，生成 11 页 PDF。最终日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，只保留此前已有的四条 underfull hbox。已目视检查总表第 8 页及相邻第 7、9 页，没有越栏、遮挡、重叠或错列。
+
+（3）git diff --check 通过。本轮未运行模型训练，其他实验数值、指标顺序、数据集位置、结果来源、参数、正式图片和参考文献文件均沿用第九项确认的版本；待用户提供 EpicCBR 复现数据及 ReCoBR Top-40 数据后继续补齐总表。
+
+
+第十一项：补齐 ReCoBR Top-40 结果，并按用户要求保留四位小数
+记录日期：2026-10-09
+
+一、用户提供的数据与精度要求
+
+（1）用户提供 ReCoBR 的三个数据集 Top-40 结果，原始五位小数为：Youshu REC_T=0.39970、NDCG_T=0.20233；NetEase REC_T=0.13900、NDCG_T=0.06274；iFashion REC_T=0.20674、NDCG_T=0.14908。
+
+（2）用户随后明确要求“保留四位小数，我发你的5位小数转成4位”。因此本轮最终稿采用四舍五入（ROUND_HALF_UP），继续沿用总表四位小数格式。按总表 Youshu、iFashion、NetEase 的顺序，新增 R@40/N@40 分别为 0.3997/0.2023、0.2067/0.1491、0.1390/0.0627。
+
+（3）提升比例使用表内四位数值计算并保留百分比两位小数，保持读者可从总表直接复核。五位原始数值另存于核对文件中，不覆盖或丢弃。前期按五位原始值计算的部分提升不作为最终表格或正文数据。
+
+二、实际修改文件及具体内容
+
+（1）AAAI文件/main.tex：补齐 tab:overall 中 ReCoBR 的六个 Top-40 单元格。ReCoBR 的 Top-20、六个已发表基线的数值及 EpicCBR 的十二个待补占位保持不变，继续使用 Youshu、iFashion、NetEase 的列顺序与 R@20、N@20、R@40、N@40 的指标顺序。
+
+（2）重新设置十二个指标列的最优加粗、次优下划线。当前已报告结果中，ReCoBR 的十二个指标均为最优；Top-40 的最强基线分别为 Youshu R@40 的 MultiCBR、N@40 的 BundleGT，iFashion 两项的 MultiCBR，以及 NetEase R@40 的 BundleGT、N@40 的 MultiCBR。该判断不包含仍待提供的 EpicCBR 结果。
+
+（3）补齐六个 Top-40 Improv.，按 Youshu、iFashion、NetEase 的 R@40/N@40 顺序为 1.29%/0.60%、1.67%/7.27%、0.07%/2.45%。计算公式沿用 (ReCoBR/该指标最强已报告基线－1)×100%，输入为表内四位小数。六个既有 Top-20 提升仍为 0.52%/1.27%、4.53%/9.31%、5.29%/3.44%。
+
+（4）Overall Performance 同步说明 ReCoBR 在当前已报告结果的两个截断位置均领先，解释各数据集及指标对应的最强基线，并加入六个 Top-40 提升比例。保留 NetEase Recall@40 提升仅 0.07% 的小幅增益事实，不夸大为所有指标大幅提升；移除 ReCoBR Top-40 仍待补的旧表述，仅保留 EpicCBR 待补说明。与 MultiCBR 的比较范围扩展至两个截断位置。
+
+（5）tmp/pdfs/overall-top20-top40-20261009/published-results.json：保存用户提供的五位原始 Top-40 数值、最终四位表格数值、ROUND_HALF_UP 精度规则及十二个提升比例；更新 ReCoBR 结果来源与本轮补充记录。既有论文结果来源映射和 BundleGT 用户纠正记录继续保留。
+
+（6）工程记录.txt：在末尾追加本第十一项，记录本轮数据补充、精度决定和实际验证。新增前的 102361 字节原文保持不变；第九、十项中 ReCoBR Top-40 待补的状态由本项覆盖。
+
+三、生成的检查文件及最新审阅稿
+
+（1）tmp/pdfs/overall-recobr-top40-20261009/：保存 source-before.tex、audit-before.json 两份修改前快照，以及最终 main.pdf、LaTeX/BibTeX 构建文件、build-run.txt 和第 7、8、9 页 PNG 排版检查图。
+
+（2）output/pdf/ReCoBR_AAAI_recobr_top40_20261009.pdf：保存补齐 ReCoBR Top-40 后的 11 页完整论文审阅稿；既有审阅稿保留用于回溯，当前内容以本稿为准。
+
+四、实际检查与后续承接
+
+（1）逐项核对六个原始数值的四舍五入结果、总表全部 84 个已报告数值及十二个 EpicCBR 占位；确认只有 ReCoBR 的六个 Top-40 缺失结果被补齐，其他结果数值未改变。重新核对十二个指标列的最优/次优标记和十二个提升比例，全部通过。
+
+（2）将当前源码与本轮 source-before.tex 比对，确认总表和 Overall Performance 之外的内容均未改变，包括摘要、引言、相关工作、方法章、结果来源说明、实现参数、数据统计表、消融表以及消融小节开始后的正文。
+
+（3）latexmk 最终编译成功，生成 11 页 PDF；从编译 PDF 提取的 ReCoBR 行与十二个最终表格数值完全一致。最终日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，仅保留原有四条 underfull hbox。已目视检查总表第 8 页及相邻第 7、9 页，无越栏、遮挡、重叠或错列。
+
+（4）git diff --check 通过。本轮未运行模型训练，未修改正式图片、参考文献、代码、配置、数据集或历史实验结果，未提交 Git。当前总表仅剩 EpicCBR 的十二个结果待用户提供；届时需要再次计算最强基线、次优标记、提升比例并同步总体分析。
+
+
+第十二项：补入 EpicCBR 的 Youshu、NetEase 复现结果
+记录日期：2026-10-09
+
+一、用户提供的结果与沿用规则
+
+（1）用户提供 EpicCBR 的两个数据集复现结果。原始五位数据按 R@20、N@20、R@40、N@40 顺序为：Youshu（0.28515、0.16914、0.39491、0.19851），NetEase（0.09132、0.05017、0.13447、0.06153）。iFashion 本轮尚未提供，四个指标继续保持横杠占位。
+
+（2）沿用用户于第十一项确认的四位小数规则，按四舍五入（ROUND_HALF_UP）转为：Youshu（0.2852、0.1691、0.3949、0.1985），NetEase（0.0913、0.0502、0.1345、0.0615）。保留五位原始数据用于回溯，提升比例按表内四位结果重新计算。
+
+二、实际修改文件与具体内容
+
+（1）AAAI文件/main.tex：将 EpicCBR 行对应 Youshu、NetEase 的八个缺失指标补齐；保持总表 Youshu、iFashion、NetEase 的顺序，iFashion 的四个占位继续保留。其他七个方法的已有结果数值均未改变。
+
+（2）重新核对十二个指标的最优/次优标记。当前 ReCoBR 的十二项仍为已报告结果中的最优。EpicCBR 新成为 Youshu R@40，以及 NetEase R@20、N@20、N@40 的最强基线，相关下划线标记从原 MultiCBR 单元格移至 EpicCBR；其他指标的最强基线保持原值。
+
+（3）对应更新四项 ReCoBR Improv.：Youshu R@40 从 1.29% 改为 1.22%；NetEase R@20 从 5.29% 改为 4.60%、N@20 从 3.44% 改为 1.79%、N@40 从 2.45% 改为 1.95%。其余八个提升比例保持不变。按总表各数据集 R@20、N@20、R@40、N@40 顺序，全部比例为 Youshu（0.52%、1.27%、1.22%、0.60%）、iFashion（4.53%、9.31%、1.67%、7.27%）、NetEase（4.60%、1.79%、0.07%、1.95%）。
+
+（4）Baselines 的结果来源段改为 EpicCBR 已报告结果来自公开实现的复现，并明确仅 iFashion 数据未报告；未新增 EpicCBR 运行次数或三次平均等未经本轮提供的统计信息。Overall Performance 同步修改最强基线归属、四个提升比例和待补范围，继续使用“已报告结果”限定比较结论。
+
+（5）tmp/pdfs/overall-top20-top40-20261009/published-results.json：录入八个最终四位结果，另存八个原始五位结果；更新 EpicCBR 来源说明、补充记录、十二个提升比例及剩余待补数据集。保留其他方法来源与既有用户纠正记录。
+
+（6）工程记录.txt：追加本第十二项，记录本轮数据补充与实际检查；新增前的 107141 字节原文保持不变。第十一项中“EpicCBR 十二个结果待补”的状态由本项覆盖，目前仅剩 iFashion 的四个结果待补。
+
+三、生成的检查文件与最新审阅稿
+
+（1）tmp/pdfs/overall-epiccbr-youshu-netease-20261009/：保存 source-before.tex、audit-before.json 两份修改前快照，以及 main.pdf、LaTeX/BibTeX 构建文件、build-run.txt 和第 7、8、9 页 PNG 排版检查图。
+
+（2）output/pdf/ReCoBR_AAAI_epiccbr_youshu_netease_20261009.pdf：保存补入两个数据集 EpicCBR 结果后的 11 页完整审阅稿；旧审阅稿保留供追溯，当前内容以本稿为准。
+
+四、实际验证与后续承接
+
+（1）核对八个用户提供结果的四位舍入，总表全部 92 个已报告数值和四个 iFashion 占位，以及十二个指标的排名标记与提升比例，全部通过。与修改前核对文件比较，确认其他方法的结果数值均未改变。
+
+（2）从编译 PDF 提取的 EpicCBR 数值与本轮八个最终四位数值完全一致。latexmk 最终编译成功，生成 11 页 PDF；日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，保留原有四条 underfull hbox 及一条 underfull vbox（badness 1102）。已目视检查总表第 8 页及相邻第 7、9 页，无越栏、遮挡、重叠或错列。
+
+（3）源码比对确认摘要、引言、相关工作、方法章、数据统计表、消融表、实现设置与消融小节开始后的正文均未改变。git diff --check 通过。未运行模型训练，未修改正式图片、参考文献、代码、配置、数据集或历史实验存档，未提交 Git。
+
+（4）当前只需等待用户提供 EpicCBR 的 iFashion Top-20/Top-40 结果；补齐后应再次核对该数据集的最强基线、提升比例和总体分析，不能直接沿用当前 iFashion 的比例作为最终值。
+
+
+第十三项：参照 CAFU、BIGCF 调整实验结果来源的写法
+记录日期：2026-10-09
+
+一、用户要求与参考范围
+
+（1）用户要求先参照 CAFU 和 BIGCF 关于论文结果来源的写法，再修改当前论文实验章的对应部分。本轮仅调整结果来源与重复运行说明的组织和措辞，沿用已经确认的各方法结果来源及现有实验事实。
+
+（2）查阅论文相关/师兄论文/CAFU-蒋师兄论文.pdf 第 5—6 页和论文相关/师兄论文/张逸-BIGCF.pdf 第 6—7 页的实验设置、基线、参数设置和总体实验部分，并目视核对 CAFU 第 6 页与 BIGCF 第 7 页。CAFU 分别说明基线实现、参数选择及重复运行；BIGCF 在基线与超参数设置中集中说明比较设置。两篇论文均没有逐一列出“某方法数值取自某论文”的来源清单，因此借鉴的是说明组织方式，不据此推断当前项目的实验来源。
+
+二、实际修改文件与具体内容
+
+（1）AAAI文件/main.tex：重写 Experimental Settings 中 Baselines 末尾的结果来源段，明确 BGCN、MIDGN、CrossCBR、MultiCBR 结果取自 MultiCBR；BundleGT 与 EBRec 使用各自论文报告的结果；EpicCBR 使用公开实现，在与 ReCoBR 相同的数据划分和评估协议下自行复现。现有三个来源引用 ma2024multicbr、wei2023bundlegt、du2025ebrec 继续保留。
+
+新段落如下：
+The results of BGCN, MIDGN, CrossCBR, and MultiCBR are taken
+from MultiCBR~\cite{ma2024multicbr}. For BundleGT and EBRec,
+we use the results reported in their respective
+papers~\cite{wei2023bundlegt,du2025ebrec}. We reproduce EpicCBR
+using its released implementation under the same data splits
+and evaluation protocol as ReCoBR.
+
+（2）将原来源段中的 ReCoBR 三次独立运行平均移到 Implementation Details 末尾，写为：We report the average ReCoBR performance over three independent runs. 这是原有说明的位置调整，并未新增运行次数或改变统计口径；未将 CAFU 的五次重训或两篇参考论文的显著性检验、调参方式转写为本项目已经完成的工作。
+
+（3）删除来源段末尾重复的 EpicCBR iFashion 缺失状态说明。总表表注的横杠解释及 Overall Performance 中“EpicCBR's iFashion results remain to be reported.”继续保留，当前仍有该数据集四个结果待补。
+
+（4）工程记录.txt：追加本第十三项；追加前的 111587 字节原文保持不变。本轮未改动总表数值、四位小数规则、最优/次优标记、提升比例、总体分析、方法章、参考文献库或训练与超参数设置。
+
+三、生成的审阅与检查文件
+
+（1）tmp/pdfs/result-source-style-20261009/：保存本轮修改前的 source-before.tex，以及 main.pdf、LaTeX/BibTeX 构建文件、build-run.txt、verification.json 和第 6、7、8 页 PNG 检查图。
+
+（2）output/pdf/ReCoBR_AAAI_result_sources_20261009.pdf：保存本轮来源说明调整后的 11 页完整审阅稿。此前各版审阅稿与历史中间文件继续保留。
+
+四、实际验证与后续承接
+
+（1）对照本轮修改前快照，逐字节验证 main.tex 仅有上述来源段替换与三次平均说明迁移两处改动，其他源码字节保持不变；原文件 CRLF 换行保留。验证三个来源引用键存在，ReCoBR 的三次平均说明仅出现一次，EpicCBR iFashion 待补说明仍明确保留。
+
+（2）latexmk 编译成功，生成 11 页 PDF；最终日志没有 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，仅保留原有四条 underfull hbox。本轮未出现上一版的 underfull vbox 警告。PDF 提取文本核对新来源段与平均说明均位于第 7 页；已目视检查第 7 页及相邻第 6、8 页，无越栏、遮挡、重叠或错列。
+
+（3）git diff --check 通过；最终审阅 PDF 与本轮编译 PDF 的 SHA256 一致。未运行模型训练、未提交 Git。EpicCBR iFashion 的 Top-20/Top-40 四个结果仍待用户提供，后续补齐时继续核对最强基线、提升比例与总体分析。

@@ -7,6 +7,7 @@ import json
 import argparse
 import hashlib
 import random
+import copy
 from datetime import datetime
 from itertools import product
 
@@ -23,6 +24,9 @@ from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 def get_cmd():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="config.yaml", type=str, help="base config or a resolved single-task config")
+    parser.add_argument("--artifact-dir", default=None, type=str, help="task-specific directory for metrics, checkpoints, and TensorBoard")
+    parser.add_argument("--result-json", default=None, type=str, help="write full-precision structured result JSON to this path")
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
     parser.add_argument("-m", "--model", default="AnchorViewBundleNet", type=str, help="which model to use, options: AnchorViewBundleNet")
@@ -56,6 +60,85 @@ def resolve_train_style(conf):
 def ensure_dir(path):
     if not os.path.isdir(path):
         os.makedirs(path)
+
+
+def ensure_parent_dir(path):
+    parent = os.path.dirname(os.path.abspath(path))
+    if parent:
+        os.makedirs(parent, exist_ok=True)
+
+
+def resolve_training_paths(conf, setting):
+    """Use a task-local artifact directory when one is supplied.
+
+    The legacy path layout remains unchanged for ordinary project commands.
+    """
+    artifact_dir = conf.get("artifact_dir")
+    if artifact_dir:
+        artifact_dir = os.path.abspath(artifact_dir)
+        paths = {
+            "log": os.path.join(artifact_dir, "metrics.log"),
+            "run": os.path.join(artifact_dir, "tensorboard"),
+            "checkpoint_model": os.path.join(artifact_dir, "checkpoints", "best_model.pt"),
+            "checkpoint_conf": os.path.join(artifact_dir, "checkpoints", "best_config.json"),
+        }
+        ensure_dir(artifact_dir)
+        ensure_dir(paths["run"])
+        ensure_parent_dir(paths["checkpoint_model"])
+        return paths
+
+    log_root = "./log/%s/%s" % (conf["dataset"], conf["model"])
+    run_root = "./runs/%s/%s" % (conf["dataset"], conf["model"])
+    checkpoint_model_root = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
+    checkpoint_conf_root = "./checkpoints/%s/%s/conf" % (conf["dataset"], conf["model"])
+    ensure_dir(run_root)
+    ensure_dir(log_root)
+    ensure_dir(checkpoint_model_root)
+    ensure_dir(checkpoint_conf_root)
+    return {
+        "log": os.path.join(log_root, setting),
+        "run": os.path.join(run_root, setting),
+        "checkpoint_model": os.path.join(checkpoint_model_root, setting),
+        "checkpoint_conf": os.path.join(checkpoint_conf_root, setting),
+    }
+
+
+def best_validation_score(metrics):
+    return (
+        metrics["recall"][20]
+        + metrics["recall"][40]
+        + metrics["ndcg"][20]
+        + metrics["ndcg"][40]
+    )
+
+
+def result_metrics(best_metrics):
+    return {
+        split: {
+            metric_name: {str(topk): float(value) for topk, value in metric_values.items()}
+            for metric_name, metric_values in split_values.items()
+        }
+        for split, split_values in best_metrics.items()
+    }
+
+
+def dump_task_result(result_path, conf, training_results):
+    if not result_path:
+        return
+    ensure_parent_dir(result_path)
+    serializable_conf = copy.deepcopy(conf)
+    serializable_conf.pop("device", None)
+    payload = {
+        "schema_version": 1,
+        "status": "success",
+        "dataset": conf["dataset"],
+        "seed": conf.get("seed"),
+        "train_style": resolve_train_style(conf),
+        "effective_config": serializable_conf,
+        "results": training_results,
+    }
+    with open(result_path, "w", encoding="utf-8") as handle:
+        json.dump(payload, handle, ensure_ascii=False, indent=2)
 
 
 def fmt_list(values):
@@ -292,6 +375,7 @@ def run_cbr_training(conf, dataset, device):
         print(f"Weights -> b_ub_ui: {anchor_cl_conf.get('ub_ui_bundle_weight')}, b_ub_bi: {anchor_cl_conf.get('ub_bi_bundle_weight')}")
         print("=" * 70)
 
+    training_results = []
     for lr, l2_reg, UB_ratio, UI_ratio, BI_ratio, embedding_size, num_layers, c_lambda, c_temp, ui_beta, bi_beta in product(
         conf["lrs"],
         conf["l2_regs"],
@@ -305,15 +389,6 @@ def run_cbr_training(conf, dataset, device):
         [conf["ui_bundle_user_agg_beta"]],
         [conf["bi_user_bundle_agg_beta"]],
     ):
-        log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
-        run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
-        checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
-        checkpoint_conf_path = "./checkpoints/%s/%s/conf" % (conf["dataset"], conf["model"])
-        ensure_dir(run_path)
-        ensure_dir(log_path)
-        ensure_dir(checkpoint_model_path)
-        ensure_dir(checkpoint_conf_path)
-
         conf["l2_reg"] = l2_reg
         conf["embedding_size"] = embedding_size
         conf["UB_ratio"] = UB_ratio
@@ -371,10 +446,11 @@ def run_cbr_training(conf, dataset, device):
             setting_hash = hashlib.md5(setting.encode()).hexdigest()[:8]
             setting = setting[:100] + "_" + setting_hash
 
-        log_path = log_path + "/" + setting
-        run_path = run_path + "/" + setting
-        checkpoint_model_path = checkpoint_model_path + "/" + setting
-        checkpoint_conf_path = checkpoint_conf_path + "/" + setting
+        paths = resolve_training_paths(conf, setting)
+        log_path = paths["log"]
+        run_path = paths["run"]
+        checkpoint_model_path = paths["checkpoint_model"]
+        checkpoint_conf_path = paths["checkpoint_conf"]
 
         run = SummaryWriter(run_path)
         model = AnchorViewBundleNet(conf, dataset.graphs).to(device)
@@ -490,36 +566,50 @@ def run_cbr_training(conf, dataset, device):
                         best_epoch,
                     )
 
+        run.close()
+        training_results.append(
+            {
+                "best_epoch": int(best_epoch + 1),
+                "best_epoch_index": int(best_epoch),
+                "best_val_score": float(best_validation_score(best_metrics["val"])),
+                "metrics": result_metrics(best_metrics),
+                "metrics_log_path": os.path.abspath(log_path),
+                "checkpoint_path": os.path.abspath(checkpoint_model_path),
+                "checkpoint_config_path": os.path.abspath(checkpoint_conf_path),
+                "valid": bool(best_perform["val"]) and os.path.isfile(checkpoint_model_path),
+            }
+        )
+
+    return training_results
+
 
 def run_dwt_training(conf, dataset, device):
     dwt_conf = conf.get("dwt", {})
     if not dwt_conf:
         raise ValueError("train_style=dwt requires a dwt config block.")
     use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
+    use_recobr_auxiliary_losses = dwt_conf.get("enable_recobr_auxiliary_losses", False)
     dwt_graph_conf = resolve_dwt_graph_config(conf)
+    c_lambda_values = conf["c_lambdas"] if use_recobr_auxiliary_losses else [0.0]
+    c_temp_values = conf["c_temps"] if use_recobr_auxiliary_losses else [dwt_conf["tau"]]
 
-    for lr, embedding_size, num_layers in product(
+    training_results = []
+    for lr, embedding_size, num_layers, c_lambda, c_temp in product(
         conf["lrs"],
         conf["embedding_sizes"],
         conf["num_layerss"],
+        c_lambda_values,
+        c_temp_values,
     ):
-        log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
-        run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
-        checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
-        checkpoint_conf_path = "./checkpoints/%s/%s/conf" % (conf["dataset"], conf["model"])
-        ensure_dir(run_path)
-        ensure_dir(log_path)
-        ensure_dir(checkpoint_model_path)
-        ensure_dir(checkpoint_conf_path)
-
         conf["embedding_size"] = embedding_size
         conf["num_layers"] = num_layers
         conf["lr"] = lr
         conf["l2_reg"] = 0.0
-        conf["c_lambda"] = 0.0
-        conf["c_temp"] = dwt_conf["tau"]
+        conf["c_lambda"] = c_lambda
+        conf["c_temp"] = c_temp
         conf["ui_bundle_user_agg_beta"] = 0.0
         conf["bi_user_bundle_agg_beta"] = 0.0
+        anchor_cl_lambda = conf.get("anchor_cl", {}).get("anchor_cl_lambda", 0.0)
 
         settings = []
         if conf["info"] != "":
@@ -543,6 +633,8 @@ def run_dwt_training(conf, dataset, device):
             str(dwt_conf["lambda_1"]),
             str(dwt_conf["lambda_2"]),
         ]
+        if use_recobr_auxiliary_losses:
+            settings += ["ReCoBRAux", str(c_lambda), str(c_temp), str(anchor_cl_lambda)]
         if use_latent_diffusion_rebuild:
             settings += [
                 f"k{dwt_conf['rebuild_k']}",
@@ -556,10 +648,11 @@ def run_dwt_training(conf, dataset, device):
             setting_hash = hashlib.md5(setting.encode()).hexdigest()[:8]
             setting = setting[:100] + "_" + setting_hash
 
-        log_path = log_path + "/" + setting
-        run_path = run_path + "/" + setting
-        checkpoint_model_path = checkpoint_model_path + "/" + setting
-        checkpoint_conf_path = checkpoint_conf_path + "/" + setting
+        paths = resolve_training_paths(conf, setting)
+        log_path = paths["log"]
+        run_path = paths["run"]
+        checkpoint_model_path = paths["checkpoint_model"]
+        checkpoint_conf_path = paths["checkpoint_conf"]
 
         run = SummaryWriter(run_path)
         model = DWT(conf, dataset.graphs).to(device)
@@ -643,8 +736,8 @@ def run_dwt_training(conf, dataset, device):
                 batch = [x.to(device) for x in batch]
                 batch_anchor = epoch_anchor + batch_i
 
-                bpr_loss, dwt_cl_loss = model(batch)
-                loss = bpr_loss + dwt_cl_loss
+                bpr_loss, dwt_cl_loss, c_loss, anchor_cl_loss = model(batch)
+                loss = bpr_loss + dwt_cl_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
 
                 loss.backward()
                 optimizer.step()
@@ -652,14 +745,18 @@ def run_dwt_training(conf, dataset, device):
                 loss_scalar = loss.detach()
                 bpr_loss_scalar = bpr_loss.detach()
                 dwt_cl_loss_scalar = dwt_cl_loss.detach()
+                c_loss_scalar = c_loss.detach()
+                anchor_cl_loss_scalar = anchor_cl_loss.detach()
 
                 run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
                 run.add_scalar("loss_dwt_cl", dwt_cl_loss_scalar, batch_anchor)
+                run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
+                run.add_scalar("loss_anchor_cl", anchor_cl_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
 
                 pbar.set_description(
-                    "epoch: %d, loss: %.4f, bpr_loss: %.4f, dwt_cl: %.4f"
-                    % (epoch, loss_scalar, bpr_loss_scalar, dwt_cl_loss_scalar)
+                    "epoch: %d, loss: %.4f, bpr_loss: %.4f, dwt_cl: %.4f, c_loss: %.4f, anchor_cl: %.4f"
+                    % (epoch, loss_scalar, bpr_loss_scalar, dwt_cl_loss_scalar, c_loss_scalar, anchor_cl_loss_scalar)
                 )
 
                 if (batch_anchor + 1) % test_interval_bs == 0:
@@ -682,11 +779,44 @@ def run_dwt_training(conf, dataset, device):
                         best_epoch,
                     )
 
+        run.close()
+        training_results.append(
+            {
+                "best_epoch": int(best_epoch + 1),
+                "best_epoch_index": int(best_epoch),
+                "best_val_score": float(best_validation_score(best_metrics["val"])),
+                "metrics": result_metrics(best_metrics),
+                "metrics_log_path": os.path.abspath(log_path),
+                "checkpoint_path": os.path.abspath(checkpoint_model_path),
+                "checkpoint_config_path": os.path.abspath(checkpoint_conf_path),
+                "valid": bool(best_perform["val"]) and os.path.isfile(checkpoint_model_path),
+                "recobr_auxiliary_losses_enabled": bool(use_recobr_auxiliary_losses),
+                "lambda_a": float(anchor_cl_lambda),
+                "lambda_c": float(c_lambda),
+            }
+        )
+
+    return training_results
+
+
+def load_training_config(config_path, dataset_name):
+    with open(config_path, encoding="utf-8") as handle:
+        loaded = yaml.safe_load(handle)
+    if not isinstance(loaded, dict):
+        raise ValueError(f"Config {config_path!r} must be a mapping")
+
+    # A task generated by the batch runner is a fully resolved, single-dataset
+    # mapping.  The historical config.yaml remains a mapping keyed by dataset.
+    if "data_path" in loaded:
+        return copy.deepcopy(loaded)
+
+    base_dataset_name = dataset_name.split("_")[0]
+    if base_dataset_name not in loaded:
+        raise KeyError(f"Dataset {dataset_name!r} is not present in {config_path!r}")
+    return copy.deepcopy(loaded[base_dataset_name])
+
 
 def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml", encoding="utf-8"))
-    print("load config file done!")
-
     if args is None:
         paras = get_cmd().__dict__
     else:
@@ -694,11 +824,8 @@ def main(args=None):
 
     dataset_name = paras["dataset"]
     assert paras["model"] in ["AnchorViewBundleNet"], "Pls select models from: AnchorViewBundleNet"
-
-    if "_" in dataset_name:
-        conf = conf[dataset_name.split("_")[0]]
-    else:
-        conf = conf[dataset_name]
+    conf = load_training_config(paras.get("config", "config.yaml"), dataset_name)
+    print("load config file done!")
 
     conf["dataset"] = dataset_name
     conf["model"] = paras["model"]
@@ -706,8 +833,11 @@ def main(args=None):
     conf["info"] = paras["info"]
 
     for key, value in paras.items():
-        if key not in ["dataset", "model", "gpu", "info"] and value is not None:
+        if key not in ["dataset", "model", "gpu", "info", "config", "artifact_dir", "result_json"] and value is not None:
             conf[key] = value
+
+    if paras.get("artifact_dir") is not None:
+        conf["artifact_dir"] = paras["artifact_dir"]
 
     if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
         conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
@@ -738,11 +868,18 @@ def main(args=None):
     print(f"train_style: {train_style}")
 
     if train_style == "cbr":
-        run_cbr_training(conf, dataset, device)
+        training_results = run_cbr_training(conf, dataset, device)
     elif train_style == "dwt":
-        run_dwt_training(conf, dataset, device)
+        training_results = run_dwt_training(conf, dataset, device)
     else:
         raise ValueError(f"Unsupported train_style: {train_style}")
+
+    result_json = paras.get("result_json")
+    if result_json:
+        if len(training_results) != 1 or not training_results[0].get("valid", False):
+            raise RuntimeError("Training ended without one valid best-epoch result and checkpoint")
+        dump_task_result(result_json, conf, training_results)
+    return training_results
 
 
 def init_best_metrics(conf):

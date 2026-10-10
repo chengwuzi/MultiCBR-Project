@@ -102,6 +102,10 @@ iFashion:
   test_interval: 5
 
   dwt:
+    # Kept off for historical DWT commands.  The dedicated ReCoBR sensitivity
+    # task configs enable it to add lambda_a/lambda_c losses without altering
+    # the existing DWT graph, fusion, or native contrastive objective.
+    enable_recobr_auxiliary_losses: false
     use_latent_diffusion_rebuild: true
     rebuild_k: 3
     latent_diffusion_user_embedding_path: './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt'

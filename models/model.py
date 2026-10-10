@@ -7,6 +7,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 import scipy.sparse as sp 
 
+from models.recobr_losses import (
+    normalized_info_nce,
+    paired_info_nce,
+    post_fusion_c_loss,
+    ub_anchored_pre_fusion_loss,
+)
+
 
 class DWT(nn.Module):
     """DWT branch for bundle recommendation.
@@ -37,6 +44,10 @@ class DWT(nn.Module):
         self.tau = dwt_conf["tau"]
         self.lambda_1 = dwt_conf["lambda_1"]
         self.lambda_2 = dwt_conf["lambda_2"]
+        # This opt-in gate keeps historical DWT runs unchanged.  The dedicated
+        # sensitivity runner enables it only for the new iFashion ReCoBR tasks.
+        self.use_recobr_auxiliary_losses = dwt_conf.get("enable_recobr_auxiliary_losses", False)
+        self.c_temp = conf.get("c_temp", dwt_conf["tau"])
 
         self.ub_graph, self.ui_graph, self.bi_graph = raw_graph
         self.ub_training_graph = None
@@ -281,7 +292,30 @@ class DWT(nn.Module):
         bundles_embedding = bundles_rep[bundles]
         bpr_loss = self.cal_bpr_loss(users_embedding, bundles_embedding)
         dwt_cl_loss = self.cal_dwt_cl_loss(users, bundles, users_feature, bundles_feature)
-        return bpr_loss, dwt_cl_loss
+
+        c_loss = torch.tensor(0.0, device=self.device)
+        anchor_cl_loss = torch.tensor(0.0, device=self.device)
+        if self.use_recobr_auxiliary_losses:
+            if self.conf.get("c_lambda", 0.0) != 0:
+                c_loss = post_fusion_c_loss(
+                    users_embedding,
+                    bundles_embedding,
+                    self.c_temp,
+                    self.device,
+                )
+
+            anchor_conf = self.conf.get("anchor_cl", {})
+            if anchor_conf.get("enabled", False) and anchor_conf.get("anchor_cl_lambda", 0.0) != 0:
+                anchor_cl_loss = ub_anchored_pre_fusion_loss(
+                    users_feature,
+                    bundles_feature,
+                    users,
+                    bundles[:, 0:1],
+                    anchor_conf,
+                    self.device,
+                )
+
+        return bpr_loss, dwt_cl_loss, c_loss, anchor_cl_loss
 
     def evaluate(self, propagate_result, users):
         users_feature, bundles_feature = propagate_result[:2]
@@ -738,22 +772,7 @@ class AnchorViewBundleNet(nn.Module):
         return users_rep, bundles_rep, users_feature, bundles_feature
 
     def cal_c_loss(self, pos, aug):
-        # pos: [batch_size, :, emb_size]
-        # aug: [batch_size, :, emb_size]
-        pos = pos[:, 0, :]
-        aug = aug[:, 0, :]
-
-        pos = F.normalize(pos, p=2, dim=1)
-        aug = F.normalize(aug, p=2, dim=1)
-        pos_score = torch.sum(pos * aug, dim=1)  # [batch_size]
-        ttl_score = torch.matmul(pos, aug.permute(1, 0))  # [batch_size, batch_size]
-
-        pos_score = torch.exp(pos_score / self.c_temp)  # [batch_size]
-        ttl_score = torch.sum(torch.exp(ttl_score / self.c_temp), axis=1)  # [batch_size]
-
-        c_loss = - torch.mean(torch.log(pos_score / ttl_score))
-
-        return c_loss
+        return paired_info_nce(pos, aug, self.c_temp, self.device)
 
     def cal_pre_fusion_anchor_cl_loss(self, pre_fusion_users, pre_fusion_bundles, users, pos_bundles):
         # 取出配置
@@ -778,9 +797,7 @@ class AnchorViewBundleNet(nn.Module):
             if anchor.size(0) <= 1:
                 return torch.tensor(0.0, device=self.device)
             # [bs, bs] 相似度矩阵，对角线为正样本，其余为负样本
-            sim_matrix = torch.matmul(anchor, positive.T) / temp
-            labels = torch.arange(anchor.size(0)).to(self.device)
-            return F.cross_entropy(sim_matrix, labels)
+            return normalized_info_nce(anchor, positive, temp, self.device)
 
         # User 侧的 UB-UI 和 UB-BI 跨视图对比
         if anchor_cl_conf.get("user_cl", True) and u_idx.size(0) > 1:

@@ -1,0 +1,47 @@
+# ReCoBR supplemental hyperparameter sensitivity campaign.
+# Every listed row is trained as a new independent process; no historical
+# result or duplicated default-point run is reused.
+
+expected_task_count: 48
+dataset_order: [Youshu, iFashion, NetEase]
+
+# Override at launch with --gpus, for example: --gpus 0,1,2,3
+gpu_order: ["0"]
+
+sweep_values:
+  lambda_set: [0.0, 0.005, 0.01, 0.02, 0.04, 0.05, 0.10, 0.20]
+  lambda_c: [0.0, 0.01, 0.02, 0.04, 0.05, 0.10, 0.20, 0.40]
+
+datasets:
+  Youshu:
+    sweeps: [lambda_set, lambda_c]
+    baseline_overrides:
+      # Complete ReCoBR baseline: set=.04, a=.004, c=.04.
+      latent_rebuild.enabled: true
+      latent_rebuild.latent_diffusion_set_loss_weight: 0.04
+      anchor_cl.enabled: true
+      anchor_cl.anchor_cl_lambda: 0.004
+      c_lambdas: [0.04]
+
+  iFashion:
+    sweeps: [lambda_set, lambda_c]
+    baseline_overrides:
+      # Complete DWT-compatible ReCoBR baseline: set=.05, a=.07, c=.10.
+      # lambda_a is fixed in both sweeps because its sensitivity figure already
+      # exists in the paper.
+      dwt.enable_recobr_auxiliary_losses: true
+      dwt.use_latent_diffusion_rebuild: true
+      dwt.latent_diffusion_set_loss_weight: 0.05
+      anchor_cl.enabled: true
+      anchor_cl.anchor_cl_lambda: 0.07
+      c_lambdas: [0.10]
+
+  NetEase:
+    sweeps: [lambda_set, lambda_c]
+    baseline_overrides:
+      # Complete ReCoBR baseline: set=.05, a=.005, c=.05.
+      latent_rebuild.enabled: true
+      latent_rebuild.latent_diffusion_set_loss_weight: 0.05
+      anchor_cl.enabled: true
+      anchor_cl.anchor_cl_lambda: 0.005
+      c_lambdas: [0.05]

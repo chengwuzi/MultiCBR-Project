@@ -1,0 +1,22 @@
+# 工程记录
+
+> 说明：当前分支未包含此前的 `工程记录.txt`。本文件于 2026-10-10 在开始本分支的 ReCoBR 批量敏感性实验开发前新建；后续记录按时间追加，保留本文件全部历史。
+
+## 2026-10-10｜启动 ReCoBR 批量敏感性实验链路开发
+
+- 背景：为 Youshu、iFashion、NetEase 的超参数敏感性实验建立一次性、可恢复、可审计的 48 次独立训练链路；历史结果不复用。
+- 已确认：Youshu/NetEase 的 CBR 模型逻辑不改。iFashion 保留 DWT 骨干和原始 DWT 对比损失，新增独立的 ReCoBR 融合前 anchor 对比与融合后 c 对比接口。
+- 本次首次改动：新增 `models/recobr_losses.py`，隔离 iFashion-DWT 所需的两项 ReCoBR 辅助损失公式；未修改 CBR 模型实现。
+- 验证：待训练入口、专用批跑器和任务清单完成后统一执行静态检查、48 任务 dry-run 与配置契约检查。
+- 未决：iFashion 的 lambda_a 八个扫描值尚待用户指定；批跑器会拒绝未提供完整 48 任务取值的正式启动。
+
+## 2026-10-10 — 批跑实现与验证进度
+- 新增 `train.py` 的单任务配置入口、任务级产物目录和全精度 JSON 结果输出；最佳轮次严格沿用验证集 R@20、N@20、R@40、N@40 四项之和选择，并导出该同轮测试指标。
+- 新增 `run_recobr_sensitivity.py`：每个点启动独立进程；任务状态持久化；成功结果二次校验；失败可重跑；同一任务的每次尝试保存到独立 `attempt_###` 目录，避免覆盖旧日志、配置、结果和检查点。
+- iFashion-DWT 仅在 `dwt.enable_recobr_auxiliary_losses: true` 时加入 ReCoBR 的融合前 anchor 损失与融合后 c 损失；其原生 DWT 图、融合和对比损失保持不变。历史直接 DWT 命令默认关闭该开关。
+- 校验：`py_compile`、48 任务构造校验均已通过；共享 InfoNCE 与原 CBR 等价公式的数值差为 0。正式任务计划尚未写入，等待确认 iFashion lambda_a 的 8 个取值。
+
+## 2026-10-10 — 扫描范围澄清与 iFashion 控制变量修正
+- 用户确认本次补跑只扫描 lambda_set 与 lambda_c；论文已有融合前对比权重图，lambda_a 不再扫描。三个数据集各跑两组八点扫描，共 48 个全新独立任务。
+- iFashion 在两组扫描中固定 lambda_a=0.07 并启用 ReCoBR 辅助损失：扫描 lambda_set 时固定 lambda_c=0.10；扫描 lambda_c 时固定 lambda_set=0.05。原先将 iFashion 的 lambda_c 扫描任务强制设 lambda_a=0 的临时逻辑已从 `run_recobr_sensitivity.py` 删除。
+- 新增 `recobr_sensitivity_plan.yaml`：固定任务顺序为 Youshu、iFashion、NetEase，写入 lambda_set 与 lambda_c 的各八个确认取值，以及三个数据集完整 ReCoBR 基准覆盖项；默认 GPU 为 0，可在服务器用 `--gpus` 覆盖。

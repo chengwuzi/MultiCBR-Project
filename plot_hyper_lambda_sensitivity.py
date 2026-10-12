@@ -1,4 +1,4 @@
-"""Generate the pre-fusion contrastive learning weight chart for Recall@20.
+"""Generate the pre-fusion cross-view contrastive-loss weight chart for Recall@20.
 
 The visual settings follow ``plot_line_demo.py`` as the frozen reference.
 """
@@ -41,7 +41,8 @@ X_TICKS = np.arange(6)
 X_TICK_LABELS = ["0", "0.001", "0.003", "0.005", "0.007", "0.009"]
 
 Y_LABEL = "Recall@20"
-X_LABEL = r"Pre-fusion CL Weight $\beta_2$"
+# Equation (16): λ_a weights the pre-fusion cross-view contrastive loss L_A.
+X_LABEL = r"Pre-fusion CL Weight $\lambda_a$"
 OUTPUT_STEM = "hyper_anchor_cl_lambda_recall_at_20"
 
 Y_AXIS_BANDS = [

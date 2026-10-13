@@ -602,9 +602,9 @@ U-B graph reconstruction use only the training interactions.
 
 We report Recall@$K$ and NDCG@$K$ for $K\in\{20,40\}$ under
 full-ranking evaluation. For each user, we rank all candidate
-bundles after excluding those observed in training. The
-checkpoint with the best Top-20 validation performance is
-selected for test evaluation.
+bundles after excluding those observed in training. We select
+the checkpoint maximizing the sum of validation Recall and
+NDCG at both cutoffs, and report its test results.
 
 \paragraph{Baselines.}
 We compare ReCoBR with seven bundle recommendation methods.
@@ -660,8 +660,19 @@ post-fusion loss weights $\lambda_c$ are $(0.04,0.05,0.10)$.
 The shared contrastive temperature is $\tau=0.20$ on all three
 datasets. The embedding regularization coefficient
 $\lambda_r$ is $10^{-5}$. Hyperparameters are selected using
-validation performance. We report the average ReCoBR performance
-over three independent runs.
+validation performance. For the overall comparison, we report
+ReCoBR results averaged over three independent runs.
+
+For hyperparameter sensitivity, we examine $\beta_T$ in
+$\{0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.06,\allowbreak 0.08\}$, $\kappa$ in
+$\{1,\allowbreak 3,\allowbreak 5,\allowbreak 7,\allowbreak 9,\allowbreak 11,\allowbreak 13,\allowbreak 15,\allowbreak 17,\allowbreak 19\}$, and $\lambda_a$ in
+$\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak 0.005,\allowbreak 0.007,\allowbreak 0.009\}$. We vary
+$\lambda_{\mathrm{set}}$ over
+$\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$ and $\lambda_c$
+over $\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
+The $\lambda_{\mathrm{set}}$ and $\lambda_c$ sensitivity
+experiments use one run per setting with a fixed seed for
+each dataset.
 
 
 \subsection{Overall Performance}
@@ -817,20 +828,24 @@ neighborhood coverage and selectivity.
 
 \begin{figure*}[t]
     \centering
-    \begin{tabular}{@{}ccc@{}}
-        \includegraphics[width=0.31\textwidth]{Figures/hp_betaT.png} &
-        \includegraphics[width=0.31\textwidth]{Figures/hp_kappa.png} &
-        \includegraphics[width=0.31\textwidth]{Figures/hp_beta2.png} \\
-        (a) & (b) & (c)
+    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
+        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
+        (a) & (b) & (c) & (d) & (e)
     \end{tabular}
 
-    \caption{Hyperparameter sensitivity measured by Recall@20
-    on three datasets. (a) Maximum per-step noise variance
-    $\beta_T$ in the linear diffusion schedule.
-    (b) Retention limit $\kappa$ for U-B graph reconstruction.
-    (c) Pre-fusion contrastive weight $\lambda_a$, labeled
-    $\beta_2$ in the plot. Broken $y$-axes separate the
-    performance scales of the three datasets.}
+    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
+    iFashion, and NetEase. (a) Diffusion noise variance endpoint
+    $\beta_T$. (b) U-B retention limit $\kappa$.
+    (c) Pre-fusion contrastive weight $\lambda_a$.
+    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (e) Post-fusion contrastive weight $\lambda_c$.
+    Broken $y$-axes use different scales for the datasets;
+    candidate values are displayed at equally spaced horizontal
+    positions. Panels (d) and (e) report one run per setting.}
     \label{fig:hyperparameter}
 \end{figure*}
 
@@ -863,9 +878,11 @@ to the lowest-interaction users.
 \subsection{Hyperparameter Sensitivity}
 
 We vary the maximum diffusion noise variance $\beta_T$, the
-retention limit $\kappa$, and the pre-fusion contrastive weight
-$\lambda_a$ one at a time while keeping the other settings
-fixed. Figure~\ref{fig:hyperparameter} reports Recall@20.
+retention limit $\kappa$, the pre-fusion contrastive weight
+$\lambda_a$, the SetLoss weight $\lambda_{\mathrm{set}}$, and
+the post-fusion contrastive weight $\lambda_c$ one at a time
+while keeping the other settings fixed.
+Figure~\ref{fig:hyperparameter} reports Recall@20.
 
 \paragraph{Diffusion Noise.}
 Figure~\ref{fig:hyperparameter}(a) shows that intermediate
@@ -900,6 +917,24 @@ zero weight. This behavior highlights the need to balance
 cross-view agreement with the ranking objective, rather than
 maximizing alignment strength. The scale of these changes
 differs across datasets, as indicated by the broken axes.
+
+\paragraph{SetLoss Weight.}
+Figure~\ref{fig:hyperparameter}(d) shows modest absolute
+changes as $\lambda_{\mathrm{set}}$ varies. Youshu generally
+improves over the zero-weight setting, whereas iFashion and
+NetEase show smaller, nonmonotonic fluctuations. These
+observations are consistent with treating SetLoss as an
+auxiliary consistency constraint alongside preference
+reconstruction.
+
+\paragraph{Post-Fusion Contrastive Weight.}
+Figure~\ref{fig:hyperparameter}(e) shows stronger sensitivity
+to $\lambda_c$ on Youshu and NetEase. Moderate nonzero weights
+improve Recall over zero weight, while performance declines
+toward the upper end of the range. iFashion favors smaller
+nonzero weights and then declines. The inherited fused-space
+regularizer therefore needs to be balanced with the ranking
+and pre-fusion objectives.
 
 
 \section{Conclusion}

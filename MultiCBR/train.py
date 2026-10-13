@@ -276,7 +276,9 @@ def test(model, dataloader, conf):
     for batch_i, (users, ground_truth_u_b, train_mask_u_b) in enumerate(dataloader):
         pred_b = model.evaluate(rs, users.to(device))
         pred_b -= 1e8 * train_mask_u_b.to(device)
-        tmp_metrics = get_metrics(tmp_metrics, ground_truth_u_b, pred_b, conf["topk"])
+        # ``pred_b`` and its Top-K indices reside on the selected GPU.  Keep
+        # the ground-truth matrix on that same device before advanced indexing.
+        tmp_metrics = get_metrics(tmp_metrics, ground_truth_u_b.to(device), pred_b, conf["topk"])
         if conf.get("smoke_test", False) and batch_i == 0:
             break
 

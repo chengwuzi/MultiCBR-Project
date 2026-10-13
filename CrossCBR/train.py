@@ -5,6 +5,8 @@ import os
 import yaml
 import json
 import argparse
+import random
+import numpy as np
 from tqdm import tqdm
 from itertools import product
 from datetime import datetime
@@ -23,9 +25,26 @@ def get_cmd():
     parser.add_argument("-d", "--dataset", default="Youshu", type=str, help="which dataset to use, options: NetEase, Youshu, iFashion")
     parser.add_argument("-m", "--model", default="CrossCBR", type=str, help="which model to use, options: CrossCBR")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
+    parser.add_argument("--data_path", default=None, type=str, help="override the dataset root directory")
+    parser.add_argument("--train_ub_path", default=None, type=str, help="override user_bundle_train.txt with an external path")
+    parser.add_argument("--seed", default=None, type=int, help="random seed for reproducibility")
+    parser.add_argument("--smoke-test", action="store_true", help="run one train/eval/save compatibility smoke-test step")
     args = parser.parse_args()
 
     return args
+
+
+def set_seed(seed):
+    if seed is None:
+        return
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
+    torch.cuda.manual_seed_all(seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+    print("Global random seed set to: %d" % seed)
 
 
 def main():
@@ -43,16 +62,23 @@ def main():
         conf = conf[dataset_name]
     conf["dataset"] = dataset_name
     conf["model"] = paras["model"]
-    dataset = Datasets(conf)
-
     conf["gpu"] = paras["gpu"]
     conf["info"] = paras["info"]
+    os.environ['CUDA_VISIBLE_DEVICES'] = conf["gpu"]
+    for key in ["data_path", "train_ub_path", "seed"]:
+        if paras[key] is not None:
+            conf[key] = paras[key]
+    if paras["smoke_test"]:
+        conf["smoke_test"] = True
+        conf["epochs"] = 1
+
+    set_seed(conf.get("seed"))
+    dataset = Datasets(conf)
 
     conf["num_users"] = dataset.num_users
     conf["num_bundles"] = dataset.num_bundles
     conf["num_items"] = dataset.num_items
 
-    os.environ['CUDA_VISIBLE_DEVICES'] = conf["gpu"]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     conf["device"] = device
     print(conf)
@@ -78,6 +104,8 @@ def main():
         settings = []
         if conf["info"] != "":
             settings += [conf["info"]]
+        if conf.get("seed") is not None:
+            settings += ["Seed_%d" % conf["seed"]]
 
         settings += [conf["aug_type"]]
         if conf["aug_type"] == "ED":
@@ -147,11 +175,13 @@ def main():
 
                 pbar.set_description("epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f" %(epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar))
 
-                if (batch_anchor+1) % test_interval_bs == 0:  
+                if conf.get("smoke_test", False) or (batch_anchor+1) % test_interval_bs == 0:
                     metrics = {}
                     metrics["val"] = test(model, dataset.val_loader, conf)
                     metrics["test"] = test(model, dataset.test_loader, conf)
                     best_metrics, best_perform, best_epoch = log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch)
+                if conf.get("smoke_test", False):
+                    break
 
 
 def init_best_metrics(conf):
@@ -202,11 +232,16 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
 
     topk_ = 20
     print("top%d as the final evaluation standard" %(topk_))
-    if metrics["val"]["recall"][topk_] > best_metrics["val"]["recall"][topk_] and metrics["val"]["ndcg"][topk_] > best_metrics["val"]["ndcg"][topk_]:
+    if conf.get("smoke_test", False) or (
+        metrics["val"]["recall"][topk_] > best_metrics["val"]["recall"][topk_]
+        and metrics["val"]["ndcg"][topk_] > best_metrics["val"]["ndcg"][topk_]
+    ):
         torch.save(model.state_dict(), checkpoint_model_path)
         dump_conf = dict(conf)
         del dump_conf["device"]
         json.dump(dump_conf, open(checkpoint_conf_path, "w"))
+        if conf.get("smoke_test", False):
+            print("SMOKE_CHECKPOINT_SAVED: %s" % checkpoint_model_path)
         best_epoch = epoch
         curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         for topk in conf['topk']:
@@ -236,10 +271,12 @@ def test(model, dataloader, conf):
     device = conf["device"]
     model.eval()
     rs = model.propagate(test=True)
-    for users, ground_truth_u_b, train_mask_u_b in dataloader:
+    for batch_i, (users, ground_truth_u_b, train_mask_u_b) in enumerate(dataloader):
         pred_b = model.evaluate(rs, users.to(device))
         pred_b -= 1e8 * train_mask_u_b.to(device)
         tmp_metrics = get_metrics(tmp_metrics, ground_truth_u_b.to(device), pred_b, conf["topk"])
+        if conf.get("smoke_test", False) and batch_i == 0:
+            break
 
     metrics = {}
     for m, topk_res in tmp_metrics.items():

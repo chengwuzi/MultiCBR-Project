@@ -31,6 +31,9 @@ def get_cmd():
     parser.add_argument("--bi_user_bundle_agg_beta", default=None, type=float, help="coefficient for bundle-side aggregation in BI view")
     parser.add_argument("-e", "--epochs", default=None, type=int, help="number of epochs to train")
     parser.add_argument("--seed", default=None, type=int, help="random seed for reproducibility")
+    parser.add_argument("--data_path", default=None, type=str, help="override the dataset root directory")
+    parser.add_argument("--train_ub_path", default=None, type=str, help="override user_bundle_train.txt with an external path")
+    parser.add_argument("--smoke-test", action="store_true", help="run one train/eval/save compatibility smoke-test step")
     return parser.parse_args()
 
 
@@ -151,7 +154,7 @@ def build_observed_bundle_batch(dataset, user_indices, device):
     }
 
 
-def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimizer, dataset, rebuild_conf, device):
+def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimizer, dataset, rebuild_conf, device, smoke_test=False):
     active_users = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
     if active_users.size == 0:
         return 0.0
@@ -176,11 +179,13 @@ def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimi
 
         total_loss += loss.detach().item()
         effective_steps += 1
+        if smoke_test:
+            break
 
     return total_loss / max(effective_steps, 1)
 
 
-def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebuild_conf, device):
+def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebuild_conf, device, smoke_test=False):
     batch_size = rebuild_conf["latent_diffusion_infer_batch_size"]
     rebuild_k = rebuild_conf["rebuild_k"]
     user_indices = np.asarray(dataset.train_active_user_indices, dtype=np.int64)
@@ -215,6 +220,8 @@ def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebu
                     u_list.append(int(user_id))
                     b_list.append(int(selected_bundles[row_idx, col_idx]))
                     edge_list.append(1.0)
+            if smoke_test:
+                break
 
     rebuilt_ub_graph = sp.coo_matrix(
         (
@@ -410,12 +417,14 @@ def run_cbr_training(conf, dataset, device):
                     dataset,
                     latent_rebuild_conf,
                     device,
+                    smoke_test=conf.get("smoke_test", False),
                 )
                 rebuilt_ub_graph = rebuild_ub_graph_with_latent_diffusion(
                     latent_diffusion_model,
                     dataset,
                     latent_rebuild_conf,
                     device,
+                    smoke_test=conf.get("smoke_test", False),
                 )
                 if epoch == 0:
                     print_statistics(rebuilt_ub_graph, "U-B statistics from Latent diffusion rebuild")
@@ -470,7 +479,7 @@ def run_cbr_training(conf, dataset, device):
                     % (epoch, loss_scalar, bpr_loss_scalar, c_loss_scalar, anchor_cl_loss_scalar)
                 )
 
-                if (batch_anchor + 1) % test_interval_bs == 0:
+                if conf.get("smoke_test", False) or (batch_anchor + 1) % test_interval_bs == 0:
                     metrics = {
                         "val": test(model, dataset.val_loader, conf),
                         "test": test(model, dataset.test_loader, conf),
@@ -489,6 +498,8 @@ def run_cbr_training(conf, dataset, device):
                         best_perform,
                         best_epoch,
                     )
+                if conf.get("smoke_test", False):
+                    break
 
 
 def run_dwt_training(conf, dataset, device):
@@ -613,12 +624,14 @@ def run_dwt_training(conf, dataset, device):
                     dataset,
                     dwt_conf,
                     device,
+                    smoke_test=conf.get("smoke_test", False),
                 )
                 rebuilt_ub_graph = rebuild_ub_graph_with_latent_diffusion(
                     latent_diffusion_model,
                     dataset,
                     dwt_conf,
                     device,
+                    smoke_test=conf.get("smoke_test", False),
                 )
                 if epoch == 0:
                     print_statistics(rebuilt_ub_graph, "U-B statistics from Latent diffusion rebuild")
@@ -662,7 +675,7 @@ def run_dwt_training(conf, dataset, device):
                     % (epoch, loss_scalar, bpr_loss_scalar, dwt_cl_loss_scalar)
                 )
 
-                if (batch_anchor + 1) % test_interval_bs == 0:
+                if conf.get("smoke_test", False) or (batch_anchor + 1) % test_interval_bs == 0:
                     metrics = {
                         "val": test(model, dataset.val_loader, conf),
                         "test": test(model, dataset.test_loader, conf),
@@ -681,6 +694,8 @@ def run_dwt_training(conf, dataset, device):
                         best_perform,
                         best_epoch,
                     )
+                if conf.get("smoke_test", False):
+                    break
 
 
 def main(args=None):
@@ -704,10 +719,15 @@ def main(args=None):
     conf["model"] = paras["model"]
     conf["gpu"] = paras["gpu"]
     conf["info"] = paras["info"]
+    os.environ["CUDA_VISIBLE_DEVICES"] = conf["gpu"]
 
     for key, value in paras.items():
         if key not in ["dataset", "model", "gpu", "info"] and value is not None:
             conf[key] = value
+
+    if paras.get("smoke_test", False):
+        conf["smoke_test"] = True
+        conf["epochs"] = 1
 
     if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
         conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
@@ -730,7 +750,6 @@ def main(args=None):
     conf["num_bundles"] = dataset.num_bundles
     conf["num_items"] = dataset.num_items
 
-    os.environ["CUDA_VISIBLE_DEVICES"] = conf["gpu"]
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     conf["device"] = device
     print(conf)
@@ -801,11 +820,13 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
     curr_score = get_score(metrics["val"])
     best_score = get_score(best_metrics["val"])
 
-    if curr_score > best_score:
+    if conf.get("smoke_test", False) or curr_score > best_score:
         torch.save(model.state_dict(), checkpoint_model_path)
         dump_conf = dict(conf)
         del dump_conf["device"]
         json.dump(dump_conf, open(checkpoint_conf_path, "w"))
+        if conf.get("smoke_test", False):
+            print("SMOKE_CHECKPOINT_SAVED: %s" % checkpoint_model_path)
         best_epoch = epoch
         curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -857,10 +878,12 @@ def test(model, dataloader, conf):
     device = conf["device"]
     model.eval()
     rs = model.get_multi_modal_representations(test=True)
-    for users, ground_truth_u_b, train_mask_u_b in dataloader:
+    for batch_i, (users, ground_truth_u_b, train_mask_u_b) in enumerate(dataloader):
         pred_b = model.evaluate(rs, users.to(device))
         pred_b -= 1e8 * train_mask_u_b.to(device)
         tmp_metrics = get_metrics(tmp_metrics, ground_truth_u_b, pred_b, conf["topk"])
+        if conf.get("smoke_test", False) and batch_i == 0:
+            break
 
     metrics = {}
     for metric_name, topk_res in tmp_metrics.items():

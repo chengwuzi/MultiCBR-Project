@@ -227,7 +227,12 @@ class Datasets():
 
 
     def get_ub(self, task):
-        with open(os.path.join(self.path, self.name, 'user_bundle_{}.txt'.format(task)), 'r') as f:
+        train_ub_path = self.conf.get("train_ub_path")
+        if task == "train" and train_ub_path:
+            ub_path = train_ub_path
+        else:
+            ub_path = os.path.join(self.path, self.name, 'user_bundle_{}.txt'.format(task))
+        with open(ub_path, 'r') as f:
             u_b_pairs = list(map(lambda s: tuple(int(i) for i in s[:-1].split('\t')), f.readlines()))
 
         indice = np.array(u_b_pairs, dtype=np.int32)

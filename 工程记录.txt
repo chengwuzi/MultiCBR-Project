@@ -1105,3 +1105,25 @@ Parameter Settings 重组为三个自然段：共同训练及去噪器设置；�
 （3）tmp/pdfs/settings-language-polish-20261014/：保存 source-before.tex、record-before.txt、datasets-after.tex、change.json、参考论文相关页 PNG、构建文件及日志、verification.json、第 5—8 页 PNG。output/pdf/ReCoBR_AAAI_settings_language_polish_20261014.pdf 为本次完整审阅稿，旧稿继续保留。
 
 （4）本轮未运行训练，未修改代码、配置、数据集、实验结果、图片或参考文献，未提交 Git。回复提供修改后的 Datasets 全段、Baselines 第一段及其忠实中文翻译，并说明 MLP 引用的研究判断。
+
+
+第二十一项：补充数据划分和全排序评估协议的一致性说明
+记录日期：2026-10-14
+
+一、用户要求与实际修改
+
+（1）用户确认在 Datasets 中加入 For a fair comparison, we use the same data splits and full-ranking evaluation protocol as MultiCBR (Ma et al., 2024).。
+
+（2）AAAI文件/main.tex：在 Table 1 数据集统计说明之后、Recall/NDCG 指标说明之前加入上述整句；MultiCBR 的出处通过现有 \cite{ma2024multicbr} 引用生成，未新增参考文献。保留原数据集介绍、指标说明和训练组合排除规则，其余正文、图表及全部数值未改。
+
+（3）工程记录.txt：追加本第二十一项，追加前的 148621 字节原文完整保留。本轮说明数据划分与全排序评估协议的一致性，没有恢复此前删除的具体预处理步骤或 70%/10%/20% 比例说明。
+
+二、验证与审阅文件
+
+（1）逐字节核对 main.tex 只有这一句新增，移除新增字节后与本轮开始前快照完全一致；文献库保持原 SHA256，CRLF 换行保留。未修改代码、配置、数据集、实验结果或图片，未运行训练，未提交 Git。
+
+（2）latexmk 编译成功，审阅稿仍为 11 页；无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，保留既有 6 条 underfull hbox，underfull vbox 为 0 条。新增句子自然跨第 6、7 页，按页面阅读顺序与连字断行核对其正文及 Ma et al. 2024 引用。第 6—9 页因文字增加自然重排，均已目视检查，无新越栏、遮挡或重叠；相邻第 5、10 页渲染与前稿完全一致。
+
+（3）tmp/pdfs/fair-comparison-20261014/：保存 source-before.tex、record-before.txt、change.json、构建文件及日志、verification.json、第 5—10 页 PNG。output/pdf/ReCoBR_AAAI_fair_comparison_20261014.pdf 为本轮完整审阅稿，历史文件继续保留。
+
+（4）回复提供新增英文句子及其忠实中文翻译。

@@ -38,6 +38,8 @@ DEFAULT_MODELS = ("crosscbr", "multicbr", "recobr")
 DEFAULT_NOISE_RATIOS = ("0", "0.05", "0.10", "0.15", "0.20", "0.25")
 DEFAULT_NOISE_SEED = 20261014
 DEFAULT_TRAIN_SEED = 20261014
+DEFAULT_NOISE_MODE = "replacement"
+NOISE_MODES = ("replacement", "injection")
 MANIFEST_VERSION = 1
 COMPATIBILITY_MANIFEST_VERSION = 1
 SMOKE_DATASET = "Youshu"
@@ -132,8 +134,49 @@ def safe_ratio_tag(ratio_text):
     return str(ratio_text).replace("/", "_").replace("\\", "_").replace(" ", "")
 
 
-def derive_seed(master_seed, dataset_name, ratio_text):
+def is_zero_noise_ratio(ratio_text):
+    """Accept equivalent CLI spellings such as 0, 0.0, and 0.00."""
+    try:
+        return Decimal(str(ratio_text)) == Decimal("0")
+    except InvalidOperation:
+        return False
+
+
+def validate_noise_mode(noise_mode):
+    if noise_mode not in NOISE_MODES:
+        raise ValueError("Unsupported noise mode: %s" % noise_mode)
+    return noise_mode
+
+
+def default_artifact_root(noise_mode):
+    """Keep independent noise mechanisms in independent resumable workspaces."""
+    validate_noise_mode(noise_mode)
+    if noise_mode == "injection":
+        return PROJECT_ROOT / "noise_benchmark_artifacts_injection"
+    return PROJECT_ROOT / "noise_benchmark_artifacts"
+
+
+def resolved_artifact_root(args):
+    explicit_root = getattr(args, "artifact_root", None)
+    if explicit_root:
+        return Path(explicit_root).resolve()
+    noise_mode = getattr(args, "noise_mode", DEFAULT_NOISE_MODE)
+    return default_artifact_root(noise_mode).resolve()
+
+
+def mode_specific_noise_data_root(artifact_root, noise_mode):
+    """Avoid data-file collisions even when a user explicitly shares a root."""
+    validate_noise_mode(noise_mode)
+    root = Path(artifact_root) / "noisy_data"
+    return root if noise_mode == DEFAULT_NOISE_MODE else root / noise_mode
+
+
+def derive_seed(master_seed, dataset_name, ratio_text, noise_mode=DEFAULT_NOISE_MODE):
+    """Derive deterministic data noise, preserving legacy replacement seeds."""
+    validate_noise_mode(noise_mode)
     material = "%s|%s|%s" % (master_seed, dataset_name, ratio_text)
+    if noise_mode != DEFAULT_NOISE_MODE:
+        material += "|%s" % noise_mode
     digest = hashlib.sha256(material.encode("utf-8")).digest()
     return int.from_bytes(digest[:8], byteorder="big")
 
@@ -207,20 +250,58 @@ def sample_unobserved_bundles(rng, all_train_bundles, observed_bundles, sample_s
     return list(selected)
 
 
-def noise_metadata_matches(metadata, source_hash, dataset_name, ratio_text, noise_seed):
+def noise_metadata_matches(
+    metadata, source_hash, dataset_name, ratio_text, noise_seed, noise_mode=DEFAULT_NOISE_MODE
+):
+    validate_noise_mode(noise_mode)
     return (
         metadata.get("manifest_version") == MANIFEST_VERSION
         and metadata.get("dataset") == dataset_name
         and metadata.get("requested_noise_ratio") == ratio_text
         and metadata.get("master_noise_seed") == noise_seed
         and metadata.get("source_train_sha256") == source_hash
+        # Older replacement metadata deliberately remains reusable.
+        and metadata.get("noise_mode", DEFAULT_NOISE_MODE) == noise_mode
         and metadata.get("candidate_definition") == "B_train_minus_T_u"
         and metadata.get("rounding_rule") == "floor(x_times_n_u)"
     )
 
 
-def prepare_noisy_training_file(source_data_root, output_root, dataset_name, ratio_text, ratio_value, noise_seed, force=False):
-    """Create or reuse one immutable noisy training UB file."""
+def normalize_noise_metadata(metadata):
+    """Expose new bookkeeping fields when reusing older replacement metadata."""
+    normalized = dict(metadata)
+    noise_mode = normalized.setdefault("noise_mode", DEFAULT_NOISE_MODE)
+    validate_noise_mode(noise_mode)
+    original_edges = int(normalized.get("original_train_edge_count", normalized["total_train_edges"]))
+    replacement_count = int(normalized.get("replacement_count", 0))
+    injected_count = int(normalized.get("injected_count", 0))
+    noise_edge_count = int(normalized.get("noise_edge_count", replacement_count + injected_count))
+    output_edges = int(normalized.get(
+        "output_train_edge_count",
+        original_edges + injected_count,
+    ))
+    normalized["original_train_edge_count"] = original_edges
+    normalized["output_train_edge_count"] = output_edges
+    normalized["replacement_count"] = replacement_count
+    normalized["injected_count"] = injected_count
+    normalized["noise_edge_count"] = noise_edge_count
+    normalized.setdefault("actual_noise_ratio", float(noise_edge_count) / original_edges)
+    normalized.setdefault("noise_fraction_in_output", float(noise_edge_count) / output_edges)
+    return normalized
+
+
+def prepare_noisy_training_file(
+    source_data_root,
+    output_root,
+    dataset_name,
+    ratio_text,
+    ratio_value,
+    noise_seed,
+    noise_mode=DEFAULT_NOISE_MODE,
+    force=False,
+):
+    """Create or reuse one immutable noisy training UB file for one noise mode."""
+    validate_noise_mode(noise_mode)
     source_path = Path(source_data_root) / dataset_name / "user_bundle_train.txt"
     if not source_path.is_file():
         raise FileNotFoundError("Missing source training UB file: %s" % source_path)
@@ -232,76 +313,118 @@ def prepare_noisy_training_file(source_data_root, output_root, dataset_name, rat
 
     if not force and output_path.is_file() and metadata_path.is_file():
         metadata = read_json(metadata_path, {})
-        if noise_metadata_matches(metadata, source_hash, dataset_name, ratio_text, noise_seed):
-            return output_path, metadata, False
+        if noise_metadata_matches(
+            metadata, source_hash, dataset_name, ratio_text, noise_seed, noise_mode
+        ):
+            return output_path, normalize_noise_metadata(metadata), False
 
     ratio_dir.mkdir(parents=True, exist_ok=True)
+    pairs, user_positions, user_bundles, all_train_bundles = read_train_pairs(source_path)
+    original_total_edges = len(pairs)
+    replacement_count = 0
+    injected_count = 0
+    affected_user_count = 0
+
     if ratio_value == Decimal("0"):
         temp_output_path = ratio_dir / (output_path.name + ".tmp")
         shutil.copyfile(str(source_path), str(temp_output_path))
         os.replace(str(temp_output_path), str(output_path))
-        pairs, user_positions, user_bundles, all_train_bundles = read_train_pairs(source_path)
-        replacement_count = 0
-        affected_user_count = 0
     else:
-        pairs, user_positions, user_bundles, all_train_bundles = read_train_pairs(source_path)
-        rng = random.Random(derive_seed(noise_seed, dataset_name, ratio_text))
-        replacement_count = 0
-        affected_user_count = 0
+        rng = random.Random(derive_seed(noise_seed, dataset_name, ratio_text, noise_mode))
+        injected_pairs = []
 
         for user_id in sorted(user_positions):
             positions = user_positions[user_id]
-            replace_count = int((ratio_value * Decimal(len(positions))).to_integral_value(rounding="ROUND_FLOOR"))
-            if replace_count == 0:
+            noise_count = int(
+                (ratio_value * Decimal(len(positions))).to_integral_value(rounding="ROUND_FLOOR")
+            )
+            if noise_count == 0:
                 continue
 
             observed_bundles = user_bundles[user_id]
-            replace_positions = rng.sample(positions, replace_count)
-            replacement_bundles = sample_unobserved_bundles(
-                rng,
-                all_train_bundles,
-                observed_bundles,
-                replace_count,
-            )
-            for position, replacement_bundle in zip(replace_positions, replacement_bundles):
-                pairs[position][1] = replacement_bundle
-            replacement_count += replace_count
+            if noise_mode == "replacement":
+                replace_positions = rng.sample(positions, noise_count)
+                noisy_bundles = sample_unobserved_bundles(
+                    rng,
+                    all_train_bundles,
+                    observed_bundles,
+                    noise_count,
+                )
+                for position, replacement_bundle in zip(replace_positions, noisy_bundles):
+                    pairs[position][1] = replacement_bundle
+                replacement_count += noise_count
+            else:
+                noisy_bundles = sample_unobserved_bundles(
+                    rng,
+                    all_train_bundles,
+                    observed_bundles,
+                    noise_count,
+                )
+                # Preserve every source interaction and append only false ones.
+                # Sorting makes the generated file's line order stable as well.
+                injected_pairs.extend((user_id, bundle_id) for bundle_id in sorted(noisy_bundles))
+                injected_count += noise_count
             affected_user_count += 1
 
+        if noise_mode == "injection":
+            pairs.extend(injected_pairs)
         text = "".join("%d\t%d\n" % (user_id, bundle_id) for user_id, bundle_id in pairs)
         atomic_write_text(output_path, text)
 
-    total_edges = len(pairs)
-    user_replacement_counts = []
+    output_total_edges = len(pairs)
+    user_noise_counts = []
     for user_id in user_positions:
         original_degree = len(user_positions[user_id])
         count = int((ratio_value * Decimal(original_degree)).to_integral_value(rounding="ROUND_FLOOR"))
-        user_replacement_counts.append(count)
+        user_noise_counts.append(count)
+    noise_edge_count = replacement_count + injected_count
+    mode_detail = {
+        "replacement": (
+            "For each affected user, replace selected original training interactions with "
+            "equally many false bundles."
+        ),
+        "injection": (
+            "For each affected user, retain every original training interaction and append "
+            "false bundle interactions."
+        ),
+    }[noise_mode]
 
     metadata = {
         "manifest_version": MANIFEST_VERSION,
         "created_at": utc_now(),
         "dataset": dataset_name,
         "requested_noise_ratio": ratio_text,
+        "noise_mode": noise_mode,
+        "noise_mode_detail": mode_detail,
         "master_noise_seed": noise_seed,
-        "derived_noise_seed": derive_seed(noise_seed, dataset_name, ratio_text),
+        "derived_noise_seed": derive_seed(noise_seed, dataset_name, ratio_text, noise_mode),
         "source_train_path": str(source_path.resolve()),
         "source_train_sha256": source_hash,
         "output_train_path": str(output_path.resolve()),
         "candidate_definition": "B_train_minus_T_u",
         "candidate_definition_detail": (
-            "For user u, draw replacement bundles from the original global training "
-            "bundle set B_train excluding u's original training set T_u."
+            "For user u, draw false bundles from the original global training bundle set "
+            "B_train excluding u's original training set T_u."
         ),
         "rounding_rule": "floor(x_times_n_u)",
         "rounding_rule_detail": "m_u = floor(noise_ratio * original_user_train_degree)",
-        "total_train_edges": total_edges,
+        # Keep the legacy field's original-denominator meaning while making both
+        # edge totals explicit for injection experiments.
+        "total_train_edges": original_total_edges,
+        "original_train_edge_count": original_total_edges,
+        "output_train_edge_count": output_total_edges,
         "active_train_users": len(user_positions),
         "global_train_bundle_count": len(all_train_bundles),
         "replacement_count": replacement_count,
+        "injected_count": injected_count,
+        "noise_edge_count": noise_edge_count,
         "affected_user_count": affected_user_count,
-        "users_with_zero_replacements": sum(1 for count in user_replacement_counts if count == 0),
-        "actual_noise_ratio": float(replacement_count) / total_edges,
+        "users_with_zero_replacements": sum(1 for count in user_noise_counts if count == 0),
+        "users_with_zero_noise_edges": sum(1 for count in user_noise_counts if count == 0),
+        # In both modes this is the realized false-edge count divided by the
+        # clean input edge count, i.e. the requested ratio's denominator.
+        "actual_noise_ratio": float(noise_edge_count) / original_total_edges,
+        "noise_fraction_in_output": float(noise_edge_count) / output_total_edges,
         "output_train_sha256": sha256_file(output_path),
     }
     atomic_write_json(metadata_path, metadata)
@@ -340,14 +463,27 @@ def validate_project_layout(models, datasets, source_data_root):
         raise FileNotFoundError("Benchmark preflight failed; missing:\n- " + "\n- ".join(missing))
 
 
-def experiment_id(model_key, dataset_name, ratio_text, noise_seed, train_seed):
-    return "%s__%s__noise_%s__nseed_%s__tseed_%s" % (
+def experiment_id(
+    model_key,
+    dataset_name,
+    ratio_text,
+    noise_seed,
+    train_seed,
+    noise_mode=DEFAULT_NOISE_MODE,
+):
+    validate_noise_mode(noise_mode)
+    identifier = "%s__%s__noise_%s__nseed_%s__tseed_%s" % (
         model_key,
         dataset_name,
         safe_ratio_tag(ratio_text),
         noise_seed,
         train_seed,
     )
+    # Preserve legacy replacement IDs so an interrupted old benchmark resumes
+    # exactly as before, even if a caller deliberately shares an artifact root.
+    if noise_mode != DEFAULT_NOISE_MODE:
+        identifier += "__mode_%s" % noise_mode
+    return identifier
 
 
 def load_manifest(manifest_path):
@@ -378,7 +514,9 @@ def build_command(
     noise_seed,
     train_seed,
     python_executable,
+    noise_mode=DEFAULT_NOISE_MODE,
 ):
+    validate_noise_mode(noise_mode)
     spec = MODEL_SPECS[model_key]
     data_root = (PROJECT_ROOT / spec["data_root"]).resolve()
     info = "noise_%s_nseed_%s_tseed_%s" % (
@@ -386,6 +524,8 @@ def build_command(
         noise_seed,
         train_seed,
     )
+    if noise_mode != DEFAULT_NOISE_MODE:
+        info += "_mode_%s" % noise_mode
     return [
         python_executable,
         "train.py",
@@ -559,10 +699,13 @@ def summary_rows(manifest):
     })
     baseline_lookup = {}
     for experiment in experiments.values():
-        if experiment.get("status") != "succeeded" or experiment.get("noise_ratio") != "0":
+        if experiment.get("status") != "succeeded" or not is_zero_noise_ratio(
+            experiment.get("noise_ratio", "")
+        ):
             continue
+        noise_mode = experiment.get("noise_mode", DEFAULT_NOISE_MODE)
         for topk_text, metric in experiment.get("metrics", {}).items():
-            baseline_lookup[(experiment["model"], experiment["dataset"], int(topk_text))] = metric
+            baseline_lookup[(noise_mode, experiment["model"], experiment["dataset"], int(topk_text))] = metric
 
     rows = []
     for experiment in experiments.values():
@@ -571,8 +714,10 @@ def summary_rows(manifest):
             "experiment_id": experiment["id"],
             "model": experiment["model"],
             "dataset": experiment["dataset"],
+            "noise_mode": experiment.get("noise_mode", DEFAULT_NOISE_MODE),
             "noise_ratio": experiment["noise_ratio"],
             "actual_noise_ratio": experiment.get("actual_noise_ratio", ""),
+            "noise_fraction_in_output": experiment.get("noise_fraction_in_output", ""),
             "status": experiment.get("status", "unknown"),
             "attempts_used": len(attempts),
             "max_attempts": experiment.get("max_attempts", ""),
@@ -580,6 +725,8 @@ def summary_rows(manifest):
             "latest_return_code": experiment.get("return_code", ""),
             "latest_failure_reason": experiment.get("failure_reason", ""),
             "replacement_count": experiment.get("replacement_count", ""),
+            "injected_count": experiment.get("injected_count", ""),
+            "noise_edge_count": experiment.get("noise_edge_count", ""),
             "noise_seed": experiment.get("noise_seed", ""),
             "train_seed": experiment.get("train_seed", ""),
             "stdout_log": experiment.get("stdout_log", ""),
@@ -587,7 +734,12 @@ def summary_rows(manifest):
         metrics = experiment.get("metrics", {})
         for topk in topks:
             metric = metrics.get(str(topk))
-            baseline = baseline_lookup.get((experiment["model"], experiment["dataset"], topk))
+            baseline = baseline_lookup.get((
+                experiment.get("noise_mode", DEFAULT_NOISE_MODE),
+                experiment["model"],
+                experiment["dataset"],
+                topk,
+            ))
             row["best_epoch@%d" % topk] = metric["best_epoch"] if metric else ""
             row["recall@%d" % topk] = metric["recall"] if metric else ""
             row["ndcg@%d" % topk] = metric["ndcg"] if metric else ""
@@ -618,9 +770,11 @@ def write_summary(artifact_root, manifest):
         stale_json_path.unlink()
 
     fieldnames = [
-        "experiment_id", "model", "dataset", "noise_ratio", "actual_noise_ratio", "status",
+        "experiment_id", "model", "dataset", "noise_mode", "noise_ratio", "actual_noise_ratio",
+        "noise_fraction_in_output", "status",
         "attempts_used", "max_attempts", "failed_attempts", "latest_return_code",
-        "latest_failure_reason", "replacement_count", "noise_seed", "train_seed", "stdout_log",
+        "latest_failure_reason", "replacement_count", "injected_count", "noise_edge_count",
+        "noise_seed", "train_seed", "stdout_log",
     ]
     for topk in topks:
         fieldnames.extend([
@@ -646,7 +800,7 @@ def write_summary(artifact_root, manifest):
 
 def prepare_selected_data(args, datasets, ratios):
     source_data_root = Path(args.source_data_root).resolve()
-    noise_data_root = Path(args.artifact_root).resolve() / "noisy_data"
+    noise_data_root = mode_specific_noise_data_root(resolved_artifact_root(args), args.noise_mode)
     prepared = {}
     for dataset_name in datasets:
         for ratio_text, ratio_value in ratios:
@@ -657,17 +811,19 @@ def prepare_selected_data(args, datasets, ratios):
                 ratio_text,
                 ratio_value,
                 args.noise_seed,
+                noise_mode=args.noise_mode,
                 force=args.force_prepare,
             )
             prepared[(dataset_name, ratio_text)] = (output_path, metadata)
             action = "created" if created else "reused"
             print(
-                "[%s] %s noisy UB data: requested=%s actual=%.8f replacements=%d path=%s" % (
+                "[%s] %s %s-noise UB data: requested=%s actual=%.8f false_edges=%d path=%s" % (
                     dataset_name,
                     action,
+                    args.noise_mode,
                     ratio_text,
                     metadata["actual_noise_ratio"],
-                    metadata["replacement_count"],
+                    metadata["noise_edge_count"],
                     output_path,
                 )
             )
@@ -685,6 +841,7 @@ def build_smoke_command(model_key, train_ub_path, args):
         args.noise_seed,
         args.train_seed,
         args.python_executable,
+        args.noise_mode,
     )
     command.append("--smoke-test")
     return command
@@ -696,7 +853,8 @@ def model_code_fingerprint(models):
     included_files = []
     ignored_directories = {
         ".git", ".idea", ".pytest_cache", "__pycache__", "datasets",
-        "noise_benchmark_artifacts", "checkpoints", "runs", "log",
+        "noise_benchmark_artifacts", "noise_benchmark_artifacts_injection",
+        "checkpoints", "runs", "log",
     }
     for model_key in sorted(models):
         workdir = (PROJECT_ROOT / MODEL_SPECS[model_key]["workdir"]).resolve()
@@ -725,6 +883,7 @@ def compatibility_signature(args, smoke_train_path, models):
     return {
         "dataset": SMOKE_DATASET,
         "train_ub_sha256": sha256_file(smoke_train_path),
+        "noise_mode": args.noise_mode,
         "noise_seed": args.noise_seed,
         "train_seed": args.train_seed,
         "gpu": str(args.gpu),
@@ -790,15 +949,17 @@ def run_compatibility_smoke(args, models):
     source_data_root = Path(args.source_data_root).resolve()
     validate_project_layout(models, (SMOKE_DATASET,), source_data_root)
 
-    artifact_root = Path(args.artifact_root).resolve()
+    artifact_root = resolved_artifact_root(args)
     smoke_root = artifact_root / "compatibility_smoke"
+    smoke_data_root = mode_specific_noise_data_root(smoke_root, args.noise_mode)
     smoke_train_path, smoke_metadata, created = prepare_noisy_training_file(
         source_data_root,
-        smoke_root / "noisy_data",
+        smoke_data_root,
         SMOKE_DATASET,
         "0",
         Decimal("0"),
         args.noise_seed,
+        noise_mode=args.noise_mode,
         force=args.force_prepare,
     )
     print(
@@ -826,7 +987,10 @@ def run_compatibility_smoke(args, models):
             )
 
         attempt_number = int(prior.get("attempt", 0)) + 1
-        attempt_dir = smoke_root / "runs" / model_key / ("attempt_%02d" % attempt_number)
+        smoke_runs_root = smoke_root / "runs"
+        if args.noise_mode != DEFAULT_NOISE_MODE:
+            smoke_runs_root = smoke_runs_root / args.noise_mode
+        attempt_dir = smoke_runs_root / model_key / ("attempt_%02d" % attempt_number)
         command = build_smoke_command(model_key, smoke_train_path, args)
         check = {
             "model": spec["display_name"],
@@ -852,8 +1016,11 @@ def run_compatibility_smoke(args, models):
             "command_path": check["command_path"],
             "stdout_log": check["stdout_log"],
         }
+        smoke_id = "compatibility__%s__%s" % (model_key, SMOKE_DATASET)
+        if args.noise_mode != DEFAULT_NOISE_MODE:
+            smoke_id += "__mode_%s" % args.noise_mode
         experiment = {
-            "id": "compatibility__%s__%s" % (model_key, SMOKE_DATASET),
+            "id": smoke_id,
             "cwd": check["cwd"],
             "command": command,
         }
@@ -920,7 +1087,7 @@ def run_benchmark(args):
     models = tuple(args.models)
     datasets = tuple(args.datasets)
     ratios = parse_noise_ratios(args.noise_ratios)
-    artifact_root = Path(args.artifact_root).resolve()
+    artifact_root = resolved_artifact_root(args)
     source_data_root = Path(args.source_data_root).resolve()
     validate_project_layout(models, datasets, source_data_root)
     artifact_root.mkdir(parents=True, exist_ok=True)
@@ -950,6 +1117,7 @@ def run_benchmark(args):
                     ratio_text,
                     args.noise_seed,
                     args.train_seed,
+                    args.noise_mode,
                 )
                 prior = manifest["experiments"].get(task_id, {})
                 if prior.get("status") == "succeeded" and not args.rerun_succeeded:
@@ -969,6 +1137,7 @@ def run_benchmark(args):
                     args.noise_seed,
                     args.train_seed,
                     args.python_executable,
+                    args.noise_mode,
                 )
                 attempts = normalized_attempt_history(prior)
                 is_manual_new_cycle = (
@@ -986,11 +1155,15 @@ def run_benchmark(args):
                     "model": spec["display_name"],
                     "model_key": model_key,
                     "dataset": dataset_name,
+                    "noise_mode": args.noise_mode,
                     "noise_ratio": ratio_text,
                     "noise_seed": args.noise_seed,
                     "train_seed": args.train_seed,
                     "actual_noise_ratio": noise_metadata["actual_noise_ratio"],
+                    "noise_fraction_in_output": noise_metadata["noise_fraction_in_output"],
                     "replacement_count": noise_metadata["replacement_count"],
+                    "injected_count": noise_metadata["injected_count"],
+                    "noise_edge_count": noise_metadata["noise_edge_count"],
                     "train_ub_path": str(train_ub_path.resolve()),
                     "noise_metadata_path": str((train_ub_path.parent / "metadata.json").resolve()),
                     "run_dir": str(run_dir.resolve()),
@@ -1111,9 +1284,14 @@ def run_benchmark(args):
                     ))
 
     write_summary(artifact_root, manifest)
-    succeeded = sum(1 for task in manifest["experiments"].values() if task.get("status") == "succeeded")
-    exhausted = sum(1 for task in manifest["experiments"].values() if task.get("status") == "exhausted")
-    pending = sum(1 for task in manifest["experiments"].values() if task.get("status") not in ("succeeded", "exhausted"))
+    selected_tasks = [
+        task
+        for task in manifest["experiments"].values()
+        if task.get("noise_mode", DEFAULT_NOISE_MODE) == args.noise_mode
+    ]
+    succeeded = sum(1 for task in selected_tasks if task.get("status") == "succeeded")
+    exhausted = sum(1 for task in selected_tasks if task.get("status") == "exhausted")
+    pending = sum(1 for task in selected_tasks if task.get("status") not in ("succeeded", "exhausted"))
     planned = len(models) * len(datasets) * len(ratios)
     print("\nBenchmark state: succeeded=%d exhausted=%d unfinished=%d planned=%d" % (
         succeeded, exhausted, pending, planned
@@ -1130,12 +1308,19 @@ def prepare_only(args):
 
 
 def show_status(args):
-    artifact_root = Path(args.artifact_root).resolve()
+    artifact_root = resolved_artifact_root(args)
     manifest_path = artifact_root / "benchmark_manifest.json"
     manifest = load_manifest(manifest_path)
-    experiments = manifest.get("experiments", {})
+    experiments = {
+        task_id: experiment
+        for task_id, experiment in manifest.get("experiments", {}).items()
+        if experiment.get("noise_mode", DEFAULT_NOISE_MODE) == args.noise_mode
+    }
     if not experiments:
-        print("No benchmark experiments have been registered: %s" % manifest_path)
+        print(
+            "No %s benchmark experiments have been registered: %s" %
+            (args.noise_mode, manifest_path)
+        )
         return
     counts = {}
     for experiment in experiments.values():
@@ -1148,10 +1333,11 @@ def show_status(args):
         experiment = experiments[task_id]
         attempts_used = len(normalized_attempt_history(experiment))
         print(
-            "%s | %s | %s | noise=%s | attempts=%s/%s" % (
+            "%s | %s | %s | mode=%s | noise=%s | attempts=%s/%s" % (
                 experiment.get("status", "unknown"),
                 experiment["model"],
                 experiment["dataset"],
+                experiment.get("noise_mode", DEFAULT_NOISE_MODE),
                 experiment["noise_ratio"],
                 attempts_used,
                 experiment.get("max_attempts", "?"),
@@ -1187,14 +1373,27 @@ def add_shared_arguments(parser):
         help="master seed used only for noisy-data generation",
     )
     parser.add_argument(
+        "--noise-mode",
+        choices=NOISE_MODES,
+        default=DEFAULT_NOISE_MODE,
+        help=(
+            "replacement: replace original UB edges (default); injection: preserve "
+            "original UB edges and append false ones"
+        ),
+    )
+    parser.add_argument(
         "--source-data-root",
         default=str(PROJECT_ROOT / "datasets"),
         help="canonical clean dataset root",
     )
     parser.add_argument(
         "--artifact-root",
-        default=str(PROJECT_ROOT / "noise_benchmark_artifacts"),
-        help="root for generated data, task state, logs, and summaries",
+        default=None,
+        help=(
+            "optional root for generated data, task state, logs, and summaries; defaults to "
+            "noise_benchmark_artifacts/ for replacement or "
+            "noise_benchmark_artifacts_injection/ for injection"
+        ),
     )
     parser.add_argument(
         "--force-prepare",
@@ -1230,14 +1429,22 @@ def add_compatibility_arguments(parser):
         help="seed for the shared zero-noise Youshu smoke input",
     )
     parser.add_argument(
+        "--noise-mode",
+        choices=NOISE_MODES,
+        default=DEFAULT_NOISE_MODE,
+        help="artifact namespace for the smoke check (default: replacement)",
+    )
+    parser.add_argument(
         "--source-data-root",
         default=str(PROJECT_ROOT / "datasets"),
         help="canonical clean dataset root",
     )
     parser.add_argument(
         "--artifact-root",
-        default=str(PROJECT_ROOT / "noise_benchmark_artifacts"),
-        help="root for smoke-test data, logs, and status",
+        default=None,
+        help=(
+            "optional root for smoke-test data, logs, and status; defaults by noise mode"
+        ),
     )
     parser.add_argument(
         "--force-prepare",
@@ -1322,9 +1529,15 @@ def build_parser():
 
     status_parser = subparsers.add_parser("status", help="show the saved benchmark task states")
     status_parser.add_argument(
+        "--noise-mode",
+        choices=NOISE_MODES,
+        default=DEFAULT_NOISE_MODE,
+        help="show replacement (default) or injection benchmark state",
+    )
+    status_parser.add_argument(
         "--artifact-root",
-        default=str(PROJECT_ROOT / "noise_benchmark_artifacts"),
-        help="benchmark artifact root",
+        default=None,
+        help="optional benchmark artifact root (defaults by --noise-mode)",
     )
     status_parser.set_defaults(handler=show_status)
 

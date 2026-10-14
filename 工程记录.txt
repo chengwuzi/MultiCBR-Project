@@ -289,3 +289,29 @@
 第 14 项修复使标签矩阵与预测张量同在 GPU 后，服务器第二次真实冒烟测试进一步定位到 MultiCBR 的 NDCG 计算：`IDCG()` 创建的理想命中向量，以及 `IDCGs` 缓存张量默认位于 CPU，却在 GPU 上的折损增益计算中参与运算，导致 CPU/GPU 张量混用错误。
 
 已为这两个张量显式指定 `device=device`，实现与 CrossCBR 的已验证 GPU 版本一致。修复仅影响指标计算中张量所在设备，不改变 Recall/NDCG 的数学公式、训练流程或实验数据。再次同步后，兼容性缓存会因源码指纹变化自动失效并完整重测三个模型。
+
+---
+
+## 16. 论文用相对抗噪退化图生成器（2026-10-14）
+
+新增 `plot_noise_degradation.py`。它读取唯一的 `noise_benchmark_artifacts/results_summary.csv`，以每个“模型 × 数据集”的 0 噪声 Recall@20/NDCG@20 为基线，计算 `((metric_x / metric_0) - 1) × 100%`，并生成三行（Youshu、iFashion、NetEase）两列（Recall@20、NDCG@20）的虚线-标记折线图。横轴为设定噪声比例 0 至 0.25，纵轴为相对变化百分比，0 以下即性能下降，样式可直接用于论文。
+
+脚本会严格要求 54 组结果均为成功状态，以防止未完成结果被画成正式结论；完成后会同时输出 300 DPI PNG 与矢量 PDF 到 `noise_benchmark_artifacts/figures/`。若环境缺少 `matplotlib`，脚本会给出明确安装命令；该依赖仅在实验结束后生成图片时需要，不影响当前进行中的训练。
+
+---
+
+## 17. 新增注入式 UB 加噪模式（2026-10-14）
+
+在既有默认 `replacement`（替换式）模式外，为 `noise_benchmark.py` 的 `prepare`、`run`、`compatibility` 与 `status` 命令新增 `--noise-mode injection`。注入式严格保留用户的每一条原训练 UB 交互；对用户 `u` 只追加 `floor(x × n_u)` 条伪交互，候选仍为原训练全局捆绑集合 `B_train` 中用户 `u` 原训练未交互过的 `B_train - T_u`，并无放回抽取。因此当 `x × n_u < 1` 时不注入，候选不足时显式报错；不会静默减少伪边数量。
+
+为避免两种噪声实验相互污染，替换式保持原有 `noise_benchmark_artifacts/`、任务 ID、随机种子派生方式与数据路径不变；注入式默认独立使用 `noise_benchmark_artifacts_injection/`，拥有独立的 54 组进度清单、冒烟测试、重试日志与 `results_summary.csv`。即使人工将两者指定到同一个产物根目录，注入式数据仍强制置于 `noisy_data/injection/`，并在任务 ID、训练信息标签和汇总行中记录 `noise_mode`，避免覆盖、错误跳过或错误基线比较。
+
+注入数据元信息和结果汇总新增 `injected_count`、`noise_edge_count`、原始/输出边数及 `noise_fraction_in_output`。其中 `actual_noise_ratio` 统一以原始训练边数为分母，使其与指定的 `x` 可直接对照；注入后训练集中的伪边占比则由 `noise_fraction_in_output` 单独给出。已用独立小型训练集验证：源交互逐行保留、仅追加未交互候选、`floor` 取整、无放回抽样、重复准备的哈希复用、零噪声原样复制、替换式向后兼容，以及注入式独立状态目录均正确；另将新替换式输出与 Git 基线版本在相同输入和种子下逐字节比较，确认训练 UB 输出、派生种子、替换边数和实际比例均保持一致。还完成一次 Youshu 注入式 `--dry-run` 总控集成验证，正确生成 5,745 条伪边、独立数据路径与包含 `noise_mode=injection` 的汇总行。全程未在本地运行模型训练。
+
+---
+
+## 18. 双加噪方式隔离复核与边界加固（2026-10-14）
+
+围绕“替换式与注入式会不会混在一起”的风险，对噪声数据、断点任务、训练输出标签、兼容性冒烟、状态展示和结果基线逐层复核。确认默认情况下两套实验分别位于 `noise_benchmark_artifacts/` 与 `noise_benchmark_artifacts_injection/`；替换式完全保留原有任务 ID、数据路径和随机种子派生，从而可安全续跑已有实验；注入式使用附带 `mode_injection` 的任务 ID 与训练信息标签，避免模型原有 checkpoint、TensorBoard、日志目录发生碰撞。
+
+补强了人工指定相同 `--artifact-root` 的极端情况：注入式训练数据固定在 `noisy_data/injection/`，兼容性冒烟的运行日志固定在 `compatibility_smoke/runs/injection/`，`status --noise-mode <mode>` 和总控完成计数均只展示所选方式的任务；汇总 CSV 即使容纳两种方式，也会以 `noise_mode` 隔离 0 噪声基线。另修复了将 `0.0`、`0.00` 写作零噪声比例时的基线识别，保证它们与 `0` 等价。已用“同一临时产物根目录”的两次 `--dry-run` 验证两种模式各只生成 1 个任务、各自训练 UB 路径不同、替换式边数不变而注入式边数增加、状态查询只显示指定模式、汇总 CSV 含有两行且不会交叉引用基线；还通过不启动模型的兼容性冒烟模拟确认两套日志目录和训练标签分离。后续使用默认目录无需额外配置，仍建议不要把两种方式人为指定到同一产物目录。

@@ -940,3 +940,44 @@ lambda_c：{0,0.01,0.02,0.04,0.05,0.10,0.20,0.40}。
 （4）依用户决定，原图的跨图默认配置点一致性、iFashion 曲线与总表的对应、断轴区间及标记边界等问题暂留后续核查；现有 iFashion 默认 lambda_a=0.07 与当前图中扫描范围上限 0.009 的关系也需一并核对。本轮没有修改这些数值，也未将图上 Recall@20 的峰值直接替换为最佳整体配置。
 
 （5）git diff --check 通过；未运行模型训练，未改动模型代码、配置、数据集或实验结果存档，未提交 Git。后续按用户安排，在方法章修改完成后再进行图、参数、实验数据与正文的整体一致性检查。
+
+
+第十六项：参照 CAFU 与 BIGCF 精简实验章开头
+记录日期：2026-10-14
+
+一、修改依据与范围
+
+用户要求实验章逐节重新研究、修改，以 CAFU 为主要参考、BIGCF 为补充，兼顾格式、措辞、叙述结构和逻辑，并控制每节篇幅。本轮具体授权仅为精简 Experiments 标题后的第一段，不提前修改后续小节。
+
+二、参考与实际修改
+
+（1）读取 CAFU 第 5 页、BIGCF 第 6 页的实验章开头；两者以一句话交代在三个数据集上评估提出的方法、与推荐基线比较。本轮采用这一简短引导结构，结合 ReCoBR 的组合推荐任务重新表述。
+
+（2）AAAI文件/main.tex：将原三句、45 词的章节概述改为一句、12 词：
+We evaluate ReCoBR against state-of-the-art bundle recommendation methods on three public datasets.
+删除对总体效果、模块贡献、交互选择、用户反馈程度和超参敏感性小节的逐项预告，保留方法名称、比较对象和三个公开数据集的信息。
+
+（3）工程记录.txt：追加本第十六项，追加前的 127203 字节原文完全保留。
+
+三、生成文件与验证
+
+（1）tmp/pdfs/experiment-opening-20261014/：保存 source-before.tex、record-before.txt、change.json、构建文件及日志、verification.json，以及第 5—11 页 PNG，用于回溯及排版核查。
+
+（2）output/pdf/ReCoBR_AAAI_experiment_opening_20261014.pdf：保存本次精简开头后的 11 页完整审阅稿，旧审阅稿继续保留。
+
+（3）逐字节核对确认 main.tex 仅上述第一段发生变化，原 CRLF 换行保留；方法章、后续实验小节、图表及其数据、图片和参考文献均未修改。编译成功，无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示；保留已有六条 underfull hbox，本轮没有 underfull vbox。缩短开头引起第 6—11 页自然重排，已目视检查这些页面，未出现新的越栏、重叠或遮挡，五张超参图仍横排于第 10 页。未修改模板、字号、页边距或间距参数，未运行训练、未提交 Git。
+
+
+第十七项：为实验章开头补充章节引导语
+记录日期：2026-10-14
+
+（1）用户要求在上一轮精简后的实验章开头加入“In this section,”，并已要求后续每次提供修改后的英文文稿时同时给出忠于原文的中文翻译。
+
+（2）AAAI文件/main.tex：仅将实验章第一句改为：
+In this section, we evaluate ReCoBR against state-of-the-art bundle recommendation methods on three public datasets.
+中文翻译：在本节中，我们在三个公开数据集上，通过与最先进的组合推荐方法进行比较来评估 ReCoBR。
+英文由 12 词变为 16 词，保持简短引导结构；中文只用于本记录和对用户的回复，不加入英文论文正文。
+
+（3）工程记录.txt：追加本第十七项，追加前原文按字节完整保留。tmp/pdfs/experiment-opening-transition-20261014/ 保存修改前源码和记录、change.json、编译文件及日志、verification.json、第 5—7 页 PNG。output/pdf/ReCoBR_AAAI_experiment_opening_transition_20261014.pdf 为本次 11 页完整审阅稿，旧稿继续保留。
+
+（4）逐字节核对确认源码仅上述第一句发生变化，CRLF 换行保留；其余正文、图表数据、图片、文献和模板均未修改。编译通过，无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，保留已有六条 underfull hbox。与上版审阅 PDF 比较，渲染仅第 6 页改变；已目视检查第 6、7 页，未出现新的遮挡、越栏或重叠。未运行训练、未提交 Git。

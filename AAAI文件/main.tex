@@ -246,7 +246,7 @@ For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u
 \end{aligned}
 \tag{10}
 \end{equation}
-Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. The dataset-specific value of $\kappa$ is reported in the experimental settings. Users with at most $\kappa$ observed bundles retain their full histories; users outside $\mathcal U_+$ have no retained U-B edges. Selection is restricted to observed interactions, so graph reconstruction neither creates new edges nor changes the ranking labels defined by $\mathbf X$. The resulting binary matrix $\widetilde{\mathbf X}$ is the reconstructed U-B graph used for downstream propagation.
+Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain their full histories; users outside $\mathcal U_+$ have no retained U-B edges. Selection is restricted to observed interactions, so graph reconstruction neither creates new edges nor changes the ranking labels defined by $\mathbf X$. The resulting binary matrix $\widetilde{\mathbf X}$ is the reconstructed U-B graph used for downstream propagation.
 
 \subsection{Pre-Fusion Cross-View Contrastive Learning}
 
@@ -321,7 +321,7 @@ Equation (13) encourages agreement for the same user or bundle across U-B--U-I a
 \end{aligned}
 \tag{14}
 \end{equation}
-Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B, U-I, and B-I views, respectively. The same coefficients are used for users and bundles; they are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$. Their dataset-specific values are reported in the experimental settings.
+Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B, U-I, and B-I views, respectively. The same coefficients are used for users and bundles; they are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$.
 
 \textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Following MultiCBR \cite{ma2024multicbr}, the fused-space self-contrastive regularizer is
 \begin{equation}
@@ -585,90 +585,58 @@ recommendation methods on three public datasets.
 
 \subsection{Experimental Settings}
 
-\paragraph{Datasets and Evaluation.}
-We use Youshu, NetEase, and iFashion for book-list, music-playlist,
-and outfit recommendation, respectively. Each dataset contains
-U-B interactions, U-I interactions, and B-I affiliations.
-Table~\ref{tab:datasets} summarizes their statistics. We adopt
-the preprocessed datasets and splits used by CrossCBR and
-MultiCBR~\cite{ma2022crosscbr,ma2024multicbr}, with 70\%, 10\%, and
-20\% of U-B interactions assigned to training, validation, and
-testing. Pretraining, historical preference construction, and
-U-B graph reconstruction use only the training interactions.
 
-We report Recall@$K$ and NDCG@$K$ for $K\in\{20,40\}$ under
-full-ranking evaluation. For each user, we rank all candidate
-bundles after excluding those observed in training. We select
-the checkpoint maximizing the sum of validation Recall and
-NDCG at both cutoffs, and report its test results.
+\paragraph{Datasets.}
+We use \textbf{Youshu}~\cite{chen2019dam}, \textbf{iFashion}~\cite{chen2019pog},
+and \textbf{NetEase}~\cite{cao2017efm}.
+Table~\ref{tab:datasets} summarizes their statistics.
+We follow the preprocessing and 70\%/10\%/20\%
+train/validation/test splits of CrossCBR and
+MultiCBR~\cite{ma2022crosscbr,ma2024multicbr}.
+We adopt full-ranking evaluation and report Recall@$K$ and
+NDCG@$K$~\cite{wang2019ngcf} for $K\in\{20,40\}$, excluding
+training bundles from the candidates.
 
 \paragraph{Baselines.}
-We compare ReCoBR with seven bundle recommendation methods.
-BGCN~\cite{chang2020bgcn} models bundle-level and item-level collaborative
-information through graph propagation, while MIDGN~\cite{zhao2022midgn}
-disentangles user intents across global and local views.
-CrossCBR~\cite{ma2022crosscbr} connects bundle-view and item-view
-representations through contrastive learning, and
-BundleGT~\cite{wei2023bundlegt} uses a hierarchical graph Transformer
-to model bundling strategies. MultiCBR~\cite{ma2024multicbr}
-encodes all three relations and applies contrastive learning
-after view fusion. EBRec~\cite{du2025ebrec} enhances item-level bundle
-representations through bundle--user--item correlations.
-EpicCBR~\cite{li2026epiccbr} combines item-relation enhancement with
-contrastive learning across warm-start and cold-start scenarios.
+\textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
+preferences through graph convolution, while
+\textbf{MIDGN}~\cite{zhao2022midgn} disentangles global and local intents.
+\textbf{CrossCBR}~\cite{ma2022crosscbr} aligns bundle and item views
+through contrastive learning. \textbf{BundleGT}~\cite{wei2023bundlegt}
+models bundling strategies with hierarchical graph Transformers.
+\textbf{MultiCBR}~\cite{ma2024multicbr} fuses three relation views before
+contrastive learning. \textbf{EBRec}~\cite{du2025ebrec} enhances
+item-level bundle representations using bundle--user--item
+correlations. \textbf{EpicCBR}~\cite{li2026epiccbr} combines item-relation
+enhancement with contrastive learning.
 
-The results of BGCN, MIDGN, CrossCBR, and MultiCBR are taken
-from MultiCBR~\cite{ma2024multicbr}. For BundleGT and EBRec,
-we use the results reported in their respective
-papers~\cite{wei2023bundlegt,du2025ebrec}. We reproduce EpicCBR
-using its released implementation under the same data splits
-and evaluation protocol as ReCoBR.
+Results for BGCN, MIDGN, CrossCBR, and MultiCBR are taken from
+MultiCBR~\cite{ma2024multicbr}; BundleGT and EBRec results are
+from their respective papers~\cite{wei2023bundlegt,du2025ebrec}.
+We reproduce EpicCBR using its open-source implementation.
 
-\paragraph{Implementation Details.}
-We implement ReCoBR in PyTorch and train it on a single NVIDIA
-GeForce RTX 3090 GPU. The recommendation embeddings use Xavier
-initialization, dimension 64, and two graph propagation layers.
-We use Adam with a learning rate of $10^{-3}$, a recommendation
-batch size of 2048, and one negative bundle per positive
-interaction. Ranking examples are drawn from the original
-training interactions; the reconstructed U-B graph determines
-the propagation connections.
+\paragraph{Parameter Settings.}
+We implement ReCoBR in PyTorch on a GeForce RTX 3090 GPU.
+We use 64-dimensional embeddings with
+Xavier~\cite{glorot2010xavier} initialization and two propagation
+layers. Recommendation training uses
+Adam~\cite{kingma2015adam} with learning rate $10^{-3}$,
+batch size 2048, and one negative bundle per positive
+interaction; $\tau=0.20$ and $\lambda_r=10^{-5}$.
+The denoiser is a two-layer MLP with hidden size 128,
+timestep embedding size 16, and dropout 0.1, trained with
+batch size 1024, learning rate $10^{-3}$, and weight decay
+$10^{-5}$.
+The minimum noise variance is fixed at $\beta_1=10^{-4}$.
 
-The denoiser is a two-layer MLP with hidden dimension 128,
-timestep embedding dimension 16, and dropout rate 0.1. Its
-separate optimizer uses a learning rate of $10^{-3}$, weight
-decay $10^{-5}$, and batch size 1024. We use a linear noise
-schedule from $\beta_1=10^{-4}$ to $\beta_T=0.02$. In the order
-Youshu, NetEase, and iFashion, the diffusion steps $T$ are
-$(9,12,12)$, the retention limits $\kappa$ are $(7,13,3)$, and
-the SetLoss weights $\lambda_{\mathrm{set}}$ are
-$(0.04,0.05,0.05)$.
-
-The fixed fusion coefficients $(\omega_1,\omega_2,\omega_3)$,
-corresponding to U-B, U-I, and B-I, are $(0.35,0.15,0.50)$
-for Youshu, $(0.50,0.20,0.30)$ for NetEase, and
-$(0.00,0.50,0.50)$ for iFashion. A zero U-B fusion coefficient
-removes its direct contribution to the final weighted sum;
-the U-B view still participates in pre-fusion contrastive
-learning. In the same dataset order, the pre-fusion loss
-weights $\lambda_a$ are $(0.004,0.005,0.07)$, and the
-post-fusion loss weights $\lambda_c$ are $(0.04,0.05,0.10)$.
-The shared contrastive temperature is $\tau=0.20$ on all three
-datasets. The embedding regularization coefficient
-$\lambda_r$ is $10^{-5}$. Hyperparameters are selected using
-validation performance. For the overall comparison, we report
-ReCoBR results averaged over three independent runs.
-
-For hyperparameter sensitivity, we examine $\beta_T$ in
+For sensitivity analysis, we vary $\beta_T$ in
 $\{0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.06,\allowbreak 0.08\}$, $\kappa$ in
-$\{1,\allowbreak 3,\allowbreak 5,\allowbreak 7,\allowbreak 9,\allowbreak 11,\allowbreak 13,\allowbreak 15,\allowbreak 17,\allowbreak 19\}$, and $\lambda_a$ in
-$\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak 0.005,\allowbreak 0.007,\allowbreak 0.009\}$. We vary
-$\lambda_{\mathrm{set}}$ over
-$\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$ and $\lambda_c$
-over $\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
-The $\lambda_{\mathrm{set}}$ and $\lambda_c$ sensitivity
-experiments use one run per setting with a fixed seed for
-each dataset.
+$\{1,\allowbreak 3,\allowbreak 5,\allowbreak 7,\allowbreak 9,\allowbreak 11,\allowbreak 13,\allowbreak 15,\allowbreak 17,\allowbreak 19\}$, $\lambda_a$ in
+$\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak 0.005,\allowbreak 0.007,\allowbreak 0.009\}$,
+$\lambda_{\mathrm{set}}$ in
+$\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$, and $\lambda_c$ in
+$\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
+ReCoBR's overall results are averaged over three independent runs.
 
 
 \subsection{Overall Performance}

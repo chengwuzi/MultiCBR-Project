@@ -981,3 +981,89 @@ In this section, we evaluate ReCoBR against state-of-the-art bundle recommendati
 （3）工程记录.txt：追加本第十七项，追加前原文按字节完整保留。tmp/pdfs/experiment-opening-transition-20261014/ 保存修改前源码和记录、change.json、编译文件及日志、verification.json、第 5—7 页 PNG。output/pdf/ReCoBR_AAAI_experiment_opening_transition_20261014.pdf 为本次 11 页完整审阅稿，旧稿继续保留。
 
 （4）逐字节核对确认源码仅上述第一句发生变化，CRLF 换行保留；其余正文、图表数据、图片、文献和模板均未修改。编译通过，无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，保留已有六条 underfull hbox。与上版审阅 PDF 比较，渲染仅第 6 页改变；已目视检查第 6、7 页，未出现新的遮挡、越栏或重叠。未运行训练、未提交 Git。
+
+
+第十八项：参照 CAFU、BIGCF 及师兄批注重构实验设置
+记录日期：2026-10-14
+
+一、授权、参考与修改范围
+
+（1）用户明确要求重构 Experimental Settings，分为 Datasets.、Baselines.、Parameter Settings. 三个部分；主要学习 CAFU、辅助参考 BIGCF 的格式、措辞、信息安排与精炼表达，补齐数据集及 Recall/NDCG 引用。Baselines 只保留方法介绍和结果来源两个自然段，EpicCBR 不再展开冷启动或冷暖场景，只说明复现开源实现的事实。
+
+（2）逐条回顾 ReCoBR-师兄批注.pdf 的 44 条文字批注，并结合被标文字，目视核对第 7、8 页。此次直接对应第 7 页“缺乏大量的引用Adam这些都要引用”、超参取值/实验支撑、融合系数依据等意见；第 8 页温度系数意见按现有统一 tau=0.20 的设置继续保留。非实验章意见中删除无意义句子、避免含糊代词、明确来源及紧凑叙述的要求纳入本次措辞判断；未扩展修改已定稿的非实验章内容。
+
+（3）重新读取 CAFU 第 5—6 页、BIGCF 第 6—7 页的实验设置，目视核对 CAFU 第 6 页及 BIGCF 第 7 页。借鉴其“数据及评估—比较方法—参数与范围”的紧凑组织方式，不照搬其数据集、优化设置、复现实验次数、显著性检验或调参事实。
+
+二、实际修改文件
+
+（1）AAAI文件/main.tex：仅重写 Experimental Settings 的正文区间，并把 Datasets and Evaluation.、Implementation Details. 分别改为 Datasets.、Parameter Settings.，保留 Baselines.。
+
+Datasets 合并为一个自然段：列出 Youshu、iFashion、NetEase 并逐一添加数据集来源引用；保留统计表引用、CrossCBR/MultiCBR 预处理与 70%/10%/20% 划分来源、全排序、Recall/NDCG 的 K=20/40 及排除训练组合的说明。删除应用领域逐一解释、三类关系重述、重复的仅训练集使用说明；检查点选择协议移入参数设置末段。
+
+Baselines 严格保留两个自然段：第一段按总表顺序介绍 BGCN、MIDGN、CrossCBR、BundleGT、MultiCBR、EBRec、EpicCBR 的核心设计，去掉重复开场和 EpicCBR 冷/暖场景的扩展；第二段精炼说明 BGCN、MIDGN、CrossCBR、MultiCBR 数据取自 MultiCBR，BundleGT、EBRec 取自各自论文，EpicCBR 由我们复现开源实现。未改变任何结果来源或数值。
+
+Parameter Settings 重组为三个自然段：共同训练及去噪器设置；噪声日程、分数据集参数与固定融合方案；五组敏感性范围、验证集选择和运行次数。补引 Xavier 与 Adam 原始文献，明确固定融合方案参照 MultiCBR，删除排序样本/重构传播关系、iFashion 零 U-B 融合权重作用等已经在方法章说明的机制解释。
+
+（2）AAAI文件/aaai2027.bib：在原文末尾追加五条文献，原有 27 条记录及其字节完整保留：cao2017efm（NetEase 来源，Cao 等，SIGIR 2017，585—594）、chen2019pog（iFashion 来源，Chen 等，KDD 2019，2662—2670）、wang2019ngcf（全排序与 Recall/NDCG 常用评估文献，Wang 等，SIGIR 2019，165—174）、kingma2015adam（Kingma/Ba，ICLR 2015）、glorot2010xavier（Glorot/Bengio，AISTATS 2010，PMLR 9，249—256）。题名、作者、出版信息按原论文、原作者公开论文、ICLR 官方档案和 PMLR 核对；Adam 采用已核实的 ICLR 2015 年份，不机械照抄参考稿中 2017 的引用年份。
+
+数据集来源关联通过 MultiCBR 原文的实验设置与参考文献核对：Youshu 对应既有 chen2019dam，NetEase 对应 Cao 2017，iFashion 对应 POG 2019。新增另一篇 Chen 等（2019）文献后，BibTeX 自动把 DAM 与 POG 分别标记为 2019a、2019b；现有正文引用随之自动消歧，非实验章源码未修改。核对所用链接保存在 change.json 的 sources 字段。
+
+（3）工程记录.txt：追加本第十八项，追加前的 130919 字节原文完全保留。本轮所有正文和文献修改均记入此项。
+
+三、参数与实验事实保持
+
+（1）正文的数据集顺序统一为 Youshu、iFashion、NetEase。原来的 Youshu、NetEase、iFashion 参数列表按索引 0、2、1 重新排列，未改变任何数据集对应值：T=(9,12,12)，kappa=(7,3,13)，lambda_set=(0.04,0.05,0.05)，lambda_a=(0.004,0.07,0.005)，lambda_c=(0.04,0.10,0.05)；融合权重依次为 (0.35,0.15,0.50)、(0.00,0.50,0.50)、(0.50,0.20,0.30)。五组扫描集合与修改前逐字比较一致，继续作为敏感性实验范围，不虚构为此前全面网格搜索。
+
+（2）保留模型维度 64、图层数 2、学习率 1e-3、推荐批量 2048、每正样本一个负组合、tau=0.20、lambda_r=1e-5，以及去噪器两层 MLP、隐藏维度 128、时间嵌入维度 16、dropout=0.1、批量 1024、学习率 1e-3、weight decay=1e-5；保留线性噪声日程 beta_1=1e-4、beta_T=0.02。
+
+（3）保留验证集选参、按验证 Recall@20+NDCG@20+Recall@40+NDCG@40 之和选检查点、ReCoBR 总体结果三次独立运行平均、新增 lambda_set/lambda_c 敏感性实验每点一次且每个数据集固定种子。总体平均明确限定为 ReCoBR，避免误解为所有引用的基线均由我们重复训练。未把曲线峰值改为实际配置，未重新处理用户已暂留的图或数据问题。
+
+四、精简、编译与排版验证
+
+（1）按去除数学公式、引用及标题后的英文叙述词数口径，Datasets 从 106 词减为 39 词，Baselines 从 124 词减为 85 词，Parameter Settings 从 240 词减为 149 词；合计由 470 词减为 273 词，减少约 41.9%。复现所需参数值及全部五组扫描范围仍明确列出。
+
+（2）逐字节比较确认 main.tex 在 Experimental Settings 区间之外完全不变，包括实验章开头、总表、消融表、所有图及其图注、总体分析、后续实验小节、非实验章和结论。参数对应与五组扫描集合核对通过，三个段标题及基线两个自然段核对通过；全部 32 个唯一 BibTeX 键无重复，正文引用均有定义，原 CRLF 换行保留。
+
+（3）最终 latexmk 编译成功，生成 11 页 PDF，无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示。保留已有六条 underfull hbox，精简后浮动图重排带来第 8 页一条 underfull vbox（badness 10000）；该页已目视检查，未发现新的越栏、遮挡或重叠，未为消除警告修改模板、字号、页边距、行距或浮动体参数。
+
+（4）目视检查新增引用导致消歧变化的第 1、2 页，以及实验和参考文献重排的第 6—11 页。Figure 2 自然移至第 8 页，五张超参图仍保持同一横行，位于第 10 页；图像原文件未修改。
+
+（5）tmp/pdfs/experimental-settings-20261014/：保存修改前源码、文献库和工程记录快照，settings-after.tex、bibliography-added.bib、change.json、annotation-review.json，师兄批注与参考论文设置页 PNG，初稿及微调前的源码/PDF/日志，最终 main.pdf、编译日志、verification.json 和页面 PNG。output/pdf/ReCoBR_AAAI_experimental_settings_20261014.pdf 为本次完整审阅稿，旧稿和中间记录继续保留。
+
+（6）本轮未运行模型训练，未改动代码、配置、数据集、图表数据或图片，未提交 Git。提供本节修改后的英文与忠实中文翻译供用户审阅；后续总体表现、消融、深入分析、超参分析等小节仍按用户安排逐项研究修改。
+
+
+第十九项：补齐名称加粗并进一步精简参数设置
+记录日期：2026-10-14
+
+一、用户要求与参考核对
+
+（1）用户要求参照 CAFU 对数据集与比较模型名称加粗，并继续精简 Parameter Settings：删除分数据集的 T、kappa、lambda_set、lambda_a、lambda_c 实际采用值与三组融合权重；删除验证集选参/四指标之和选检查点，以及新增两个敏感性实验单次运行/固定种子说明。五组超参范围和已有超参图继续保留。
+
+（2）读取 CAFU 第 5—6 页的字体元数据，确认 Datasets 中三个数据集名称与 Baselines 中首次介绍的模型名称使用粗体，邻接的文献引用及后续一般提及使用正常字体。采用这一处理范围，不把所有重复出现的模型名或引用一起加粗。字体核对证据保存在 change.json。
+
+（3）核对当前方法章：User-Conditioned Diffusion Denoising 已说明线性方差日程，但没有给出 beta_1 的固定数值；Prediction and Model Optimization 已明确 Following MultiCBR, we adopt its fixed view coefficients。因此参数节不重复线性日程或融合继承解释。beta_T 的具体默认值随用户要求精简的分数据集取值一并去掉，仅保留未在别处交代的固定噪声下限 beta_1=1e-4。
+
+二、实际修改文件与内容
+
+（1）AAAI文件/main.tex：Datasets 首次列举的 Youshu、iFashion、NetEase 加 textbf；Baselines 第一段首次介绍的 BGCN、MIDGN、CrossCBR、BundleGT、MultiCBR、EBRec、EpicCBR 加 textbf。引用保持常规字体，基线仍为方法介绍和结果来源两个自然段，文字与结果来源没有改变。
+
+（2）AAAI文件/main.tex：删除 Parameter Settings 原第二段全部分数据集参数与融合权重列表；原线性噪声日程两端取值说明改为一句 The minimum noise variance is fixed at beta_1=1e-4，接在共同训练及去噪器设置段末尾。该句只说明固定下限，不再列 beta_T=0.02。保留 PyTorch/GPU、嵌入与传播层数、Adam/Xavier 引用、共同训练与去噪器设置、tau 和 lambda_r、五组扫描集合及 ReCoBR 总体结果三次运行平均。
+
+（3）AAAI文件/main.tex：按用户指令，从参数节删除验证集选择及检查点四指标求和说明、lambda_set/lambda_c 单次运行和固定种子说明。末尾保留 ReCoBR's overall results are averaged over three independent runs.，把原连接的分号改为句号。超参图注及后续小节未改动，本轮删除的是参数节中的文字说明，并未改变实验实际选模型协议或运行次数。
+
+（4）同步清理两处关联指向：方法章式（10）后的 The dataset-specific value of kappa is reported in the experimental settings.，以及式（14）后的 Their dataset-specific values are reported in the experimental settings.。由于对应具体取值已按用户要求删除，这两句不再成立，直接删除而不增加新解释。方法章有关沿用 MultiCBR 固定融合系数、公式和其他科学内容保持原文。
+
+（5）工程记录.txt：追加本第十九项，追加前的 138482 字节原文完全保留。第十八项关于当前正文披露具体配置和验证协议的描述作为当时历史保留，由本项覆盖当前状态；原始参数、实验协议及用户确认记录继续用于回溯。
+
+三、验证与生成文件
+
+（1）逐字节核对源码，仅实验设置的名称格式、上述参数节内容及两句方法章关联指向发生变化；清除删除末句留下的一处行尾空格，原 CRLF 换行保留。五组敏感性集合逐字比较不变，32 条文献库的 SHA256 与本轮开始前一致，数据统计表、总实验表、消融表、图和后续分析未修改。
+
+（2）编译成功，仍为 11 页；日志无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，仅保留已有六条 underfull hbox，上一轮的 underfull vbox 本轮未出现。通过 PDF 字体核对确认三个数据集、七个基线使用 TeXGyreTermesX-Bold；其中 iFashion 在自然换行处分为 iFash- 与 ion，两部分均为粗体，字体检查已按实际断词核对。
+
+（3）与上轮审阅稿比较，第 5—9 页因两句关联文字删除、名称加粗和参数段精简而自然重排；相邻第 4、10 页渲染一致。已目视检查第 5、6、7、8、9 页，未发现新的越栏、重叠或遮挡，未改变模板、全局字号、页边距或行距。五张超参图仍在第 10 页横向并列。
+
+（4）tmp/pdfs/parameter-settings-trim-20261014/：保留修改前源码与工程记录、settings-after.tex、change.json、CAFU 第 5—6 页 PNG、构建文件及日志、verification.json、第 4—10 页 PNG。output/pdf/ReCoBR_AAAI_parameter_settings_trim_20261014.pdf 为本轮完整审阅稿，旧稿与历史中间文件继续保留。
+
+（5）本轮未运行训练，未修改代码、配置、数据集、实际实验结果、图片或参考文献，未提交 Git。回复提供当前 Parameter Settings 的完整英文及忠实中文翻译。

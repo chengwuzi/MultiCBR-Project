@@ -587,18 +587,19 @@ recommendation methods on three public datasets.
 
 
 \paragraph{Datasets.}
-We use \textbf{Youshu}~\cite{chen2019dam}, \textbf{iFashion}~\cite{chen2019pog},
-and \textbf{NetEase}~\cite{cao2017efm}.
+To evaluate ReCoBR, we conduct experiments on three public
+datasets: \textbf{Youshu}~\cite{chen2019dam},
+\textbf{iFashion}~\cite{chen2019pog}, and
+\textbf{NetEase}~\cite{cao2017efm}.
 Table~\ref{tab:datasets} summarizes their statistics.
-We follow the preprocessing and 70\%/10\%/20\%
-train/validation/test splits of CrossCBR and
-MultiCBR~\cite{ma2022crosscbr,ma2024multicbr}.
-We adopt full-ranking evaluation and report Recall@$K$ and
-NDCG@$K$~\cite{wang2019ngcf} for $K\in\{20,40\}$, excluding
-training bundles from the candidates.
+Performance is measured using Recall@$K$ and
+NDCG@$K$~\cite{wang2019ngcf} for $K\in\{20,40\}$ under
+full-ranking evaluation, with training bundles excluded from
+the candidates.
 
 \paragraph{Baselines.}
-\textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
+We compare ReCoBR with seven representative bundle recommendation
+methods. \textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
 preferences through graph convolution, while
 \textbf{MIDGN}~\cite{zhao2022midgn} disentangles global and local intents.
 \textbf{CrossCBR}~\cite{ma2022crosscbr} aligns bundle and item views

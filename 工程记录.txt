@@ -1397,3 +1397,36 @@ Parameter Settings 重组为三个自然段：共同训练及去噪器设置；�
 （4）tmp/pdfs/float-placement-20261016/：保留 source-before.tex、record-before.txt、bibliography-before.bib、source-trial-01.tex、change.json、trial-01-verification.json、verification.json、编译文件与日志及页面 PNG。output/pdf/ReCoBR_AAAI_float_placement_20261016.pdf 为本轮审阅文件（5143417 字节），SHA256：747bb08a46b0fb36f0e4fd26971435c395caa3dbdf70ea245ebd3283c8d9b7d5。历史文件继续保留。
 
 （5）本轮未运行训练，未修改代码、配置、数据集或图片，未提交 Git。
+
+第三十项：相关工作按问题与设计选择重构并落实定稿
+记录日期：2026-10-16
+
+一、定稿依据与约束
+
+（1）承接前期对参照论文、四篇师兄论文与原稿批注的研究，按用户审阅通过的最后一版英文稿落实 Related Work。CAFU 没有独立的相关工作章节，参考其引言中的组织与语言风格；同时参考 BIGCF、DMRec、ProEx 等相关工作中的分类与衔接方式。原稿相关工作没有直接批注，将师兄关于简洁表达、逻辑衔接与引用规范的一般建议用于本节，不将编辑判断当作批注明确规定。
+
+（2）用户要求篇幅不增加、引用不减少。本节正文由约 621 词压缩至 415 词（不计标题和引用标签），原有 24 个不同引用键全部保留，新增 DeCA 与 AdaGCL 后为 26 个。全文实际引用由 34 篇增至 36 篇，bib 条目由 35 条增至 37 条；原有未使用条目 sun2024intent 保留。
+
+二、实际修改内容
+
+（1）AAAI文件/main.tex：仅替换 Related Work 正文，保留三个原小节。Bundle Recommendation 按表示构建与跨视图协调组织；Denoising and Diffusion for Recommendation 按反馈可靠性、恢复目标与条件信息组织；Contrastive Learning for Recommendation 按视图构建、对比目标与辅助关系组织。合并同类工作描述，减少逐一以模型名起句的罗列和本模型流程复述，保留与 ReCoBR 设计选择的必要联系。
+
+（2）逐字落实用户最后批准的稿件：CrossCBR 与 MultiCBR 分别引用；自适应视图的交互权重与成对生成/去噪模型之间使用 or；MIDGN 描述为跨全局与局部视图分离用户意图；BIGCF 从目标层面引入，避免用排他转折。DCBR 仍仅保留已确认的条件 U-B 去噪与解耦对比学习概括，不扩展其讨论。中文忠实译文已在讨论阶段提供，不写入英文论文。
+
+（3）AAAI文件/aaai2027.bib：以原 14503 字节为完整前缀，仅追加 wang2022deca 与 jiang2023adagcl。DeCA 按最终发表版作者顺序为 Yu Wang、Xin Xin、Zaiqiao Meng、Joemon M. Jose、Fuli Feng、Xiangnan He，WWW 2022，2015–2025，DOI 10.1145/3485447.3512202；AdaGCL 作者为 Yangqin Jiang、Chao Huang、Lianghao Xia，KDD 2023，4252–4261，DOI 10.1145/3580305.3599768。AdaGCL 第三作者以论文原文 Xia 为准，未采用仓库 BibTeX 中的 Huang 拼写。核对来源：https://eprints.gla.ac.uk/265372/ 、https://hexiangnan.github.io/papers/www22-robust-rec.pdf 、https://arxiv.org/html/2305.10837v3 。
+
+（4）Related Work 以外的 main.tex 源码逐字节保持原样，所有浮动体声明、正文、公式、数据、图注与表注均未改动。本轮没有进一步移动图表或改动模板参数。main.tex SHA256：13a0b8fb48aece53f52922b3606351e4c322bea6b44a2462484dec1aa429d97f；aaai2027.bib SHA256：35cd30a9328644378ecf6976587a74fa82068a7f23f618667a76c2e64597d3bd。
+
+（5）工程记录.txt：追加本第三十项，追加前的 186635 字节完整保留；本项一并记录源稿、文献库、构建与审阅产物的修改。
+
+三、验证与审阅文件
+
+（1）latexmk 首轮构建成功，全文仍为十页；无 LaTeX 错误、未定义引用或文献、overfull box、重复标签及待重编译提示。当前日志有六条 underfull hbox 与一条 underfull vbox；实际查看页面后未发现新增遮挡、重叠、越栏或公式裁切，没有为普通松散盒提示额外调整定稿文字与版式。
+
+（2）原 24 个相关工作引用键全部保留，仅增加两键；全文 36 个实际引用键与生成 main.bbl 的 36 条文献一一对应，bib 无重复键或缺失键。独立代理核对获批稿对应、源码修改边界、原 bib 字节前缀及新增条目通过。交叉引用及两条新文献的作者、年份、页码在输出中正常。
+
+（3）第 1 页与上一版逐像素一致，第 2–10 页因正文压缩和文献增补自然重排；已保存全十页 PNG，并由主代理实际查看第 2、3、9、10 页、独立代理实际查看第 4–8 页。相关工作结束位置提前约 228 点，渲染篇幅没有增加。Table 2 总表与 Table 3 消融表仍在第七页；Figure 2 四张深入分析小图仍在第八页；Figure 1、Table 1、Figure 3 分别仍在第四、六、九页。五张超参图仍在同一横行。
+
+（4）tmp/pdfs/related-work-final-20261016/：保留 source-before.tex、bibliography-before.bib、record-before.txt、related-work-approved.tex、new-entries.bib、change.json、trial-01-verification.json、verification.json、构建文件与日志、文本提取和全十页 PNG。output/pdf/ReCoBR_AAAI_related_work_final_20261016.pdf 为本轮完整审阅文件（5142886 字节），SHA256：8c9d421ce32078e09cf5ba9b1c86f75d1659f1b1bd0c2a93bcbe330efea353b9。历史产物继续保留。
+
+（5）git diff --check 通过。本轮未运行训练，未修改代码、配置、数据集、图片或表格数值，未提交 Git。

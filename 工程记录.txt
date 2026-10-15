@@ -1127,3 +1127,63 @@ Parameter Settings 重组为三个自然段：共同训练及去噪器设置；�
 （3）tmp/pdfs/fair-comparison-20261014/：保存 source-before.tex、record-before.txt、change.json、构建文件及日志、verification.json、第 5—10 页 PNG。output/pdf/ReCoBR_AAAI_fair_comparison_20261014.pdf 为本轮完整审阅稿，历史文件继续保留。
 
 （4）回复提供新增英文句子及其忠实中文翻译。
+
+
+第二十二项：接入四种通用图推荐基线并重写总体性能分析
+记录日期：2026-10-15
+
+一、用户要求与资料核对
+
+（1）用户明确要求将 LightGCN、SGL、XSimGCL、LightGCL 接入实验总表，依据所给 MultiCBR Table 2 截图提取结果、同步关联部分，并给出新版 Overall Performance。此前讨论中的风格要求继续适用：以 CAFU 为主要参考、BIGCF 为次要参考，精炼表达；总体性能采用短引导和三条观察，避免把 MultiCBR 描述为主角或由整体模型比较推断单个组件的因果作用。
+
+（2）四种方法的 48 个数值由主代理逐格提取，另一代理独立复核，并参照 MultiCBR 官方正文的表 2 与基线说明核查。来源：https://arxiv.org/html/2311.16751v2#S3.SS1 。采用截图中的 SGL 版本，不混用 EBRec 或 BundleGT 论文中不同的 SGL 结果。按当前总表的 Youshu、iFashion、NetEase 次序重新排列，指标仍为 R@20、N@20、R@40、N@40，统一四位小数。
+
+（3）新增两条文献的原始来源核查：XSimGCL 为 IEEE Transactions on Knowledge and Data Engineering 36(2):913–926，正式卷期年份 2024，DOI 10.1109/TKDE.2023.3288135，非 TOIS；LightGCL 为 ICLR 2023。参考作者官方大学主页 https://eecs.uq.edu.au/profile/1592/junliang-yu 、原始预印本 https://arxiv.org/abs/2209.02544 、https://arxiv.org/abs/2302.08191 及官方项目 https://github.com/HKUDS/LightGCL 。IEEE 页面和 OpenReview 正文存在访问限制，不声称直接读取其受限页面；元数据由上述可访问的原始来源交叉核对。
+
+二、实际修改文件与内容
+
+（1）AAAI文件/main.tex：Table 2 在 BGCN 前新增 LightGCN、SGL、XSimGCL、LightGCL 四行；四种 U-B-only 基线与七种组合推荐基线之间、ReCoBR 之前各加一条 midrule 分隔。共十一种比较方法加 ReCoBR。原八个模型行逐字保持，尤其 BundleGT 的 iFashion R@20 保持用户已确认的 0.1263。所有结果、最佳/次佳标记、Improv. 十二个数值均按当前表格四位小数重新核对，结果不变。未改变表格缩放、字号、tabcolsep、页边距或模板。
+
+（2）AAAI文件/main.tex：Baselines 开场数量从 seven 更新为 eleven；前置四种方法的精炼介绍及引用，首次名称加粗，说明在此比较中它们把 bundle 视为 item，仅使用 U-B 交互。保留原七种方法的介绍与出处，不增加 EpicCBR 冷/暖场景说明。该小节仍为两个自然段：方法介绍、结果来源。来源段明确四种新增方法及 BGCN、MIDGN、CrossCBR、MultiCBR 均采用 MultiCBR 论文结果，BundleGT/EBRec 采用各自论文结果，EpicCBR 使用用户复现其开源实现得到的结果，不声称本代理进行了训练或统一重跑这些基线。
+
+（3）AAAI文件/main.tex：Overall Performance 改为短引导和三条观察：ReCoBR 在十二项指标上均第一，保留三个数据集 R@20 的代表性提升率；三种通用图对比方法均超过 LightGCN，且在 iFashion 上均超过 BGCN/MIDGN，说明物品信息的可用性本身不保证更好的结果；ReCoBR 超过五种较新的组合推荐方法，而这五种方法均超过四种 U-B-only 方法，进而讨论整体建模选择。第三条改为 ReCoBR 作主语，删除 establishing strong comparisons 这类空泛措辞。不把全模型优势当作单独组件或互补性的证明。特意核查并避免将 iFashion 上的结论扩展到所有数据集：NetEase 上 XSimGCL 的 R@40=0.1079 低于 MIDGN 的 0.1085。
+
+（4）AAAI文件/aaai2027.bib：保留原 32 条文献及其全部字节，仅追加 yu2024xsimgcl 和 cai2023lightgcl，共 34 条；LightGCN、SGL 复用现有引用。不改已定稿的 Datasets、Parameter Settings，也不扩展修改 Related Work、方法章、后续实验小节、图注或图片。
+
+（5）工程记录.txt：追加本第二十二项，追加前的 150624 字节完整保留。此前已完成的 Overall Performance 参考资料精读作为本轮写作背景；本轮文件实际修改、数值来源与检查在此单独记录。
+
+三、验证与审阅文件
+
+（1）逐字节验证：将新增四行、两条 midrule、Baselines 和 Overall Performance 还原后，main.tex 与 source-before.tex 完全一致；原 CRLF 保留。文献库以修改前完整字节为前缀。所有 144 个结果单元、12 项最佳/次佳标记及提升率、三条观察涉及的比较关系、11 个基线首次加粗、全部引用键均通过核对。
+
+（2）latexmk 编译成功，完整审阅稿仍为 11 页；日志无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示，保留 6 条既有 underfull hbox，underfull vbox 为 0。与上一稿相比，第 7—11 页因新增基线、表格行、分析及文献自然重排；相邻第 6 页不变。第 6—11 页均已渲染并目视检查，未发现新增越栏、遮挡、重叠或表格错位；总表完整显示，新增引用正常生成，五张超参图仍在同一横行。
+
+（3）tmp/pdfs/baseline-expansion-20261015/：保留 source-before.tex、bibliography-before.bib、record-before.txt、baselines-after.tex、overall-after.tex、new-table-rows.tex、change.json、verification.json、构建文件与日志、第 6—11 页 PNG。output/pdf/ReCoBR_AAAI_baseline_expansion_20261015.pdf 为本轮完整审阅稿，SHA256：df270e375c1e968c3800efdc1087b256bae7dffe669c12c8e795c5964efa45e9。历史输出与中间文件均保留。
+
+（4）本轮未运行训练，未修改训练代码、配置、数据集、实际实验结果或图片，未提交 Git。回复提供新增数据与完整更新总表的审阅稿、关联文字及新版 Overall Performance，并附忠实中文翻译。
+
+
+第二十三项：落实 Overall Performance 定稿
+记录日期：2026-10-15
+
+一、定稿依据与实际修改
+
+（1）用户在多轮审阅完整英文及忠实中文翻译后，明确确认“可以，就定稿为这一版吧”。本轮将最后一次完整稿写入论文，保持短引导加三条观察的结构，不再自行润色或扩展讨论稿。
+
+（2）AAAI文件/main.tex：仅替换 Overall Performance 小节。第一条保留三个数据集的 R@20 提升率，补充 iFashion 提升突出、尤其 NDCG 的概括；将“较丰富的 U-B 历史提供图重构及邻居筛选上下文，可能提炼更清晰、更具区分性的用户偏好信号”写为一个连续的可能原因句。第二条保留三种图对比方法优于 LightGCN 及在 iFashion 优于 BGCN/MIDGN 的观察，并将结论接到 ReCoBR 的偏好引导图重构。第三条按定稿描述五种较新的基线基于原始 U-B 关系进行组合偏好建模及跨视图信息整合，再过渡至 ReCoBR 对参与跨视图学习的 U-B 连接进行细化，结尾明确落到扩散驱动图重构挖掘有效 U-B 偏好信号的价值。
+
+（3）正文英文与用户确认稿逐句一致，只将 Table 2 改为现有表格引用命令、百分号按 LaTeX 转义、ReCoBR’s 改为源码 ASCII 撇号，并按源码习惯换行。另一代理只读独立核对通过，没有提出或实施新的措辞修改。中文翻译已在用户确认前完整提供，本轮不在英文论文中额外插入中文。
+
+（4）工程记录.txt：追加本第二十三项，追加前的 156431 字节完整保留。此前第二十二项中的 Overall Performance 作为当时版本继续保留供回溯，当前正文以本次用户确认的完整稿为准。此前后续讨论期间没有修改正文，本轮统一落实定稿。
+
+二、验证与审阅文件
+
+（1）逐字节核对，main.tex 的变动仅位于 Overall Performance 起止边界之间，将该小节还原后与本轮快照完全一致，原 CRLF 保留。因此方法章、已定稿实验设置、全部表格数值和分组线、图、后续实验正文均保持本轮开始前内容。aaai2027.bib 的 SHA256 未变，未新增或删除引用。
+
+（2）latexmk 编译成功，审阅稿仍为 11 页；无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示。保留 6 条 underfull hbox，本次自然重排出现 1 条 underfull vbox；已检查对应图表与续文的留白，没有越栏、遮挡或重叠，不为消除排版提示而改变模板或定稿文字。PDF 文本在处理正常行末断词后核对定稿关键句通过。
+
+（3）与上一审阅稿相比，第 7—11 页自然重排，第 6 页不变；第 6—11 页均已渲染并目视检查。总表数据及分组线正常，五张超参图仍同一横行。字体、页边距、行距、图表缩放与浮动参数未人工调整。
+
+（4）tmp/pdfs/overall-final-20261015/：保留 source-before.tex、record-before.txt、overall-approved.tex、change.json、verification.json、构建文件与日志、第 6—11 页 PNG。output/pdf/ReCoBR_AAAI_overall_final_20261015.pdf 为本轮定稿审阅文件，SHA256：5464c65c6f07e2a40a75381bcbb4240c0f28777c2714b2edd6e3af3a57c894d6。历史输出和中间文件继续保留。
+
+（5）本轮未运行训练，未修改代码、配置、数据集、图片或参考文献，未提交 Git。

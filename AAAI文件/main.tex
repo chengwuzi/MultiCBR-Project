@@ -462,6 +462,27 @@ recommendation methods on three public datasets.
         & R@20 & N@20 & R@40 & N@40 \\
         \midrule
 
+        LightGCN
+        & 0.2286 & 0.1344 & 0.3190 & 0.1592
+        & 0.0837 & 0.0612 & 0.1284 & 0.0770
+        & 0.0496 & 0.0254 & 0.0795 & 0.0334 \\
+
+        SGL
+        & 0.2622 & 0.1551 & 0.3630 & 0.1825
+        & 0.1000 & 0.0739 & 0.1498 & 0.0915
+        & 0.0716 & 0.0386 & 0.1104 & 0.0488 \\
+
+        XSimGCL
+        & 0.2644 & 0.1560 & 0.3569 & 0.1814
+        & 0.1003 & 0.0744 & 0.1501 & 0.0920
+        & 0.0710 & 0.0376 & 0.1079 & 0.0475 \\
+
+        LightGCL
+        & 0.2710 & 0.1556 & 0.3693 & 0.1827
+        & 0.0894 & 0.0653 & 0.1362 & 0.0818
+        & 0.0705 & 0.0371 & 0.1122 & 0.0481 \\
+        \midrule
+
         BGCN
         & 0.2436 & 0.1329 & 0.3379 & 0.1589
         & 0.0802 & 0.0582 & 0.1239 & 0.0736
@@ -497,6 +518,7 @@ recommendation methods on three public datasets.
         & 0.1474 & 0.1189 & 0.2000 & 0.1374
         & \underline{0.0913} & \underline{0.0502} & 0.1345 & \underline{0.0615} \\
 
+        \midrule
         \textbf{ReCoBR}
         & \textbf{0.2920} & \textbf{0.1759} & \textbf{0.3997} & \textbf{0.2023}
         & \textbf{0.1568} & \textbf{0.1315} & \textbf{0.2067} & \textbf{0.1491}
@@ -600,8 +622,15 @@ full-ranking evaluation, with training bundles excluded from
 the candidates.
 
 \paragraph{Baselines.}
-We compare ReCoBR with seven representative bundle recommendation
-methods. \textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
+We compare ReCoBR with eleven representative recommendation
+methods. \textbf{LightGCN}~\cite{he2020lightgcn} learns collaborative
+representations through neighborhood aggregation.
+\textbf{SGL}~\cite{wu2021sgl} applies contrastive learning to augmented
+graphs. \textbf{XSimGCL}~\cite{yu2024xsimgcl} uses noise-based embedding
+augmentation, while \textbf{LightGCL}~\cite{cai2023lightgcl} constructs
+contrastive views using singular value decomposition.
+These four methods treat bundles as items and use only U-B
+interactions. \textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
 preferences through graph convolution, while
 \textbf{MIDGN}~\cite{zhao2022midgn} disentangles global and local intents.
 \textbf{CrossCBR}~\cite{ma2022crosscbr} aligns bundle and item views
@@ -613,7 +642,8 @@ item-level bundle representations using bundle--user--item
 correlations. \textbf{EpicCBR}~\cite{li2026epiccbr} combines item-relation
 enhancement with contrastive learning.
 
-Results for BGCN, MIDGN, CrossCBR, and MultiCBR are taken from
+Results for LightGCN, SGL, XSimGCL, LightGCL, BGCN, MIDGN,
+CrossCBR, and MultiCBR are taken from
 MultiCBR~\cite{ma2024multicbr}; BundleGT and EBRec results are
 from their respective papers~\cite{wei2023bundlegt,du2025ebrec}.
 We reproduce EpicCBR using its open-source implementation.
@@ -644,30 +674,35 @@ ReCoBR's overall results are averaged over three independent runs.
 
 \subsection{Overall Performance}
 
-Table~\ref{tab:overall} reports Top-20 and Top-40 results for
-ReCoBR and seven baselines. ReCoBR obtains the highest Recall
-and NDCG at both cutoffs on all three datasets. The strongest
-baseline varies by dataset and metric. At Top-20, it is BundleGT on
-Youshu, MultiCBR on iFashion, and EpicCBR on NetEase. At
-Top-40, EpicCBR leads in Recall on Youshu and NDCG on NetEase,
-BundleGT leads in NDCG on Youshu and Recall on NetEase,
-and MultiCBR leads in both metrics on iFashion.
-
-Compared with the strongest baseline for each metric,
-ReCoBR improves R@20 and N@20 by 0.52\% and 1.27\% on Youshu,
-4.53\% and 9.31\% on iFashion, and 4.60\% and 1.79\% on
-NetEase, respectively. At Top-40, the corresponding improvements
-are 1.22\% and 0.60\% on Youshu, 1.67\% and 7.27\% on
-iFashion, and 0.07\% and 1.95\% on NetEase. The gain in
-Recall@40 on NetEase is small, whereas the NDCG gain is larger.
-
-The comparison with MultiCBR is particularly informative
-because it already uses the three relation views, representation
-fusion, and post-fusion contrastive learning. ReCoBR improves
-over this baseline at both cutoffs on all three datasets. This
-motivates examining the additional graph reconstruction and
-pre-fusion objectives separately, as we do next, to understand
-their contributions beyond the multi-view backbone.
+Table~\ref{tab:overall} compares ReCoBR with eleven baselines.
+We draw the following observations:
+\begin{itemize}
+\item ReCoBR achieves the best results across all datasets and
+metrics. Its Recall@20 improves over the strongest baseline by
+0.52\%, 4.53\%, and 4.60\% on Youshu, iFashion, and NetEase,
+respectively. The gains are most pronounced on iFashion,
+particularly in NDCG. This may be because its richer U-B
+histories provide more context for preference-guided graph
+reconstruction and neighbor selection, helping distill clearer
+and more discriminative user preference signals.
+\item SGL, XSimGCL, and LightGCL outperform LightGCN across all
+datasets and metrics. On iFashion, they also exceed BGCN and
+MIDGN despite using only U-B interactions. These results show
+that incorporating item information alone does not guarantee
+better recommendation. They highlight the importance of
+effective U-B preference learning, which ReCoBR addresses
+through preference-guided graph reconstruction.
+\item ReCoBR also outperforms CrossCBR, BundleGT, MultiCBR,
+EBRec, and EpicCBR, which build on the original U-B relations
+to model bundle preferences and integrate information across
+views. ReCoBR further considers which U-B connections should
+guide learning across views, bringing interaction refinement
+and auxiliary-information integration into one framework.
+ReCoBR's consistent gains across all three datasets support
+the value of diffusion-driven graph reconstruction in
+uncovering informative U-B preference signals for cross-view
+learning.
+\end{itemize}
 
 
 \subsection{Ablation Study}

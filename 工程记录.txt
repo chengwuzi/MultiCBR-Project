@@ -1187,3 +1187,39 @@ Parameter Settings 重组为三个自然段：共同训练及去噪器设置；�
 （4）tmp/pdfs/overall-final-20261015/：保留 source-before.tex、record-before.txt、overall-approved.tex、change.json、verification.json、构建文件与日志、第 6—11 页 PNG。output/pdf/ReCoBR_AAAI_overall_final_20261015.pdf 为本轮定稿审阅文件，SHA256：5464c65c6f07e2a40a75381bcbb4240c0f28777c2714b2edd6e3af3a57c894d6。历史输出和中间文件继续保留。
 
 （5）本轮未运行训练，未修改代码、配置、数据集、图片或参考文献，未提交 Git。
+
+
+第二十四项：精简并落实 Ablation Study 定稿
+记录日期：2026-10-15
+
+一、阅读研究与用户确认
+
+（1）用户要求重构当前过长的消融小节，正文篇幅最多比 CAFU 的 Ablation Study 多约 15%；先精读十四篇参照材料的消融及必要控制实验，再重点研究 CAFU、BIGCF、DMRec、ProEx 四篇师兄论文，并回顾师兄批注。研究及讨论阶段均只读，没有修改文稿或生成笔记文件。
+
+（2）CAFU 消融在 PDF 第 6 页右栏，正文一个自然段、五句话；分栏恢复正常排版断词后，按空格分词为 106 词（不含标题、表格和表注）。两人独立核对。其组织为目的与表引用、集中定义变体、两项设计的删除结果及解释、整体结论；没有逐格复述数值或为每个模块设小标题。其他论文用于学习按研究问题归组、替换对照和差异化解释；没有机械套用长篇消融结构。
+
+（3）明确区分参照材料实际类型：Revisiting 与 Survey 没有原创方法的独立模块消融，不虚构其章节；DDPM、SimCLR、DiffRec 等的设计控制实验按实际内容阅读。MCCLK、DiffRec、LightGCN、SimCLR 本地 TXT 的相关抽取缺口通过官方 arXiv HTML 补读；项目标注“假结果”的 RDiffBR 仅参考组织方式，不采信结果或机制结论。
+
+（4）用户审阅初稿后要求扩展收尾，最后认可完整的 121 词版本，并明确确认“行，就用这版吧。”。本轮按该最终版本写入，不在定稿后再自行增删措辞。
+
+二、实际修改内容
+
+（1）AAAI文件/main.tex：仅替换 4.3 Ablation Study，取消原四个模块小标题及逐数据集、逐指标的数值复述，合并为一个自然段。五种变体在开头统一介绍，包含原来稍后才补充的 w/o SetLoss；使用恢复原始图、移除损失、移除对应对比目标等操作说明。
+
+（2）结果分析保留图重构在 iFashion 收益突出、SetLoss 的额外收益、融合前跨视图关联的作用，以及去掉融合后或全部对比学习时更大的性能下降。收尾按用户确认稿写为 Overall, ReCoBR outperforms all variants, demonstrating the effectiveness of jointly refining U-B preference signals and integrating auxiliary information for bundle recommendation.，从完整模型优势落到两项设计共同服务于组合偏好学习的价值。
+
+（3）正文与用户认可稿逐句一致，只将 Table 3 换为现有表格引用、Markdown 粗体换为 textbf，并按源码习惯换行。另一代理只读核对定稿与 main.tex 对应段落一致，全文 121 词；比 CAFU 的 106 词多约 14.2%，符合要求。原文三百余词的统计与当前口径仅在 Table 3 算一词还是两词上有微小差异，不影响大幅压缩的结论；当前统一将 Table 3 算两词。
+
+（4）工程记录.txt：追加本第二十四项，追加前的 159853 字节完整保留。历史记录继续保留供回溯。中文翻译已在用户确认前完整给出，不额外插入英文论文。
+
+三、验证与审阅文件
+
+（1）逐字节核对，main.tex 仅 Ablation Study 起止边界之间发生变化，恢复该段后与 source-before.tex 完全一致；原 CRLF 保留。已定稿的实验设置和 Overall Performance、消融表及其他全部表格数据、图注与图片、方法章和后续实验正文均保持本轮开始前内容。aaai2027.bib 的 SHA256 未变，引用未增删。
+
+（2）latexmk 编译成功，完整审阅稿仍为 11 页；无 LaTeX 错误、未定义引用/文献、overfull box 或待重编译提示。日志有 6 条 underfull hbox 和 1 条 underfull vbox，与上一版的数量相同。PDF 正文在恢复正常行末断词后核对关键定稿句通过。
+
+（3）与上一稿相比，第 7—11 页因正文压缩自然重排，相邻第 6 页不变；第 6—11 页均已渲染并目视检查，未发现越栏、重叠、遮挡或表格错位。4.3 完整显示于第 7 页，表格数据和分组线正常；五张超参图仍同一横行，自然前移至第 9 页。没有调整模板、字号、页边距、行距、图表缩放或浮动参数。
+
+（4）tmp/pdfs/ablation-final-20261015/：保留 source-before.tex、record-before.txt、ablation-approved.tex、change.json、verification.json、构建文件与日志、第 6—11 页 PNG。output/pdf/ReCoBR_AAAI_ablation_final_20261015.pdf 为本轮定稿审阅文件，SHA256：565d50cd5db5523eaed729d5846bb51b9f8ab5e581be24a102a9f8c10f6c184d。历史输出和中间文件继续保留。
+
+（5）本轮未运行训练，未修改代码、配置、数据集、图片或参考文献，未提交 Git。

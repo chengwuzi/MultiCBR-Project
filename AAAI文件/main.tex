@@ -707,59 +707,24 @@ learning.
 
 \subsection{Ablation Study}
 
-Table~\ref{tab:ablation} compares ReCoBR with five variants.
-\textbf{w/o Graph Recon.} replaces the reconstructed U-B graph
-with the original observed graph while retaining the
-recommendation objectives. \textbf{w/o Pre-fusion CL} removes
-the U-B-anchored cross-view objective but retains graph
-reconstruction. \textbf{w/o Post-fusion CL} removes the
-contrastive regularizer in the fused representation space,
-and \textbf{w/o All CL} removes both contrastive objectives.
-
-\paragraph{U-B Graph Reconstruction.}
-Removing graph reconstruction reduces R@20 and N@20 on iFashion
-from 0.1568 and 0.1315 to 0.1500 and 0.1245, respectively.
-Both metrics also decrease on NetEase. On Youshu, R@20 is
-essentially unchanged (0.2920 versus 0.2919), whereas N@20
-drops from 0.1759 to 0.1734. Thus, the benefit of reconstruction
-varies across datasets and metrics, with the clearest gains on
-iFashion. These results support refining the U-B connections
-used for propagation through the complete pretraining,
-conditional denoising, and interaction-selection pipeline.
-
-\paragraph{Bundle-Set Consistency.}
-We additionally examine \textbf{w/o SetLoss}, which removes
-the bundle-set consistency term from denoiser training while
-retaining the reconstruction objective and both ReCoBR modules.
-Removing this term yields a modest performance decrease
-across all three datasets. This supports its role as an
-auxiliary task-specific constraint: maintaining agreement
-with historical bundle representations helps the recovered
-preference serve subsequent interaction scoring.
-
-\paragraph{Pre-Fusion Cross-View Learning.}
-Removing the pre-fusion objective lowers both metrics on all
-three datasets. On NetEase, R@20 and N@20 decrease from
-0.0955 and 0.0511 to 0.0906 and 0.0487, respectively; on
-Youshu, N@20 falls from 0.1759 to 0.1692. These comparisons
-show that explicit U-B--U-I and U-B--B-I associations provide
-value beyond representation fusion and its existing
-regularizer. Using the reconstructed U-B view as a common
-reference allows auxiliary behavioral and compositional
-information to contribute to bundle-preference learning
-before the views are combined.
-
-\paragraph{Backbone Contrastive Regularization.}
-Removing post-fusion contrastive learning causes larger
-decreases, and removing both contrastive objectives further
-reduces performance on every dataset. The fused-space
-regularizer therefore remains important to the inherited
-recommendation backbone. Meanwhile, the full model's gains
-over \textbf{w/o Pre-fusion CL} show that this regularizer does
-not make the proposed cross-view objective redundant. The
-two objectives constrain different representations:
-relation-specific pairs before fusion and the combined
-representations used for prediction.
+Table~\ref{tab:ablation} compares ReCoBR with five variants:
+\textbf{w/o Graph Recon.} restores the original U-B graph;
+\textbf{w/o SetLoss} removes the bundle-set consistency loss;
+\textbf{w/o Pre-fusion CL} and \textbf{w/o Post-fusion CL}
+remove their respective contrastive objectives; and
+\textbf{w/o All CL} removes both. Graph reconstruction
+improves ranking performance, particularly on iFashion,
+supporting preference-guided selection of propagation
+connections. SetLoss yields further gains, reinforcing the
+value of consistency with historical bundle preferences.
+Removing pre-fusion learning also degrades performance,
+highlighting the value of connecting U-B preferences with
+auxiliary views before fusion. The larger losses without
+post-fusion or all contrastive learning emphasize the
+importance of representation regularization. Overall, ReCoBR
+outperforms all variants, demonstrating the effectiveness of
+jointly refining U-B preference signals and integrating
+auxiliary information for bundle recommendation.
 
 
 \subsection{In-depth Analysis}

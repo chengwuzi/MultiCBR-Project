@@ -744,53 +744,37 @@ auxiliary information for bundle recommendation.
         (c) & (d)
     \end{tabular}
 
-    \caption{In-depth analysis of ReCoBR.
-    (a)--(b) Recall@20 and NDCG@20 of interaction selection
-    strategies on iFashion, with retention limit $\kappa$
-    plotted as $K$.
-    (c)--(d) Recall@20 and NDCG@20 of complete ReCoBR and
-    w/o Pre-fusion CL on NetEase. Both retain graph
-    reconstruction. G1--G4 are ordered by training U-B degree,
-    with ranges $[0,7)$, $[7,8)$, $[8,12)$, and $[12,660]$.
-    Lines show ReCoBR's relative gains over w/o Pre-fusion CL.}
+    \caption{In-depth analysis of ReCoBR using Recall@20 and
+    NDCG@20. (a)--(b) Interaction selection on iFashion
+    ($K=\kappa$). (c)--(d) ReCoBR versus w/o Pre-fusion CL on
+    NetEase, both retaining graph reconstruction. Users are
+    sorted by increasing training U-B interaction counts and
+    divided into four equally sized groups (G1--G4). Lines show
+    relative improvements over w/o Pre-fusion CL.}
     \label{fig:in-depth-analysis}
 \end{figure}
 
 
 \paragraph{Interaction Selection Strategies.}
-To examine how the choice of retained interactions affects
-recommendation, we compare five U-B graph construction
-strategies on iFashion. \textbf{Original UB} keeps the observed
-graph. \textbf{Random-$K$} retains randomly selected observed
-interactions, whereas \textbf{Popularity-$K$} selects those
-associated with the most popular bundles.
-\textbf{Pretrain-Sim} scores interactions by the cosine
-similarity of pretrained user and bundle embeddings.
-\textbf{ReCoBR} instead scores them against the user's refined
-historical bundle-preference vector. Each filtering strategy
-retains at most $\kappa$ interactions per user, where $\kappa$
-is denoted by $K$ in the figure, and selects only from the
-user's training history. Results are averaged over multiple
-independent runs.
-
-Figure~\ref{fig:in-depth-analysis}(a)--(b) shows that ReCoBR
-achieves the highest Recall@20 and NDCG@20 among the compared
-strategies at every tested retention limit. Random selection
-can improve over the original graph, but consistently trails
-ReCoBR at matched retention limits. Thus, the choice of
-connections matters beyond reducing their number.
-Popularity-based selection is especially weak in NDCG,
-indicating that globally popular bundles are not necessarily
-the most useful propagation neighbors for an individual user.
-
-Pretrain-Sim also underperforms ReCoBR. This comparison favors
-the complete history-based refinement and scoring pipeline
-over direct pretrained user--bundle similarity. ReCoBR's
-performance initially improves as more interactions are
-retained and then declines at larger limits. Together, these
-observations support selecting connections according to
-personalized bundle-preference context while balancing
-neighborhood coverage and selectivity.
+On iFashion, we compare ReCoBR with the original graph
+(\textbf{Original UB}) and three filtering strategies: random
+selection (\textbf{Random-K}), bundle popularity
+(\textbf{Popularity-K}), and pretrained user-bundle similarity
+(\textbf{Pretrain-Sim}). All filtering strategies select from
+users' training histories under the same per-user retention
+limit $\kappa$. As shown in
+Figure~\ref{fig:in-depth-analysis}(a)--(b), ReCoBR consistently
+performs best. Random-K can improve over Original UB but
+remains inferior to ReCoBR, indicating that selecting
+appropriate connections matters beyond reducing their number.
+Popularity-K's weak NDCG suggests that global popularity is
+insufficient for personalized ranking. Pretrain-Sim even
+underperforms Random-K, suggesting that pretrained user-bundle
+similarity does not necessarily reflect a connection's value
+for subsequent propagation. ReCoBR instead evaluates each
+observed bundle against a refined historical preference
+representation, providing an explicit bundle-preference
+reference for neighbor selection.
 
 
 \begin{figure*}[t]
@@ -818,114 +802,58 @@ neighborhood coverage and selectivity.
 
 
 \paragraph{Performance on Sparse Users.}
-To evaluate the pre-fusion objective under limited bundle
-feedback, we group NetEase users by their numbers of training
-U-B interactions, from the lowest-degree group G1 to the
-highest-degree group G4. The degree ranges are given in
-Figure~\ref{fig:in-depth-analysis}. We compare complete ReCoBR
-with \textbf{w/o Pre-fusion CL}. Both settings retain
-diffusion-driven graph reconstruction and the recommendation
-backbone; they differ in whether the U-B-anchored cross-view
-objective is included.
+NetEase users are sorted by increasing training U-B
+interaction counts and divided into four equally sized groups
+(G1--G4). We compare ReCoBR with \textbf{w/o Pre-fusion CL},
+retaining graph reconstruction in both.
+Figure~\ref{fig:in-depth-analysis}(c)--(d) shows improvements
+across all four groups, with the largest relative gains in
+the sparsest group G1: 12.64\% in Recall@20 and 9.32\% in
+NDCG@20. These results suggest that explicit cross-view
+learning is particularly useful when direct bundle feedback
+is limited, allowing U-I behavior and B-I composition to
+provide additional learning signals for bundle preference
+modeling.
 
-As shown in Figure~\ref{fig:in-depth-analysis}(c)--(d), ReCoBR
-improves Recall@20 and NDCG@20 in all four groups. The largest
-relative gains occur in G1: 12.64\% in Recall@20 and 9.32\%
-in NDCG@20. Gains in the other groups are smaller and do not
-decrease monotonically with interaction count. This result
-directly supports the role of pre-fusion cross-view learning
-under sparse U-B feedback. By associating U-B representations
-with representations derived from U-I behavior and B-I
-composition, the objective provides additional learning
-signals for users with limited bundle histories. The gains
-for G2--G4 further indicate that its benefit is not restricted
-to the lowest-interaction users.
 
 
 \subsection{Hyperparameter Sensitivity}
 
-We vary the maximum diffusion noise variance $\beta_T$, the
-retention limit $\kappa$, the pre-fusion contrastive weight
-$\lambda_a$, the SetLoss weight $\lambda_{\mathrm{set}}$, and
-the post-fusion contrastive weight $\lambda_c$ one at a time
-while keeping the other settings fixed.
-Figure~\ref{fig:hyperparameter} reports Recall@20.
+Figure~\ref{fig:hyperparameter} reports ReCoBR's sensitivity
+to five key hyperparameters. We vary one parameter at a time
+while keeping the others fixed. For $\beta_T$, intermediate
+noise levels yield better performance than the extremes,
+suggesting that preference recovery benefits from moderate
+perturbation without excessively disrupting historical
+information. For $\kappa$, iFashion favors smaller retained
+neighborhoods, whereas NetEase benefits from retaining more
+connections. This difference highlights the need to balance
+neighborhood coverage with preference relevance when selecting
+propagation connections. Nonzero $\lambda_{\mathrm{set}}$
+weights improve performance on Youshu, while iFashion and
+NetEase show only small, nonmonotonic changes. Increasing
+this weight does not consistently yield further gains.
+Moderate nonzero values of $\lambda_a$ and $\lambda_c$ improve
+performance, while larger weights can reduce it. The decline
+is especially pronounced for $\lambda_c$ on Youshu and
+NetEase, suggesting the need to balance contrastive
+regularization with the ranking objective.
 
-\paragraph{Diffusion Noise.}
-Figure~\ref{fig:hyperparameter}(a) shows that intermediate
-noise levels perform better than the ends of the tested range.
-Youshu and NetEase exhibit clearer changes, whereas iFashion
-varies within a narrower absolute range. Increasing $\beta_T$
-makes the recovery task harder by perturbing the historical
-preference more strongly. The observed curves are consistent
-with balancing this training perturbation against preservation
-of personalized information; stronger corruption does not
-consistently improve recommendation.
-
-\paragraph{Retention Limit.}
-Figure~\ref{fig:hyperparameter}(b) reveals different responses
-to $\kappa$. NetEase benefits markedly from increasing a very
-small retained neighborhood, then levels off and slightly
-declines. iFashion favors smaller limits and loses accuracy
-as more connections are included. Youshu fluctuates within a
-narrower range. These differences show that aggressive
-filtering can discard useful propagation connections, while
-retaining more observed edges is not always beneficial.
-The retention limit should therefore account for the
-dataset's balance between neighborhood coverage and
-preference relevance.
-
-\paragraph{Pre-Fusion Contrastive Weight.}
-In Figure~\ref{fig:hyperparameter}(c), moderate nonzero weights
-improve over omitting the cross-view objective, especially
-on NetEase. Larger weights eventually reduce performance;
-on Youshu, the largest tested weight also underperforms
-zero weight. This behavior highlights the need to balance
-cross-view agreement with the ranking objective, rather than
-maximizing alignment strength. The scale of these changes
-differs across datasets, as indicated by the broken axes.
-
-\paragraph{SetLoss Weight.}
-Figure~\ref{fig:hyperparameter}(d) shows modest absolute
-changes as $\lambda_{\mathrm{set}}$ varies. Youshu generally
-improves over the zero-weight setting, whereas iFashion and
-NetEase show smaller, nonmonotonic fluctuations. These
-observations are consistent with treating SetLoss as an
-auxiliary consistency constraint alongside preference
-reconstruction.
-
-\paragraph{Post-Fusion Contrastive Weight.}
-Figure~\ref{fig:hyperparameter}(e) shows stronger sensitivity
-to $\lambda_c$ on Youshu and NetEase. Moderate nonzero weights
-improve Recall over zero weight, while performance declines
-toward the upper end of the range. iFashion favors smaller
-nonzero weights and then declines. The inherited fused-space
-regularizer therefore needs to be balanced with the ranking
-and pre-fusion objectives.
 
 
 \section{Conclusion}
 
-We presented ReCoBR for bundle recommendation with noisy and
-sparse U-B feedback. Its central design connects pretraining,
-user-conditioned latent diffusion, and interaction selection
-to reconstruct the graph used for recommendation. Within this
-pipeline, bundle-set consistency adapts preference recovery
-to the historical bundles used for subsequent scoring.
-Pre-fusion cross-view contrastive learning then connects
-representations from the reconstructed U-B graph with the
-U-I and B-I views on both the user and bundle sides.
-
-Experiments on three public benchmarks show improvements over
-the compared baselines. Component ablations and interaction
-selection analyses support the graph reconstruction pipeline
-and the additional cross-view objective. The user-group
-analysis further shows that pre-fusion learning yields its
-largest relative gains for users with the fewest bundle
-interactions. Together, these findings support refining the
-U-B propagation graph and using its representations to guide
-auxiliary-view learning as a way to improve bundle
-recommendation under noisy and limited feedback.
+In this paper, we proposed ReCoBR to address noisy and sparse
+U-B feedback in bundle recommendation. ReCoBR refined
+historical bundle preferences through user-conditioned
+diffusion with a bundle-set consistency constraint and used
+the refined preferences to reconstruct the U-B propagation
+graph. The reconstructed U-B view then anchored pre-fusion
+contrastive learning, enabling auxiliary behavioral and
+compositional information to support bundle preference
+modeling. Experiments on three public datasets demonstrated
+ReCoBR's advantages over state-of-the-art baselines and the
+effectiveness of its key designs.
 
 \bibliography{aaai2027}
 

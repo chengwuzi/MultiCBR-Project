@@ -1331,3 +1331,69 @@ Parameter Settings 重组为三个自然段：共同训练及去噪器设置；�
 （4）tmp/pdfs/conclusion-final-20261016/：保存 source-before.tex、record-before.txt、conclusion-approved.tex、change.json、verification.json、构建文件与日志、第 8—10 页 PNG。output/pdf/ReCoBR_AAAI_conclusion_final_20261016.pdf 为本轮完整定稿审阅文件，SHA256：e048a38d7eb06404fac8dc8aa7a0775bb38e626b986da5280e67d7055c3da2c0；历史输出和中间文件继续保留。
 
 （5）本轮未运行训练，未修改代码、配置、数据集、图片、表格数值或参考文献，未提交 Git。
+
+
+第二十八项：补充相关工作中的 EBRec、EpicCBR 与 DCCF
+记录日期：2026-10-16
+
+一、讨论结论与修改边界
+
+（1）在与四篇师兄论文比较引用覆盖后，用户要求把建议落实为具体改法。用户明确表示 DCBR 已有冷处理结论，撤回此前关于扩散与去噪讨论的第 1 项建议；本轮不调整该小节及 DCBR 的现有描述。经给出两处准确英文修改与忠实中文翻译，用户确认“行，改吧。”，本轮仅落实确认的两处相关工作修改，并为 DCCF 追加文献条目。
+
+（2）此前文献数量比较及缺引检查均为只读讨论；本轮是这两处建议首次实际落盘。没有据此修改引言、方法章或已定稿的实验章，不新增实验、不更改研究主张。
+
+二、实际修改内容
+
+（1）AAAI文件/main.tex，Related Work 的 Bundle Recommendation 第二段：以 EBRec、EpicCBR 的具体介绍替换原句“These studies establish several ways to exploit auxiliary information for bundle preference learning.”；新句为“EBRec~\cite{du2025ebrec} and EpicCBR~\cite{li2026epiccbr} further enhance item-level information through bundle--user--item correlations and item-relation modeling, respectively.”。复用现有两篇文献，不新增段落。忠实中文：EBRec 和 EpicCBR 分别通过组合—用户—物品关联与物品关系建模，进一步增强物品层面的信息。
+
+（2）AAAI文件/main.tex，Contrastive Learning for Recommendation 第一段：在 SGL 介绍后、BIGCF 之前加入“DCCF~\cite{ren2023dccf} learns similarity-based soft weights for observed interactions to adapt graph propagation and construct contrastive views.”，不另起段落。忠实中文：DCCF 根据相似度为已观测交互学习软权重，以调整图传播并构建对比视图。
+
+（3）AAAI文件/aaai2027.bib：仅追加 ren2023dccf 一条，原 34 条文献的 14087 字节完整保留为前缀。新增文献为 Xubin Ren、Lianghao Xia、Jiashu Zhao、Dawei Yin、Chao Huang 的 Disentangled Contrastive Collaborative Filtering，SIGIR 2023，1137--1146，DOI 10.1145/3539618.3591665。作者、会议、页码及 DOI 已依据作者原文 https://arxiv.org/html/2305.02759、https://arxiv.org/pdf/2305.02759v4 与官方代码仓库 https://github.com/HKUDS/DCCF 核验。该条与已有 DGMAE 为不同论文、不同作者组合，未更改 DGMAE 条目。
+
+（4）文献库条目数由 34 增至 35；正文实际使用的唯一文献数由 33 增至 34，Related Work 唯一文献数由 21 增至 24（EBRec、EpicCBR 已在基线节引用，只有 DCCF 是新增实际文献）。既有未引用条目 sun2024intent 保留。BibTeX 自动将 DCCF 与 DGMAE 区分为 Ren et al. 2023a、2023b，并同步更新正文相关引文显示；这属于正常消歧，未人工修改其他引用语句。
+
+（5）工程记录.txt：追加本第二十八项，追加前的 178511 字节完整保留。
+
+三、验证与审阅文件
+
+（1）逐字节逆向替换核验通过：main.tex 恰好只有批准的两处文字变化，其余源码全部保持原样；Denoising and Diffusion for Recommendation 整节（包括 DCBR）逐字节不变。现有 CRLF 换行保留。独立代理只读核验通过，无重复文献键或缺失引用。当前 main.tex SHA256：1b776df6dee01146359c405db8f0074fb111c664ca36ce9b21c5a4e9f211fa00；aaai2027.bib SHA256：8f367a5ef0bf1e5f6721a70fe711c266cdd5813934f52c925ce62b23897a0c35。
+
+（2）latexmk 编译成功，全文仍为 10 页，生成 34 条参考文献；无 LaTeX 错误、未定义引用或文献、overfull box、重复标签或待重编译提示。保留四条 underfull hbox、零条 underfull vbox，与上一版数量相同。PDF 中新增句子及 DCCF 作者、标题、页码、年份标签核验通过。
+
+（3）与上一版 Conclusion 定稿 PDF 对比，第 1—6、10 页因相关工作补充或 Ren et al. 年份后缀消歧发生变化，第 7—9 页渲染不变。本轮渲染并实际查看第 1—7、9—10 页，未发现新增越栏、遮挡或重叠；表格、公式与图注显示正常。未调整模板、字号、行距、页边距、图表缩放或浮动参数。
+
+（4）tmp/pdfs/related-work-citations-20261016/：保存 source-before.tex、bibliography-before.bib、record-before.txt、approved-snippets.tex、dccf-entry.bib、change.json、verification.json、构建文件与日志、第 1—7、9—10 页 PNG。output/pdf/ReCoBR_AAAI_related_work_citations_20261016.pdf 为本轮完整审阅文件（5143541 字节），SHA256：340e2ce8a122ab4af5b072b3f77fe5bfccb05d5bb0013fb7b117af113188f33d。历史输出和中间文件继续保留。
+
+（5）本轮未运行训练，未修改代码、配置、数据集、图片、表格数值或其他已定稿章节，未提交 Git。
+
+
+第二十九项：调整实验总表、消融表与深入分析图的页面位置
+记录日期：2026-10-16
+
+一、用户要求与排版原因
+
+（1）用户要求实验总表、消融表放在第七页，四张深入分析小图放在第八页。本轮按 PDF 的物理页码核对；未修改论文内容。
+
+（2）调整前，数据集统计表位于第七页，实验总表与消融表均在第八页，深入分析四图也在第八页。三个表在源码中靠近第六页末尾进入浮动队列，较早声明的单栏数据集表阻碍后续跨栏总表提前到第七页。
+
+二、实际修改内容
+
+（1）AAAI文件/main.tex：将三个表的完整声明按原有顺序整体移动到 Computational Complexity 小节之前，使浮动体提前进入排版队列；数据集表的常规位置选项由 [!ht] 改为 [!b]，总表由 [t] 改为 [!t]，消融表由 [t] 改为 [!t]，并更新一行排版注释说明提前声明的原因。深入分析四图的源码、位置选项及 2×2 组合方式保持原样。
+
+（2）首轮编译即达到目标：Table 2 实验总表位于第七页上方跨栏，Table 3 消融表位于同页左栏上部；Figure 2 的四张深入分析小图位于第八页右栏上部。数据集统计表 Table 1 随排版调整到第六页右栏底部。五张超参图仍在第九页同一横行，全文仍为十页。
+
+（3）仅采用源码声明顺序与常规浮动位置选项控制排版，没有新增宏包、强制分页或修改模板。未改动正文措辞、公式、表格数据、图注、表注、图片文件、字号、行距、页边距、图表尺寸及编号；aaai2027.bib 和生成的 main.bbl 均与上一版逐字节一致。main.tex 当前 SHA256：fee44a2a162384e5bb1273fded9b4d9a35594101051c6ad1689c55e455affcd0。
+
+（4）工程记录.txt：追加本第二十九项，追加前的 183365 字节完整保留。
+
+三、验证与审阅文件
+
+（1）按六个浮动体逐一核对，除三处 table 位置选项外，全部浮动体内部源码完整保留；移除浮动体与排版注释后，其余正文及顺序保持原样。独立代理只读检查通过。
+
+（2）latexmk 编译成功；无 LaTeX 错误、未定义引用或文献、overfull box、重复标签或待重编译提示。四条 underfull hbox、零条 underfull vbox，与上一版相同。git diff --check 通过。
+
+（3）与上一版相关工作补引稿比较，第 1—5 页渲染逐像素不变，第 6—10 页因浮动体移动自然重排。保存第 5—10 页 PNG，并由主代理及独立代理实际查看第 6—10 页，确认目标页码正确，无新增越栏、遮挡或重叠，图表、公式、引用与参考文献显示正常。
+
+（4）tmp/pdfs/float-placement-20261016/：保留 source-before.tex、record-before.txt、bibliography-before.bib、source-trial-01.tex、change.json、trial-01-verification.json、verification.json、编译文件与日志及页面 PNG。output/pdf/ReCoBR_AAAI_float_placement_20261016.pdf 为本轮审阅文件（5143417 字节），SHA256：747bb08a46b0fb36f0e4fd26971435c395caa3dbdf70ea245ebd3283c8d9b7d5。历史文件继续保留。
+
+（5）本轮未运行训练，未修改代码、配置、数据集或图片，未提交 Git。

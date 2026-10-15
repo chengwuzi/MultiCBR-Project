@@ -80,7 +80,7 @@ Our main contributions are as follows:
 
 Bundle recommendation includes both ranking existing bundles and generating new item combinations \cite{sun2024survey}. For predefined-bundle ranking, a central issue is how to combine bundle-level interaction evidence with information about constituent items. DAM addresses this issue through attentive item aggregation and joint learning of U-B and U-I interactions \cite{chen2019dam}. BGCN uses graph propagation to capture bundle-level and item-level collaborative information \cite{chang2020bgcn}. In the broader collaborative filtering setting, LightGCN demonstrates the effectiveness of simplified neighborhood aggregation \cite{he2020lightgcn}. Subsequent bundle models enrich the preferences and composition patterns captured by graph representations. MIDGN disentangles user intents across global and local views \cite{zhao2022midgn}, and BundleGT uses a hierarchical graph transformer to model bundling strategies \cite{wei2023bundlegt}.
 
-Beyond representation construction, another line of research focuses on cooperation across views. CrossCBR contrasts bundle-view and item-view representations to encourage mutual enhancement \cite{ma2022crosscbr}. MultiCBR explicitly models B-I relations alongside U-B and U-I relations, and combines representation fusion with post-fusion contrastive learning \cite{ma2024multicbr}. DGMAE instead distills first- and higher-order U-B knowledge into an item-view graph masked autoencoder \cite{ren2023dgmae}. These studies establish several ways to exploit auxiliary information for bundle preference learning. ReCoBR builds on this multi-view setting by refining the U-B graph through conditional latent diffusion and using the reconstructed view to anchor cross-view learning before fusion.
+Beyond representation construction, another line of research focuses on cooperation across views. CrossCBR contrasts bundle-view and item-view representations to encourage mutual enhancement \cite{ma2022crosscbr}. MultiCBR explicitly models B-I relations alongside U-B and U-I relations, and combines representation fusion with post-fusion contrastive learning \cite{ma2024multicbr}. DGMAE instead distills first- and higher-order U-B knowledge into an item-view graph masked autoencoder \cite{ren2023dgmae}. EBRec~\cite{du2025ebrec} and EpicCBR~\cite{li2026epiccbr} further enhance item-level information through bundle--user--item correlations and item-relation modeling, respectively. ReCoBR builds on this multi-view setting by refining the U-B graph through conditional latent diffusion and using the reconstructed view to anchor cross-view learning before fusion.
 
 \subsection{Denoising and Diffusion for Recommendation}
 
@@ -90,7 +90,7 @@ Diffusion has also been applied to bundle recommendation. DCBR combines conditio
 
 \subsection{Contrastive Learning for Recommendation}
 
-Contrastive learning derives learning signals by encouraging agreement between related representations while distinguishing unrelated ones. SimCLR demonstrates the importance of view construction and contrastive objectives for representation learning \cite{chen2020simclr}. For graph-based recommendation, SGL creates perturbed graph views through operations such as edge and node dropout, then contrasts representations of the same node across views \cite{wu2021sgl}. BIGCF instead applies augmentation-free graph contrastive regularization in both interaction and intent spaces \cite{zhang2024bigcf}. Knowledge-aware methods extend this principle to structured auxiliary information. KGCL uses consistency under knowledge-graph perturbations to guide interaction augmentation \cite{yang2022kgcl}, while MCCLK connects collaborative, semantic, and structural representations through multi-level cross-view objectives \cite{zou2022mcclk}.
+Contrastive learning derives learning signals by encouraging agreement between related representations while distinguishing unrelated ones. SimCLR demonstrates the importance of view construction and contrastive objectives for representation learning \cite{chen2020simclr}. For graph-based recommendation, SGL creates perturbed graph views through operations such as edge and node dropout, then contrasts representations of the same node across views \cite{wu2021sgl}. DCCF~\cite{ren2023dccf} learns similarity-based soft weights for observed interactions to adapt graph propagation and construct contrastive views. BIGCF instead applies augmentation-free graph contrastive regularization in both interaction and intent spaces \cite{zhang2024bigcf}. Knowledge-aware methods extend this principle to structured auxiliary information. KGCL uses consistency under knowledge-graph perturbations to guide interaction augmentation \cite{yang2022kgcl}, while MCCLK connects collaborative, semantic, and structural representations through multi-level cross-view objectives \cite{zou2022mcclk}.
 
 The bundle-specific methods discussed above apply contrastive learning to views defined by different user, bundle, and item relations \cite{ma2022crosscbr,ma2024multicbr}. ReCoBR follows this approach with a targeted choice of contrastive pairs: U-B--U-I and U-B--B-I for both users and bundles, formed before representation fusion. The reconstructed U-B view provides a common reference for jointly optimizing the paired representations. This links item-level behavioral and compositional information to bundle-level preference learning, helping the model exploit auxiliary evidence under sparse U-B feedback.
 
@@ -357,45 +357,11 @@ Here, $\sigma$ is the sigmoid function, $\Theta$ comprises the trainable initial
 
 \textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (14) after excluding bundles observed in the training data. Graph reconstruction is performed before scoring; the denoiser is not run separately for each candidate bundle.
 
-\subsection{Computational Complexity}
-
-Let $n_+=|\mathcal U_+|$ and $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$. Let $M=|\mathcal E_{\mathrm{UB}}|$ be the number of observed U-B edges, and let $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ be the total number of edges used for graph propagation. We use $Q$ and $m$ to denote the number and size of recommendation minibatches, respectively. With a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
-
-\begin{equation}
-O\!\left(
-\begin{aligned}
-&(T+1)n_+C_f\\
-&+n_+h_{\max}\!\left[d+\log(1+\kappa)\right]\\
-&+Q\bigl(LEd+m^2d\bigr)
-\end{aligned}
-\right).
-\tag{17}
-\end{equation}
-The three terms correspond to denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Since $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$, reconstruction does not densify the U-B graph.
-
-For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$, let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the denoiser parameter count. The peak training space is
-\begin{equation}
-O\!\left(
-\begin{aligned}
-&(L+1)Vd+P_\theta+(|\mathcal U|+|\mathcal B|)d\\
-&+E+M+m^2+b_dh_{\max}d
-\end{aligned}
-\right).
-\tag{18}
-\end{equation}
-At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and ranking all candidate bundles for one user costs $O(|\mathcal B|d)$.
-
-
-\section{Experiments}
-
-In this section, we evaluate ReCoBR against state-of-the-art bundle
-recommendation methods on three public datasets.
-
 % =========================================================
 % Table 1: Dataset statistics, single-column table
 % =========================================================
-% Prefer placement here, within Experiments, before allowing a top float.
-\begin{table}[!ht]
+% Declare experiment tables early so they can appear on the intended pages.
+\begin{table}[!b]
     \centering
     {\small
     \setlength{\tabcolsep}{2pt}
@@ -444,7 +410,7 @@ recommendation methods on three public datasets.
 % =========================================================
 % Table 2: Overall results, double-column table
 % =========================================================
-\begin{table*}[t]
+\begin{table*}[!t]
     \centering
     {\small
     \setlength{\tabcolsep}{1mm}
@@ -544,7 +510,7 @@ recommendation methods on three public datasets.
 
 % Table 3: Ablation study, single-column table
 % =========================================================
-\begin{table}[t]
+\begin{table}[!t]
     \centering
     {\small
     \setlength{\tabcolsep}{2pt}
@@ -604,6 +570,40 @@ recommendation methods on three public datasets.
     \label{tab:ablation}
 \end{table}
 
+
+\subsection{Computational Complexity}
+
+Let $n_+=|\mathcal U_+|$ and $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$. Let $M=|\mathcal E_{\mathrm{UB}}|$ be the number of observed U-B edges, and let $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ be the total number of edges used for graph propagation. We use $Q$ and $m$ to denote the number and size of recommendation minibatches, respectively. With a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
+
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(T+1)n_+C_f\\
+&+n_+h_{\max}\!\left[d+\log(1+\kappa)\right]\\
+&+Q\bigl(LEd+m^2d\bigr)
+\end{aligned}
+\right).
+\tag{17}
+\end{equation}
+The three terms correspond to denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Since $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$, reconstruction does not densify the U-B graph.
+
+For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$, let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the denoiser parameter count. The peak training space is
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(L+1)Vd+P_\theta+(|\mathcal U|+|\mathcal B|)d\\
+&+E+M+m^2+b_dh_{\max}d
+\end{aligned}
+\right).
+\tag{18}
+\end{equation}
+At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and ranking all candidate bundles for one user costs $O(|\mathcal B|d)$.
+
+
+\section{Experiments}
+
+In this section, we evaluate ReCoBR against state-of-the-art bundle
+recommendation methods on three public datasets.
 
 \subsection{Experimental Settings}
 

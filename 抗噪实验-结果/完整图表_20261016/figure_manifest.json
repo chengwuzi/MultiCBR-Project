@@ -7,7 +7,7 @@
     },
     {
       "file": "注入式(youshu+ifashion)results_summary (2).csv",
-      "sha256": "a56d4312216f0ec10e8846ac94654d8d1f9d5179cd56d7e50c8c358310df758b",
+      "sha256": "57815a21cdbd5a64fd0a1f83c03b401082f001e067917f80f2aea251e74e0cfe",
       "rows": 36
     },
     {
@@ -2954,7 +2954,7 @@
           0.29108,
           0.28762,
           0.2942,
-          0.2791
+          0.2825
         ]
       }
     },
@@ -2992,7 +2992,7 @@
           0.17279,
           0.17107,
           0.17219,
-          0.16221
+          0.166
         ]
       }
     },
@@ -3194,7 +3194,7 @@
           0.29108,
           0.28762,
           0.2942,
-          0.2791
+          0.2825
         ]
       }
     },
@@ -3232,7 +3232,7 @@
           0.17279,
           0.17107,
           0.17219,
-          0.16221
+          0.166
         ]
       }
     },
@@ -3434,16 +3434,16 @@
           0.9747805876435311,
           -0.22548305408125469,
           2.057099247233496,
-          -3.181045547576933
+          -2.0015957262288997
         ]
       }
     },
     {
       "y_limits": [
-        -8.580533108540198,
-        1.0300999941863818
+        -5.463356729451623,
+        0.8311312891381748
       ],
-      "bottom_fraction": 0.3,
+      "bottom_fraction": 0.30000000000000004,
       "break": null,
       "mode": "injection",
       "dataset": "Youshu",
@@ -3472,7 +3472,7 @@
           0.4534620080227869,
           -0.5464798558223349,
           0.10464507877450124,
-          -5.6973431777222245
+          -3.493982907970461
         ]
       }
     },
@@ -3662,16 +3662,16 @@
           0.9747805876435311,
           -0.22548305408125469,
           2.057099247233496,
-          -3.181045547576933
+          -2.0015957262288997
         ]
       }
     },
     {
       "y_limits": [
-        -8.580533108540198,
-        1.0300999941863818
+        -5.463356729451623,
+        0.8311312891381748
       ],
-      "bottom_fraction": 0.3,
+      "bottom_fraction": 0.30000000000000004,
       "break": null,
       "mode": "injection",
       "dataset": "Youshu",
@@ -3700,7 +3700,7 @@
           0.4534620080227869,
           -0.5464798558223349,
           0.10464507877450124,
-          -5.6973431777222245
+          -3.493982907970461
         ]
       }
     },
@@ -3855,6 +3855,36 @@
           -4.037390612569602
         ]
       }
+    }
+  ],
+  "corrections": [
+    {
+      "date": "2026-10-17",
+      "experiment_id": "recobr__Youshu__noise_0.25__nseed_20261014__tseed_20261014__mode_injection",
+      "source": "User-provided correction in this conversation; no replacement training log supplied.",
+      "old_metrics": {
+        "recall@20": 0.2791,
+        "ndcg@20": 0.16221
+      },
+      "corrected_metrics": {
+        "recall@20": 0.284,
+        "ndcg@20": 0.166
+      },
+      "note": "Only @20 metrics and dependent relative changes corrected. Original checkpoint epoch, log path, other metrics and run metadata retained, not newly verified as matching the corrected values. See engineering record 25."
+    },
+    {
+      "date": "2026-10-17",
+      "experiment_id": "recobr__Youshu__noise_0.25__nseed_20261014__tseed_20261014__mode_injection",
+      "source": "User-provided correction in this conversation; no replacement training log supplied.",
+      "old_metrics": {
+        "recall@20": 0.284,
+        "ndcg@20": 0.166
+      },
+      "corrected_metrics": {
+        "recall@20": 0.2825,
+        "ndcg@20": 0.166
+      },
+      "note": "User clarified the preceding correction: Recall@20 must be 0.2825, not 0.284. NDCG@20 remains 0.166. Only Recall@20 and its relative change corrected. Original checkpoint epoch, log path, other metrics and run metadata retained, not newly verified as matching the corrected values. See engineering record 26."
     }
   ]
 }

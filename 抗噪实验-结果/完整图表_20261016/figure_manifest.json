@@ -1,0 +1,3860 @@
+{
+  "sources": [
+    {
+      "file": "替换式results_summary.csv",
+      "sha256": "3c5a559113f475a0fc2b0abd072d45c25dbb8d6f5d5cc1a5ce89c6d17c165d24",
+      "rows": 54
+    },
+    {
+      "file": "注入式(youshu+ifashion)results_summary (2).csv",
+      "sha256": "a56d4312216f0ec10e8846ac94654d8d1f9d5179cd56d7e50c8c358310df758b",
+      "rows": 36
+    },
+    {
+      "file": "注入式-netease-results_summary (2).csv",
+      "sha256": "308035fa8ab55ab34879b40ff98755977e9c43a13a64a1d85e022515bb756d90",
+      "rows": 18
+    }
+  ],
+  "condition_count": 108,
+  "relative_percent_definition": "(metric_at_noise / same_model_dataset_mode_metric_at_zero - 1) * 100",
+  "noise_axis": "requested per-user noise ratio, not rounded actual aggregate ratio",
+  "noise_ratios": [
+    0.0,
+    0.05,
+    0.1,
+    0.15,
+    0.2,
+    0.25
+  ],
+  "bottom_fraction": 0.3,
+  "styles": {
+    "CrossCBR": {
+      "color": "#1f77b4",
+      "marker": "^"
+    },
+    "MultiCBR": {
+      "color": "#ff7f0e",
+      "marker": "s"
+    },
+    "ReCoBR": {
+      "color": "#2ca02c",
+      "marker": "o"
+    }
+  },
+  "png_dpi": 300,
+  "axis_policy": "Independent labeled bounds per panel; iFashion absolute empty gaps compressed. Equal units per height above/below each marked break. No breaks in relative charts.",
+  "rerun_note": "ReCoBR/Youshu/injection/0.20 is read directly from archived CSV, already updated to user-selected epoch 99 rerun. See engineering record item 23.",
+  "outputs": [
+    "replacement/youshu_replacement_absolute_top10_bottom30.png",
+    "replacement/youshu_replacement_absolute_top10_bottom30.svg",
+    "replacement/ifashion_replacement_absolute_top10_bottom30.png",
+    "replacement/ifashion_replacement_absolute_top10_bottom30.svg",
+    "replacement/netease_replacement_absolute_top10_bottom30.png",
+    "replacement/netease_replacement_absolute_top10_bottom30.svg",
+    "replacement/all_datasets_replacement_absolute_top10_bottom30.png",
+    "replacement/all_datasets_replacement_absolute_top10_bottom30.svg",
+    "replacement/youshu_replacement_relative_top10_bottom30.png",
+    "replacement/youshu_replacement_relative_top10_bottom30.svg",
+    "replacement/ifashion_replacement_relative_top10_bottom30.png",
+    "replacement/ifashion_replacement_relative_top10_bottom30.svg",
+    "replacement/netease_replacement_relative_top10_bottom30.png",
+    "replacement/netease_replacement_relative_top10_bottom30.svg",
+    "replacement/all_datasets_replacement_relative_top10_bottom30.png",
+    "replacement/all_datasets_replacement_relative_top10_bottom30.svg",
+    "replacement/youshu_replacement_absolute_top20_bottom30.png",
+    "replacement/youshu_replacement_absolute_top20_bottom30.svg",
+    "replacement/ifashion_replacement_absolute_top20_bottom30.png",
+    "replacement/ifashion_replacement_absolute_top20_bottom30.svg",
+    "replacement/netease_replacement_absolute_top20_bottom30.png",
+    "replacement/netease_replacement_absolute_top20_bottom30.svg",
+    "replacement/all_datasets_replacement_absolute_top20_bottom30.png",
+    "replacement/all_datasets_replacement_absolute_top20_bottom30.svg",
+    "replacement/youshu_replacement_relative_top20_bottom30.png",
+    "replacement/youshu_replacement_relative_top20_bottom30.svg",
+    "replacement/ifashion_replacement_relative_top20_bottom30.png",
+    "replacement/ifashion_replacement_relative_top20_bottom30.svg",
+    "replacement/netease_replacement_relative_top20_bottom30.png",
+    "replacement/netease_replacement_relative_top20_bottom30.svg",
+    "replacement/all_datasets_replacement_relative_top20_bottom30.png",
+    "replacement/all_datasets_replacement_relative_top20_bottom30.svg",
+    "injection/youshu_injection_absolute_top10_bottom30.png",
+    "injection/youshu_injection_absolute_top10_bottom30.svg",
+    "injection/ifashion_injection_absolute_top10_bottom30.png",
+    "injection/ifashion_injection_absolute_top10_bottom30.svg",
+    "injection/netease_injection_absolute_top10_bottom30.png",
+    "injection/netease_injection_absolute_top10_bottom30.svg",
+    "injection/all_datasets_injection_absolute_top10_bottom30.png",
+    "injection/all_datasets_injection_absolute_top10_bottom30.svg",
+    "injection/youshu_injection_relative_top10_bottom30.png",
+    "injection/youshu_injection_relative_top10_bottom30.svg",
+    "injection/ifashion_injection_relative_top10_bottom30.png",
+    "injection/ifashion_injection_relative_top10_bottom30.svg",
+    "injection/netease_injection_relative_top10_bottom30.png",
+    "injection/netease_injection_relative_top10_bottom30.svg",
+    "injection/all_datasets_injection_relative_top10_bottom30.png",
+    "injection/all_datasets_injection_relative_top10_bottom30.svg",
+    "injection/youshu_injection_absolute_top20_bottom30.png",
+    "injection/youshu_injection_absolute_top20_bottom30.svg",
+    "injection/ifashion_injection_absolute_top20_bottom30.png",
+    "injection/ifashion_injection_absolute_top20_bottom30.svg",
+    "injection/netease_injection_absolute_top20_bottom30.png",
+    "injection/netease_injection_absolute_top20_bottom30.svg",
+    "injection/all_datasets_injection_absolute_top20_bottom30.png",
+    "injection/all_datasets_injection_absolute_top20_bottom30.svg",
+    "injection/youshu_injection_relative_top20_bottom30.png",
+    "injection/youshu_injection_relative_top20_bottom30.svg",
+    "injection/ifashion_injection_relative_top20_bottom30.png",
+    "injection/ifashion_injection_relative_top20_bottom30.svg",
+    "injection/netease_injection_relative_top20_bottom30.png",
+    "injection/netease_injection_relative_top20_bottom30.svg",
+    "injection/all_datasets_injection_relative_top20_bottom30.png",
+    "injection/all_datasets_injection_relative_top20_bottom30.svg"
+  ],
+  "panels": [
+    {
+      "y_limits": [
+        0.15992281249999998,
+        0.2063134375
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.19922,
+          0.19494,
+          0.19066,
+          0.18349,
+          0.18028,
+          0.17384
+        ],
+        "MultiCBR": [
+          0.20259,
+          0.20106,
+          0.19843,
+          0.19683,
+          0.18262,
+          0.18339
+        ],
+        "ReCoBR": [
+          0.2009,
+          0.20353,
+          0.19994,
+          0.19719,
+          0.18756,
+          0.17732
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.10967562499999998,
+        0.14945687500000002
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.14275,
+          0.14044,
+          0.13768,
+          0.13191,
+          0.12892,
+          0.12161
+        ],
+        "MultiCBR": [
+          0.14598,
+          0.1431,
+          0.1423,
+          0.1392,
+          0.12777,
+          0.12862
+        ],
+        "ReCoBR": [
+          0.14677,
+          0.14707,
+          0.14299,
+          0.14009,
+          0.13102,
+          0.126
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.05256547770700636,
+        0.11658290445859873
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": {
+        "omitted_interval": [
+          0.07842020000000001,
+          0.0979298
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07709,
+          0.07682,
+          0.07391,
+          0.07163,
+          0.06937,
+          0.06608
+        ],
+        "MultiCBR": [
+          0.10543,
+          0.10517,
+          0.10378,
+          0.10323,
+          0.10147,
+          0.09926
+        ],
+        "ReCoBR": [
+          0.11378,
+          0.11388,
+          0.11196,
+          0.11032,
+          0.10707,
+          0.10476
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.046574904458598715,
+        0.11755301910828027
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": {
+        "omitted_interval": [
+          0.0744268,
+          0.0944732
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07306,
+          0.07244,
+          0.06979,
+          0.06769,
+          0.06544,
+          0.06204
+        ],
+        "MultiCBR": [
+          0.10224,
+          0.10152,
+          0.10079,
+          0.09967,
+          0.09794,
+          0.09584
+        ],
+        "ReCoBR": [
+          0.11424,
+          0.11446,
+          0.11258,
+          0.11137,
+          0.1085,
+          0.10564
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.0345440625,
+        0.0629971875
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.051,
+          0.04897,
+          0.0501,
+          0.04736,
+          0.04489,
+          0.04308
+        ],
+        "MultiCBR": [
+          0.05741,
+          0.05664,
+          0.05709,
+          0.05332,
+          0.05074,
+          0.04861
+        ],
+        "ReCoBR": [
+          0.06129,
+          0.05974,
+          0.05896,
+          0.05698,
+          0.05378,
+          0.05132
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.023840937500000003,
+        0.041137812499999996
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.03477,
+          0.03311,
+          0.03409,
+          0.03174,
+          0.03058,
+          0.02903
+        ],
+        "MultiCBR": [
+          0.03896,
+          0.0382,
+          0.03782,
+          0.03601,
+          0.03412,
+          0.03297
+        ],
+        "ReCoBR": [
+          0.0401,
+          0.03958,
+          0.03877,
+          0.03815,
+          0.03641,
+          0.03426
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.15992281249999998,
+        0.2063134375
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.19922,
+          0.19494,
+          0.19066,
+          0.18349,
+          0.18028,
+          0.17384
+        ],
+        "MultiCBR": [
+          0.20259,
+          0.20106,
+          0.19843,
+          0.19683,
+          0.18262,
+          0.18339
+        ],
+        "ReCoBR": [
+          0.2009,
+          0.20353,
+          0.19994,
+          0.19719,
+          0.18756,
+          0.17732
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.10967562499999998,
+        0.14945687500000002
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.14275,
+          0.14044,
+          0.13768,
+          0.13191,
+          0.12892,
+          0.12161
+        ],
+        "MultiCBR": [
+          0.14598,
+          0.1431,
+          0.1423,
+          0.1392,
+          0.12777,
+          0.12862
+        ],
+        "ReCoBR": [
+          0.14677,
+          0.14707,
+          0.14299,
+          0.14009,
+          0.13102,
+          0.126
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.05256547770700636,
+        0.11658290445859873
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": {
+        "omitted_interval": [
+          0.07842020000000001,
+          0.0979298
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07709,
+          0.07682,
+          0.07391,
+          0.07163,
+          0.06937,
+          0.06608
+        ],
+        "MultiCBR": [
+          0.10543,
+          0.10517,
+          0.10378,
+          0.10323,
+          0.10147,
+          0.09926
+        ],
+        "ReCoBR": [
+          0.11378,
+          0.11388,
+          0.11196,
+          0.11032,
+          0.10707,
+          0.10476
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.046574904458598715,
+        0.11755301910828027
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": {
+        "omitted_interval": [
+          0.0744268,
+          0.0944732
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07306,
+          0.07244,
+          0.06979,
+          0.06769,
+          0.06544,
+          0.06204
+        ],
+        "MultiCBR": [
+          0.10224,
+          0.10152,
+          0.10079,
+          0.09967,
+          0.09794,
+          0.09584
+        ],
+        "ReCoBR": [
+          0.11424,
+          0.11446,
+          0.11258,
+          0.11137,
+          0.1085,
+          0.10564
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.0345440625,
+        0.0629971875
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.051,
+          0.04897,
+          0.0501,
+          0.04736,
+          0.04489,
+          0.04308
+        ],
+        "MultiCBR": [
+          0.05741,
+          0.05664,
+          0.05709,
+          0.05332,
+          0.05074,
+          0.04861
+        ],
+        "ReCoBR": [
+          0.06129,
+          0.05974,
+          0.05896,
+          0.05698,
+          0.05378,
+          0.05132
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.023840937500000003,
+        0.041137812499999996
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.03477,
+          0.03311,
+          0.03409,
+          0.03174,
+          0.03058,
+          0.02903
+        ],
+        "MultiCBR": [
+          0.03896,
+          0.0382,
+          0.03782,
+          0.03601,
+          0.03412,
+          0.03297
+        ],
+        "ReCoBR": [
+          0.0401,
+          0.03958,
+          0.03877,
+          0.03815,
+          0.03641,
+          0.03426
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -19.325056855009805,
+        2.626183426338332
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -2.1483786768396795,
+          -4.296757353679359,
+          -7.895793595020595,
+          -9.507077602650337,
+          -12.739684770605365
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.755219902265658,
+          -2.0534083617157806,
+          -2.843180808529533,
+          -9.857347351794255,
+          -9.477269361765138
+        ],
+        "ReCoBR": [
+          0.0,
+          1.3091090094574431,
+          -0.4778496764559437,
+          -1.846689895470377,
+          -6.640119462419114,
+          -11.737182677949221
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -21.846688833822338,
+        1.6119178451768246
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -1.6182136602451713,
+          -3.5516637478108515,
+          -7.593695271453582,
+          -9.68826619964972,
+          -14.809106830122587
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.9728729963008562,
+          -2.5208932730510947,
+          -4.644471845458287,
+          -12.47431154952734,
+          -11.892040005480197
+        ],
+        "ReCoBR": [
+          0.0,
+          0.2044014444368747,
+          -2.575458199904612,
+          -4.551338829461072,
+          -10.731075832935899,
+          -14.151393336512918
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -21.01789723831366,
+        1.43506674757295
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.35023997924504835,
+          -4.125048644441565,
+          -7.082630691399672,
+          -10.01426903619147,
+          -14.282008042547679
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.2466091245376001,
+          -1.5650194441809706,
+          -2.0866925922412904,
+          -3.7560466660343295,
+          -5.852224224603997
+        ],
+        "ReCoBR": [
+          0.0,
+          0.08788890841975316,
+          -1.5995781332395875,
+          -3.0409562313236105,
+          -5.897345754965732,
+          -7.927579539462116
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -22.24415085549002,
+        1.6247085980231124
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.848617574596211,
+          -4.475773336983291,
+          -7.3501231864221195,
+          -10.429783739392285,
+          -15.083493019436078
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7042253521126751,
+          -1.4182316118935723,
+          -2.5136932707355286,
+          -4.205790297339595,
+          -6.259780907668233
+        ],
+        "ReCoBR": [
+          0.0,
+          0.19257703081232425,
+          -1.453081232492992,
+          -2.5122549019607865,
+          -5.024509803921562,
+          -7.528011204481788
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -23.892050089737324,
+        1.525024473813021
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -3.9803921568627443,
+          -1.764705882352935,
+          -7.137254901960777,
+          -11.98039215686274,
+          -15.52941176470588
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.3412297509144744,
+          -0.5573941821982231,
+          -7.12419439122105,
+          -11.618184985194224,
+          -15.328340010451146
+        ],
+        "ReCoBR": [
+          0.0,
+          -2.5289606787404106,
+          -3.80159895578398,
+          -7.032142274433017,
+          -12.253222385380969,
+          -16.26692772067222
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -24.24683635317803,
+        1.547670405522002
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -4.774230658613754,
+          -1.9557089444923736,
+          -8.71440897325282,
+          -12.050618349151577,
+          -16.50848432556802
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.9507186858316317,
+          -2.9260780287474364,
+          -7.571868583162223,
+          -12.422997946611925,
+          -15.374743326488716
+        ],
+        "ReCoBR": [
+          0.0,
+          -1.2967581047381493,
+          -3.316708229426424,
+          -4.86284289276806,
+          -9.201995012468823,
+          -14.56359102244389
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -19.325056855009805,
+        2.626183426338332
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -2.1483786768396795,
+          -4.296757353679359,
+          -7.895793595020595,
+          -9.507077602650337,
+          -12.739684770605365
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.755219902265658,
+          -2.0534083617157806,
+          -2.843180808529533,
+          -9.857347351794255,
+          -9.477269361765138
+        ],
+        "ReCoBR": [
+          0.0,
+          1.3091090094574431,
+          -0.4778496764559437,
+          -1.846689895470377,
+          -6.640119462419114,
+          -11.737182677949221
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -21.846688833822338,
+        1.6119178451768246
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -1.6182136602451713,
+          -3.5516637478108515,
+          -7.593695271453582,
+          -9.68826619964972,
+          -14.809106830122587
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.9728729963008562,
+          -2.5208932730510947,
+          -4.644471845458287,
+          -12.47431154952734,
+          -11.892040005480197
+        ],
+        "ReCoBR": [
+          0.0,
+          0.2044014444368747,
+          -2.575458199904612,
+          -4.551338829461072,
+          -10.731075832935899,
+          -14.151393336512918
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -21.01789723831366,
+        1.43506674757295
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.35023997924504835,
+          -4.125048644441565,
+          -7.082630691399672,
+          -10.01426903619147,
+          -14.282008042547679
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.2466091245376001,
+          -1.5650194441809706,
+          -2.0866925922412904,
+          -3.7560466660343295,
+          -5.852224224603997
+        ],
+        "ReCoBR": [
+          0.0,
+          0.08788890841975316,
+          -1.5995781332395875,
+          -3.0409562313236105,
+          -5.897345754965732,
+          -7.927579539462116
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -22.24415085549002,
+        1.6247085980231124
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.848617574596211,
+          -4.475773336983291,
+          -7.3501231864221195,
+          -10.429783739392285,
+          -15.083493019436078
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7042253521126751,
+          -1.4182316118935723,
+          -2.5136932707355286,
+          -4.205790297339595,
+          -6.259780907668233
+        ],
+        "ReCoBR": [
+          0.0,
+          0.19257703081232425,
+          -1.453081232492992,
+          -2.5122549019607865,
+          -5.024509803921562,
+          -7.528011204481788
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -23.892050089737324,
+        1.525024473813021
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -3.9803921568627443,
+          -1.764705882352935,
+          -7.137254901960777,
+          -11.98039215686274,
+          -15.52941176470588
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.3412297509144744,
+          -0.5573941821982231,
+          -7.12419439122105,
+          -11.618184985194224,
+          -15.328340010451146
+        ],
+        "ReCoBR": [
+          0.0,
+          -2.5289606787404106,
+          -3.80159895578398,
+          -7.032142274433017,
+          -12.253222385380969,
+          -16.26692772067222
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -24.24683635317803,
+        1.547670405522002
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -4.774230658613754,
+          -1.9557089444923736,
+          -8.71440897325282,
+          -12.050618349151577,
+          -16.50848432556802
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.9507186858316317,
+          -2.9260780287474364,
+          -7.571868583162223,
+          -12.422997946611925,
+          -15.374743326488716
+        ],
+        "ReCoBR": [
+          0.0,
+          -1.2967581047381493,
+          -3.316708229426424,
+          -4.86284289276806,
+          -9.201995012468823,
+          -14.56359102244389
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.23359749999999999,
+        0.2919725
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.28072,
+          0.2788,
+          0.27236,
+          0.27174,
+          0.26103,
+          0.25111
+        ],
+        "MultiCBR": [
+          0.28526,
+          0.28237,
+          0.28158,
+          0.27534,
+          0.27376,
+          0.2664
+        ],
+        "ReCoBR": [
+          0.28847,
+          0.28733,
+          0.28214,
+          0.27363,
+          0.2808,
+          0.26269
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.1309053125,
+        0.17442093749999998
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.16637,
+          0.16489,
+          0.16176,
+          0.15761,
+          0.15263,
+          0.14396
+        ],
+        "MultiCBR": [
+          0.16947,
+          0.1667,
+          0.16649,
+          0.16201,
+          0.1545,
+          0.15249
+        ],
+        "ReCoBR": [
+          0.17181,
+          0.17085,
+          0.16693,
+          0.16276,
+          0.15786,
+          0.15111
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.08296235668789807,
+        0.15962752866242036
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": {
+        "omitted_interval": [
+          0.1161474,
+          0.13884259999999998
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.1146,
+          0.1138,
+          0.11085,
+          0.10708,
+          0.10371,
+          0.09935
+        ],
+        "MultiCBR": [
+          0.1495,
+          0.1487,
+          0.1473,
+          0.14543,
+          0.14305,
+          0.14107
+        ],
+        "ReCoBR": [
+          0.15635,
+          0.15519,
+          0.15245,
+          0.14877,
+          0.1452,
+          0.14039
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.05928515923566878,
+        0.13459296815286625
+      ],
+      "bottom_fraction": 0.3,
+      "break": {
+        "omitted_interval": [
+          0.08974120000000001,
+          0.1113188
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08827,
+          0.08742,
+          0.08481,
+          0.08215,
+          0.07943,
+          0.0756
+        ],
+        "MultiCBR": [
+          0.12,
+          0.1191,
+          0.11835,
+          0.11668,
+          0.11476,
+          0.11279
+        ],
+        "ReCoBR": [
+          0.13133,
+          0.13105,
+          0.12889,
+          0.12677,
+          0.12382,
+          0.1199
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.055904687499999994,
+        0.0963890625
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08092,
+          0.07794,
+          0.07829,
+          0.07421,
+          0.07065,
+          0.06805
+        ],
+        "MultiCBR": [
+          0.09053,
+          0.08881,
+          0.08744,
+          0.08081,
+          0.07849,
+          0.07444
+        ],
+        "ReCoBR": [
+          0.09396,
+          0.09307,
+          0.08974,
+          0.08736,
+          0.08239,
+          0.07986
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.030262812499999996,
+        0.051653437499999996
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.04405,
+          0.04215,
+          0.04289,
+          0.04011,
+          0.03869,
+          0.03668
+        ],
+        "MultiCBR": [
+          0.04921,
+          0.04812,
+          0.04735,
+          0.04462,
+          0.04271,
+          0.041
+        ],
+        "ReCoBR": [
+          0.05037,
+          0.04998,
+          0.04845,
+          0.04765,
+          0.04543,
+          0.043
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.23359749999999999,
+        0.2919725
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.28072,
+          0.2788,
+          0.27236,
+          0.27174,
+          0.26103,
+          0.25111
+        ],
+        "MultiCBR": [
+          0.28526,
+          0.28237,
+          0.28158,
+          0.27534,
+          0.27376,
+          0.2664
+        ],
+        "ReCoBR": [
+          0.28847,
+          0.28733,
+          0.28214,
+          0.27363,
+          0.2808,
+          0.26269
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.1309053125,
+        0.17442093749999998
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.16637,
+          0.16489,
+          0.16176,
+          0.15761,
+          0.15263,
+          0.14396
+        ],
+        "MultiCBR": [
+          0.16947,
+          0.1667,
+          0.16649,
+          0.16201,
+          0.1545,
+          0.15249
+        ],
+        "ReCoBR": [
+          0.17181,
+          0.17085,
+          0.16693,
+          0.16276,
+          0.15786,
+          0.15111
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.08296235668789807,
+        0.15962752866242036
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": {
+        "omitted_interval": [
+          0.1161474,
+          0.13884259999999998
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.1146,
+          0.1138,
+          0.11085,
+          0.10708,
+          0.10371,
+          0.09935
+        ],
+        "MultiCBR": [
+          0.1495,
+          0.1487,
+          0.1473,
+          0.14543,
+          0.14305,
+          0.14107
+        ],
+        "ReCoBR": [
+          0.15635,
+          0.15519,
+          0.15245,
+          0.14877,
+          0.1452,
+          0.14039
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.05928515923566878,
+        0.13459296815286625
+      ],
+      "bottom_fraction": 0.3,
+      "break": {
+        "omitted_interval": [
+          0.08974120000000001,
+          0.1113188
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08827,
+          0.08742,
+          0.08481,
+          0.08215,
+          0.07943,
+          0.0756
+        ],
+        "MultiCBR": [
+          0.12,
+          0.1191,
+          0.11835,
+          0.11668,
+          0.11476,
+          0.11279
+        ],
+        "ReCoBR": [
+          0.13133,
+          0.13105,
+          0.12889,
+          0.12677,
+          0.12382,
+          0.1199
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.055904687499999994,
+        0.0963890625
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08092,
+          0.07794,
+          0.07829,
+          0.07421,
+          0.07065,
+          0.06805
+        ],
+        "MultiCBR": [
+          0.09053,
+          0.08881,
+          0.08744,
+          0.08081,
+          0.07849,
+          0.07444
+        ],
+        "ReCoBR": [
+          0.09396,
+          0.09307,
+          0.08974,
+          0.08736,
+          0.08239,
+          0.07986
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.030262812499999996,
+        0.051653437499999996
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.04405,
+          0.04215,
+          0.04289,
+          0.04011,
+          0.03869,
+          0.03668
+        ],
+        "MultiCBR": [
+          0.04921,
+          0.04812,
+          0.04735,
+          0.04462,
+          0.04271,
+          0.041
+        ],
+        "ReCoBR": [
+          0.05037,
+          0.04998,
+          0.04845,
+          0.04765,
+          0.04543,
+          0.043
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -15.492194179253355,
+        0.9888634582502143
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.6839555428897248,
+          -2.9780564263322984,
+          -3.198917070390439,
+          -7.0141065830721105,
+          -10.547876888002284
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.0131108462455352,
+          -1.2900511813783933,
+          -3.4775292715417683,
+          -4.031409941807473,
+          -6.611512304564249
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.3951884078067125,
+          -2.1943356328214425,
+          -5.14438243144868,
+          -2.65885534024336,
+          -8.936804520400743
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -19.784028069964528,
+        1.2628103023381616
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.8895834585562201,
+          -2.7709322594217767,
+          -5.2653723628057865,
+          -8.258700486866621,
+          -13.469976558273721
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.634507582462985,
+          -1.758423319761615,
+          -4.401959048799209,
+          -8.833421844574262,
+          -10.019472473004088
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.558756766195212,
+          -2.840346894825674,
+          -5.267446597986147,
+          -8.119434258774227,
+          -12.04819277108433
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -19.54488438045375,
+        1.2475458115183249
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.698080279232105,
+          -3.27225130890052,
+          -6.561954624781851,
+          -9.50261780104712,
+          -13.30715532286213
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.5351170568561825,
+          -1.4715719063545185,
+          -2.7224080267558515,
+          -4.3143812709030005,
+          -5.638795986622069
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.7419251678925431,
+          -2.4944035817076937,
+          -4.8480972177806,
+          -7.13143588103613,
+          -10.207866965142308
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -21.081978588421894,
+        1.3456582077716104
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.9629545712020016,
+          -3.9197915486575363,
+          -6.9332729126543535,
+          -10.014727540500735,
+          -14.353687549563842
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7499999999999951,
+          -1.375000000000004,
+          -2.7666666666666617,
+          -4.366666666666664,
+          -6.008333333333327
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.21320338079646728,
+          -1.8579151755120704,
+          -3.4721693443996116,
+          -5.718419249219531,
+          -8.703266580370062
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -26.104261018446916,
+        1.6662294267093778
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -3.682649530400406,
+          -3.2501235788433114,
+          -8.292140385566004,
+          -12.691547207118138,
+          -15.904597132970844
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.8999226775654465,
+          -3.4132331823704787,
+          -10.73677234066055,
+          -13.299458742958127,
+          -17.773113884900027
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.9472115793954905,
+          -4.49127288207748,
+          -7.024265644955308,
+          -12.313750532141333,
+          -15.00638569604087
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -24.573637911464242,
+        1.5685300794551646
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -4.313280363223604,
+          -2.6333711691259976,
+          -8.944381384790013,
+          -12.167990919409755,
+          -16.73098751418842
+        ],
+        "MultiCBR": [
+          0.0,
+          -2.2149969518390433,
+          -3.7797195691932406,
+          -9.327372485267215,
+          -13.208697419223736,
+          -16.683600894127203
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.7742703990470501,
+          -3.811792733770103,
+          -5.400039706174309,
+          -9.807425054595987,
+          -14.631725233273773
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -15.492194179253355,
+        0.9888634582502143
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.6839555428897248,
+          -2.9780564263322984,
+          -3.198917070390439,
+          -7.0141065830721105,
+          -10.547876888002284
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.0131108462455352,
+          -1.2900511813783933,
+          -3.4775292715417683,
+          -4.031409941807473,
+          -6.611512304564249
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.3951884078067125,
+          -2.1943356328214425,
+          -5.14438243144868,
+          -2.65885534024336,
+          -8.936804520400743
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -19.784028069964528,
+        1.2628103023381616
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.8895834585562201,
+          -2.7709322594217767,
+          -5.2653723628057865,
+          -8.258700486866621,
+          -13.469976558273721
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.634507582462985,
+          -1.758423319761615,
+          -4.401959048799209,
+          -8.833421844574262,
+          -10.019472473004088
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.558756766195212,
+          -2.840346894825674,
+          -5.267446597986147,
+          -8.119434258774227,
+          -12.04819277108433
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -19.54488438045375,
+        1.2475458115183249
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.698080279232105,
+          -3.27225130890052,
+          -6.561954624781851,
+          -9.50261780104712,
+          -13.30715532286213
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.5351170568561825,
+          -1.4715719063545185,
+          -2.7224080267558515,
+          -4.3143812709030005,
+          -5.638795986622069
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.7419251678925431,
+          -2.4944035817076937,
+          -4.8480972177806,
+          -7.13143588103613,
+          -10.207866965142308
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -21.081978588421894,
+        1.3456582077716104
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.9629545712020016,
+          -3.9197915486575363,
+          -6.9332729126543535,
+          -10.014727540500735,
+          -14.353687549563842
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7499999999999951,
+          -1.375000000000004,
+          -2.7666666666666617,
+          -4.366666666666664,
+          -6.008333333333327
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.21320338079646728,
+          -1.8579151755120704,
+          -3.4721693443996116,
+          -5.718419249219531,
+          -8.703266580370062
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -26.104261018446916,
+        1.6662294267093778
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -3.682649530400406,
+          -3.2501235788433114,
+          -8.292140385566004,
+          -12.691547207118138,
+          -15.904597132970844
+        ],
+        "MultiCBR": [
+          0.0,
+          -1.8999226775654465,
+          -3.4132331823704787,
+          -10.73677234066055,
+          -13.299458742958127,
+          -17.773113884900027
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.9472115793954905,
+          -4.49127288207748,
+          -7.024265644955308,
+          -12.313750532141333,
+          -15.00638569604087
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -24.573637911464242,
+        1.5685300794551646
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "replacement",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -4.313280363223604,
+          -2.6333711691259976,
+          -8.944381384790013,
+          -12.167990919409755,
+          -16.73098751418842
+        ],
+        "MultiCBR": [
+          0.0,
+          -2.2149969518390433,
+          -3.7797195691932406,
+          -9.327372485267215,
+          -13.208697419223736,
+          -16.683600894127203
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.7742703990470501,
+          -3.811792733770103,
+          -5.400039706174309,
+          -9.807425054595987,
+          -14.631725233273773
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.1817009375,
+        0.20499781250000002
+      ],
+      "bottom_fraction": 0.2999999999999999,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.19922,
+          0.19506,
+          0.19568,
+          0.19273,
+          0.19003,
+          0.18869
+        ],
+        "MultiCBR": [
+          0.20229,
+          0.20334,
+          0.20335,
+          0.20248,
+          0.20279,
+          0.19919
+        ],
+        "ReCoBR": [
+          0.20165,
+          0.2036,
+          0.20351,
+          0.19977,
+          0.19859,
+          0.1896
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.131035,
+        0.148785
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.14275,
+          0.14266,
+          0.14156,
+          0.14001,
+          0.13794,
+          0.1378
+        ],
+        "MultiCBR": [
+          0.14614,
+          0.14534,
+          0.14607,
+          0.14537,
+          0.14436,
+          0.1408
+        ],
+        "ReCoBR": [
+          0.14722,
+          0.14748,
+          0.14772,
+          0.14593,
+          0.14475,
+          0.13636
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.06494414012738854,
+        0.1162631719745223
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": {
+        "omitted_interval": [
+          0.0786656,
+          0.1017744
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07709,
+          0.07668,
+          0.07614,
+          0.07474,
+          0.07457,
+          0.07351
+        ],
+        "MultiCBR": [
+          0.10549,
+          0.10495,
+          0.10552,
+          0.10503,
+          0.10414,
+          0.10335
+        ],
+        "ReCoBR": [
+          0.11368,
+          0.11405,
+          0.11455,
+          0.1132,
+          0.11297,
+          0.11133
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.059624458598726116,
+        0.11767110828025477
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": {
+        "omitted_interval": [
+          0.0747598,
+          0.09969019999999999
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07306,
+          0.07293,
+          0.07232,
+          0.07096,
+          0.0704,
+          0.06968
+        ],
+        "MultiCBR": [
+          0.10206,
+          0.10224,
+          0.10289,
+          0.10266,
+          0.1024,
+          0.10139
+        ],
+        "ReCoBR": [
+          0.1142,
+          0.11437,
+          0.11566,
+          0.11552,
+          0.1152,
+          0.11463
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.042098750000000004,
+        0.06253625
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.051,
+          0.05195,
+          0.05055,
+          0.04823,
+          0.04852,
+          0.05014
+        ],
+        "MultiCBR": [
+          0.05752,
+          0.05769,
+          0.05677,
+          0.05652,
+          0.05598,
+          0.05502
+        ],
+        "ReCoBR": [
+          0.06131,
+          0.0606,
+          0.06015,
+          0.05907,
+          0.05835,
+          0.05635
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.028810624999999992,
+        0.04084187500000001
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.03477,
+          0.03449,
+          0.03413,
+          0.03242,
+          0.03304,
+          0.03361
+        ],
+        "MultiCBR": [
+          0.03896,
+          0.03899,
+          0.03852,
+          0.03797,
+          0.03779,
+          0.0373
+        ],
+        "ReCoBR": [
+          0.04012,
+          0.04005,
+          0.03993,
+          0.03928,
+          0.03964,
+          0.03844
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.1817009375,
+        0.20499781250000002
+      ],
+      "bottom_fraction": 0.2999999999999999,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.19922,
+          0.19506,
+          0.19568,
+          0.19273,
+          0.19003,
+          0.18869
+        ],
+        "MultiCBR": [
+          0.20229,
+          0.20334,
+          0.20335,
+          0.20248,
+          0.20279,
+          0.19919
+        ],
+        "ReCoBR": [
+          0.20165,
+          0.2036,
+          0.20351,
+          0.19977,
+          0.19859,
+          0.1896
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.131035,
+        0.148785
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.14275,
+          0.14266,
+          0.14156,
+          0.14001,
+          0.13794,
+          0.1378
+        ],
+        "MultiCBR": [
+          0.14614,
+          0.14534,
+          0.14607,
+          0.14537,
+          0.14436,
+          0.1408
+        ],
+        "ReCoBR": [
+          0.14722,
+          0.14748,
+          0.14772,
+          0.14593,
+          0.14475,
+          0.13636
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.06494414012738854,
+        0.1162631719745223
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": {
+        "omitted_interval": [
+          0.0786656,
+          0.1017744
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07709,
+          0.07668,
+          0.07614,
+          0.07474,
+          0.07457,
+          0.07351
+        ],
+        "MultiCBR": [
+          0.10549,
+          0.10495,
+          0.10552,
+          0.10503,
+          0.10414,
+          0.10335
+        ],
+        "ReCoBR": [
+          0.11368,
+          0.11405,
+          0.11455,
+          0.1132,
+          0.11297,
+          0.11133
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.059624458598726116,
+        0.11767110828025477
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": {
+        "omitted_interval": [
+          0.0747598,
+          0.09969019999999999
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.07306,
+          0.07293,
+          0.07232,
+          0.07096,
+          0.0704,
+          0.06968
+        ],
+        "MultiCBR": [
+          0.10206,
+          0.10224,
+          0.10289,
+          0.10266,
+          0.1024,
+          0.10139
+        ],
+        "ReCoBR": [
+          0.1142,
+          0.11437,
+          0.11566,
+          0.11552,
+          0.1152,
+          0.11463
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.042098750000000004,
+        0.06253625
+      ],
+      "bottom_fraction": 0.29999999999999993,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.051,
+          0.05195,
+          0.05055,
+          0.04823,
+          0.04852,
+          0.05014
+        ],
+        "MultiCBR": [
+          0.05752,
+          0.05769,
+          0.05677,
+          0.05652,
+          0.05598,
+          0.05502
+        ],
+        "ReCoBR": [
+          0.06131,
+          0.0606,
+          0.06015,
+          0.05907,
+          0.05835,
+          0.05635
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.028810624999999992,
+        0.04084187500000001
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.03477,
+          0.03449,
+          0.03413,
+          0.03242,
+          0.03304,
+          0.03361
+        ],
+        "MultiCBR": [
+          0.03896,
+          0.03899,
+          0.03852,
+          0.03797,
+          0.03779,
+          0.0373
+        ],
+        "ReCoBR": [
+          0.04012,
+          0.04005,
+          0.03993,
+          0.03928,
+          0.03964,
+          0.03844
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -9.230101661294333,
+        1.6179023059757072
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -2.0881437606665942,
+          -1.7769300271057165,
+          -3.2577050496938043,
+          -4.61299066358799,
+          -5.285613894187335
+        ],
+        "MultiCBR": [
+          0.0,
+          0.5190567996440798,
+          0.5240001977359299,
+          0.09392456374510694,
+          0.24716990459241472,
+          -1.532453408472978
+        ],
+        "ReCoBR": [
+          0.0,
+          0.9670220679395047,
+          0.9223902801884565,
+          -0.9323084552442351,
+          -1.5174807835358295,
+          -5.975700471113321
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -10.993750849069396,
+        1.0630349137345356
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.06304728546407956,
+          -0.8336252189141802,
+          -1.9194395796847563,
+          -3.369527145359008,
+          -3.467600700525386
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.5474202819214402,
+          -0.047899274668117275,
+          -0.52689202134939,
+          -1.2180101272752153,
+          -3.6540303818256348
+        ],
+        "ReCoBR": [
+          0.0,
+          0.1766064393424971,
+          0.33962776796629957,
+          -0.8762396413530715,
+          -1.677761173753567,
+          -7.376715120228217
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -7.179498692556541,
+        1.2724213234067827
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.5318458944091442,
+          -1.2323258528992187,
+          -3.048385004540155,
+          -3.268906472953703,
+          -4.643922687767543
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.5118968622618292,
+          0.028438714570100387,
+          -0.4360602900748911,
+          -1.279742155654573,
+          -2.0286283060005683
+        ],
+        "ReCoBR": [
+          0.0,
+          0.32547501759323527,
+          0.7653061224489832,
+          -0.4222378606615118,
+          -0.6245601688951496,
+          -2.0672061928219576
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -7.394206408810167,
+        1.8320332219805557
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.1779359430605032,
+          -1.0128661374213088,
+          -2.8743498494388287,
+          -3.6408431426224963,
+          -4.62633451957295
+        ],
+        "MultiCBR": [
+          0.0,
+          0.17636684303350414,
+          0.8132471095434024,
+          0.5878894767783693,
+          0.3331373701744189,
+          -0.6564765824025098
+        ],
+        "ReCoBR": [
+          0.0,
+          0.14886164623468812,
+          1.2784588441331124,
+          1.1558669001751287,
+          0.8756567425569184,
+          0.37653239929946736
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -12.755399572567594,
+        2.795818162120518
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          1.8627450980392313,
+          -0.8823529411764675,
+          -5.431372549019597,
+          -4.862745098039212,
+          -1.68627450980392
+        ],
+        "MultiCBR": [
+          0.0,
+          0.29554937413072135,
+          -1.3038942976356105,
+          -1.7385257301808066,
+          -2.6773296244784417,
+          -4.346314325452017
+        ],
+        "ReCoBR": [
+          0.0,
+          -1.158049257869842,
+          -1.8920241396183313,
+          -3.653563855814723,
+          -4.82792366661231,
+          -8.09003425216116
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -9.962935379767547,
+        0.7178491235894983
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.8052919183203944,
+          -1.8406672418751824,
+          -6.758700028760433,
+          -4.975553638193853,
+          -3.3362093758987688
+        ],
+        "MultiCBR": [
+          0.0,
+          0.07700205338807553,
+          -1.1293634496920002,
+          -2.541067761806992,
+          -3.003080082135534,
+          -4.260780287474342
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.17447657028913932,
+          -0.4735792622133639,
+          -2.093718843469594,
+          -1.1964107676969093,
+          -4.187437686939188
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -9.230101661294333,
+        1.6179023059757072
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -2.0881437606665942,
+          -1.7769300271057165,
+          -3.2577050496938043,
+          -4.61299066358799,
+          -5.285613894187335
+        ],
+        "MultiCBR": [
+          0.0,
+          0.5190567996440798,
+          0.5240001977359299,
+          0.09392456374510694,
+          0.24716990459241472,
+          -1.532453408472978
+        ],
+        "ReCoBR": [
+          0.0,
+          0.9670220679395047,
+          0.9223902801884565,
+          -0.9323084552442351,
+          -1.5174807835358295,
+          -5.975700471113321
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -10.993750849069396,
+        1.0630349137345356
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.06304728546407956,
+          -0.8336252189141802,
+          -1.9194395796847563,
+          -3.369527145359008,
+          -3.467600700525386
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.5474202819214402,
+          -0.047899274668117275,
+          -0.52689202134939,
+          -1.2180101272752153,
+          -3.6540303818256348
+        ],
+        "ReCoBR": [
+          0.0,
+          0.1766064393424971,
+          0.33962776796629957,
+          -0.8762396413530715,
+          -1.677761173753567,
+          -7.376715120228217
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -7.179498692556541,
+        1.2724213234067827
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.5318458944091442,
+          -1.2323258528992187,
+          -3.048385004540155,
+          -3.268906472953703,
+          -4.643922687767543
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.5118968622618292,
+          0.028438714570100387,
+          -0.4360602900748911,
+          -1.279742155654573,
+          -2.0286283060005683
+        ],
+        "ReCoBR": [
+          0.0,
+          0.32547501759323527,
+          0.7653061224489832,
+          -0.4222378606615118,
+          -0.6245601688951496,
+          -2.0672061928219576
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -7.394206408810167,
+        1.8320332219805557
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.1779359430605032,
+          -1.0128661374213088,
+          -2.8743498494388287,
+          -3.6408431426224963,
+          -4.62633451957295
+        ],
+        "MultiCBR": [
+          0.0,
+          0.17636684303350414,
+          0.8132471095434024,
+          0.5878894767783693,
+          0.3331373701744189,
+          -0.6564765824025098
+        ],
+        "ReCoBR": [
+          0.0,
+          0.14886164623468812,
+          1.2784588441331124,
+          1.1558669001751287,
+          0.8756567425569184,
+          0.37653239929946736
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -12.755399572567594,
+        2.795818162120518
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          1.8627450980392313,
+          -0.8823529411764675,
+          -5.431372549019597,
+          -4.862745098039212,
+          -1.68627450980392
+        ],
+        "MultiCBR": [
+          0.0,
+          0.29554937413072135,
+          -1.3038942976356105,
+          -1.7385257301808066,
+          -2.6773296244784417,
+          -4.346314325452017
+        ],
+        "ReCoBR": [
+          0.0,
+          -1.158049257869842,
+          -1.8920241396183313,
+          -3.653563855814723,
+          -4.82792366661231,
+          -8.09003425216116
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -9.962935379767547,
+        0.7178491235894983
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@10",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.8052919183203944,
+          -1.8406672418751824,
+          -6.758700028760433,
+          -4.975553638193853,
+          -3.3362093758987688
+        ],
+        "MultiCBR": [
+          0.0,
+          0.07700205338807553,
+          -1.1293634496920002,
+          -2.541067761806992,
+          -3.003080082135534,
+          -4.260780287474342
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.17447657028913932,
+          -0.4735792622133639,
+          -2.093718843469594,
+          -1.1964107676969093,
+          -4.187437686939188
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.2602571875,
+        0.29636656250000004
+      ],
+      "bottom_fraction": 0.2999999999999998,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.28072,
+          0.274,
+          0.28095,
+          0.2746,
+          0.27412,
+          0.27109
+        ],
+        "MultiCBR": [
+          0.28424,
+          0.28215,
+          0.28542,
+          0.2807,
+          0.28434,
+          0.27755
+        ],
+        "ReCoBR": [
+          0.28827,
+          0.28423,
+          0.29108,
+          0.28762,
+          0.2942,
+          0.2791
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.1564134375,
+        0.1738353125
+      ],
+      "bottom_fraction": 0.30000000000000016,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.16637,
+          0.16531,
+          0.16587,
+          0.16356,
+          0.16246,
+          0.16164
+        ],
+        "MultiCBR": [
+          0.16951,
+          0.16821,
+          0.16966,
+          0.16798,
+          0.16811,
+          0.16345
+        ],
+        "ReCoBR": [
+          0.17201,
+          0.17111,
+          0.17279,
+          0.17107,
+          0.17219,
+          0.16221
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.10049146496815287,
+        0.15810770700636942
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": {
+        "omitted_interval": [
+          0.116399,
+          0.142931
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.11459,
+          0.11449,
+          0.11374,
+          0.11144,
+          0.11076,
+          0.10993
+        ],
+        "MultiCBR": [
+          0.15003,
+          0.14873,
+          0.14833,
+          0.14732,
+          0.14654,
+          0.14474
+        ],
+        "ReCoBR": [
+          0.15622,
+          0.15599,
+          0.15489,
+          0.15291,
+          0.15139,
+          0.14871
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.07435738853503183,
+        0.13382852229299366
+      ],
+      "bottom_fraction": 0.2999999999999998,
+      "break": {
+        "omitted_interval": [
+          0.0900586,
+          0.1162914
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08827,
+          0.08827,
+          0.08756,
+          0.08582,
+          0.08508,
+          0.08445
+        ],
+        "MultiCBR": [
+          0.12,
+          0.11989,
+          0.1201,
+          0.11967,
+          0.11942,
+          0.11808
+        ],
+        "ReCoBR": [
+          0.13128,
+          0.13117,
+          0.13181,
+          0.13139,
+          0.13052,
+          0.12955
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.0675178125,
+        0.0956584375
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08092,
+          0.0815,
+          0.08015,
+          0.07652,
+          0.07596,
+          0.07656
+        ],
+        "MultiCBR": [
+          0.09065,
+          0.09063,
+          0.08888,
+          0.08684,
+          0.08648,
+          0.08428
+        ],
+        "ReCoBR": [
+          0.09367,
+          0.09397,
+          0.09305,
+          0.0902,
+          0.08905,
+          0.08834
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.036884062499999995,
+        0.0513371875
+      ],
+      "bottom_fraction": 0.30000000000000027,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.04405,
+          0.04366,
+          0.04336,
+          0.04122,
+          0.04167,
+          0.04188
+        ],
+        "MultiCBR": [
+          0.04921,
+          0.04915,
+          0.04848,
+          0.04738,
+          0.04724,
+          0.04636
+        ],
+        "ReCoBR": [
+          0.05028,
+          0.05047,
+          0.05007,
+          0.04901,
+          0.04938,
+          0.04825
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.2602571875,
+        0.29636656250000004
+      ],
+      "bottom_fraction": 0.2999999999999998,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.28072,
+          0.274,
+          0.28095,
+          0.2746,
+          0.27412,
+          0.27109
+        ],
+        "MultiCBR": [
+          0.28424,
+          0.28215,
+          0.28542,
+          0.2807,
+          0.28434,
+          0.27755
+        ],
+        "ReCoBR": [
+          0.28827,
+          0.28423,
+          0.29108,
+          0.28762,
+          0.2942,
+          0.2791
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.1564134375,
+        0.1738353125
+      ],
+      "bottom_fraction": 0.30000000000000016,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.16637,
+          0.16531,
+          0.16587,
+          0.16356,
+          0.16246,
+          0.16164
+        ],
+        "MultiCBR": [
+          0.16951,
+          0.16821,
+          0.16966,
+          0.16798,
+          0.16811,
+          0.16345
+        ],
+        "ReCoBR": [
+          0.17201,
+          0.17111,
+          0.17279,
+          0.17107,
+          0.17219,
+          0.16221
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.10049146496815287,
+        0.15810770700636942
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": {
+        "omitted_interval": [
+          0.116399,
+          0.142931
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.11459,
+          0.11449,
+          0.11374,
+          0.11144,
+          0.11076,
+          0.10993
+        ],
+        "MultiCBR": [
+          0.15003,
+          0.14873,
+          0.14833,
+          0.14732,
+          0.14654,
+          0.14474
+        ],
+        "ReCoBR": [
+          0.15622,
+          0.15599,
+          0.15489,
+          0.15291,
+          0.15139,
+          0.14871
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.07435738853503183,
+        0.13382852229299366
+      ],
+      "bottom_fraction": 0.2999999999999998,
+      "break": {
+        "omitted_interval": [
+          0.0900586,
+          0.1162914
+        ],
+        "visible_break_height": 0.012
+      },
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08827,
+          0.08827,
+          0.08756,
+          0.08582,
+          0.08508,
+          0.08445
+        ],
+        "MultiCBR": [
+          0.12,
+          0.11989,
+          0.1201,
+          0.11967,
+          0.11942,
+          0.11808
+        ],
+        "ReCoBR": [
+          0.13128,
+          0.13117,
+          0.13181,
+          0.13139,
+          0.13052,
+          0.12955
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.0675178125,
+        0.0956584375
+      ],
+      "bottom_fraction": 0.3000000000000001,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.08092,
+          0.0815,
+          0.08015,
+          0.07652,
+          0.07596,
+          0.07656
+        ],
+        "MultiCBR": [
+          0.09065,
+          0.09063,
+          0.08888,
+          0.08684,
+          0.08648,
+          0.08428
+        ],
+        "ReCoBR": [
+          0.09367,
+          0.09397,
+          0.09305,
+          0.0902,
+          0.08905,
+          0.08834
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        0.036884062499999995,
+        0.0513371875
+      ],
+      "bottom_fraction": 0.30000000000000027,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "absolute",
+      "series": {
+        "CrossCBR": [
+          0.04405,
+          0.04366,
+          0.04336,
+          0.04122,
+          0.04167,
+          0.04188
+        ],
+        "MultiCBR": [
+          0.04921,
+          0.04915,
+          0.04848,
+          0.04738,
+          0.04724,
+          0.04636
+        ],
+        "ReCoBR": [
+          0.05028,
+          0.05047,
+          0.05007,
+          0.04901,
+          0.04938,
+          0.04825
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -6.002760035606087,
+        2.5715583503934694
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -2.393844400113998,
+          0.08193217440863876,
+          -2.1801082929609583,
+          -2.3510971786834034,
+          -3.43046451980622
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7352941176470562,
+          0.415142133408386,
+          -1.245426400225158,
+          0.03518153672952273,
+          -2.3536448072051686
+        ],
+        "ReCoBR": [
+          0.0,
+          -1.4014639053665068,
+          0.9747805876435311,
+          -0.22548305408125469,
+          2.057099247233496,
+          -3.181045547576933
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -8.580533108540198,
+        1.0300999941863818
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.6371340986956686,
+          -0.3005349522149481,
+          -1.6890064314479702,
+          -2.350183326320854,
+          -2.843060647953344
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7669164061117284,
+          0.08849035455136267,
+          -0.9026016164238149,
+          -0.825909975812622,
+          -3.5750103238746833
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.5232253938724396,
+          0.4534620080227869,
+          -0.5464798558223349,
+          0.10464507877450124,
+          -5.6973431777222245
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -7.060755665087688,
+        0.45068653181410784
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.08726764988219449,
+          -0.7417750239986032,
+          -2.748930971288943,
+          -3.34235099048783,
+          -4.066672484509992
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.8664933679930598,
+          -1.1331067119909388,
+          -1.8063054055855399,
+          -2.3262014263813913,
+          -3.525961474371786
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.14722826782742615,
+          -0.8513634617846599,
+          -2.118806810907703,
+          -3.0917936243758826,
+          -4.80732300601715
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -6.5454506836314845,
+        0.8472811559572961
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          0.0,
+          -0.8043502888863685,
+          -2.7755749405234065,
+          -3.61391186133454,
+          -4.32763113175485
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.09166666666666767,
+          0.08333333333334636,
+          -0.275000000000003,
+          -0.4833333333333356,
+          -1.5999999999999903
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.08379037172455694,
+          0.4037172455819693,
+          0.08379037172456805,
+          -0.5789152955514965,
+          -1.3177940280316935
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -10.656925926173338,
+        1.4427370709810092
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          0.7167572911517484,
+          -0.9515570934256146,
+          -5.437469105289172,
+          -6.129510627780532,
+          -5.388037567968363
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.022062879205730912,
+          -1.9525648097076576,
+          -4.202978488692766,
+          -4.600110314396022,
+          -7.027027027027033
+        ],
+        "ReCoBR": [
+          0.0,
+          0.3202732998825564,
+          -0.6618981530906454,
+          -3.7044945019750197,
+          -4.932208818191519,
+          -5.690188961246934
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -9.61314327055662,
+        1.0156089858201618
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.8853575482406395,
+          -1.5664018161180349,
+          -6.424517593643586,
+          -5.402951191827466,
+          -4.926220204313281
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.12192643771590239,
+          -1.4834383255435735,
+          -3.718756350335295,
+          -4.003251371672423,
+          -5.7915057915057915
+        ],
+        "ReCoBR": [
+          0.0,
+          0.3778838504375548,
+          -0.4176610978520179,
+          -2.5258552108194166,
+          -1.7899761336515496,
+          -4.037390612569602
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -6.002760035606087,
+        2.5715583503934694
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -2.393844400113998,
+          0.08193217440863876,
+          -2.1801082929609583,
+          -2.3510971786834034,
+          -3.43046451980622
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7352941176470562,
+          0.415142133408386,
+          -1.245426400225158,
+          0.03518153672952273,
+          -2.3536448072051686
+        ],
+        "ReCoBR": [
+          0.0,
+          -1.4014639053665068,
+          0.9747805876435311,
+          -0.22548305408125469,
+          2.057099247233496,
+          -3.181045547576933
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -8.580533108540198,
+        1.0300999941863818
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "Youshu",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.6371340986956686,
+          -0.3005349522149481,
+          -1.6890064314479702,
+          -2.350183326320854,
+          -2.843060647953344
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.7669164061117284,
+          0.08849035455136267,
+          -0.9026016164238149,
+          -0.825909975812622,
+          -3.5750103238746833
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.5232253938724396,
+          0.4534620080227869,
+          -0.5464798558223349,
+          0.10464507877450124,
+          -5.6973431777222245
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -7.060755665087688,
+        0.45068653181410784
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.08726764988219449,
+          -0.7417750239986032,
+          -2.748930971288943,
+          -3.34235099048783,
+          -4.066672484509992
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.8664933679930598,
+          -1.1331067119909388,
+          -1.8063054055855399,
+          -2.3262014263813913,
+          -3.525961474371786
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.14722826782742615,
+          -0.8513634617846599,
+          -2.118806810907703,
+          -3.0917936243758826,
+          -4.80732300601715
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -6.5454506836314845,
+        0.8472811559572961
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "iFashion",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          0.0,
+          -0.8043502888863685,
+          -2.7755749405234065,
+          -3.61391186133454,
+          -4.32763113175485
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.09166666666666767,
+          0.08333333333334636,
+          -0.275000000000003,
+          -0.4833333333333356,
+          -1.5999999999999903
+        ],
+        "ReCoBR": [
+          0.0,
+          -0.08379037172455694,
+          0.4037172455819693,
+          0.08379037172456805,
+          -0.5789152955514965,
+          -1.3177940280316935
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -10.656925926173338,
+        1.4427370709810092
+      ],
+      "bottom_fraction": 0.30000000000000004,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "recall@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          0.7167572911517484,
+          -0.9515570934256146,
+          -5.437469105289172,
+          -6.129510627780532,
+          -5.388037567968363
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.022062879205730912,
+          -1.9525648097076576,
+          -4.202978488692766,
+          -4.600110314396022,
+          -7.027027027027033
+        ],
+        "ReCoBR": [
+          0.0,
+          0.3202732998825564,
+          -0.6618981530906454,
+          -3.7044945019750197,
+          -4.932208818191519,
+          -5.690188961246934
+        ]
+      }
+    },
+    {
+      "y_limits": [
+        -9.61314327055662,
+        1.0156089858201618
+      ],
+      "bottom_fraction": 0.3,
+      "break": null,
+      "mode": "injection",
+      "dataset": "NetEase",
+      "metric": "ndcg@20",
+      "kind": "relative",
+      "series": {
+        "CrossCBR": [
+          0.0,
+          -0.8853575482406395,
+          -1.5664018161180349,
+          -6.424517593643586,
+          -5.402951191827466,
+          -4.926220204313281
+        ],
+        "MultiCBR": [
+          0.0,
+          -0.12192643771590239,
+          -1.4834383255435735,
+          -3.718756350335295,
+          -4.003251371672423,
+          -5.7915057915057915
+        ],
+        "ReCoBR": [
+          0.0,
+          0.3778838504375548,
+          -0.4176610978520179,
+          -2.5258552108194166,
+          -1.7899761336515496,
+          -4.037390612569602
+        ]
+      }
+    }
+  ]
+}

@@ -345,3 +345,22 @@
 读取用户提供的 `注入式-netease-results_summary (2).csv`，确认 NetEase 的三个模型、六个噪声比例共 18 组全部成功，@10、@20 指标完整、条件无重复，汇总中的相对变化与各模型无噪声基线核算一致。直接采用全部原始指标生成 Top10、Top20 的实际值图与百分比图，共四张 300 DPI PNG；各图下方留 30% 空间，不进行换值或断轴。
 
 产物保存于 `noise_benchmark_artifacts_injection/figures/netease_20261015_bottom30/`，同时保留原始 CSV 的逐字节副本、包含来源哈希和百分比定义的清单，以及图和数据的压缩包。原始下载文件、服务器训练任务和已有结果均不修改。
+
+---
+
+## 23. 将 ReCoBR 注入式 Youshu 0.20 复验值写入归档汇总（2026-10-16）
+
+按用户明确要求，更新 `抗噪实验-结果/注入式(youshu+ifashion)results_summary (2).csv` 中唯一的 ReCoBR + Youshu + injection + 0.20 记录。采用用户提供的 2026-10-15 16:42:31 复验日志所选检查点，四档最佳轮次由 14 改为 99。噪声种子、训练种子均保持 20261014。原值与复验值留档如下（每项依次为 Recall、NDCG）：
+
+- Top10：原值 0.11089、0.07702；复验值 0.19859、0.14475。
+- Top20：原值 0.16276、0.09194；复验值 0.29420、0.17219。
+- Top40：原值 0.23185、0.11088；复验值 0.39550、0.19985。
+- Top80：原值 0.30943、0.12860；复验值 0.51592、0.22710。
+
+八个 `*_change_vs_zero@K` 字段使用该文件中 ReCoBR + Youshu 的无噪声基线重新计算，定义仍为“当前指标 / 无噪声指标 - 1”，CSV 存小数比例而非乘以 100 后的百分数。四档无噪声基线依次为：Top10 0.20165、0.14722；Top20 0.28827、0.17201；Top40 0.39451、0.20061；Top80 0.52274、0.22975。
+
+原日志路径为 `/code/25-chenglong/ReCoBR_noise_2/MultiCBR-Project/noise_benchmark_artifacts_injection/runs/recobr__Youshu__noise_0.20__nseed_20261014__tseed_20261014__mode_injection/attempt_01/stdout.log`。依据用户执行的复验命令及工程日志目录规则，`stdout_log` 改为 `/code/25-chenglong/ReCoBR_noise/MultiCBR-Project/noise_benchmark_artifacts_injection_recobr020_recheck/runs/recobr__Youshu__noise_0.20__nseed_20261014__tseed_20261014__mode_injection/attempt_01/stdout.log`。未连接服务器核实该路径，数值证据为用户粘贴的复验日志。
+
+本次是按用户选定复验检查点更新归档，并非确定或修复前次运行低值的原因，不将前次低值归因为早停。原汇总的状态、尝试次数、返回码和噪声统计等调度元数据保持不变，不据此声称已核验复验进程结束标记。该文件其余 35 条记录、另外两份结果 CSV、现有图片以及训练代码均不修改。原始低值同时保留在本项记录和 Git 历史中，服务器运行产物不受影响。
+
+验证：与提交前版本逐行、逐字段对比，确认 CSV 仅这一行的 21 个预期字段变化（日志路径、四个最佳轮次、八个指标及八个相对变化）。三份汇总仍包含 108 个不重复实验条件且状态均为 succeeded，全部 864 组指标及相对变化配对核算通过；`git diff --check` 通过。本地不运行模型训练。

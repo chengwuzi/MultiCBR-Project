@@ -778,6 +778,9 @@ representation, providing an explicit bundle-preference
 reference for neighbor selection.
 
 
+
+
+
 \begin{figure*}[t]
     \centering
     \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
@@ -801,7 +804,6 @@ reference for neighbor selection.
     \label{fig:hyperparameter}
 \end{figure*}
 
-
 \paragraph{Performance on Sparse Users.}
 NetEase users are sorted by increasing training U-B
 interaction counts and divided into four equally sized groups
@@ -815,6 +817,39 @@ learning is particularly useful when direct bundle feedback
 is limited, allowing U-I behavior and B-I composition to
 provide additional learning signals for bundle preference
 modeling.
+
+
+
+\begin{figure}[t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
+        \multicolumn{2}{c}{(a) Youshu} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
+        \multicolumn{2}{c}{(b) iFashion} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
+        \multicolumn{2}{c}{(c) NetEase}
+    \end{tabular}
+    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
+    Youshu, iFashion, and NetEase. We add random edges at ratios from
+    0\% to 25\% in 5\% increments relative to each user's original
+    training interactions, retaining all original edges.}
+    \label{fig:noise-robustness}
+\end{figure}
+
+\paragraph{Robustness to Noisy U-B Interactions.}
+We compare ReCoBR with CrossCBR and MultiCBR using the same
+perturbed U-B input graph for each dataset and noise ratio.
+Ranking supervision, U-I and B-I relations, and evaluation data
+remain unchanged. We rerun ReCoBR's full training pipeline,
+including U-B pretraining. Figure~\ref{fig:noise-robustness} shows
+that ReCoBR maintains the highest Recall@20 and NDCG@20 across
+all datasets and tested noise ratios, showing that it retains
+its recommendation advantage when additional random connections
+interfere with U-B graph propagation.
 
 
 

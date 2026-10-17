@@ -1503,3 +1503,205 @@ Parameter Settings 重组为三个自然段：共同训练及去噪器设置；�
 （3）“工程记录.txt”在原三十一项之后追加本第三十二项，追加前的 197067 字节原文完整保留，沿用 UTF-8 无 BOM 与 CRLF 换行。本轮实际变更为六张图的文件名与本项记录；未修改论文正文、图注、表格数值、参考文献、其他正式图、训练代码、配置或数据，未编译论文、运行训练或实验。
 
 （4）改名前后的文件完整性、引用范围、目标路径和受保护文件检查通过；git diff --check 通过。
+
+
+第三十三项：当前十页论文的逐页、逐段与图表布局核对
+记录日期：2026-10-17
+
+一、任务、版面基准与版本确认
+
+（1）用户要求熟悉当前论文每一段所在页码、左右栏和图片表格的位置，为后续精修及插入抗噪实验提供版面认知。本轮读取当前源码、定位现有 PDF、核对文字并查看全部十页实际图像；未改写论文、移动浮动体或插入新增抗噪图。
+
+（2）当前源码仍为“AAAI文件/main.tex”，SHA256 为 13a0b8fb48aece53f52922b3606351e4c322bea6b44a2462484dec1aa429d97f；“AAAI文件/aaai2027.bib”的 SHA256 为 35cd30a9328644378ecf6976587a74fa82068a7f23f618667a76c2e64597d3bd。两者与第三十项定稿一致。
+
+（3）当前项目不含第三十项记录的 tmp/output 编译产物，也没有可用的 TeX 编译器。在桌面找到“C:/Users/86188/Desktop/ReCoBR-新稿.pdf”：十页，5526942 字节，SHA256 为 3e4660e8022473afc9b3a7c0418fde162d1bdfaa467582160fc5d253ec65209c，PDF 内嵌编译时间为北京时间 2026-10-16 03:17:20。其二进制大小和哈希与第三十项归档审阅稿不同，不能称为同一个二进制产物。
+
+（4）对该 PDF 与当前 main.tex 做全文正文比对：去除注释、公式、浮动体和引用/交叉引用命令后形成 188 个可比较正文片段，全部匹配；PDF 提取读序造成的版权脚注、Figure 2 及 Figure 3 插入干扰已单独处理。结合十八个公式、图表及引用的逐页视觉核对，将这份文字与当前源码一致的十页导出稿作为本次实际布局基准。以下页码均为 PDF 物理页码，左右栏按页面的视觉位置描述。
+
+二、逐页与逐段布局索引
+
+【第 1 页】
+（1）上部跨栏为论文标题及匿名作者信息。
+（2）左栏上部为完整 Abstract，摘要为一个自然段。左栏下部开始第 1 节 Introduction：首段“Bundle recommendation (BR) aims...”从左栏下部续到同页右栏顶部，右栏开头为“to bundles. Effectively integrating...”。左栏底部是匿名稿版权脚注。
+（3）右栏在引言首段结尾后，依次为“Early approaches...”段（DAM/BGCN）、“Learning separate views...”段（CrossCBR/MultiCBR/DGMAE）、“These advances...”过渡段（U-B 的作用及两个挑战的引出）；过渡段在右栏底部结束。
+
+【第 2 页】
+（1）左栏顶部依次为 Challenge 1 噪声段、Challenge 2 稀疏段；中部起为“To address these challenges...”的完整方法总述自然段。
+（2）左栏下部为“Our main contributions...”及贡献列表：前两条在左栏完整呈现，第三条从左栏最后一行跨到右栏顶部，其续文从“CoBR's recommendation improvements...”开始。
+（3）右栏贡献列表结束后开始第 2 节 Related Work。2.1 Bundle Recommendation 的两段均在右栏：第一段表示构建与辅助信息，第二段跨视图协调。
+（4）右栏下部为 2.2 Denoising and Diffusion for Recommendation：第一段可靠性处理完整呈现；第二段从“Diffusion models learn...”写到页底，并跨到第 3 页左栏。
+
+【第 3 页】
+（1）左栏顶部两行接续 2.2 第二段，以历史偏好细化及观测连接筛选收束。其下是 2.3 Contrastive Learning for Recommendation 的两段：先视图构建与目标，再辅助关系与跨视图约束。
+（2）左栏中下部开始第 3 节 Methodology 及 3.1 Task Definition and Framework Overview。三个自然段依次是“Let U, B, and I...”任务定义、“Figure 1 outlines ReCoBR...”框架概述，以及“We distinguish...”原始矩阵和重构矩阵的用途区分；第三段在左栏底部结束。
+（3）右栏顶部开始 3.2 Diffusion-Driven U-B Graph Denoising and Reconstruction，先为“The purpose of this module...”动机段。
+（4）右栏中上部为 Pretraining and Historical Preference Construction：预训练定义与式（1），随后解释传播层数、固定层权重及冻结输出的用途；再是“For each active user...”历史均值、式（2）及历史偏好定义和非无噪假设的解释。
+（5）右栏下部开始 User-Conditioned Diffusion Denoising：前向扰动、噪声日程与式（3），以及 Gaussian 噪声和保留信息比例的解释；该部分在本页末结束。
+
+【第 4 页】
+（1）页顶跨双栏为 Figure 1 总框架图及图注。
+（2）图下左栏从“To make recovery personalized...”开始：条件 MLP 定义与式（4），其后“In Eq. (4)...”解释输入各部分和维度；然后为“During training...”抽样、重构损失式（5）及其作用说明。
+（3）左栏底部开始 Bundle-Set Consistency in Denoising，其引入动机段从“Reconstructing the pooled vector...”到 Figure 1 中 SetLoss 的说明均在左栏。
+（4）右栏顶部接 SetLoss 的具体定义：“Let sim...”及式（6），接“Equation (5) reconstructs...”的 MSE/方向一致性区别说明，再是“We optimize...”总去噪目标式（7）和 lambda_set 解释。
+（5）右栏中下部为 Preference Refinement and Graph Reconstruction：以“After learning the denoiser...”引出确定性细化、式（8）及 refinement iterates 与训练扰动状态的区别；本页结束在“without sampling a Gaussian starting state.”。
+
+【第 5 页】
+（1）左栏顶部接图重构小节：观测捆绑评分式（9），随后 Top-K 规模及式（10），并解释返回集合、短历史、仅保留已观测边及不改变排序标签。
+（2）左栏中部开始 3.3 Pre-Fusion Cross-View Contrastive Learning：先是“With the U-B graph reconstructed...”过渡段，然后是 View-Specific Representations 的骨干、传播、扰动和嵌入说明段。
+（3）左栏下部依次是 U-B view、U-I view、B-I view 三段，再到两种物品池化式（11）；式（11）的 where 解释跨到右栏顶部。
+（4）右栏顶部先完成池化邻居与空集合说明，再是“This step yields...”三视图输出段。
+（5）右栏上中部为 Cross-View Objectives Anchored in U-B：同实体配对及去重实体集合段；定向 InfoNCE 式（12）及温度/分母说明；四项 L_A 式（13）及梯度、实体不足和辅助信息作用说明。
+（6）右栏下部开始 3.4 Prediction and Model Optimization，View fusion and prediction 段与式（14）在本页；固定融合系数说明从本页右栏底部跨到第 6 页左栏顶部。
+
+【第 6 页】
+（1）左栏最上两行完成三视图系数非负、和为 1 的说明。随后 Recommendation objectives 引入批次与式（15）；“For each occurrence...”解释融合后正则，并引出 BPR 和总排序目标式（16）；“Here, sigma...”解释参数、权重和原始监督的保留。
+（2）左栏中下部依次为 Training 段、Inference 段。
+（3）左栏底部开始 3.5 Computational Complexity，其首段定义从“Let n_+...”写到栏底，跨到右栏顶部继续；右栏接时间复杂度式（17）。
+（4）右栏上部依次为“The three terms...”时间项解释、离线预训练与图边数说明；“For space complexity...”与空间复杂度式（18）；最后是“At inference...”缓存与评分复杂度段。
+（5）右栏中部开始第 4 节 Experiments 及开场自然段，随后是 4.1 Experimental Settings。Datasets 段在右栏中下部完整呈现。
+（6）Baselines 第一段从右栏下部开始，在 XSimGCL 的引用后跨到第 7 页左栏继续；本页右栏底部为 Table 1 数据集统计表及表注。
+
+【第 7 页】
+（1）页顶跨双栏为 Table 2 总体性能表及表注。
+（2）其下左栏上部为 Table 3 消融表及表注；左栏中下部接第 6 页的 Baselines 第一段，从“uses noise-based embedding augmentation...”继续介绍至 EpicCBR。
+（3）左栏底部为“Results for...”基线结果来源段，最后一个 implementation 的尾部跨到右栏顶部，右栏图表下第一行显示“mentation.”。
+（4）右栏上中部为 Parameter Settings 两个自然段：第一段共同训练与去噪器配置，第二段五组扫描范围及 ReCoBR 总体结果三次平均。
+（5）右栏下部开始 4.2 Overall Performance：引导句与第一条观察完整呈现；第二条观察写至右栏底部，在“better recommendation.”之后跨到第 8 页左栏继续。
+
+【第 8 页】
+（1）左栏顶部三行接 4.2 第二条观察，以 U-B 偏好学习及偏好引导图重构收束；随后是完整的第三条观察。
+（2）左栏中上部为 4.3 Ablation Study，五种变体定义、结果归纳与总体收束均在同一个自然段。
+（3）左栏中下部开始 4.4 In-depth Analysis；Interaction Selection Strategies 标题与整段分析位于左栏。
+（4）Performance on Sparse Users 段从左栏底部开始，写到“the sparsest”后跨到右栏；其续文在 Figure 2 图注下方，以“group G1: 12.64%...”开始并完成该自然段。因此当前 4.4 的两个分析自然段都在第 8 页，稀疏段跨左右栏。
+（5）右栏顶部为 Figure 2 的 2×2 四面板深入分析图及图注。
+（6）右栏中下部为 4.5 Hyperparameter Sensitivity：标题及五参数单段分析均在第 8 页右栏，当前版本没有跨到第 9 页。
+（7）右栏底部开始第 5 节 Conclusion：结论自然段的前部写到“The reconstructed U-B view then”，跨到第 9 页左栏。
+
+【第 9 页】
+（1）页顶跨双栏为 Figure 3，五幅超参数图同一横行，图下注明（a）至（e）并给完整图注。
+（2）图下左栏上部接结论后五行，从“anchored pre-fusion contrastive learning...”至全文结论结束。
+（3）随后左栏开始 References，右栏亦为参考文献。Glorot 与 Bengio（2010）条目从第 9 页左栏底部续到右栏顶部。
+
+【第 10 页】
+（1）整页均为参考文献，左栏从 Ren et al.（2023a，DCCF）开始，到 Yu et al.（2024，XSimGCL）结束。
+（2）右栏从 Zhang et al.（2026，RDiffBR）到 Zou et al.（2022，MCCLK）结束，右栏下部留白。没有后续正文、附录或新增抗噪图。
+
+三、图表与公式快速定位
+
+（1）Figure 1：第 4 页顶部，跨双栏，总框架图。
+（2）Table 1：第 6 页右栏底部，单栏，数据集统计。
+（3）Table 2：第 7 页顶部，跨双栏，总体性能。
+（4）Table 3：第 7 页左栏上部、Table 2 之后，单栏，消融。
+（5）Figure 2：第 8 页右栏上部，单栏，四面板交互筛选与稀疏用户分析。
+（6）Figure 3：第 9 页顶部，跨双栏，五幅超参数图同一横行。
+（7）公式位置：式（1）至（3）在第 3 页右栏；式（4）至（5）在第 4 页左栏，式（6）至（8）在第 4 页右栏；式（9）至（11）在第 5 页左栏，式（12）至（14）在第 5 页右栏；式（15）至（16）在第 6 页左栏，式（17）至（18）在第 6 页右栏。
+
+四、本轮文件产物与核验
+
+（1）以 Windows 原生 Windows.Data.Pdf 渲染桌面 PDF，在“PDF逐页图片/ReCoBR-新稿/”新增 page-001.png 至 page-010.png 十张长期页图，实际尺寸均为 1836×2376。未覆盖、删除或移动任何既有页图，桌面 PDF 原件保持原样。本轮没有重新编译 LaTeX，也没有生成新的论文 PDF。
+
+（2）更新“PDF逐页图片/README.txt”，补充当前稿页图的来源、尺寸和十页条目，将所列七组核心 PDF 页图合计更新为 74 页；原有保留规则继续有效。其余不在该清单中的历史诊断页图保持原样。
+
+（3）“工程记录.txt”追加本第三十三项，追加前的 201008 字节完整保留，沿用 UTF-8 无 BOM 和 CRLF。新增本项是对本轮页图生成及目录说明修改的留痕，也保存插入抗噪图之前的逐段版面基准；不把旧记录中历史稿的分页当作当前分页。
+
+（4）全文正文匹配及十页视觉检查完成；第 6—10 页另经独立只读复核，索引一致。main.tex 与 aaai2027.bib 哈希保持本项所列值，原 PDF 哈希保持不变，十张新页图均能正常打开，数量与尺寸核对通过，git diff --check 通过。没有修改正文、模板、图表素材、表格数据、模型代码、配置或数据集，没有运行训练或实验，没有提交 Git。
+
+
+第三十四项：定稿抗噪实验文稿与六张正式图片整合入论文
+记录日期：2026-10-17
+
+一、用户授权与本轮边界
+
+（1）用户确认上一轮精简版抗噪实验正文及图注定稿，并要求实际整合图片和文稿；新增分析放在 In-depth Analysis 后面，原第八页已有图，抗噪图放第九页。本轮据此修改“AAAI文件/main.tex”，编译、查看实际页面，保存新 PDF 与长期页图。
+
+（2）沿用论文后期精修规则：本轮新增内容与排版整合独立记录；CAFU 仍为第一档核心参照，BIGCF、DMRec、ProEx 为重点，其他参照为辅。定稿文句按用户确认版本保留，不在集成时再次润色或扩大修改范围。
+
+二、实际源码与图片整合
+
+（1）4.4 In-depth Analysis 的分析顺序现为 Interaction Selection Strategies、Performance on Sparse Users、Robustness to Noisy U-B Interactions；抗噪分析是本小节最后一项，其后为原 4.5 Hyperparameter Sensitivity。新增正文逐字沿用用户定稿，仅将 Figure X 替换为自动交叉引用，并按 LaTeX 源码换行。
+
+（2）定稿英文正文如下：
+We compare ReCoBR with CrossCBR and MultiCBR using the same perturbed U-B input graph for each dataset and noise ratio. Ranking supervision, U-I and B-I relations, and evaluation data remain unchanged. We rerun ReCoBR's full training pipeline, including U-B pretraining. Figure 3 shows that ReCoBR maintains the highest Recall@20 and NDCG@20 across all datasets and tested noise ratios, showing that it retains its recommendation advantage when additional random connections interfere with U-B graph propagation.
+
+忠实中文：在每个数据集和噪声比例下，我们使用相同的扰动 U-B 输入图比较 ReCoBR、CrossCBR 和 MultiCBR。排序监督、U-I 和 B-I 关系以及评估数据保持不变。我们重新运行 ReCoBR 的完整训练流程，包括 U-B 预训练。图 3 表明，ReCoBR 在全部数据集和测试噪声比例下均保持最高的 Recall@20 和 NDCG@20，说明当额外随机连接干扰 U-B 图传播时，它仍能保持推荐优势。
+
+（3）新增跨双栏 Figure 3，引用 Figures 目录中的六张正式 PNG：noise_youshu_r20.png、noise_youshu_n20.png、noise_ifashion_r20.png、noise_ifashion_n20.png、noise_netease_r20.png、noise_netease_n20.png。使用两行三列排布：三列依次为 Youshu、iFashion、NetEase；上排 Recall@20，下排 NDCG@20；列下标识为 (a) Youshu、(b) iFashion、(c) NetEase。单图宽度为 0.32\textwidth，列间距为 0.01\textwidth。直接使用原始图片，没有重新绘图、裁剪、压缩、改色或改变文件名。
+
+（4）定稿英文图注如下（源码中的百分号转义为 \%）：
+Recall@20 and NDCG@20 under injected U-B graph noise on Youshu, iFashion, and NetEase. We add random edges at ratios from 0% to 25% in 5% increments relative to each user's original training interactions, retaining all original edges.
+
+忠实中文：在 Youshu、iFashion 和 NetEase 上注入 U-B 图噪声时的 Recall@20 和 NDCG@20。我们保留全部原始边，并以每个用户原训练交互数量为基准，按 0% 至 25%、每次递增 5% 的比例添加随机边。
+
+（5）按用户上一轮意见，抗噪图注不保留 iFashion 断轴说明；正文末句围绕图中随机连接干扰下仍保持推荐优势的观察，不恢复此前笼统复述方法机制的结尾。结论范围保持为全部展示条件下的绝对性能领先，没有新增相对降幅最小、退化最慢、精确识别噪声边或机制单独因果证明等表述。本轮不扩展核查注噪实现细节。
+
+（6）为保证浮动体顺序，抗噪 figure* 声明放在新增 paragraph 之前，使用常规 [!t] 页顶选项；原超参数 figure* 整块移到抗噪 paragraph 之后，其图片、尺寸、图注、标签保持原样。自动图号为框架 Figure 1、原深入分析 Figure 2、抗噪 Figure 3、超参数 Figure 4，原超参数正文中的引用自动顺延。不使用强制分页、负间距、字号或模板参数调整。
+
+三、实际编译结果与本轮新版面
+
+（1）本机此前无可用 TeX。本轮在项目“tmp/tools/texlive2026/”建立便携 TeX Live 2026，安装器及宏包下载均做 SHA512 校验，使用 pdfTeX 1.40.29、BibTeX 0.99e。未修改系统 PATH、文件关联或桌面集成。便携环境及运行说明保存在 tmp/tools/texlive2026-runtime.json；下载、配置和安装日志均在 tmp/tools。首次缺少 xcolor/scalefnt 的环境依赖已补齐，之后完成 pdfLaTeX、BibTeX、pdfLaTeX 两遍的完整构建。
+
+（2）实际成稿共十一页，较插入前十页增加一页；不将旧版分页直接当作新版分页。新增正文完整位于物理第 8 页右栏中段，接稀疏用户分析结尾，之后才是 4.5 标题。原 Figure 2 保持在第 8 页右栏顶部。
+
+（3）新增抗噪六图 Figure 3 位于物理第 9 页顶部，符合用户指定。原五面板超参数图顺延为 Figure 4，同在第 9 页，排在抗噪图及其图注之后。第 8 页末的超参数分析末行“ranking objective.”自然续到第 9 页左栏，其后为完整结论；参考文献从第 9 页后部续至第 10、11 页。前七页的主要段落、公式和表格布局保持原有位置。
+
+（4）最终构建日志无 LaTeX 错误、缺失引用、未解析交叉引用或 Overfull 盒。原有部分 Underfull 行间警告经目视确认可接受，不为清除警告改写其他定稿内容。公式仍为十八个，独立文献引用仍为三十六个，没有新增参考文献。全部图表路径与标签均有效。
+
+（5）主代理查看全部十一页，新第 8—11 页另经独立只读复核：六张抗噪图的坐标、刻度、图例和数据集标识可辨，页面及图注无裁切、碰撞或遮挡；新增段确为 4.4 最后一项，结论和参考文献衔接正常。无需追加全局排版调整。
+
+四、产物、保留与完整性核验
+
+（1）主源码“AAAI文件/main.tex”由 54372 字节变为 55972 字节，SHA256 由 13a0b8fb48aece53f52922b3606351e4c322bea6b44a2462484dec1aa429d97f 变为 31b65f093b689e95f361e2a21ef340ffdd6ab9ad269e83cdfd49c4aeccf8f0fc。去除浮动体与新增 paragraph 后的原正文，与本轮修改前逐字一致（仅忽略空白）；原各图块完整保留，超参数图仅整体移动。
+
+（2）新审阅稿保存为“output/pdf/ReCoBR_AAAI_noise_20261017.pdf”，十一页、7105583 字节，SHA256 为 4ecf1848547b3ab2637b1304ecf65a06b222e0254d3da540bca50fe1e3e3eb8c。构建产物保存在“tmp/pdfs/noise-integration-20261017/build-trial-01/”，新审阅 PDF 与该目录中的 main.pdf 字节一致。此前桌面 PDF 和项目历史 PDF 均保留原样。
+
+（3）使用 Windows.Data.Pdf 渲染全部十一页，并在“PDF逐页图片/ReCoBR_AAAI_noise_20261017/”长期保存 page-001.png 至 page-011.png，实际尺寸均为 1836×2376。更新“PDF逐页图片/README.txt”，新增本稿来源、哈希、版面说明和十一页条目，核心清单总数由 74 页变为 85 页。原目录中全部既有页图保留，不混用不同版本页面。
+
+（4）本轮修改前源码、工程记录、bib/sty/bst 与图片哈希清单、批准文句、源码整合快照、构建日志、逐页渲染、验证脚本及 verification.json 统一保存在“tmp/pdfs/noise-integration-20261017/”。核对 aaai2027.bib、aaai2027.sty、aaai2027.bst 和十六张正式图片的 SHA256 均与本轮开始前一致；没有修改表格数值、方法公式、其余正文、模板、参考文献或图片内容。
+
+（5）本项在原第三十三项之后独立追加，追加前的 213446 字节原文完整保留，沿用 UTF-8 无 BOM、CRLF 换行。最终文件完整性检查、逐页可读性核对和 git diff --check 通过。未修改模型训练代码、配置或数据集，未运行训练或抗噪实验，未修改 Git 暂存区或提交 Git。
+
+
+第三十五项：抗噪六图改为 CAFU 式单栏排布，并纠正本地自检产物保留规则
+记录日期：2026-10-17
+
+一、用户明确的工作流与长期规则
+
+（1）用户指出“PDF逐页图片/ReCoBR-新稿”是代理新增的文件，要求删除；论文修改后本地编译得到的 PDF、逐页图片只用于代理检查自己的工作，项目不需要，用户也不会提交。用户将“AAAI文件”内的相关源码与正式素材复制到 Overleaf，自己编译并审阅 PDF。本轮将此前误把自检材料长期归档的做法改正。
+
+（2）用户进一步明确：编译工具没必要删除，避免每次修改重新安装环境，但工具也不会提交；每次编译检查生成的产物由代理看完、确认没问题后删除。以后保留可复用的 TeX 环境、宏包、字体及必要工具，不把其当论文交付物；检查 PDF、页图、aux/bbl/blg/log 等辅助文件和临时检查脚本使用后清理，不在项目的 PDF逐页图片 或 output 目录中归档。
+
+（3）上述用户指令覆盖第三十三、三十四项中将“ReCoBR-新稿”、新增抗噪集成稿和构建材料长期保存的做法；旧记录保留为历史事实，不回改历史。既有核心参照材料、原论文 PDF、师兄批注以及正式 Figures 素材继续保留。已在“PDF逐页图片/README.txt”同步新的规则。
+
+二、本轮产物清理
+
+（1）删除“PDF逐页图片/ReCoBR-新稿/”十张代理新增页图，以及“PDF逐页图片/ReCoBR_AAAI_noise_20261017/”十一张代理新增页图。删除“output/pdf/ReCoBR_AAAI_noise_20261017.pdf”。对应的 output/pdf、output 目录在确认空目录后移除。
+
+（2）清理此前“tmp/pdfs/noise-integration-20261017/”中的重复页图、检查 PDF、构建辅助文件、快照和临时验证脚本，删除该代理生成的临时目录；tmp/pdfs 为空后移除。清理上轮 PDF 标记工具附带生成的根目录 debug.log。各项递归删除均先确认绝对路径及所属目录，未对项目根、正式素材或编译工具执行删除。
+
+（3）本轮重新编译和渲染所需检查文件只作临时使用；查看全部页面并完成独立复核后，删除临时 PDF、十一页页图、辅助文件、检查用副本和脚本，不保存新版审阅 PDF。保留“tmp/tools/texlive2026/”及其编译工具，无需再次安装。
+
+（4）README 移除上述两组新稿的条目、来源和归档说明，当前六组核心材料清单合计恢复为 64 页。除已获授权删除的两组新稿外，其余 65 张既有页图（含未列入核心清单的历史诊断页）逐一校验哈希不变；原稿、批注及参照 PDF 保留不动。
+
+三、参照 CAFU 的抗噪六图布局
+
+（1）用户指出此前跨栏两行三列不是期望布局，要求采用 CAFU 抗噪六图的“三行两列、占半边”形式。已实际查看 CAFU 物理第 7 页 Figure 4：该图在左单栏，每行同一数据集，左 Recall、右 NDCG，每行两图下方共用数据集标签。
+
+（2）据此将 main.tex 中抗噪图从跨双栏 figure* 改为单栏 figure[t]，使用三行两列。第一行 Youshu，第二行 iFashion，第三行 NetEase；每行左图 Recall@20，右图 NDCG@20。两图下分别用一条居中的共享行标签“(a) Youshu”“(b) iFashion”“(c) NetEase”。单图宽度为 0.49\columnwidth，列间距为 0.02\columnwidth；整组下方为原定稿图注。
+
+（3）保留用户准备的六张正式 PNG，不改文件名、像素、图例、颜色或数据。抗噪正文及图注逐字保持定稿，只有自动 Figure 引用因图号变化而更新。4.4 顺序仍是 Interaction Selection Strategies、Performance on Sparse Users、Robustness to Noisy U-B Interactions，抗噪分析仍为最后一项。
+
+（4）为形成与 CAFU 一致的跨栏超参数图在上、单栏抗噪图在下的自然浮动排布，将原超参数图声明恢复到稀疏用户分析前，图块内容完整不变。图号现为 Figure 1 框架、Figure 2 原深入分析、Figure 3 超参数、Figure 4 抗噪；对应引用自动一致。未改模板、版心、字号、浮动参数，也未用强制分页或负间距。
+
+四、实际编译与核验
+
+（1）直接复用已有便携 TeX Live 2026，完成 pdfLaTeX/BibTeX/后续两遍 pdfLaTeX 构建。实际 PDF 仍为十一页；原 Figure 2 在物理第 8 页右栏；抗噪正文完整位于第 8 页右栏，紧接稀疏用户分析结尾，在 4.5 标题之前。
+
+（2）第 9 页顶部为跨双栏超参数 Figure 3；其下左单栏为抗噪 Figure 4，六图三行两列，不跨双栏，满足用户指定第九页与占半边的要求。图注位于六图整体下方，后接超参数末行与结论；结论自然续到右栏，参考文献续至第 10、11 页。
+
+（3）主代理实际查看全部十一页，第 8、9 页另经独立只读视觉复核。六图、刻度、行标签和图注完整，未见越栏、裁切或图文碰撞；原素材直接缩放后的图例较小，未擅自重绘。最终日志无 LaTeX 错误、缺失引用、未解析交叉引用、Overfull 盒或待重跑提示。原有 Underfull 行间警告经目检可接受。
+
+（4）与本轮前源码对比，去除浮动体并忽略空白后，全部原正文完全一致；原各图块均完整保留，只有抗噪图排布及超参数图声明位置变化。十八个公式、三十六个独立文献引用保持不变。AAAI文件 中除 main.tex 外的二十八个文件逐一核对 SHA256 均未改变。
+
+（5）main.tex 当前为 56041 字节，SHA256 为 ae635943d1b4738650666be0eaf314600f1d6f20034ae461f54df365215fa0d6。本轮临时检查 PDF 的 SHA256 为 1d37e95723afedfd9d5c310fe59b3ff328840cb546099e1e6b0453ed8de3dd69，仅记录以供追溯，该文件检查后删除，不作为保留或交付产物。
+
+（6）工程记录在第三十四项后独立追加本第三十五项，追加前 221504 字节原文完整保留，沿用 UTF-8 无 BOM 和 CRLF。git diff --check 通过；本轮最终项目内容变动为 main.tex、PDF逐页图片/README.txt、本项工程记录及已说明的自检文件清理。未修改训练代码、配置或数据集，未运行训练或实验，未修改 Git 暂存区或提交 Git。

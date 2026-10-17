@@ -82,6 +82,13 @@ Bundle recommendation covers both predefined-bundle ranking and the generation o
 
 Constructing informative representations also raises the question of how information should be coordinated across views. CrossCBR aligns bundle and item views \cite{ma2022crosscbr}, whereas MultiCBR applies contrastive learning after three-view fusion \cite{ma2024multicbr}. Distillation offers another form of cooperation by transferring first- and higher-order U-B knowledge to item-view learning \cite{ren2023dgmae}. ReCoBR further considers which observed U-B connections should be retained for propagation and cross-view preference learning.
 
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
+    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction with user-conditioned denoising and bundle-set consistency, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \label{fig:framework}
+\end{figure*}
+
 \subsection{Denoising and Diffusion for Recommendation}
 
 Denoising methods differ in how feedback reliability enters recommendation learning. Loss-based methods suppress potentially noisy feedback through truncation or reweighting \cite{wang2021adt}, whereas cross-model agreement provides an alternative constraint on learned user preferences \cite{wang2022deca}. For recommenders based on alignment and uniformity, CAFU constrains positive-pair alignment and filters unreliable pairs in the uniformity objective \cite{jiang2026cafu}.
@@ -96,12 +103,7 @@ Auxiliary relations provide another source of contrastive supervision. In knowle
 
 
 
-\begin{figure*}[!t]
-    \centering
-    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
-    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction with user-conditioned denoising and bundle-set consistency, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
-    \label{fig:framework}
-\end{figure*}
+
 
 
 \section{Methodology}\label{sec:methodology}
@@ -673,6 +675,31 @@ $\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowb
 ReCoBR's overall results are averaged over three independent runs.
 
 
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1ndcg20.png} \\
+        (a) & (b) \\
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2ndcg20.png} \\
+        (c) & (d)
+    \end{tabular}
+
+    \caption{In-depth analysis of ReCoBR using Recall@20 and
+    NDCG@20. (a)--(b) Interaction selection on iFashion
+    ($K=\kappa$). (c)--(d) ReCoBR versus w/o Pre-fusion CL on
+    NetEase, both retaining graph reconstruction. Users are
+    sorted by increasing training U-B interaction counts and
+    divided into four equally sized groups (G1--G4). Lines show
+    relative improvements over w/o Pre-fusion CL.}
+    \label{fig:in-depth-analysis}
+\end{figure}
+
 \subsection{Overall Performance}
 
 Table~\ref{tab:overall} compares ReCoBR with eleven baselines.
@@ -728,32 +755,52 @@ jointly refining U-B preference signals and integrating
 auxiliary information for bundle recommendation.
 
 
-\subsection{In-depth Analysis}
-
-\begin{figure}[t]
+\begin{figure}[!b]
     \centering
-    \begin{tabular}{@{}cc@{}}
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m1recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m1ndcg20.png} \\
-        (a) & (b) \\
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2ndcg20.png} \\
-        (c) & (d)
+    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
+        \multicolumn{2}{c}{(a) Youshu} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
+        \multicolumn{2}{c}{(b) iFashion} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
+        \multicolumn{2}{c}{(c) NetEase}
+    \end{tabular}
+    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
+    Youshu, iFashion, and NetEase. We add random edges at ratios from
+    0\% to 25\% in 5\% increments relative to each user's original
+    training interactions, retaining all original edges.}
+    \label{fig:noise-robustness}
+\end{figure}
+
+\begin{figure*}[t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
+        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
+        (a) & (b) & (c) & (d) & (e)
     \end{tabular}
 
-    \caption{In-depth analysis of ReCoBR using Recall@20 and
-    NDCG@20. (a)--(b) Interaction selection on iFashion
-    ($K=\kappa$). (c)--(d) ReCoBR versus w/o Pre-fusion CL on
-    NetEase, both retaining graph reconstruction. Users are
-    sorted by increasing training U-B interaction counts and
-    divided into four equally sized groups (G1--G4). Lines show
-    relative improvements over w/o Pre-fusion CL.}
-    \label{fig:in-depth-analysis}
-\end{figure}
+    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
+    iFashion, and NetEase. (a) Diffusion noise variance endpoint
+    $\beta_T$. (b) U-B retention limit $\kappa$.
+    (c) Pre-fusion contrastive weight $\lambda_a$.
+    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (e) Post-fusion contrastive weight $\lambda_c$.
+    Broken $y$-axes use different scales for the datasets;
+    candidate values are displayed at equally spaced horizontal
+    positions. Panels (d) and (e) report one run per setting.}
+    \label{fig:hyperparameter}
+\end{figure*}
+
+\subsection{In-depth Analysis}
+
+
 
 
 \paragraph{Interaction Selection Strategies.}
@@ -781,28 +828,7 @@ reference for neighbor selection.
 
 
 
-\begin{figure*}[t]
-    \centering
-    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
-        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
-        (a) & (b) & (c) & (d) & (e)
-    \end{tabular}
 
-    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
-    iFashion, and NetEase. (a) Diffusion noise variance endpoint
-    $\beta_T$. (b) U-B retention limit $\kappa$.
-    (c) Pre-fusion contrastive weight $\lambda_a$.
-    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
-    (e) Post-fusion contrastive weight $\lambda_c$.
-    Broken $y$-axes use different scales for the datasets;
-    candidate values are displayed at equally spaced horizontal
-    positions. Panels (d) and (e) report one run per setting.}
-    \label{fig:hyperparameter}
-\end{figure*}
 
 \paragraph{Performance on Sparse Users.}
 NetEase users are sorted by increasing training U-B
@@ -820,25 +846,7 @@ modeling.
 
 
 
-\begin{figure}[t]
-    \centering
-    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
-        \multicolumn{2}{c}{(a) Youshu} \\
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
-        \multicolumn{2}{c}{(b) iFashion} \\
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
-        \multicolumn{2}{c}{(c) NetEase}
-    \end{tabular}
-    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
-    Youshu, iFashion, and NetEase. We add random edges at ratios from
-    0\% to 25\% in 5\% increments relative to each user's original
-    training interactions, retaining all original edges.}
-    \label{fig:noise-robustness}
-\end{figure}
+
 
 \paragraph{Robustness to Noisy U-B Interactions.}
 We compare ReCoBR with CrossCBR and MultiCBR using the same
@@ -850,6 +858,8 @@ that ReCoBR maintains the highest Recall@20 and NDCG@20 across
 all datasets and tested noise ratios, showing that it retains
 its recommendation advantage when additional random connections
 interfere with U-B graph propagation.
+
+
 
 
 

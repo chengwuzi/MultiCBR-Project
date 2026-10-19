@@ -54,11 +54,11 @@ Bundle recommendation integrates bundle-level feedback and item-level informatio
 
 Bundle recommendation (BR) aims to match users with collections of related items, such as music playlists and fashion outfits \cite{chen2019dam,ma2022crosscbr}. For platforms, BR can create additional sales opportunities; for users, it can simplify the discovery and selection of collections suited to their needs \cite{ma2022crosscbr,ma2024multicbr}. Learning the preferences underlying these recommendations involves modeling bundle-level choices through user-bundle (U-B) interactions and item-level behavior through user-item (U-I) interactions, with bundle-item (B-I) affiliations linking individual items to bundles. Effectively integrating information about user behavior and bundle composition is therefore key to accurately modeling users' preferences and providing personalized bundle recommendations.
 
-Early approaches pursue this goal through joint learning at the bundle and item levels. DAM, for example, jointly models U-B and U-I interactions and uses attention to aggregate constituent-item representations into bundle representations \cite{chen2019dam}. Graph-based approaches further exploit the collaborative structure formed by these relations. BGCN uses graph propagation to model preferences at both the bundle and item levels, linking items to bundles through B-I affiliations \cite{chang2020bgcn}. This graph formulation captures higher-order collaborative information while retaining two perspectives on users' bundle preferences.
+Early approaches learn users' bundle preferences by combining direct U-B feedback with item-level information. DAM jointly models U-B and U-I interactions and uses attention to aggregate constituent-item representations into bundle representations \cite{chen2019dam}. Graph-based approaches further exploit the collaborative structure formed by these relations. BGCN uses graph propagation to model preferences in the bundle and item views, linking items to bundles through B-I affiliations \cite{chang2020bgcn}. In the bundle view, observed U-B connections determine the neighborhoods from which bundle-level collaborative signals are learned.
 
-Learning separate views also raises the question of how they can inform one another. CrossCBR addresses this question through cross-view contrastive learning, encouraging agreement between the representations of the same user or bundle across the bundle and item views \cite{ma2022crosscbr}. MultiCBR extends the formulation to three views by encoding U-B interactions, U-I interactions, and B-I affiliations separately \cite{ma2024multicbr}. It combines these representations before prediction, allowing information from different views to interact in bundle scoring, and applies contrastive learning to the fused representation. DGMAE explores another form of cross-view cooperation by distilling first- and higher-order U-B knowledge into item-view representation learning \cite{ren2023dgmae}.
+Building on these representations, subsequent studies explore how different views can cooperate in learning bundle preferences. CrossCBR uses cross-view contrastive learning to encourage agreement between representations of the same user or bundle across the bundle and item views \cite{ma2022crosscbr}. MultiCBR separately encodes U-B interactions, U-I interactions, and B-I affiliations into three views \cite{ma2024multicbr}. It combines their representations before prediction and applies contrastive learning to the fused representations. DGMAE explores knowledge distillation, transferring first- and higher-order U-B knowledge into item-view representation learning \cite{ren2023dgmae}. These approaches strengthen bundle preference learning by coordinating direct bundle feedback with auxiliary behavioral and compositional information.
 
-These advances demonstrate the benefits of coordinating complementary views, while also highlighting the central role of U-B interactions in bundle recommendation: U-B interactions define the bundle-view graph used for propagation, provide direct supervision for bundle ranking, and supply the bundle-level signal that is coordinated with auxiliary views in multi-view learning \cite{ma2022crosscbr,ma2024multicbr,ren2023dgmae}. However, existing multi-view methods mainly focus on representation construction and cross-view coordination, typically treating the observed U-B feedback itself as a given rather than explicitly examining or refining the information it provides. At the same time, the reliability and sufficiency of observed U-B feedback remain concerns, as it can be noisy and sparse. Based on the above analysis, we identify the following two challenges.
+Taken together, these studies highlight the central role of U-B interactions in both graph-based preference modeling and cross-view cooperation. However, these methods directly use the observed U-B graph for propagation without an explicit mechanism to examine and refine its connections. In practice, observed U-B feedback is subject to noise and sparsity: noisy interactions can introduce misleading preference signals, while sparse feedback limits the direct evidence available for learning. Given the central role of U-B interactions, these limitations pose major obstacles to bundle preference learning. Based on the above analysis, we identify the following two challenges.
 
 \textbf{Challenge 1: Noise in user-bundle interactions.} Implicit feedback may include interactions that do not faithfully reflect users' preferences \cite{wang2021adt,jiang2026cafu}. Once incorporated as edges in the U-B graph, such interactions can introduce misleading signals that spread through neighborhood aggregation into the representations used for bundle ranking \cite{wu2021sgl}. At the same time, observed U-B interactions contain useful bundle-level evidence about each user's preferences. The challenge is therefore to limit the influence of potentially misleading connections during graph propagation without discarding useful personalized evidence.
 
@@ -69,9 +69,9 @@ To address these challenges, we propose \textbf{ReCoBR} (Reconstruction and Cont
 Our main contributions are as follows:
 
 \begin{itemize}
-\item We develop a diffusion-driven U-B graph reconstruction framework that integrates pretraining, user-conditioned historical preference refinement, and observed-interaction selection, supplemented by a bundle-set consistency objective.
-\item We introduce cross-view contrastive objectives that use the reconstructed U-B view as a common anchor for user-side and bundle-side learning from auxiliary views before fusion.
-\item Experiments on three public datasets demonstrate ReCoBR's recommendation improvements and examine the contributions of graph reconstruction and cross-view learning through ablations, interaction-selection comparisons, and user-group analysis.
+\item We propose ReCoBR, a bundle recommendation framework that uses diffusion-driven U-B graph reconstruction to mitigate the influence of noisy interactions on graph propagation.
+\item We design pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view to improve bundle preference learning under sparse U-B feedback.
+\item Extensive experiments on three public datasets demonstrate ReCoBR's improved recommendation performance and the effectiveness of the proposed designs.
 \end{itemize}
 
 \section{Related Work}
@@ -569,7 +569,7 @@ Here, $\sigma$ is the sigmoid function, $\Theta$ comprises the trainable initial
 
     \caption{Component ablations on three datasets, evaluated by
     Recall@20 (R@20) and NDCG@20 (N@20). Bold entries identify
-    the complete ReCoBR model.}
+    the complete ReCoBR model. CL denotes contrastive learning.}
     \label{tab:ablation}
 \end{table}
 
@@ -600,7 +600,7 @@ O\!\left(
 \right).
 \tag{18}
 \end{equation}
-At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and ranking all candidate bundles for one user costs $O(|\mathcal B|d)$.
+At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and scoring all candidate bundles for one user costs $O(|\mathcal B|d)$.
 
 
 \section{Experiments}
@@ -675,30 +675,7 @@ $\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowb
 ReCoBR's overall results are averaged over three independent runs.
 
 
-\begin{figure}[!b]
-    \centering
-    \begin{tabular}{@{}cc@{}}
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m1recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m1ndcg20.png} \\
-        (a) & (b) \\
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2ndcg20.png} \\
-        (c) & (d)
-    \end{tabular}
 
-    \caption{In-depth analysis of ReCoBR using Recall@20 and
-    NDCG@20. (a)--(b) Interaction selection on iFashion
-    ($K=\kappa$). (c)--(d) ReCoBR versus w/o Pre-fusion CL on
-    NetEase, both retaining graph reconstruction. Users are
-    sorted by increasing training U-B interaction counts and
-    divided into four equally sized groups (G1--G4). Lines show
-    relative improvements over w/o Pre-fusion CL.}
-    \label{fig:in-depth-analysis}
-\end{figure}
 
 \subsection{Overall Performance}
 
@@ -754,6 +731,31 @@ outperforms all variants, demonstrating the effectiveness of
 jointly refining U-B preference signals and integrating
 auxiliary information for bundle recommendation.
 
+
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1ndcg20.png} \\
+        (a) & (b) \\
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2ndcg20.png} \\
+        (c) & (d)
+    \end{tabular}
+
+    \caption{In-depth analysis of ReCoBR using Recall@20 and
+    NDCG@20. (a)--(b) Interaction selection on iFashion
+    ($K=\kappa$). (c)--(d) ReCoBR versus w/o Pre-fusion CL on
+    NetEase, both retaining graph reconstruction. Users are
+    sorted by increasing training U-B interaction counts and
+    divided into four equally sized groups (G1--G4). Lines show
+    relative improvements over w/o Pre-fusion CL.}
+    \label{fig:in-depth-analysis}
+\end{figure}
 
 \begin{figure}[!b]
     \centering
@@ -819,10 +821,10 @@ Popularity-K's weak NDCG suggests that global popularity is
 insufficient for personalized ranking. Pretrain-Sim even
 underperforms Random-K, suggesting that pretrained user-bundle
 similarity does not necessarily reflect a connection's value
-for subsequent propagation. ReCoBR instead evaluates each
-observed bundle against a refined historical preference
-representation, providing an explicit bundle-preference
-reference for neighbor selection.
+for subsequent propagation. These results suggest that ReCoBR's preference-guided
+selection helps retain interactions that better reflect users'
+bundle preferences, providing more informative signals for
+graph propagation.
 
 
 

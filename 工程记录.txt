@@ -1807,3 +1807,183 @@ Recall@20 and NDCG@20 under injected U-B graph noise on Youshu, iFashion, and Ne
 （4）本轮仅在 tmp/pdfs/abstract-setloss-20261019 临时保存构建 PDF、前三页页图、快照和验证文件，用于实际编译与目检；完成检查后清理该轮目录，不保留或交付 PDF，不新增长期页图。临时 PDF SHA256 为 7b0e0705ede10276941db5a1fb7d104da4b5f5a9b68a345f3ac30f960f3c6bd5，仅在本项留作追溯。可复用编译工具与其他历史材料保留。
 
 （5）本轮保留的文件改动为 main.tex、摘要与引言对照文本及本项工程记录。未改动模型代码、配置或数据集，未运行训练或实验，未操作 Git 暂存区或提交 Git。
+
+第三十九项：按用户完整定稿重写引言两段已有工作介绍及过渡段
+记录日期：2026-10-19
+
+一、任务依据与版本选择
+
+（1）用户以“论文相关/ReCoBR-新稿-审阅批注.pdf”引言过渡段的长批注为本轮重点，要求两段已有工作铺垫与过渡段协同修改。参考 CAFU 的论证推进方式，研究如何在表示构建、跨视图协作两层面逐步建立 U-B 的作用，再讨论观测反馈本身的审视与优化，并引出噪声和稀疏两个挑战。用户说明后续准备投期刊，允许这三段每段适度增加一句。
+
+（2）经过多版讨论和上下文检查，用户最终贴出完整三段并明确“先定稿为这一版吧”。本轮严格以用户最后贴出的文字为准，保留五句过渡段：Taken together 总结两层面作用；However 单独说明研究重点；The observed U-B graph 单独说明传播基础及较少显式检视；Noise and sparsity 明确写 U-B feedback；末句为“Based on the above analysis, we identify the following two challenges.”。未擅自采用代理后来建议的合并句、按历史捆绑偏好选边或分别展开噪声/稀疏后果的替代版本。
+
+二、实际修改
+
+（1）AAAI文件/main.tex：仅替换从“Early approaches”开始、到两个 Challenge 之前的连续三段。第一段介绍直接 U-B 反馈与物品信息的联合建模、DAM 和 BGCN，并以 U-B 连接决定捆绑视图传播邻域收束。第二段介绍 CrossCBR、MultiCBR 与 DGMAE 的视图协作方式，并概括直接捆绑反馈与辅助行为及组成信息的协调。第三段落实用户选定的五句过渡。
+
+（2）ReCoBR_摘要与引言新稿_v3.txt：同步同样的三段，保持其已有 [1]—[10] 审阅编号体系，本轮涉及 [1]、[3]、[2]、[4]、[7]。main.tex 对应采用 chen2019dam、chang2020bgcn、ma2022crosscbr、ma2024multicbr、ren2023dgmae 的正式 cite。用户文字中的弯单引号按既有源码习惯转为 ASCII 单引号；除引用载体与引号适配外，全部正文措辞与用户定稿逐字一致。
+
+（3）两份文稿三段之前及之后的全部原始字节均保留，包括已定稿摘要、引言开篇任务段、两个 Challenge、方法总述、贡献列表及其他章节；v3 文末历史引用核验说明也未回改。未改变模板、公式、图片或表格。工程记录独立追加本第三十九项，追加前的 241858 字节完整保留，沿用 UTF-8 无 BOM 与 CRLF。
+
+三、核验与编译目检
+
+（1）主代理与独立只读代理核对通过：两份文稿各仅替换上述连续三段；引用和引号适配后与用户批准稿严格一致。main.tex 从 55936 字节变为 55702 字节，SHA256 为 44fe780b45cb97a109048722714dacc780b14fa81d5c9e9d42afda3fae76665e；v3 从 18390 字节变为 18198 字节，SHA256 为 5eebde028f130483b9c7004f3808721c4c058534930f9bc25f7822fe4e93f1cd。
+
+（2）复用 tmp/tools/texlive-20261013 便携环境，以 latexmk 完成构建。全文仍为十一页，三十六个实际引用键保持不变；无 LaTeX 错误、未定义引用或文献、Overfull 盒、重复标签或待重编译提示。六条 Underfull hbox、两条 Underfull vbox 与本轮修改前一致。
+
+（3）独立代理实际目检第 1、2 页，主代理实际目检相邻第 3 页：定稿三段完整，摘要与引言、Challenge 跨页、方法总述、贡献列表、相关工作跨栏续接及框架图均正常，无新增遮挡或裁切。贡献列表现完整位于第 2 页左栏，Related Work 从该页右栏开始，2.3 由该页右栏末续第 3 页。关键图表页码保持：框架 Figure 1 第 3 页，Table 1 第 6 页，总表与消融表第 7 页，深入分析 Figure 2 与抗噪 Figure 3 第 8 页，超参 Figure 4 第 9 页。
+
+（4）逐一核验 AAAI文件 中除 main.tex 外的全部文件与本轮前哈希一致，新审阅批注 PDF 哈希也不变；正式素材、参考文献库、模型代码、配置、数据集均未修改。未运行训练或实验，未操作 Git 暂存区或提交 Git。
+
+四、临时产物处理
+
+本轮仅在 tmp/pdfs/intro-three-paragraphs-20261019 临时保存批准稿、快照、构建 PDF、前三页页图和验证文件。完成核验后清理该轮目录，不保留或交付 PDF，不新增长期页图；便携工具和其他历史材料保留。临时 PDF 的 SHA256 为 dc2a63405c4ef5e580f2bc30bbd4401407fceba22a5543f08cb662b8dadd8fe1，仅在本项留作追溯。最终保留的项目文件改动为 main.tex、摘要与引言对照文本及本项记录。
+
+第四十项：按用户定稿精简三条贡献并保持深入分析图的既定页码
+记录日期：2026-10-19
+
+一、任务依据与定稿选择
+
+（1）按新审阅稿的三条贡献批注，对照 CAFU 为主、BIGCF、DMRec、ProEx 为辅，研究“主要工作及对应问题—另一关键设计及对应问题—实验结论”的组织方式。用户最终明确贴出三条贡献并确认“就这版吧，定稿吧”。本轮严格采用用户最后选定的文字；第三条保留 improved recommendation performance 与 effectiveness of the proposed designs，未擅自换成代理后来建议的噪声/稀疏条件表述。
+
+（2）三条定稿英文如下，源文件将弯单引号适配为 ASCII 单引号：
+1. We propose ReCoBR, a bundle recommendation framework that uses diffusion-driven U-B graph reconstruction to mitigate the influence of noisy interactions on graph propagation.
+2. We design pre-fusion cross-view contrastive learning anchored in the reconstructed U-B view to improve bundle preference learning under sparse U-B feedback.
+3. Extensive experiments on three public datasets demonstrate ReCoBR’s improved recommendation performance and the effectiveness of the proposed designs.
+
+二、实际修改
+
+（1）AAAI文件/main.tex 与 ReCoBR_摘要与引言新稿_v3.txt：分别仅将三条原贡献替换为上述文字，沿用 main 的三条 itemize 和 v3 的三个圆点格式。第一条删除预训练、偏好提炼、交互选择和 SetLoss 的组件罗列；第二条突出融合前跨视图学习、重构 U-B 锚点及稀疏反馈问题；第三条删除消融、交互选择和用户分组的实验项目清单。摘要、引言首段、已定稿的三段铺垫/过渡、两个 Challenge、方法总述和方法章正文均未更改。
+
+（2）本轮初次编译因贡献篇幅缩短而自然重排为十页，原深入分析 Figure 2 自动提前到第七页。依照用户此前明确要求的“总表和消融表在第七页，深入分析两组图在第八页”，将 Figure 2 的完整 [!b] 图块从 Overall Performance 之前移动到 Ablation Study 正文之后、Figure 3 图块之前。仅改变声明位置与邻接空白，图内全部内容、图注、标签及浮动选项逐字不变，其他三个图块也完全不变。没有调整模板、字号、页边距、浮动参数，没有强制分页或负间距。
+
+（3）工程记录独立追加本第四十项，追加前的 246471 字节完整保留，继续使用 UTF-8 无 BOM 与 CRLF。
+
+三、核验、编译与目检
+
+（1）主代理及独立只读代理核对通过：三条贡献与用户批准文字逐字一致，除弯单引号的源码适配外未改措辞，尤其第三条未套用代理替代建议。main 除三条贡献、完整 Figure 2 图块移位及邻接空白外，其他内容不变；v3 仅替换三条贡献。main.tex 从 55702 字节变为 55536 字节，SHA256 为 4d3d3cce06e3e418ee9df08a54ba844cee490221f700de7bc4a0cd931fd07c97；v3 从 18198 字节变为 18028 字节，SHA256 为 a97a438b4ad9aacb281f4106dd0faaadd4b06f2cca62da30e100ae46a64e1b75。
+
+（2）复用 tmp/tools/texlive-20261013 的 latexmk 完成实际构建并在图块移位后重新编译。最终全文十页；无 LaTeX 错误、未定义引用或文献、Overfull 盒、重复标签或待重编译提示。Underfull hbox 从六条减为三条，Underfull vbox 从两条减为一条。三十六个实际引用键和十八个公式编号保持不变，参考文献内容未减。
+
+（3）主代理实际目检最终第 2、3、7、8 页，独立代理实际目检第 2、8 页：三条贡献完整，列表词距正常，相关工作跨栏和方法公式续页无新增遮挡或裁切。第七页总表与消融表保持；第八页 Figure 2 在左下、Figure 3 抗噪六图在右下，图文完整。框架 Figure 1 仍在第三页，统计 Table 1 在第六页，超参 Figure 4 在第九页。
+
+（4）AAAI文件 中除 main.tex 外的全部文件、新审阅批注 PDF 及正式图片逐一核验哈希不变。未修改模型代码、配置或数据集，未运行训练或实验，未操作 Git 暂存区或提交 Git。
+
+四、临时产物处理
+
+本轮在 tmp/pdfs/contributions-final-20261019 临时保存批准稿、快照、构建 PDF、受影响页图和验证文件，完成核验后清理该轮目录；不保留或交付 PDF，不新增长期页图。最终临时 PDF 的 SHA256 为 1d62c55e6429fde529ab17dc0615a9088cc3333cc18eb6031690f3660591477f，仅在记录中追溯。可复用工具及其他历史材料保留。最终保留的项目文件改动为 main.tex、摘要与引言对照文本及本项记录。
+
+第四十一项：按审阅批注定稿交互选择分析收尾句并完成本轮批注闭环
+记录日期：2026-10-19
+
+一、任务依据与定稿
+
+用户确认结论章定稿后，要求核对“论文相关/ReCoBR-新稿-审阅批注.pdf”的剩余意见。逐条核对九条非空文字批注：摘要两条、引言一条、三条贡献已分别落实；方法整章复审已经完成；结论按用户意见保留。最后未处理的是第八页交互选择策略分析末句的批注。该意见要求末句归纳策略对比说明的筛选价值，避免仅复述方法流程。
+
+结合相同保留上限下 ReCoBR 与 Random-K、Popularity-K、Pretrain-Sim 的比较，讨论以结果支持“保留更能反映捆绑偏好的交互，为传播提供有用信号”，不将推荐效果升级为真实偏好或噪声边的识别标签。用户批准代理给出的下列句子，并要求替换；本轮未采用独立代理另拟的传播邻域表述。
+
+二、实际修改
+
+AAAI文件/main.tex：仅将交互选择策略段的末句“ReCoBR instead evaluates each observed bundle against a refined historical preference representation, providing an explicit bundle-preference reference for neighbor selection.”替换为“These results suggest that ReCoBR’s preference-guided selection helps retain interactions that better reflect users’ bundle preferences, providing more informative signals for graph propagation.”。源文件按既有习惯使用 ASCII 单引号，并保持自然段连续，仅作普通源码换行。
+
+忠实中文：这些结果表明，ReCoBR 基于偏好的筛选有助于保留更能反映用户捆绑偏好的交互，为图传播提供更有信息量的信号。
+
+其余全文原始字节完全保留；所有图块、图片、图注、表格、公式、参考文献及浮动声明均未改动。ReCoBR_摘要与引言新稿_v3.txt 不包含本次实验分析内容，因此不修改。工程记录独立追加本第四十一项，追加前的 251160 字节完整保留，沿用 UTF-8 无 BOM 与 CRLF。
+
+三、核验、编译与目检
+
+（1）主代理及独立只读代理逐字节核对通过：原句仅替换一次，批准句除引号和源码换行适配外逐字一致；main.tex 从 55536 字节变为 55555 字节，SHA256 为 e8d7f62211919a59ea4e3c73239b529ef684b429f9afb1c7082d7942dd9451e7。v3 保持 18028 字节，SHA256 为 a97a438b4ad9aacb281f4106dd0faaadd4b06f2cca62da30e100ae46a64e1b75。其他论文文件、新审阅批注 PDF 及正式素材均核对哈希不变。
+
+（2）复用 tmp/tools/texlive-20261013 便携环境，以 latexmk 完成构建。全文仍为十页；三十六个实际引用键、十八个公式编号不变。无 LaTeX 错误、未定义引用或文献、Overfull 盒、重复标签或待重编译提示；三条 Underfull hbox、一条 Underfull vbox 与上轮一致。
+
+（3）独立代理实际目检第八页，主代理实际目检相邻第七、九页。新收尾句完整，交互选择分析跨栏续接及随后稀疏用户分析间距正常，无新增遮挡或裁切。总表与消融表保持第七页；Figure 2 深入分析与 Figure 3 抗噪图保持第八页左下和右下；超参 Figure 4 仍在第九页。框架 Figure 1 在第三页，统计 Table 1 在第六页。
+
+四、闭环与临时产物处理
+
+至此，“论文相关/ReCoBR-新稿-审阅批注.pdf”本轮九条有文字的意见均已按用户决定完成处理：需要修改的文字已落实，需要全面审阅的方法章已完成复审，需要保留定稿的结论已确认。不把此闭环扩大为所有后续审阅或期刊投稿要求均已完成；用户此前明确忽略的图刻度裁切、方法可选细改及实现争论不重新开启。
+
+本轮临时目录 tmp/pdfs/interaction-selection-closing-20261019 内的批准句、快照、构建 PDF、页图及验证文件，检查完成后清理，不保留或交付 PDF，不新增长期页图；可复用工具及其他历史材料保留。最终临时 PDF 的 SHA256 为 2ba996c463c5570e73fb8ec5fd539dfd35007c5e72d18df258950cddcd1fc855，仅在本项追溯。最终保留改动仅为 main.tex 和本项记录；未修改代码、配置或数据集，未运行训练或实验，未操作 Git 暂存区或提交 Git。
+第四十二项：按全文复审建议澄清推断打分复杂度并补充 CL 缩写定义
+记录日期：2026-10-19
+
+一、授权与实际修改
+
+用户明确同意实施全文只读复审提出的两处小修。本轮仅修改 AAAI文件/main.tex 的以下两处，不扩展到其他定稿内容：
+
+（1）计算复杂度小节最后一句：将“and ranking all candidate bundles for one user costs $O(|\mathcal B|d)$”中的 ranking 改为 scoring。保留原来的单对打分、缓存表示计算及复杂度表达式，仅明确该项计量全部候选的内积打分，避免被理解为还包括完整排序。
+忠实中文：为一个用户的全部候选捆绑计算分数需要 O(|B|d)。
+
+（2）消融表 Table 3 图注：在“the complete ReCoBR model.”后补充“CL denotes contrastive learning.”，解释表内 All CL、Pre-fusion CL 和 Post-fusion CL 的共同缩写。
+忠实中文：CL 表示对比学习。
+
+二、核验与版面
+
+（1）主代理与独立只读代理核对通过：将本轮前源码依次应用上述两项替换后，与当前 main.tex 逐字节完全一致。main.tex 从 55555 字节变为 55588 字节，保留 UTF-8 无 BOM、CRLF 换行；SHA256 为 816191a735338c9dcade21ccfa8ce0e18c65a21efa2c83600f9c1186c95ea769。
+
+（2）复用 tmp/tools/texlive-20261013，以 latexmk 完成编译。全文仍为十页；无 LaTeX 错误、缺失文献或交叉引用、Overfull 盒、重复标签或待重编译提示。三条 Underfull hbox 保持，Underfull vbox 从一条减为零条。十八个公式编号及三十六个实际引用键与文献项保持一致。
+
+（3）实际目检受影响的第六、七页：scoring 表述和新增图注完整，公式、表格及正文无新增遮挡或裁切。图表页码保持：Figure 1 第三页，Table 1 第六页，总表与消融表第七页，Figure 2 与 Figure 3 第八页，五图横排 Figure 4 第九页。
+
+三、范围、记录与清理
+
+工程记录在第四十一项后独立追加本项，追加前的 255460 字节完整保留。AAAI文件 中除 main.tex 外的文件，以及 ReCoBR_摘要与引言新稿_v3.txt 均逐一核对哈希不变。未修改正式图片、参考文献、模型代码、配置或数据集，未运行训练或实验，未操作 Git 暂存区或提交 Git。
+
+本轮 tmp/pdfs/review-two-fixes-20261019 内的快照、构建 PDF、受影响页图与辅助文件仅用于自检，完成检查后清理，不保留或交付 PDF；可复用工具和其他历史材料保留。临时检查 PDF 的 SHA256 为 26c15635adc0432e4b05f60db1df9de82ed629877772cfb435f8c18c61b48d91，仅在本项用于追溯。最终保留的本轮文件修改仅为 main.tex 和本项工程记录。
+
+
+第四十三项：按用户最终定稿调整引言过渡段的研究缺口与问题衔接
+记录日期：2026-10-19
+
+一、任务依据与版本选择
+
+用户在全文复审后再次审阅引言过渡段，要求直接表达“缺少”对 U-B 连接的检视和优化，避免“较少关注”的措辞；随后指出数据噪声、稀疏及后果之前需要交代观测反馈本身的问题。经过多版讨论，代理给出完整四句英文及忠实中文，用户明确“行，定稿吧”。本项落实最后批准的完整稿，替代第三十九项中原五句过渡段；保留前面两段已有工作铺垫和后面的两个挑战。
+
+二、实际修改与定稿
+
+（1）AAAI文件/main.tex、ReCoBR_摘要与引言新稿_v3.txt：各且仅将 Taken together 开始的整段替换为下列相同英文：
+
+Taken together, these studies highlight the central role of U-B interactions in both graph-based preference modeling and cross-view cooperation. However, these methods directly use the observed U-B graph for propagation without an explicit mechanism to examine and refine its connections. In practice, observed U-B feedback is subject to noise and sparsity: noisy interactions can introduce misleading preference signals, while sparse feedback limits the direct evidence available for learning. Based on the above analysis, we identify the following two challenges.
+
+（2）忠实中文：综合来看，这些研究突出了 U-B 交互在基于图的偏好建模和跨视图协作中的核心作用。然而，这些方法直接使用观测到的 U-B 图进行传播，缺少对其中连接进行显式检视和优化的机制。在实际应用中，观测到的 U-B 反馈存在噪声和稀疏问题：含噪交互可能引入误导性的偏好信号，而稀疏反馈限制了可用于学习的直接证据。基于上述分析，我们识别出以下两个挑战。中文仅用于讨论和记录，不插入英文正文。
+
+（3）本次落实“U-B 两层面作用—缺少连接检视和优化—观测反馈存在噪声/稀疏及各自后果—引出两挑战”的结构。不套用其他候选中的 mainly focus、limited attention 等句子。两份文件中该段前后全部原始字节保留，摘要、其余引言、贡献及其他章节均未修改。
+
+三、核验、编译与目检
+
+（1）主代理与独立只读代理核验通过：两份当前段落逐字等于用户批准稿，各仅出现一次；对照修改前快照，仅上述整段发生替换，UTF-8 无 BOM 与 CRLF 均保留。main.tex 从 55588 字节变为 55567 字节，SHA256 为 190966e04f6d2a6a2b9e49912767d4a047e997758bef0bcb6ef4a06280b00ca0；v3 从 18028 字节变为 18007 字节，SHA256 为 4b18929bcf55ab0da6722b8cc7244fd97dbb53a0ee1cc218e51e8f7f59da7034。
+
+（2）复用 tmp/tools/texlive-20261013，以 latexmk 完成实际构建。全文仍为十页，无 LaTeX 错误、缺失文献或交叉引用、Overfull 盒、重复标签或待重编译提示；三条 Underfull hbox、零条 Underfull vbox 与上轮一致。十八个公式编号与三十六个实际引用键及文献项保持不变。
+
+（3）主代理实际目检第 1、3 页，独立代理实际目检第 1、2 页：新四句过渡完整位于第 1 页右栏，与前文和 Challenge 1 衔接正常；Challenge 1 跨页至第 2 页，方法总述、贡献和相关工作续接完整，无新增遮挡或裁切。关键图表页码保持：框架第 3 页，统计表第 6 页，总表和消融表第 7 页，深入分析与抗噪图第 8 页，五张超参图第 9 页。
+
+四、范围、记录与清理
+
+本项在第四十二项后独立追加，追加前的 258200 字节完整保留。AAAI文件 中除 main.tex 外的全部文件逐一核对哈希不变，正式图片、参考文献、模型代码、配置、数据集均未修改；未运行训练或实验，未操作 Git 暂存区或提交 Git。
+
+本轮 tmp/pdfs/intro-transition-final-20261019 内的批准稿、快照、构建 PDF、页图和辅助文件只作自检，完成检查后清理，不保留或交付 PDF；可复用工具与其他历史材料保留。临时检查 PDF 的 SHA256 为 0a40114b0841681fadc166483890a1331ee557ad02554f257d36ae5a4b1ee78f，仅在本项追溯。最终保留的本轮改动为 main.tex、摘要引言对照文本及本项工程记录。
+第四十四项：在引言过渡段补充 U-B 局限重要性的总结句
+记录日期：2026-10-19
+
+一、授权与实际修改
+
+用户认为过渡段说明 U-B 的核心作用及噪声、稀疏问题后，需要进一步点明问题的重要性；要求保留“鉴于 U-B 交互的核心作用”，后半句精简、直接，不再具体展开两类建模效果。用户最终批准下句并要求加入：
+Given the central role of U-B interactions, these limitations pose major obstacles to bundle preference learning.
+忠实中文：鉴于 U-B 交互的核心作用，这些局限构成了捆绑偏好学习的重大障碍。
+
+AAAI文件/main.tex 与 ReCoBR_摘要与引言新稿_v3.txt：各仅在引言过渡段中、噪声与稀疏后果说明之后、“Based on the above analysis, we identify the following two challenges.”之前，插入上述完整句及一个普通空格。维持同一自然段，其余全部原始字节保留。
+
+二、核验、编译与目检
+
+（1）主代理及独立只读代理逐字节核验通过：两份文稿各只新增一次批准句，位置和措辞正确，段落全文同步，UTF-8 无 BOM 与 CRLF 保留。main.tex 从 55567 字节变为 55681 字节，SHA256 为 e75887d7e39625ea479fa8ce4cc0874cb53dff286369d8c13f1adcf0e0a85fa1；v3 从 18007 字节变为 18121 字节，SHA256 为 1df79c4d444de6b887fabe020ccbb81a83b66d3f0555c102655236596bc52758。
+
+（2）复用 tmp/tools/texlive-20261013，以 latexmk 完成构建。新增文字引起自然重排，全文由十页变为十一页，参考文献末尾 MIDGN、MCCLK 两条顺延至第十一页。没有为恢复旧页数调整模板、段间距、字号、正文或浮动体。无 LaTeX 错误、缺失文献或交叉引用、Overfull 盒、重复标签及待重编译提示；三条 Underfull hbox 保持，Underfull vbox 从零条变为两条。
+
+（3）十八个公式编号和三十六个实际引用键及文献项均保持不变。关键图表页码保持：Figure 1 第三页，Table 1 第六页，总表 Table 2 与消融表 Table 3 第七页，深入分析 Figure 2 与抗噪 Figure 3 第八页，五张超参图 Figure 4 第九页。
+
+（4）独立代理实际目检第 1、2、10、11 页：新句完整，引言、Challenge 1 跨页、贡献及相关工作续接正常；参考文献尾页两项完整，未见碰撞或裁切。主代理实际查看第 3、4、9 页：方法章及式（1）自然续页，框架图、超参图、结论和参考文献起始均完整。页内因自然分页形成的留白与原有排版机制一致，未擅自压页。
+
+三、记录、范围与临时产物
+
+本项在第四十三项后独立追加，追加前的 262559 字节完整保留。逐一核对 AAAI文件 中除 main.tex 外的全部文件哈希不变；正式图片、参考文献、模型代码、配置与数据集均未修改，未运行训练或实验，未操作 Git 暂存区或提交 Git。
+
+本轮 tmp/pdfs/intro-impact-sentence-20261019 的快照、批准句、构建 PDF、页图及辅助文件仅用于检查，完成后清理，不保留或交付 PDF；可复用工具及其他历史材料保留。临时检查 PDF 的 SHA256 为 9530e14163edf966461bfb00e27049d4de79237cb1a2d6624114163cd9679c41，仅在本项留作追溯。最终保留的本轮文件修改仅为 main.tex、摘要引言对照稿及本项记录。

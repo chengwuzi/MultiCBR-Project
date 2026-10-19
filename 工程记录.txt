@@ -1749,3 +1749,61 @@ Recall@20 and NDCG@20 under injected U-B graph noise on Youshu, iFashion, and Ne
 （3）工程记录在原第三十五项后独立追加本第三十六项，追加前 227841 字节原文完整保留，沿用 UTF-8 无 BOM 与 CRLF。最终 git diff --check 通过。本轮保留的项目文件修改仅为 AAAI文件/main.tex 和本项记录；没有改动 README、模板、图片、参考文献、训练代码、配置或数据集，没有运行训练或实验，没有修改 Git 暂存区或提交 Git。
 
 （4）按用户已明确的工作流，编译工具保留复用且不作为论文提交内容；本轮临时试排 PDF、全部页图、构建辅助文件、快照和检查脚本在检查完成后删除，不建立 output 或长期新稿页图目录。用户只需将更新的 AAAI文件/main.tex 同步到 Overleaf，继续使用既有正式图片与 bib/sty/bst 文件编译审阅。
+
+第三十七项：按新审阅批注落实摘要现有工作概述句定稿
+记录日期：2026-10-19
+
+一、任务依据与定稿
+
+（1）用户要求研读“论文相关/ReCoBR-新稿-审阅批注.pdf”的全部意见后，先讨论摘要第一处批注。该意见要求概述已有研究中 U-B 的核心依据作用、用户—物品行为及捆绑组成的补充作用，以及图建模、表示融合、对比学习带来的进展。参考 CAFU 的清晰叙述方式，结合摘要上下文讨论措辞；用户进一步明确偏好准确、直白、简练的计算机论文表达。
+
+（2）给出四版英文及忠实中文后，用户明确选择第一版并确认定稿。本轮只落实这一句，不实施摘要 SetLoss、引言铺垫与过渡、三项贡献、方法整章复审及交互选择分析末句等其他批注。
+
+二、实际修改
+
+（1）AAAI文件/main.tex：仅将摘要第二句由“Recent research has integrated user-bundle (U-B) interactions, user-item behavior, and bundle composition into a common multi-view framework that combines graph-based modeling, representation fusion, and contrastive learning.”替换为“Recent studies build on user-bundle (U-B) feedback and use user-item behavior and bundle composition as auxiliary information, improving recommendation performance through graph-based modeling, representation fusion, and contrastive learning.”。其余全部原始字节保持不变，未调整正文、引用、图表、公式、模板或排版选项。
+
+（2）ReCoBR_摘要与引言新稿_v3.txt：同步同一句替换，维持摘要独立定稿对照文本与 main.tex 一致；该文件其余字节及文末历史核验说明均保留。
+
+（3）定稿中文：近年来，相关研究以用户—捆绑（U-B）反馈为基础，将用户—物品行为和捆绑组成作为辅助信息，通过图建模、表示融合和对比学习改进推荐效果。中文用于讨论与记录，不插入英文论文。
+
+（4）工程记录.txt：追加本第三十七项，追加前的 234493 字节完整保留，沿用 UTF-8 无 BOM 与 CRLF。后续论文表达继续以准确、直白、简练为准，兼顾计算机论文的概念与论证要求。
+
+三、核验、版面与临时产物处理
+
+（1）主代理逐字节核验、独立只读代理复核均通过：两份文稿各且仅替换一次，句子与用户批准文字逐字一致，两份摘要完全一致。main.tex 从 56063 字节变为 56080 字节，SHA256 为 0747b70a0cf0ee8beed0e2f828bb9ac86d2728443912ff0f9fc9470310597229；v3 从 18517 字节变为 18534 字节，SHA256 为 c918ac2e6c2d3a9b994ffdb9fbba3ae36d6061a53addfbce884f9113d768d64e。
+
+（2）复用本机 tmp/tools/texlive-20261013 便携环境，以 latexmk 完成实际构建。全文仍为十一页；无 LaTeX 错误、未定义引用或文献、Overfull 盒、重复标签或待重编译提示。六条 Underfull hbox、一条 Underfull vbox，经受影响页目检未发现新增异常。
+
+（3）独立代理实际查看第 1、2 页，主代理实际查看相邻第 3 页：批准句完整，摘要换行及词距正常，正文、脚注、贡献跨栏与框架图无新增遮挡或裁切。核心页码保持：框架 Figure 1 第 3 页，总表与消融表第 7 页，原深入分析 Figure 2 与抗噪 Figure 3 第 8 页，超参 Figure 4 第 9 页。十八个公式、三十六篇实际引用及全部表格数据不变。
+
+（4）本轮在 tmp/pdfs/abstract-sentence-20261019 临时保存构建 PDF、前三页页图、源稿与记录快照及验证文件，仅用于自检；检查完成后按第三十五、三十六项规则清理该轮目录，不保留或交付 PDF，不新增长期页图。临时 PDF SHA256 为 c6d336092a5ddbbc9304672ce6c9ae39aa0ed8fc9c72a4c09b8f159182265c5d，仅在本项留作追溯。便携工具及其他历史材料保持原样。
+
+（5）aaai2027.bib、正式图片、新审阅批注 PDF、模型代码、配置与数据集均未修改，未运行训练或实验，未操作 Git 暂存区或提交 Git。最终源码及记录差异检查通过。
+
+第三十八项：按新审阅批注落实摘要集合一致性损失引入句定稿
+记录日期：2026-10-19
+
+一、任务依据与定稿
+
+用户与代理讨论“论文相关/ReCoBR-新稿-审阅批注.pdf”摘要第二处批注后，选择简洁说明去噪对捆绑推荐任务的适配及集合一致性损失的引入。结合摘要上下文复核后，用户明确确认：“行吧，就定为这一句吧。”本轮据此落实该句，并延续准确、直白、简练的表达原则。
+
+二、实际修改
+
+（1）AAAI文件/main.tex：仅将摘要中的“To adapt the denoising process to bundle recommendation, we introduce a bundle-set consistency loss that complements preference reconstruction by encouraging agreement between the refined preference and historical bundle embeddings.”替换为“To adapt denoising to bundle recommendation, we introduce a bundle-set consistency loss.”。其余全部原始字节不变，保留第三十七项已定稿的摘要第二句；其他待审批注本轮不实施。
+
+（2）ReCoBR_摘要与引言新稿_v3.txt：同步同一句替换，其余全部字节不变；两份完整摘要保持一致。定稿中文为“为使去噪适应捆绑推荐，我们引入捆绑集合一致性损失。”，用于讨论与记录，不插入英文论文。
+
+（3）工程记录.txt：独立追加本第三十八项，追加前的 238611 字节完整保留，沿用 UTF-8 无 BOM 与 CRLF。
+
+三、核验、版面与临时产物处理
+
+（1）主代理及独立只读代理逐字节复核通过：两份文稿各且仅替换一次，批准句逐字一致；main.tex 从 56080 字节变为 55936 字节，SHA256 为 a35d8887f74f88a9375f844e6708bfe5c4e124ab50ebe1fc65580a47cba96d83；v3 从 18534 字节变为 18390 字节，SHA256 为 aa55a7fe699a045d80f61768cd8da012703066f3228c040417128a8546538228。
+
+（2）复用 tmp/tools/texlive-20261013 便携环境，以 latexmk 完成编译。全文仍为十一页，无 LaTeX 错误、未定义引用或文献、Overfull 盒、重复标签或待重编译提示。六条 Underfull hbox 不变，Underfull vbox 从一条变为两条；独立代理实际目检第 1、2 页，主代理实际目检第 1、3 页，摘要、引言、跨栏续接及框架图均正常，无新增遮挡或裁切。
+
+（3）关键图表页码保持：框架 Figure 1 第 3 页，Table 1 第 6 页，总表与消融表第 7 页，深入分析 Figure 2 与抗噪 Figure 3 第 8 页，超参 Figure 4 第 9 页。参考文献文件及新审阅批注 PDF 的 SHA256 不变；公式、图表、图片、其他正文未作修改。
+
+（4）本轮仅在 tmp/pdfs/abstract-setloss-20261019 临时保存构建 PDF、前三页页图、快照和验证文件，用于实际编译与目检；完成检查后清理该轮目录，不保留或交付 PDF，不新增长期页图。临时 PDF SHA256 为 7b0e0705ede10276941db5a1fb7d104da4b5f5a9b68a345f3ac30f960f3c6bd5，仅在本项留作追溯。可复用编译工具与其他历史材料保留。
+
+（5）本轮保留的文件改动为 main.tex、摘要与引言对照文本及本项工程记录。未改动模型代码、配置或数据集，未运行训练或实验，未操作 Git 暂存区或提交 Git。

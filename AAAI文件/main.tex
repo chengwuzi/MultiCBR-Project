@@ -123,22 +123,23 @@ The purpose of this module is to evaluate an observed interaction in the context
 \subsubsection{Pretraining and Historical Preference Construction}
 
 We pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ be its trainable initial embeddings, and let $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$ denote the observed neighbors of user $u$ and bundle $b$. LightGCN propagation and layer aggregation are given by
-\begin{equation}
-\begin{aligned}
+\begingroup
+\allowdisplaybreaks[4]
+\begin{align}
 \mathbf h_u^{(\ell+1)}
 &=\sum_{b\in\mathcal N_u}
 \frac{\mathbf h_b^{(\ell)}}
-{\sqrt{|\mathcal N_u||\mathcal N_b|}},\\
+{\sqrt{|\mathcal N_u||\mathcal N_b|}},\notag\\
 \mathbf h_b^{(\ell+1)}
 &=\sum_{u\in\mathcal N_b}
 \frac{\mathbf h_u^{(\ell)}}
-{\sqrt{|\mathcal N_b||\mathcal N_u|}},\\
+{\sqrt{|\mathcal N_b||\mathcal N_u|}},\notag\\
 \mathbf e_u^0&=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_u^{(\ell)},
 \qquad
 \mathbf e_b^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_b^{(\ell)}.
-\end{aligned}
 \tag{1}
-\end{equation}
+\end{align}
+\endgroup
 Here, $L_p$ is the number of pretraining propagation layers, and the fixed aggregation coefficients satisfy $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$. The resulting embeddings $\mathbf e_u^0$ and $\mathbf e_b^0$ remain fixed during graph reconstruction. They are subsequently used to construct historical preferences, condition the denoiser, and score observed interactions.
 
 For each active user $u$, we summarize the representations of the historically interacted bundles by mean pooling:

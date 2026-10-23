@@ -17,14 +17,14 @@ import torch.optim as optim
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from models.model import AnchorViewBundleNet, DWT, LatentDiffusionRebuilder, resolve_dwt_graph_config
+from models.model import AnchorViewBundleNet, LatentDiffusionRebuilder
 from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 
 def get_cmd():
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
-    parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, iFashion")
+    parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, Youshu, iFashion")
     parser.add_argument("-m", "--model", default="AnchorViewBundleNet", type=str, help="which model to use, options: AnchorViewBundleNet")
     parser.add_argument("-i", "--info", default="", type=str, help="any auxilary info that will be appended to the log file name")
     parser.add_argument("--ui_bundle_user_agg_beta", default=None, type=float, help="coefficient for user-side aggregation in UI view")
@@ -49,10 +49,6 @@ def set_seed(seed):
         print("Random seed not set, running with random initialization.")
 
 
-def resolve_train_style(conf):
-    return conf.get("train_style", "cbr").strip().lower()
-
-
 def ensure_dir(path):
     if not os.path.isdir(path):
         os.makedirs(path)
@@ -60,6 +56,15 @@ def ensure_dir(path):
 
 def fmt_list(values):
     return str(values).replace(" ", "").replace("[", "").replace("]", "").replace(",", "-")
+
+
+def build_run_setting(settings, conf):
+    # Include every effective parameter so tuning anchor CL or the seed cannot
+    # silently reuse another configuration's logs and checkpoint paths.
+    run_conf = {key: value for key, value in conf.items() if key != "device"}
+    serialized = json.dumps(run_conf, sort_keys=True, ensure_ascii=True)
+    setting_hash = hashlib.sha256(serialized.encode("utf-8")).hexdigest()[:12]
+    return "_".join(settings)[:100] + "_" + setting_hash
 
 
 def summarize_sparse_graph(graph):
@@ -98,26 +103,6 @@ def report_latent_rebuild_epoch(run, log_path, epoch, latent_diffusion_loss, reb
     run.add_scalar(f"{prefix}/user_coverage", graph_stats["row_coverage"], epoch)
     run.add_scalar(f"{prefix}/bundle_coverage", graph_stats["col_coverage"], epoch)
     run.add_scalar(f"{prefix}/density", graph_stats["density"], epoch)
-
-
-def build_dwt_training_ub_graph(ub_graph, conf, device):
-    adjacency_matrix = sp.bmat([
-        [sp.csr_matrix((conf["num_users"], conf["num_users"])), ub_graph],
-        [ub_graph.T, sp.csr_matrix((conf["num_bundles"], conf["num_bundles"]))],
-    ])
-    adjacency_matrix = adjacency_matrix + sp.eye(adjacency_matrix.shape[0])
-    row_sum = np.array(adjacency_matrix.sum(axis=1))
-    d_inv = np.power(row_sum, -0.5).flatten()
-    d_inv[np.isinf(d_inv)] = 0.0
-    degree_matrix = sp.diags(d_inv)
-    norm_adjacency = degree_matrix.dot(adjacency_matrix).dot(degree_matrix).tocoo()
-    values = norm_adjacency.data
-    indices = np.vstack((norm_adjacency.row, norm_adjacency.col))
-    return torch.sparse_coo_tensor(
-        torch.LongTensor(indices),
-        torch.FloatTensor(values),
-        torch.Size(norm_adjacency.shape),
-    ).to(device)
 
 
 def build_observed_bundle_batch(dataset, user_indices, device):
@@ -166,7 +151,7 @@ def train_latent_diffusion_epoch(latent_diffusion_model, latent_diffusion_optimi
     latent_diffusion_model.train(True)
     for step_idx in pbar:
         start = step_idx * batch_size
-        end = min((step_idx + 1) * batch_size, dataset.num_users)
+        end = min((step_idx + 1) * batch_size, user_order.shape[0])
         batch = build_observed_bundle_batch(dataset, user_order[start:end], device)
 
         latent_diffusion_optimizer.zero_grad()
@@ -226,27 +211,27 @@ def rebuild_ub_graph_with_latent_diffusion(latent_diffusion_model, dataset, rebu
     return rebuilt_ub_graph
 
 
-def create_latent_diffusion_rebuilder(dwt_conf, user_embedding_tensor, bundle_embedding_tensor, device):
+def create_latent_diffusion_rebuilder(rebuild_conf, user_embedding_tensor, bundle_embedding_tensor, device):
     latent_diffusion_model = LatentDiffusionRebuilder(
-        dwt_conf,
+        rebuild_conf,
         user_embedding_tensor.to(device),
         bundle_embedding_tensor.to(device),
     ).to(device)
     latent_diffusion_optimizer = torch.optim.Adam(
         latent_diffusion_model.parameters(),
-        lr=dwt_conf["latent_diffusion_lr"],
-        weight_decay=dwt_conf["latent_diffusion_weight_decay"],
+        lr=rebuild_conf["latent_diffusion_lr"],
+        weight_decay=rebuild_conf["latent_diffusion_weight_decay"],
     )
     return latent_diffusion_model, latent_diffusion_optimizer
 
 
-def reset_latent_diffusion_rebuilder(dwt_conf, latent_diffusion_model, latent_diffusion_optimizer):
+def reset_latent_diffusion_rebuilder(rebuild_conf, latent_diffusion_model, latent_diffusion_optimizer):
     latent_diffusion_model.reset_parameters()
-    if dwt_conf.get("latent_diffusion_reset_optimizer", True):
+    if rebuild_conf.get("latent_diffusion_reset_optimizer", True):
         latent_diffusion_optimizer = torch.optim.Adam(
             latent_diffusion_model.parameters(),
-            lr=dwt_conf["latent_diffusion_lr"],
-            weight_decay=dwt_conf["latent_diffusion_weight_decay"],
+            lr=rebuild_conf["latent_diffusion_lr"],
+            weight_decay=rebuild_conf["latent_diffusion_weight_decay"],
         )
     return latent_diffusion_model, latent_diffusion_optimizer
 
@@ -314,6 +299,7 @@ def run_cbr_training(conf, dataset, device):
         ensure_dir(checkpoint_model_path)
         ensure_dir(checkpoint_conf_path)
 
+        conf["lr"] = lr
         conf["l2_reg"] = l2_reg
         conf["embedding_size"] = embedding_size
         conf["UB_ratio"] = UB_ratio
@@ -366,10 +352,7 @@ def run_cbr_training(conf, dataset, device):
                 f"ldw{latent_rebuild_conf['latent_diffusion_set_loss_weight']}",
             ]
 
-        setting = "_".join(settings)
-        if len(setting) > 100:
-            setting_hash = hashlib.md5(setting.encode()).hexdigest()[:8]
-            setting = setting[:100] + "_" + setting_hash
+        setting = build_run_setting(settings, conf)
 
         log_path = log_path + "/" + setting
         run_path = run_path + "/" + setting
@@ -444,7 +427,7 @@ def run_cbr_training(conf, dataset, device):
                 if conf["aug_type"] == "ED" and (batch_anchor + 1) % ed_interval_bs == 0:
                     ED_drop = True
 
-                bpr_loss, c_loss, anchor_cl_loss, anchor_cl_dict = model(batch, ED_drop=ED_drop)
+                bpr_loss, c_loss, anchor_cl_loss = model(batch, ED_drop=ED_drop)
                 anchor_cl_lambda = conf.get("anchor_cl", {}).get("anchor_cl_lambda", 0.0)
                 loss = bpr_loss + conf["c_lambda"] * c_loss + anchor_cl_lambda * anchor_cl_loss
 
@@ -460,10 +443,6 @@ def run_cbr_training(conf, dataset, device):
                 run.add_scalar("loss_c", c_loss_scalar, batch_anchor)
                 run.add_scalar("loss_anchor_cl", anchor_cl_loss_scalar, batch_anchor)
                 run.add_scalar("loss", loss_scalar, batch_anchor)
-
-                if conf.get("anchor_cl", {}).get("enabled", False):
-                    for key, value in anchor_cl_dict.items():
-                        run.add_scalar(f"loss_anchor_cl/{key}", value, batch_anchor)
 
                 pbar.set_description(
                     "epoch: %d, loss: %.4f, bpr_loss: %.4f, c_loss: %.4f, anchor_cl: %.4f"
@@ -491,196 +470,7 @@ def run_cbr_training(conf, dataset, device):
                     )
 
 
-def run_dwt_training(conf, dataset, device):
-    dwt_conf = conf.get("dwt", {})
-    if not dwt_conf:
-        raise ValueError("train_style=dwt requires a dwt config block.")
-    use_latent_diffusion_rebuild = dwt_conf.get("use_latent_diffusion_rebuild", False)
-    dwt_graph_conf = resolve_dwt_graph_config(conf)
-
-    for lr, embedding_size, num_layers in product(
-        conf["lrs"],
-        conf["embedding_sizes"],
-        conf["num_layerss"],
-    ):
-        log_path = "./log/%s/%s" % (conf["dataset"], conf["model"])
-        run_path = "./runs/%s/%s" % (conf["dataset"], conf["model"])
-        checkpoint_model_path = "./checkpoints/%s/%s/model" % (conf["dataset"], conf["model"])
-        checkpoint_conf_path = "./checkpoints/%s/%s/conf" % (conf["dataset"], conf["model"])
-        ensure_dir(run_path)
-        ensure_dir(log_path)
-        ensure_dir(checkpoint_model_path)
-        ensure_dir(checkpoint_conf_path)
-
-        conf["embedding_size"] = embedding_size
-        conf["num_layers"] = num_layers
-        conf["lr"] = lr
-        conf["l2_reg"] = 0.0
-        conf["c_lambda"] = 0.0
-        conf["c_temp"] = dwt_conf["tau"]
-        conf["ui_bundle_user_agg_beta"] = 0.0
-        conf["bi_user_bundle_agg_beta"] = 0.0
-
-        settings = []
-        if conf["info"] != "":
-            settings += [conf["info"]]
-        settings += [
-            "DWT",
-            "LatentRebuild" if use_latent_diffusion_rebuild else "Noise",
-            "Neg_%d" % conf["neg_num"],
-            str(conf["batch_size_train"]),
-            str(lr),
-            str(embedding_size),
-            str(num_layers),
-            fmt_list([dwt_graph_conf["upsilon"]["UB"], dwt_graph_conf["upsilon"]["UI"], dwt_graph_conf["upsilon"]["BI"]]),
-            fmt_list(dwt_graph_conf["layer_coefs"]["UB"]),
-            fmt_list(dwt_graph_conf["layer_coefs"]["UI"]),
-            fmt_list(dwt_graph_conf["layer_coefs"]["BI"]),
-            str(dwt_graph_conf["omega"]),
-            str(dwt_conf["gamma_1"]),
-            str(dwt_conf["gamma_2"]),
-            str(dwt_conf["tau"]),
-            str(dwt_conf["lambda_1"]),
-            str(dwt_conf["lambda_2"]),
-        ]
-        if use_latent_diffusion_rebuild:
-            settings += [
-                f"k{dwt_conf['rebuild_k']}",
-                f"step{dwt_conf['latent_diffusion_num_steps']}",
-                f"ldlr{dwt_conf['latent_diffusion_lr']}",
-                f"ldw{dwt_conf['latent_diffusion_set_loss_weight']}",
-            ]
-
-        setting = "_".join(settings)
-        if len(setting) > 100:
-            setting_hash = hashlib.md5(setting.encode()).hexdigest()[:8]
-            setting = setting[:100] + "_" + setting_hash
-
-        log_path = log_path + "/" + setting
-        run_path = run_path + "/" + setting
-        checkpoint_model_path = checkpoint_model_path + "/" + setting
-        checkpoint_conf_path = checkpoint_conf_path + "/" + setting
-
-        run = SummaryWriter(run_path)
-        model = DWT(conf, dataset.graphs).to(device)
-        optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=0.0)
-
-        if use_latent_diffusion_rebuild:
-            user_embedding_tensor = load_external_embedding_tensor(
-                dwt_conf["latent_diffusion_user_embedding_path"],
-                dataset.num_users,
-                "user",
-            )
-            bundle_embedding_tensor = load_external_embedding_tensor(
-                dwt_conf["latent_diffusion_bundle_embedding_path"],
-                dataset.num_bundles,
-                "bundle",
-            )
-            if user_embedding_tensor.shape[1] != bundle_embedding_tensor.shape[1]:
-                raise ValueError("Latent diffusion user and bundle embeddings must share the same dimension")
-            latent_diffusion_model, latent_diffusion_optimizer = create_latent_diffusion_rebuilder(
-                dwt_conf,
-                user_embedding_tensor,
-                bundle_embedding_tensor,
-                device,
-            )
-        else:
-            latent_diffusion_model = None
-            latent_diffusion_optimizer = None
-            model.set_training_ub_graph(build_dwt_training_ub_graph(dataset.graphs[0], conf, device))
-
-        batch_cnt = len(dataset.train_loader)
-        test_interval_bs = int(batch_cnt * conf["test_interval"])
-
-        best_metrics, best_perform = init_best_metrics(conf)
-        best_epoch = 0
-        for epoch in range(conf["epochs"]):
-            if (
-                use_latent_diffusion_rebuild
-                and dwt_conf.get("latent_diffusion_reset_after_epoch", -1) >= 0
-                and epoch == dwt_conf["latent_diffusion_reset_after_epoch"] + 1
-            ):
-                latent_diffusion_model, latent_diffusion_optimizer = reset_latent_diffusion_rebuilder(
-                    dwt_conf,
-                    latent_diffusion_model,
-                    latent_diffusion_optimizer,
-                )
-
-            if use_latent_diffusion_rebuild:
-                latent_diffusion_loss = train_latent_diffusion_epoch(
-                    latent_diffusion_model,
-                    latent_diffusion_optimizer,
-                    dataset,
-                    dwt_conf,
-                    device,
-                )
-                rebuilt_ub_graph = rebuild_ub_graph_with_latent_diffusion(
-                    latent_diffusion_model,
-                    dataset,
-                    dwt_conf,
-                    device,
-                )
-                if epoch == 0:
-                    print_statistics(rebuilt_ub_graph, "U-B statistics from Latent diffusion rebuild")
-                report_latent_rebuild_epoch(
-                    run,
-                    log_path,
-                    epoch,
-                    latent_diffusion_loss,
-                    rebuilt_ub_graph,
-                    conf["dataset"],
-                    "latent_diffusion",
-                )
-                model.set_training_ub_graph(build_dwt_training_ub_graph(rebuilt_ub_graph, conf, device))
-
-            epoch_anchor = epoch * batch_cnt
-            model.train(True)
-            pbar = tqdm(enumerate(dataset.train_loader), total=len(dataset.train_loader), disable=True)
-
-            for batch_i, batch in pbar:
-                model.train(True)
-                optimizer.zero_grad()
-                batch = [x.to(device) for x in batch]
-                batch_anchor = epoch_anchor + batch_i
-
-                bpr_loss, dwt_cl_loss = model(batch)
-                loss = bpr_loss + dwt_cl_loss
-
-                loss.backward()
-                optimizer.step()
-
-                loss_scalar = loss.detach()
-                bpr_loss_scalar = bpr_loss.detach()
-                dwt_cl_loss_scalar = dwt_cl_loss.detach()
-
-                run.add_scalar("loss_bpr", bpr_loss_scalar, batch_anchor)
-                run.add_scalar("loss_dwt_cl", dwt_cl_loss_scalar, batch_anchor)
-                run.add_scalar("loss", loss_scalar, batch_anchor)
-
-                pbar.set_description(
-                    "epoch: %d, loss: %.4f, bpr_loss: %.4f, dwt_cl: %.4f"
-                    % (epoch, loss_scalar, bpr_loss_scalar, dwt_cl_loss_scalar)
-                )
-
-                if (batch_anchor + 1) % test_interval_bs == 0:
-                    metrics = {
-                        "val": test(model, dataset.val_loader, conf),
-                        "test": test(model, dataset.test_loader, conf),
-                    }
-                    best_metrics, best_perform, best_epoch = log_metrics(
-                        conf,
-                        model,
-                        metrics,
-                        run,
-                        log_path,
-                        checkpoint_model_path,
-                        checkpoint_conf_path,
-                        epoch,
-                        batch_anchor,
-                        best_metrics,
-                        best_perform,
-                        best_epoch,
-                    )
+        run.close()
 
 
 def main(args=None):
@@ -709,22 +499,8 @@ def main(args=None):
         if key not in ["dataset", "model", "gpu", "info"] and value is not None:
             conf[key] = value
 
-    if "ui_bundle_user_agg_beta" in paras and paras["ui_bundle_user_agg_beta"] is not None:
-        conf["ui_bundle_user_agg_beta"] = paras["ui_bundle_user_agg_beta"]
-    if "bi_user_bundle_agg_beta" in paras and paras["bi_user_bundle_agg_beta"] is not None:
-        conf["bi_user_bundle_agg_beta"] = paras["bi_user_bundle_agg_beta"]
-    if "epochs" in paras and paras["epochs"] is not None:
-        conf["epochs"] = paras["epochs"]
-    if "seed" in paras and paras["seed"] is not None:
-        conf["seed"] = paras["seed"]
-
-    train_style = resolve_train_style(conf)
-    if train_style == "dwt":
-        set_seed(conf.get("seed", None))
-
     dataset = Datasets(conf)
-    if train_style != "dwt":
-        set_seed(conf.get("seed", None))
+    set_seed(conf.get("seed", None))
 
     conf["num_users"] = dataset.num_users
     conf["num_bundles"] = dataset.num_bundles
@@ -735,14 +511,7 @@ def main(args=None):
     conf["device"] = device
     print(conf)
 
-    print(f"train_style: {train_style}")
-
-    if train_style == "cbr":
-        run_cbr_training(conf, dataset, device)
-    elif train_style == "dwt":
-        run_dwt_training(conf, dataset, device)
-    else:
-        raise ValueError(f"Unsupported train_style: {train_style}")
+    run_cbr_training(conf, dataset, device)
 
 
 def init_best_metrics(conf):
@@ -792,8 +561,7 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
 
     log = open(log_path, "a")
 
-    topk_ = 20
-    print("top%d as the final evaluation standard" % topk_)
+    print("Best model criterion: validation Recall@20 + Recall@40 + NDCG@20 + NDCG@40")
 
     def get_score(metric_dict):
         return metric_dict["recall"][20] + metric_dict["recall"][40] + metric_dict["ndcg"][20] + metric_dict["ndcg"][40]
@@ -805,13 +573,14 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
         torch.save(model.state_dict(), checkpoint_model_path)
         dump_conf = dict(conf)
         del dump_conf["device"]
-        json.dump(dump_conf, open(checkpoint_conf_path, "w"))
+        with open(checkpoint_conf_path, "w", encoding="utf-8") as conf_file:
+            json.dump(dump_conf, conf_file)
         best_epoch = epoch
         curr_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
         ui_beta = conf.get("ui_bundle_user_agg_beta", 0.0)
         bi_beta = conf.get("bi_user_bundle_agg_beta", 0.0)
-        param_info = "褰撳墠缃戞牸鍙傛暟: %.2f + %.2f" % (
+        param_info = "Residual aggregation coefficients (UI, BI): %.2f + %.2f" % (
             ui_beta if ui_beta is not None else 0.0,
             bi_beta if bi_beta is not None else 0.0,
         )
@@ -847,6 +616,7 @@ def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, chec
     return best_metrics, best_perform, best_epoch
 
 
+@torch.no_grad()
 def test(model, dataloader, conf):
     tmp_metrics = {}
     for metric_name in ["recall", "ndcg"]:

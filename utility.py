@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import os
-import random
 import numpy as np
 import scipy.sparse as sp 
 
@@ -93,19 +92,13 @@ def load_external_embedding_tensor(
 
 
 class BundleTrainDataset(Dataset):
-    def __init__(self, conf, u_b_pairs, u_b_graph, num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, neg_sample=1):
-        self.conf = conf
+    def __init__(self, u_b_pairs, u_b_graph, num_bundles, neg_sample=1):
         self.u_b_pairs = u_b_pairs
         self.u_b_graph = u_b_graph
         self.num_bundles = num_bundles
         self.neg_sample = neg_sample
 
-        self.u_b_for_neg_sample = u_b_for_neg_sample
-        self.b_b_for_neg_sample = b_b_for_neg_sample
-
-
     def __getitem__(self, index):
-        conf = self.conf
         user_b, pos_bundle = self.u_b_pairs[index]
         all_bundles = [pos_bundle]
 
@@ -124,16 +117,9 @@ class BundleTrainDataset(Dataset):
 
 
 class BundleTestDataset(Dataset):
-    def __init__(self, u_b_pairs, u_b_graph, u_b_graph_train, num_users, num_bundles):
-        self.u_b_pairs = u_b_pairs
+    def __init__(self, u_b_graph, u_b_graph_train):
         self.u_b_graph = u_b_graph
         self.train_mask_u_b = u_b_graph_train
-
-        self.num_users = num_users
-        self.num_bundles = num_bundles
-
-        self.users = torch.arange(num_users, dtype=torch.long).unsqueeze(dim=1)
-        self.bundles = torch.arange(num_bundles, dtype=torch.long)
 
 
     def __getitem__(self, index):
@@ -149,7 +135,6 @@ class BundleTestDataset(Dataset):
 
 class Datasets():
     def __init__(self, conf):
-        self.conf = conf
         self.path = conf['data_path']
         self.name = conf['dataset']
         batch_size_train = conf['batch_size_train']
@@ -157,22 +142,16 @@ class Datasets():
 
         self.num_users, self.num_bundles, self.num_items = self.get_data_size()
 
-        b_i_pairs, b_i_graph = self.get_bi()
-        u_i_pairs, u_i_graph = self.get_ui()
+        b_i_graph = self.get_bi()
+        u_i_graph = self.get_ui()
 
         u_b_pairs_train, u_b_graph_train = self.get_ub("train")
-        u_b_pairs_val, u_b_graph_val = self.get_ub("tune")
-        u_b_pairs_test, u_b_graph_test = self.get_ub("test")
+        _, u_b_graph_val = self.get_ub("tune")
+        _, u_b_graph_test = self.get_ub("test")
 
-        u_b_for_neg_sample, b_b_for_neg_sample = None, None
-
-        self.bundle_train_data = BundleTrainDataset(conf, u_b_pairs_train, u_b_graph_train, self.num_bundles, u_b_for_neg_sample, b_b_for_neg_sample, conf["neg_num"])
-        self.bundle_val_data = BundleTestDataset(u_b_pairs_val, u_b_graph_val, u_b_graph_train, self.num_users, self.num_bundles)
-        self.bundle_test_data = BundleTestDataset(u_b_pairs_test, u_b_graph_test, u_b_graph_train, self.num_users, self.num_bundles)
-
-        # High-order substitution pre-computation (Legacy - Disabled)
-        # if conf.get('enable_high_order_replace', False):
-        #    ... (Logic removed)
+        self.bundle_train_data = BundleTrainDataset(u_b_pairs_train, u_b_graph_train, self.num_bundles, conf["neg_num"])
+        self.bundle_val_data = BundleTestDataset(u_b_graph_val, u_b_graph_train)
+        self.bundle_test_data = BundleTestDataset(u_b_graph_test, u_b_graph_train)
 
         self.graphs = [u_b_graph_train, u_i_graph, b_i_graph]
         self.user_observed_bundles = self.build_user_observed_bundles(u_b_graph_train)
@@ -209,7 +188,7 @@ class Datasets():
 
         print_statistics(b_i_graph, 'B-I statistics')
 
-        return b_i_pairs, b_i_graph
+        return b_i_graph
 
 
     def get_ui(self):
@@ -223,7 +202,7 @@ class Datasets():
 
         print_statistics(u_i_graph, 'U-I statistics')
 
-        return u_i_pairs, u_i_graph
+        return u_i_graph
 
 
     def get_ub(self, task):

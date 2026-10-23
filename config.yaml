@@ -69,14 +69,13 @@ NetEase:
 
 iFashion:
   data_path: './datasets'
-  train_style: "dwt"
   batch_size_train: 2048
   batch_size_test: 2048
   topk: [10, 20, 40, 80]
   neg_num: 1
-  seed: 2026 # Align with the DWT reference training setup for iFashion
+  seed: 2026
 
-  # the following are the best settings
+  # Initial settings for the unified CBR path; retune after migration.
   aug_type: "Noise"
   ed_interval: 1
   embedding_sizes: [64]
@@ -101,8 +100,8 @@ iFashion:
   epochs: 30
   test_interval: 5
 
-  dwt:
-    use_latent_diffusion_rebuild: true
+  latent_rebuild:
+    enabled: true
     rebuild_k: 3
     latent_diffusion_user_embedding_path: './datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt'
     latent_diffusion_bundle_embedding_path: './datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt'
@@ -121,15 +120,9 @@ iFashion:
     latent_diffusion_reset_after_epoch: -1
     latent_diffusion_reset_optimizer: false
 
-    gamma_1: 0.3
-    gamma_2: 0.2
-    tau: 0.08
-    lambda_1: 0.3
-    lambda_2: 1.0e-6
-
   # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
-    enabled: false
+    enabled: true
     anchor_cl_lambda: 0.07
     temp: 0.2
     user_cl: true

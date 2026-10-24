@@ -195,8 +195,8 @@ class LatentDiffusionRebuilder(nn.Module):
         return selected_bundles, selected_valid
 
 
-class AnchorViewBundleNet(nn.Module):
-    """Anchor-guided multi-view bundle recommendation model.
+class ReCoBR(nn.Module):
+    """ReCoBR multi-view bundle recommendation model.
 
     The model keeps three recommendation views over user-bundle, user-item,
     and bundle-item relations. Two project-specific components live on top of

@@ -75,7 +75,7 @@ iFashion:
   neg_num: 1
   seed: 2026
 
-  # Initial settings for the unified CBR path; retune after migration.
+  # ReCoBR settings for iFashion.
   aug_type: "Noise"
   ed_interval: 1
   embedding_sizes: [64]

@@ -34,7 +34,14 @@ python run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_0
 
 该命令校验计划和数据路径，显示将运行的实验，不写进度、不创建结果记录、不启动训练。
 dry-run 不导入 PyTorch，也不验证 CUDA、显存、训练依赖或预训练嵌入内容；这些仍需在服务器实际运行时确认。
-默认 gpu 为计划中的 "0"。需要换卡时修改计划 gpu；同一轮不要同时启动多个控制器。
+可在命令行使用 --gpu 1（或 -g 1）指定显卡，命令行优先于计划文件 gpu，且不会修改计划文件。
+不传 --gpu 时使用计划文件 gpu（当前为 "0"）。dry-run、实际训练、进度显示和结果记录均使用最终生效的 GPU。
+例如使用 1 号卡预检查：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --gpu 1 --dry-run
+正式运行：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --gpu 1
+续跑时沿用相同的 --gpu 参数；现有实验指纹包含 GPU，换卡会被视为新的实验执行条件。
+同一轮不要同时启动多个控制器。
 不同轮次也请依次执行，避免多个任务争用同一张显卡。
 
 四、正式执行与四种模式（只在服务器执行）

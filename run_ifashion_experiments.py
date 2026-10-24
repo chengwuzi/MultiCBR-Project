@@ -160,7 +160,7 @@ def validate_config(conf, seed):
                 raise ValueError(f"Missing embedding: {path}")
 
 
-def load_plan(path):
+def load_plan(path, gpu=None):
     with Path(path).open(encoding="utf-8") as stream:
         plan = yaml.safe_load(stream)
     allowed = {"version", "round_id", "note", "base_config", "seed", "gpu",
@@ -174,7 +174,7 @@ def load_plan(path):
         raise ValueError("A round note is required")
     if type(plan.get("seed")) is not int or plan.get("max_attempts") != 3:
         raise ValueError("A fixed integer seed and max_attempts: 3 are required")
-    plan["gpu"] = str(plan.get("gpu", "0"))
+    plan["gpu"] = str(gpu if gpu is not None else plan.get("gpu", "0"))
     plan["result_file"] = str(resolve_path(plan["result_file"]))
     with resolve_path(plan["base_config"]).open(encoding="utf-8") as stream:
         base = yaml.safe_load(stream)["iFashion"]
@@ -274,7 +274,7 @@ class ConsoleProgress:
         lines = ["", "=" * 72,
                  f"[{timestamp()}] 实验进度 | 轮次: {self.plan['round_id']}",
                  f"轮次备注: {self.plan['note']}",
-                 f"模式: {self.mode} | 计划 {len(self.rows)} 组，本次运行 {len(self.selected_ids)} 组，"
+                 f"模式: {self.mode} | GPU: {self.plan['gpu']} | 计划 {len(self.rows)} 组，本次运行 {len(self.selected_ids)} 组，"
                  f"跳过 {len(self.rows) - len(self.selected_ids)} 组",
                  f"本次进度: 已结束 {ended}/{len(self.selected_ids)} | 已完成 {counts.get('SUCCESS', 0)} | "
                  f"三次机会耗尽 {counts.get('FAILED', 0)} | 正在运行 {counts.get('RUNNING', 0)} | "
@@ -551,14 +551,14 @@ def execute_experiment(plan, experiment, state, state_path, round_dir, commit, p
     return record["status"]
 
 
-def run(plan_path, mode="resume", only=None, dry_run=False):
-    plan = load_plan(plan_path)
+def run(plan_path, mode="resume", only=None, dry_run=False, gpu=None):
+    plan = load_plan(plan_path, gpu=gpu)
     round_dir = PROJECT_ROOT / "log" / "ifashion_tuning" / plan["round_id"]
     state_path = round_dir / "state.json"
     if dry_run:
         state = load_state(state_path)
         selected = select_experiments(plan, state, mode, only or [])
-        print(f"DRY RUN: {plan['round_id']} | {plan['note']} | selected={len(selected)}")
+        print(f"DRY RUN: {plan['round_id']} | {plan['note']} | GPU: {plan['gpu']} | selected={len(selected)}")
         for e in selected:
             c = e["config"]
             print(f"  {e['id']}: {e['note']} | c_lambdas={c['c_lambdas']} "
@@ -604,6 +604,7 @@ def main():
             stream.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--plan", required=True, help="experiment plan YAML (relative to the current directory)")
+    parser.add_argument("-g", "--gpu", default=None, help="GPU to use; overrides the plan's gpu field")
     parser.add_argument("--mode", choices=("resume", "failed", "selected", "all"), default="resume")
     parser.add_argument("--only", nargs="+", help="experiment IDs; requires --mode selected")
     parser.add_argument("--dry-run", action="store_true", help="validate and list work without writing files or launching training")
@@ -612,7 +613,7 @@ def main():
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, interrupted)
     try:
-        return run(args.plan, args.mode, args.only, args.dry_run)
+        return run(args.plan, args.mode, args.only, args.dry_run, gpu=args.gpu)
     except KeyboardInterrupt:
         print("Stopped. Resume with the same plan; the interrupted experiment restarts from epoch 0.", file=sys.stderr)
         return 130

@@ -133,19 +133,36 @@ class ControllerTests(unittest.TestCase):
             (self.root / name).write_bytes((ROOT / name).read_bytes())
         command = [sys.executable, str(self.root / "run_ifashion_experiments.py"), "--plan", str(self.path)]
         self.behavior({"0.05": "fail"})
-        first = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
+        first = subprocess.run(command + ["--gpu", "1"], cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
         self.assertEqual(first.returncode, 1, first.stderr)
+        self.assertIn("GPU: 1", first.stdout)
         self.assertIn("已结束 2/2 | 已完成 1 | 三次机会耗尽 1", first.stdout)
         self.assertIn("a | c_lambda=0.05 | 失败：三次机会耗尽（3/3）", first.stdout)
         self.behavior({})
-        resumed = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
+        resumed = subprocess.run(command + ["-g", "1"], cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
         self.assertEqual(resumed.returncode, 0, resumed.stderr)
         self.assertIn("b | c_lambda=0.1 | 已完成（历史成功，本次跳过）", resumed.stdout)
         self.assertIn("已结束 1/1 | 已完成 1 | 三次机会耗尽 0", resumed.stdout)
         self.assertEqual([r["status"] for r in self.state()["executions"]], ["FAILED", "SUCCESS", "SUCCESS"])
+        self.assertTrue(all(r["gpu"] == "1" and r["result"]["config"]["gpu"] == "1"
+                            for r in self.state()["executions"] if r["status"] == "SUCCESS"))
         report = (self.root / "results/result.txt").read_text(encoding="utf-8")
         self.assertEqual(report.count("END_EXECUTION:"), 3)
         self.assertEqual(report.count("实验总耗时（含重试）:"), 3)
+        self.assertEqual(report.count("GPU: 1"), 3)
+
+    def test_gpu_override_applies_before_fingerprinting_without_changing_plan(self):
+        original = self.path.read_bytes()
+        default = runner.load_plan(self.path)
+        overridden = runner.load_plan(self.path, gpu="1")
+        self.assertEqual(default["gpu"], "0")
+        self.assertEqual(overridden["gpu"], "1")
+        self.assertEqual(default["experiments"][0]["config"], overridden["experiments"][0]["config"])
+        self.assertNotEqual(default["experiments"][0]["fingerprint"], overridden["experiments"][0]["fingerprint"])
+        self.assertEqual(self.run_plan(gpu="1", dry_run=True), 0)
+        self.assertIn("GPU: 1", self.console)
+        self.assertFalse((self.root / "log").exists())
+        self.assertEqual(self.path.read_bytes(), original)
 
     def test_retry_success_on_third_attempt(self):
         self.behavior({"0.05": "twice"})

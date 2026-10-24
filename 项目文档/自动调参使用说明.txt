@@ -1,0 +1,113 @@
+iFashion 自动调参使用说明
+
+一、文件分工
+
+run_ifashion_experiments.py：串行调度、结果校验、重试、续跑和主动重跑。
+tuning_plans/ifashion_clambda_coarse_01.yaml：已经确定的第一轮实验计划。
+实验结果存档/Ifashion调参.txt：供人工阅读的追加式结果记录，尚未运行时为空。
+log/ifashion_tuning/<round_id>/：进度 state.json、控制器锁、每次尝试的配置快照、
+stdout 和结构化结果。它们用于恢复执行与定位失败，不需要手动整理成另一套结果表。
+原来的模型、TensorBoard、训练日志仍由 train.py 自动生成，具体路径写入结果记录。
+
+二、第一轮实际安排
+
+本轮 round_id=stage1_clambda_coarse_01，共五组：
+clambda_005：c_lambdas=[0.05]
+clambda_010：c_lambdas=[0.1]
+clambda_020：c_lambdas=[0.2]
+clambda_050：c_lambdas=[0.5]
+clambda_100：c_lambdas=[1.0]
+
+所有组共同覆盖 anchor_cl.enabled=false、c_temps=[0.2]，固定 seed=2026。
+其余值继承 config.yaml 中的 iFashion 配置，包括当前 epochs=30。
+脚本没有修改基础 config.yaml，也不读取 NetEase、Youshu 来执行训练。
+每组均使用新 Python 进程；子进程启动前固定 PYTHONHASHSEED 和 CUDA_VISIBLE_DEVICES。
+当前激活的 Python 环境会用于子进程，请在具备训练依赖的服务器环境运行。
+
+三、先检查计划，不训练
+
+在项目根目录执行：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --dry-run
+
+该命令校验计划和数据路径，显示将运行的实验，不写进度、不创建结果记录、不启动训练。
+默认 gpu 为计划中的 "0"。需要换卡时修改计划 gpu；同一轮不要同时启动多个控制器。
+不同轮次也请依次执行，避免多个任务争用同一张显卡。
+
+四、正式执行与四种模式（只在服务器执行）
+
+1. 首次运行或中断后续跑，默认 mode=resume：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml
+
+默认只跳过已成功组；未运行、上次失败和中断的组都会执行。
+因中断而未完成的组从第 0 个 epoch 重新训练，不进行模型断点续训。
+某组连续三次失败后，本次启动内记录失败并继续下一组；下次启动时该组重新获得最多三次尝试机会。
+训练 stdout 写入每次尝试独立的日志，终端显示当前组、尝试次数和日志路径。
+
+2. 主动重跑失败项：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --mode failed
+
+只选择该计划当前实际配置对应、最近一次执行为 FAILED 的组。
+每组重新获得最多三次尝试机会，历史失败记录继续保留。
+
+3. 指定一组或多组，不论以前是否成功：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --mode selected --only clambda_010 clambda_050
+
+--only 后填写计划中的实验 id。未知 id 会报错，不会悄悄忽略。
+每次指定重跑都是一次新执行，有自己的记录、快照、日志和训练产物。
+
+4. 明确要求全部重跑：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --mode all
+
+所有组均重新执行，历史成功和失败记录不覆盖。
+以上任一模式都可以增加 --dry-run，先检查选择范围。
+
+五、重试、中断和结果判断
+
+每次启动脚本，每个选中的组最多尝试三次：首次运行 + 两次重试。再次启动时，选中的组获得新的三次机会。
+非零退出、结果 JSON 缺失、配置不匹配、指标无效、最佳 checkpoint 缺失，都记为失败并重试。
+best_epoch 指现有验证选模标准选出的同一个 epoch，记录验证和测试四档 Recall/NDCG；
+不会把不同轮次的各个指标最高值拼成一份结果。
+
+正常按 Ctrl+C 或收到终止信号时，控制器会停止本次训练及队列，记录 INTERRUPTED，
+不会把主动停止当成失败继续重试。再次以 resume 运行即可重新执行未完成组。
+如果控制器被强制杀死，旧子进程可能还在运行；脚本会检查已记录的 worker PID。
+发现旧 worker 仍存活时会停止启动新任务，先由操作者核对并停止旧任务后再续跑。
+同一轮控制器有操作系统文件锁，避免重复启动。
+
+进度文件通过临时文件替换写入；结果 txt 在实验结束后追加并写盘。
+如果进度已保存、结果 txt 尚未写入时发生中断，下次启动会补写记录，不重复添加完整记录。
+不要删除 state.json 或手动修改其状态；删除它会失去自动跳过历史执行的依据。
+若只删除结果 txt 而保留 state.json，下次正式启动会从进度文件补回结果。
+
+六、新轮次与配置管理
+
+计划包含轮次 id、轮次备注、公共覆盖配置，以及带 id/备注/覆盖项的实验列表。
+覆盖项按字典字段递归合并；例如只改 anchor_cl.enabled，不会丢失其余对比配置。
+拼错参数名、传入多值候选列表等会在启动训练前报错。
+每个实验必须是一组单值配置，脚本负责跨实验执行，避免训练函数内部多组合消耗不同随机状态。
+
+同一轮每组按“实验 id + 完整配置 + 训练源码摘要 + GPU”识别，修改实际参数或训练源码
+会被视为新实验，不会因 id 相同而误跳过。备注变化不改变实验身份，但写入新执行的记录。
+每次执行会记录 Git 提交号和训练源码摘要；即使工作树有未提交训练改动，也能区分实际源码。
+
+第二轮细扫时复制计划、使用新的 round_id 和轮次备注，按第一轮结果填写候选值。
+不自动推断细扫范围，也不在粗扫完成后自动开始未经确认的下一轮。
+基础配置在本次启动时读入内存，每次尝试使用保存的独立快照，不回写 config.yaml。
+
+七、结果和退出码
+
+Ifashion调参.txt 中逐组记录轮次/实验备注、完整实际配置、代码版本、尝试次数、日志路径，
+成功时记录同一个最佳 epoch 的指标与 checkpoint 路径，失败时记录最终错误及日志尾部。
+失败记录的配置是提交给训练进程的完整输入快照；成功记录还包含训练解析出的实际标量参数。
+时间使用 UTC+08:00；best_epoch 从 0 开始，同时记录从 1 开始的训练轮次。
+
+退出码：0=本次选择的任务完成且无最终失败，或没有需要运行的任务；
+1=本次执行存在最终失败，其他组已经继续执行；2=计划、状态或控制器错误；130=主动中断。
+resume 会重新执行历史失败组；--mode failed 可用于只重跑失败组。历史执行记录继续保留，新结果追加记录。
+
+八、本地验证
+
+python -m unittest discover -s tests -p test_ifashion_experiments.py -v
+
+这些测试使用临时目录和假训练进程，覆盖实际子进程调度、重试、重跑、恢复与记录，
+不导入或运行推荐模型。当前电脑只进行此类验证和 dry-run，真实训练效果待服务器确认。

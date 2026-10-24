@@ -19,10 +19,13 @@ from tqdm import tqdm
 
 from models.model import AnchorViewBundleNet, LatentDiffusionRebuilder
 from utility import Datasets, load_external_embedding_tensor, print_statistics
+from experiment_io import save_best_result
 
 
 def get_cmd():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--config", default="./config.yaml", help="dataset configuration YAML")
+    parser.add_argument("--result-json", default=None, help="write the completed single experiment result")
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
     parser.add_argument("-d", "--dataset", default="NetEase", type=str, help="which dataset to use, options: NetEase, Youshu, iFashion")
     parser.add_argument("-m", "--model", default="AnchorViewBundleNet", type=str, help="which model to use, options: AnchorViewBundleNet")
@@ -267,7 +270,12 @@ def create_cbr_latent_rebuild_components(conf, dataset, device):
     return latent_diffusion_model, latent_diffusion_optimizer
 
 
-def run_cbr_training(conf, dataset, device):
+def run_cbr_training(conf, dataset, device, result_path=None):
+    if result_path and any(len(conf[key]) != 1 for key in (
+        "lrs", "l2_regs", "UB_ratios", "UI_ratios", "BI_ratios",
+        "embedding_sizes", "num_layerss", "c_lambdas", "c_temps",
+    )):
+        raise ValueError("--result-json requires one parameter combination per process")
     anchor_cl_conf = conf.get("anchor_cl", {})
     if anchor_cl_conf.get("enabled", False):
         print("=" * 20 + " Pre-fusion Anchor CL Enabled " + "=" * 20)
@@ -471,16 +479,25 @@ def run_cbr_training(conf, dataset, device):
 
 
         run.close()
+        if result_path:
+            save_best_result(result_path, conf, best_metrics, best_epoch, {
+                "log": log_path,
+                "tensorboard": run_path,
+                "checkpoint_model": checkpoint_model_path,
+                "checkpoint_config": checkpoint_conf_path,
+            })
 
 
 def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml", encoding="utf-8"))
-    print("load config file done!")
-
     if args is None:
         paras = get_cmd().__dict__
     else:
-        paras = args
+        paras = dict(args)
+    config_path = paras.pop("config", "./config.yaml")
+    result_path = paras.pop("result_json", None)
+    with open(config_path, encoding="utf-8") as config_file:
+        conf = yaml.safe_load(config_file)
+    print("load config file done!")
 
     dataset_name = paras["dataset"]
     assert paras["model"] in ["AnchorViewBundleNet"], "Pls select models from: AnchorViewBundleNet"
@@ -511,7 +528,7 @@ def main(args=None):
     conf["device"] = device
     print(conf)
 
-    run_cbr_training(conf, dataset, device)
+    run_cbr_training(conf, dataset, device, result_path=result_path)
 
 
 def init_best_metrics(conf):

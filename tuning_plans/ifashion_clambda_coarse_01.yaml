@@ -1,0 +1,35 @@
+version: 1
+round_id: stage1_clambda_coarse_01
+note: "第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。"
+base_config: config.yaml
+seed: 2026
+gpu: "0"
+max_attempts: 3 # 首次运行 + 两次重试；再次启动时，未成功组重新获得三次机会。
+result_file: "实验结果存档/Ifashion调参.txt"
+
+common_overrides:
+  anchor_cl:
+    enabled: false
+  c_temps: [0.2]
+
+experiments:
+  - id: clambda_005
+    note: "c_lambda=0.05，当前参考值的一半。"
+    overrides:
+      c_lambdas: [0.05]
+  - id: clambda_010
+    note: "c_lambda=0.1，参考点。"
+    overrides:
+      c_lambdas: [0.1]
+  - id: clambda_020
+    note: "c_lambda=0.2，参考值的两倍。"
+    overrides:
+      c_lambdas: [0.2]
+  - id: clambda_050
+    note: "c_lambda=0.5，参考值的五倍。"
+    overrides:
+      c_lambdas: [0.5]
+  - id: clambda_100
+    note: "c_lambda=1.0，参考值的十倍。"
+    overrides:
+      c_lambdas: [1.0]

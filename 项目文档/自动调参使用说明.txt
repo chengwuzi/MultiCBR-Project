@@ -20,6 +20,9 @@ clambda_100：c_lambdas=[1.0]
 
 所有组共同覆盖 anchor_cl.enabled=false、c_temps=[0.2]，固定 seed=2026。
 其余值继承 config.yaml 中的 iFashion 配置，包括当前 epochs=30。
+扩散重构保持开启，rebuild_k=3，其余扩散参数固定。
+本轮 UB 融合权重为 0、两项残差系数为 0，且 anchor_cl 关闭，因此扩散模块虽然训练、
+重构并消耗算力，重构图目前没有影响推荐目标的有效路径；保留此设置用于保持已定实验方案。
 脚本没有修改基础 config.yaml，也不读取 NetEase、Youshu 来执行训练。
 每组均使用新 Python 进程；子进程启动前固定 PYTHONHASHSEED 和 CUDA_VISIBLE_DEVICES。
 当前激活的 Python 环境会用于子进程，请在具备训练依赖的服务器环境运行。
@@ -30,6 +33,7 @@ clambda_100：c_lambdas=[1.0]
 python run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --dry-run
 
 该命令校验计划和数据路径，显示将运行的实验，不写进度、不创建结果记录、不启动训练。
+dry-run 不导入 PyTorch，也不验证 CUDA、显存、训练依赖或预训练嵌入内容；这些仍需在服务器实际运行时确认。
 默认 gpu 为计划中的 "0"。需要换卡时修改计划 gpu；同一轮不要同时启动多个控制器。
 不同轮次也请依次执行，避免多个任务争用同一张显卡。
 
@@ -42,6 +46,14 @@ python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coars
 因中断而未完成的组从第 0 个 epoch 重新训练，不进行模型断点续训。
 某组连续三次失败后，本次启动内记录失败并继续下一组；下次启动时该组重新获得最多三次尝试机会。
 训练 stdout 写入每次尝试独立的日志，终端显示当前组、尝试次数和日志路径。
+
+Linux 服务器通过 SSH 启动并需要断开连接后继续运行时，可在项目根目录执行：
+mkdir -p log/ifashion_tuning
+nohup python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml > log/ifashion_tuning/stage1_clambda_coarse_01_controller.txt 2>&1 &
+
+可通过以下命令查看控制器进度；每次训练的详细日志路径会显示在其中：
+tail -f log/ifashion_tuning/stage1_clambda_coarse_01_controller.txt
+此时 Ctrl+C 仅退出 tail 查看，不停止后台实验。再次启动前先确认旧控制器已结束。
 
 2. 主动重跑失败项：
 python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_coarse_01.yaml --mode failed

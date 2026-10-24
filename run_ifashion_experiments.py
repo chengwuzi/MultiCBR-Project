@@ -13,6 +13,7 @@ import re
 import signal
 import subprocess
 import sys
+import time
 import uuid
 
 import yaml
@@ -30,6 +31,29 @@ TERMINAL = {"SUCCESS", "FAILED", "INTERRUPTED"}
 
 def timestamp():
     return datetime.now(timezone(timedelta(hours=8))).isoformat(timespec="seconds")
+
+
+def finish_timing(record, started):
+    record["ended_at"] = timestamp()
+    record["duration_seconds"] = round(max(0, time.monotonic() - started), 3)
+
+
+def elapsed_text(record):
+    seconds = record.get("duration_seconds")
+    suffix = ""
+    if seconds is None and not record.get("timing_note"):
+        # Older progress files contain timestamps but no monotonic duration.
+        try:
+            seconds = max(0, (datetime.fromisoformat(record["ended_at"])
+                              - datetime.fromisoformat(record["started_at"])).total_seconds())
+        except (KeyError, TypeError, ValueError):
+            return "未知"
+        suffix = "（根据开始和结束时间估算）"
+    if seconds is None:
+        return "未知"
+    hours, remainder = divmod(round(seconds * 1000), 3600000)
+    minutes, milliseconds = divmod(remainder, 60000)
+    return f"{hours:02d}:{minutes:02d}:{milliseconds / 1000:06.3f}（共 {seconds:.3f} 秒）" + suffix
 
 
 def resolve_path(value):
@@ -220,6 +244,60 @@ def select_experiments(plan, state, mode, only):
     return chosen
 
 
+class ConsoleProgress:
+    """Print complete status snapshots that also remain readable in nohup logs."""
+
+    def __init__(self, plan, state, selected, mode):
+        self.plan = plan
+        self.mode = mode
+        self.selected_ids = {experiment["id"] for experiment in selected}
+        self.rows = {}
+        for experiment in plan["experiments"]:
+            previous = latest_execution(state, experiment)
+            status = previous["status"] if previous else None
+            if experiment["id"] in self.selected_ids:
+                detail = {"SUCCESS": "（主动重跑）", "FAILED": "（上次失败，本次重新尝试）",
+                          "INTERRUPTED": "（上次中断，本次重新运行）"}.get(status, "")
+                self.rows[experiment["id"]] = ("WAITING", "等待运行" + detail)
+            else:
+                label = {"SUCCESS": "已完成（历史成功，本次跳过）",
+                         "FAILED": "失败：三次机会耗尽（历史记录，本次未选中）",
+                         "INTERRUPTED": "已中断（本次未选中）"}.get(status, "未运行（本次未选中）")
+                self.rows[experiment["id"]] = ("SKIPPED", label)
+
+    def show(self):
+        counts = {}
+        for eid in self.selected_ids:
+            status = self.rows[eid][0]
+            counts[status] = counts.get(status, 0) + 1
+        ended = sum(counts.get(status, 0) for status in TERMINAL)
+        lines = ["", "=" * 72,
+                 f"[{timestamp()}] 实验进度 | 轮次: {self.plan['round_id']}",
+                 f"轮次备注: {self.plan['note']}",
+                 f"模式: {self.mode} | 计划 {len(self.rows)} 组，本次运行 {len(self.selected_ids)} 组，"
+                 f"跳过 {len(self.rows) - len(self.selected_ids)} 组",
+                 f"本次进度: 已结束 {ended}/{len(self.selected_ids)} | 已完成 {counts.get('SUCCESS', 0)} | "
+                 f"三次机会耗尽 {counts.get('FAILED', 0)} | 正在运行 {counts.get('RUNNING', 0)} | "
+                 f"等待 {counts.get('WAITING', 0) + counts.get('RETRY', 0)} | 已中断 {counts.get('INTERRUPTED', 0)}"]
+        for index, experiment in enumerate(self.plan["experiments"], 1):
+            label = self.rows[experiment["id"]][1]
+            value = experiment["config"]["c_lambdas"][0]
+            lines.append(f"  {index}. {experiment['id']} | c_lambda={value} | {label} | {experiment['note']}")
+        lines.append("=" * 72)
+        print("\n".join(lines), flush=True)
+
+    def update(self, experiment, status, label):
+        self.rows[experiment["id"]] = (status, label)
+        self.show()
+
+    def finished(self, experiment, record):
+        count = len(record["attempts"])
+        label = {"SUCCESS": f"已完成（第 {count}/3 次尝试成功）",
+                 "FAILED": "失败：三次机会耗尽（3/3）",
+                 "INTERRUPTED": "已中断（下次启动重新运行）"}[record["status"]]
+        self.update(experiment, record["status"], label)
+
+
 @contextmanager
 def round_lock(path):
     """An OS lock is automatically released even after the controller crashes."""
@@ -258,13 +336,22 @@ def append_report(path, record):
              f"实验: {record['experiment_id']}", f"实验备注: {record['note']}",
              f"状态: {record['status']}", f"GPU: {record['gpu']}",
              f"开始时间(UTC+08:00): {record['started_at']}",
-             f"结束时间(UTC+08:00): {record['ended_at']}", f"尝试次数: {len(record['attempts'])}/3",
+             f"结束时间(UTC+08:00): {record['ended_at']}",
+             f"实验总耗时（含重试）: {elapsed_text(record)}",
+             f"尝试次数: {len(record['attempts'])}/3",
              f"代码版本: {record['git_commit']}", f"训练源码摘要: {record['source_hash']}",
              f"配置指纹: {record['fingerprint']}", "完整实际配置:",
              yaml.safe_dump(result["config"] if result else record["config"],
                             allow_unicode=True, sort_keys=False).rstrip()]
+    if record.get("timing_note"):
+        lines.append("计时说明: " + record["timing_note"])
     for attempt in record["attempts"]:
         lines.append(f"尝试 {attempt['number']}: {attempt['status']}；日志: {attempt['stdout']}")
+        lines.extend([f"  开始时间(UTC+08:00): {attempt['started_at']}",
+                      f"  结束时间(UTC+08:00): {attempt.get('ended_at', '未记录')}",
+                      f"  本次尝试耗时: {elapsed_text(attempt)}"])
+        if attempt.get("timing_note"):
+            lines.append("  计时说明: " + attempt["timing_note"])
         if attempt.get("error"):
             lines.append("原因: " + attempt["error"])
     if result:
@@ -359,21 +446,28 @@ def stop_process(process):
         subprocess.run(["taskkill", "/PID", str(process.pid), "/T", "/F"],
                        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=False)
     else:
-        os.killpg(process.pid, signal.SIGTERM)
+        try:
+            os.killpg(process.pid, signal.SIGTERM)
+        except ProcessLookupError:
+            pass  # The worker may exit between poll() and killpg().
     try:
         process.wait(timeout=10)
     except subprocess.TimeoutExpired:
         if os.name == "nt":
             process.kill()
         else:
-            os.killpg(process.pid, signal.SIGKILL)
+            try:
+                os.killpg(process.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
         process.wait()
 
 
-def execute_experiment(plan, experiment, state, state_path, round_dir, commit):
+def execute_experiment(plan, experiment, state, state_path, round_dir, commit, progress=None):
     execution_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + "_" + uuid.uuid4().hex[:8]
     directory = round_dir / experiment["id"] / execution_id
     directory.mkdir(parents=True)
+    execution_started = time.monotonic()
     record = {
         "execution_id": execution_id, "round_id": plan["round_id"], "round_note": plan["note"],
         "experiment_id": experiment["id"], "note": experiment["note"],
@@ -392,11 +486,14 @@ def execute_experiment(plan, experiment, state, state_path, round_dir, commit):
             info = f"tune_{execution_id}_{experiment['id']}_a{number}"
             config_path.write_text(yaml.safe_dump({"iFashion": experiment["config"]},
                                                  allow_unicode=True, sort_keys=False), encoding="utf-8")
+            attempt_started = time.monotonic()
             attempt = {"number": number, "status": "RUNNING", "started_at": timestamp(),
                        "stdout": str(stdout_path), "config_snapshot": str(config_path)}
             record["attempts"].append(attempt)
             atomic_write_json(state_path, state)
             command = training_command(config_path, result_path, info, plan["gpu"])
+            if progress is not None:
+                progress.update(experiment, "RUNNING", f"正在运行（第 {number}/3 次尝试）")
             print(f"[{plan['round_id']}/{experiment['id']}] attempt {number}/3 -> {stdout_path}", flush=True)
             environment = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1",
                                PYTHONHASHSEED=str(plan["seed"]), CUDA_VISIBLE_DEVICES=plan["gpu"])
@@ -420,12 +517,14 @@ def execute_experiment(plan, experiment, state, state_path, round_dir, commit):
                 attempt["error"] = str(error) + ("\nstdout tail:\n" + tail if tail else "")
                 record["error"] = attempt["error"]
                 print(f"  FAILED: {error}", flush=True)
+                if progress is not None and number < 3:
+                    progress.update(experiment, "RETRY", f"第 {number}/3 次尝试失败，等待第 {number + 1}/3 次尝试")
             else:
                 attempt["status"] = "SUCCESS"
                 record["status"] = "SUCCESS"
-                record["ended_at"] = timestamp()
+                finish_timing(record, execution_started)
                 record.pop("error", None)
-            attempt["ended_at"] = timestamp()
+            finish_timing(attempt, attempt_started)
             atomic_write_json(state_path, state)
             if record["status"] == "SUCCESS":
                 break
@@ -434,15 +533,21 @@ def execute_experiment(plan, experiment, state, state_path, round_dir, commit):
     except KeyboardInterrupt:
         if process is not None:
             stop_process(process)
-        if record["attempts"] and record["attempts"][-1]["status"] == "RUNNING":
-            record["attempts"][-1].update(status="INTERRUPTED", ended_at=timestamp())
+        if record["attempts"]:
+            attempt = record["attempts"][-1]
+            if attempt["status"] == "RUNNING":
+                attempt["status"] = "INTERRUPTED"
+            if "ended_at" not in attempt:
+                finish_timing(attempt, attempt_started)
         record.update(status="INTERRUPTED", error="Controller stopped; next resume starts this experiment from epoch 0")
         raise
     finally:
-        record["ended_at"] = timestamp()
+        finish_timing(record, execution_started)
         atomic_write_json(state_path, state)
         if record["status"] in TERMINAL:
             append_report(plan["result_file"], record)
+            if progress is not None:
+                progress.finished(experiment, record)
     return record["status"]
 
 
@@ -475,17 +580,20 @@ def run(plan_path, mode="resume", only=None, dry_run=False):
                 else:
                     r.update(status="INTERRUPTED", error="Previous controller stopped before completion")
                     if attempt and attempt["status"] == "RUNNING":
-                        attempt.update(status="INTERRUPTED", ended_at=timestamp())
-                r["ended_at"] = timestamp()
+                        attempt.update(status="INTERRUPTED", ended_at=timestamp(), duration_seconds=None,
+                                       timing_note="结束时间为恢复检测时间；实际停止时间及耗时无法确定。")
+                r.update(ended_at=timestamp(), duration_seconds=None,
+                         timing_note="结束时间为恢复检测时间；强制中断前未保存最终耗时，实际耗时无法确定。")
         atomic_write_json(state_path, state)
         for record in state["executions"]:
             if record["status"] in TERMINAL:
                 append_report(plan["result_file"], record)
         selected = select_experiments(plan, state, mode, only or [])
-        print(f"Round {plan['round_id']}: selected={len(selected)}, skipped={len(plan['experiments']) - len(selected)}", flush=True)
+        progress = ConsoleProgress(plan, state, selected, mode)
+        progress.show()
         commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=PROJECT_ROOT,
                                 capture_output=True, text=True, check=False).stdout.strip() or "unknown"
-        statuses = [execute_experiment(plan, e, state, state_path, round_dir, commit) for e in selected]
+        statuses = [execute_experiment(plan, e, state, state_path, round_dir, commit, progress) for e in selected]
         print(f"Finished: success={statuses.count('SUCCESS')}, failed={statuses.count('FAILED')}", flush=True)
         return 1 if "FAILED" in statuses else 0
 

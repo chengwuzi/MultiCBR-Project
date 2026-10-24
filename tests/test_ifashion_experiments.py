@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -46,6 +47,7 @@ result={'completed':True,'config':conf,'best_epoch':4,'best_epoch_1based':5,'sel
         'metrics':metrics,'artifacts':{'checkpoint_model':str(model),'checkpoint_config':str(config)}}
 if action=='nan': result['metrics']['test']['ndcg']['20']=float('nan')
 if action=='wrong': result['config']['seed']=0
+if action=='missing_checkpoint': model.unlink()
 Path(a.result_json).write_text(json.dumps(result),encoding='utf-8')
 '''
 
@@ -97,8 +99,12 @@ class ControllerTests(unittest.TestCase):
         (self.root / "behavior.json").write_text(json.dumps(value), encoding="utf-8")
 
     def run_plan(self, **kwargs):
-        with redirect_stdout(io.StringIO()):
-            return runner.run(self.path, **kwargs)
+        output = io.StringIO()
+        with redirect_stdout(output):
+            try:
+                return runner.run(self.path, **kwargs)
+            finally:
+                self.console = output.getvalue()
 
     def state(self):
         return json.loads((self.root / "log/ifashion_tuning/test_round/state.json").read_text(encoding="utf-8"))
@@ -121,12 +127,75 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(report.read_text(encoding="utf-8"), text)
         self.assertEqual((self.root / "base.yaml").read_bytes(), original)
 
+    def test_cli_runs_fake_plan_and_resumes_with_utf8_progress_and_reports(self):
+        # Exercise the actual CLI in an isolated project with the fake trainer.
+        for name in ("run_ifashion_experiments.py", "experiment_io.py"):
+            (self.root / name).write_bytes((ROOT / name).read_bytes())
+        command = [sys.executable, str(self.root / "run_ifashion_experiments.py"), "--plan", str(self.path)]
+        self.behavior({"0.05": "fail"})
+        first = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
+        self.assertEqual(first.returncode, 1, first.stderr)
+        self.assertIn("已结束 2/2 | 已完成 1 | 三次机会耗尽 1", first.stdout)
+        self.assertIn("a | c_lambda=0.05 | 失败：三次机会耗尽（3/3）", first.stdout)
+        self.behavior({})
+        resumed = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
+        self.assertEqual(resumed.returncode, 0, resumed.stderr)
+        self.assertIn("b | c_lambda=0.1 | 已完成（历史成功，本次跳过）", resumed.stdout)
+        self.assertIn("已结束 1/1 | 已完成 1 | 三次机会耗尽 0", resumed.stdout)
+        self.assertEqual([r["status"] for r in self.state()["executions"]], ["FAILED", "SUCCESS", "SUCCESS"])
+        report = (self.root / "results/result.txt").read_text(encoding="utf-8")
+        self.assertEqual(report.count("END_EXECUTION:"), 3)
+        self.assertEqual(report.count("实验总耗时（含重试）:"), 3)
+
     def test_retry_success_on_third_attempt(self):
         self.behavior({"0.05": "twice"})
         self.assertEqual(self.run_plan(), 0)
         record = self.state()["executions"][0]
         self.assertEqual([a["status"] for a in record["attempts"]], ["FAILED", "FAILED", "SUCCESS"])
         self.assertEqual(len({a["config_snapshot"] for a in record["attempts"]}), 3)
+
+    def test_report_records_execution_and_attempt_times_including_retries(self):
+        self.behavior({"0.05": "twice", "0.1": "fail"})
+        self.assertEqual(self.run_plan(), 1)
+        report = (self.root / "results/result.txt").read_text(encoding="utf-8")
+        records = self.state()["executions"]
+        self.assertEqual([r["status"] for r in records], ["SUCCESS", "FAILED"])
+        for record in records:
+            self.assertGreaterEqual(record["duration_seconds"], 0)
+            self.assertGreaterEqual(record["duration_seconds"] + .003,
+                                    sum(a["duration_seconds"] for a in record["attempts"]))
+            self.assertIn(f"开始时间(UTC+08:00): {record['started_at']}", report)
+            self.assertIn(f"结束时间(UTC+08:00): {record['ended_at']}", report)
+            self.assertIn(f"实验总耗时（含重试）: {runner.elapsed_text(record)}", report)
+            for attempt in record["attempts"]:
+                self.assertGreaterEqual(attempt["duration_seconds"], 0)
+                self.assertIn(f"  开始时间(UTC+08:00): {attempt['started_at']}", report)
+                self.assertIn(f"  结束时间(UTC+08:00): {attempt['ended_at']}", report)
+                self.assertIn(f"  本次尝试耗时: {runner.elapsed_text(attempt)}", report)
+
+    def test_console_lists_all_experiments_and_updates_retry_and_terminal_states(self):
+        self.behavior({"0.05": "twice", "0.1": "fail"})
+        self.assertEqual(self.run_plan(), 1)
+        snapshots = [part for part in self.console.split("=" * 72) if "实验进度 |" in part]
+        self.assertIn("计划 2 组，本次运行 2 组，跳过 0 组", snapshots[0])
+        self.assertIn("1. a | c_lambda=0.05 | 等待运行", snapshots[0])
+        self.assertIn("2. b | c_lambda=0.1 | 等待运行", snapshots[0])
+        self.assertIn("轮次备注: round note", snapshots[0])
+        self.assertIn("a | c_lambda=0.05 | 正在运行（第 1/3 次尝试）", self.console)
+        self.assertIn("第 1/3 次尝试失败，等待第 2/3 次尝试", self.console)
+        self.assertIn("第 2/3 次尝试失败，等待第 3/3 次尝试", self.console)
+        self.assertIn("a | c_lambda=0.05 | 已完成（第 3/3 次尝试成功）", snapshots[-1])
+        self.assertIn("b | c_lambda=0.1 | 失败：三次机会耗尽（3/3）", snapshots[-1])
+        self.assertIn("已结束 2/2 | 已完成 1 | 三次机会耗尽 1 | 正在运行 0 | 等待 0", snapshots[-1])
+        self.assertEqual([len(r["attempts"]) for r in self.state()["executions"]], [3, 3])
+
+        self.behavior({})
+        self.assertEqual(self.run_plan(), 0)
+        self.assertIn("计划 2 组，本次运行 1 组，跳过 1 组", self.console)
+        self.assertIn("a | c_lambda=0.05 | 已完成（历史成功，本次跳过）", self.console)
+        self.assertIn("b | c_lambda=0.1 | 等待运行（上次失败，本次重新尝试）", self.console)
+        self.assertIn("已结束 1/1 | 已完成 1 | 三次机会耗尽 0", self.console)
+        self.assertEqual([r["experiment_id"] for r in self.state()["executions"]], ["a", "b", "b"])
 
     def test_exhaustion_retries_on_next_launch_and_explicit_failed_rerun(self):
         self.behavior({"0.05": "fail"})
@@ -154,6 +223,7 @@ class ControllerTests(unittest.TestCase):
     def test_selected_successful_group_and_all_rerun(self):
         self.run_plan()
         self.run_plan(mode="selected", only=["b"])
+        self.assertIn("b | c_lambda=0.1 | 等待运行（主动重跑）", self.console)
         self.assertEqual([r["experiment_id"] for r in self.state()["executions"]], ["a", "b", "b"])
         self.run_plan(mode="all")
         self.assertEqual(len(self.state()["executions"]), 5)
@@ -161,7 +231,7 @@ class ControllerTests(unittest.TestCase):
             self.run_plan(mode="selected", only=["unknown"])
 
     def test_missing_nonfinite_and_mismatched_results_retry(self):
-        for action in ("missing", "nan", "wrong"):
+        for action in ("missing", "nan", "wrong", "missing_checkpoint"):
             with self.subTest(action=action):
                 self.behavior({"0.05": action})
                 self.assertEqual(self.run_plan(mode="selected", only=["a"]), 1)
@@ -215,9 +285,36 @@ class ControllerTests(unittest.TestCase):
         records = self.state()["executions"]
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["status"], "INTERRUPTED")
+        self.assertGreaterEqual(records[0]["duration_seconds"], 0)
+        self.assertGreaterEqual(records[0]["attempts"][-1]["duration_seconds"], 0)
+        self.assertIn("a | c_lambda=0.05 | 已中断（下次启动重新运行）", self.console)
+        self.assertIn("b | c_lambda=0.1 | 等待运行", self.console)
         self.assertFalse(runner.process_alive(triggered[0]))
         self.assertEqual(self.run_plan(), 0)
         self.assertEqual([r["status"] for r in self.state()["executions"]], ["INTERRUPTED", "SUCCESS", "SUCCESS"])
+
+    def test_interrupt_between_failure_and_retry_preserves_attempt_timing(self):
+        self.behavior({"0.05": "fail"})
+        original_update = runner.ConsoleProgress.update
+        def interrupt_on_retry(progress, experiment, status, label):
+            original_update(progress, experiment, status, label)
+            if status == "RETRY":
+                raise KeyboardInterrupt
+        with mock.patch.object(runner.ConsoleProgress, "update", interrupt_on_retry):
+            with self.assertRaises(KeyboardInterrupt):
+                self.run_plan()
+        records = self.state()["executions"]
+        self.assertEqual(len(records), 1)
+        self.assertEqual(records[0]["status"], "INTERRUPTED")
+        self.assertEqual(len(records[0]["attempts"]), 1)
+        attempt = records[0]["attempts"][0]
+        self.assertEqual(attempt["status"], "FAILED")
+        self.assertIn("ended_at", attempt)
+        self.assertGreaterEqual(attempt["duration_seconds"], 0)
+        report = (self.root / "results/result.txt").read_text(encoding="utf-8")
+        self.assertIn("状态: INTERRUPTED", report)
+        self.assertNotIn("耗时: 未知", report)
+        self.assertNotIn("结束时间(UTC+08:00): 未记录", report)
 
     def test_round_lock_and_stale_running_record(self):
         lock = self.root / "lock"
@@ -230,9 +327,14 @@ class ControllerTests(unittest.TestCase):
         state = self.state()
         state["executions"][0].update(status="RUNNING")
         state["executions"][0]["attempts"] = []
+        (self.root / "results/result.txt").unlink()
         atomic_write_json(path, state)
         self.run_plan()
         self.assertEqual(self.state()["executions"][0]["status"], "INTERRUPTED")
+        self.assertIsNone(self.state()["executions"][0]["duration_seconds"])
+        report = (self.root / "results/result.txt").read_text(encoding="utf-8")
+        self.assertIn("实验总耗时（含重试）: 未知", report)
+        self.assertIn("结束时间为恢复检测时间", report)
 
     def test_live_orphan_worker_blocks_another_launch(self):
         self.run_plan()
@@ -246,6 +348,33 @@ class ControllerTests(unittest.TestCase):
 
 
 class ResultTests(unittest.TestCase):
+    def test_stop_process_tolerates_unix_exit_races(self):
+        for timeout in (False, True):
+            with self.subTest(force_stop=timeout), mock.patch.object(runner, "os") as platform, \
+                    mock.patch.object(runner, "signal") as signals:
+                # Windows exposes neither killpg nor SIGKILL; simulate both Unix APIs.
+                platform.name = "posix"
+                signals.SIGTERM, signals.SIGKILL = 15, 9
+                platform.killpg.side_effect = ProcessLookupError
+                process = mock.Mock(pid=123)
+                process.poll.return_value = None
+                process.wait.side_effect = [subprocess.TimeoutExpired("fake", 10), 0] if timeout else [0]
+                runner.stop_process(process)
+                self.assertEqual(platform.killpg.call_count, 2 if timeout else 1)
+                self.assertEqual(process.wait.call_count, 2 if timeout else 1)
+
+    def test_elapsed_time_uses_monotonic_clock_and_reads_legacy_timestamps(self):
+        record = {"started_at": "2026-10-24T12:00:00+08:00"}
+        with mock.patch.object(runner, "time") as clock, mock.patch.object(
+                runner, "timestamp", return_value="2026-10-24T11:59:00+08:00"):
+            clock.monotonic.return_value = 10000.125
+            runner.finish_timing(record, 6000)
+        self.assertEqual(record["duration_seconds"], 4000.125)
+        self.assertEqual(runner.elapsed_text(record), "01:06:40.125（共 4000.125 秒）")
+        legacy = {"started_at": "2026-10-24T23:30:00+08:00", "ended_at": "2026-10-25T00:31:01+08:00"}
+        self.assertEqual(runner.elapsed_text(legacy), "01:01:01.000（共 3661.000 秒）（根据开始和结束时间估算）")
+        self.assertEqual(runner.elapsed_text(dict(legacy, timing_note="Recovered after hard stop")), "未知")
+
     def test_export_requires_best_and_excludes_device(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "best.json"

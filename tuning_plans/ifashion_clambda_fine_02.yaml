@@ -1,0 +1,37 @@
+version: 1
+round_id: stage1_clambda_fine_02
+note: "第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。"
+base_config: config.yaml
+seed: 2026
+
+gpu: "1"
+max_attempts: 3 # 首次运行 + 两次重试；再次启动时，未成功组重新获得三次机会。
+result_file: "实验结果存档/Ifashion调参.txt"
+
+common_overrides:
+  epochs: 40
+  anchor_cl:
+    enabled: false
+  c_temps: [0.2]
+
+experiments:
+  - id: clambda_015
+    note: "c_lambda=0.15，检查第一轮 0.1 与 0.2 之间的区间，训练 40 轮。"
+    overrides:
+      c_lambdas: [0.15]
+  - id: clambda_020
+    note: "c_lambda=0.2，第一轮优胜参数，训练 40 轮作为本轮同训练预算的对照组。"
+    overrides:
+      c_lambdas: [0.2]
+  - id: clambda_025
+    note: "c_lambda=0.25，检查第一轮 0.2 与 0.5 之间的偏低位置，训练 40 轮。"
+    overrides:
+      c_lambdas: [0.25]
+  - id: clambda_035
+    note: "c_lambda=0.35，检查第一轮 0.2 与 0.5 之间的中间位置，训练 40 轮。"
+    overrides:
+      c_lambdas: [0.35]
+  - id: clambda_045
+    note: "c_lambda=0.45，检查第一轮 0.2 与 0.5 之间的偏高位置，训练 40 轮。"
+    overrides:
+      c_lambdas: [0.45]

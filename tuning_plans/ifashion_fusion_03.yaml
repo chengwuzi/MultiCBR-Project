@@ -1,0 +1,48 @@
+version: 1
+round_id: stage3_fusion_03
+note: "第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。"
+base_config: config.yaml
+seed: 2026
+
+gpu: "0"
+max_attempts: 3 # 首次运行 + 两次重试；再次启动时，未成功组重新获得三次机会。
+result_file: "实验结果存档/Ifashion调参.txt"
+
+common_overrides:
+  epochs: 40
+  c_lambdas: [0.35]
+  c_temps: [0.2]
+  anchor_cl:
+    enabled: false
+
+experiments:
+  - id: ui_to_ub_005
+    note: "UI 向 UB 转移 0.05；[UB,UI,BI]=[0.05,0.45,0.50]，BI 保持 0.50。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.05, 0.45, 0.50]
+  - id: ui_to_ub_010
+    note: "UI 向 UB 转移 0.10；[UB,UI,BI]=[0.10,0.40,0.50]，BI 保持 0.50。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.10, 0.40, 0.50]
+  - id: ui_to_ub_020
+    note: "UI 向 UB 转移 0.20；[UB,UI,BI]=[0.20,0.30,0.50]，BI 保持 0.50。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.20, 0.30, 0.50]
+  - id: bi_to_ub_005
+    note: "BI 向 UB 转移 0.05；[UB,UI,BI]=[0.05,0.50,0.45]，UI 保持 0.50。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.05, 0.50, 0.45]
+  - id: bi_to_ub_010
+    note: "BI 向 UB 转移 0.10；[UB,UI,BI]=[0.10,0.50,0.40]，UI 保持 0.50。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.10, 0.50, 0.40]
+  - id: bi_to_ub_020
+    note: "BI 向 UB 转移 0.20；[UB,UI,BI]=[0.20,0.50,0.30]，UI 保持 0.50。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.20, 0.50, 0.30]

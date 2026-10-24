@@ -4,7 +4,9 @@ iFashion 自动调参使用说明
 
 run_ifashion_experiments.py：串行调度、结果校验、重试、续跑和主动重跑。
 tuning_plans/ifashion_clambda_coarse_01.yaml：已经确定的第一轮实验计划。
-实验结果存档/Ifashion调参.txt：供人工阅读的追加式结果记录，尚未运行时为空。
+tuning_plans/ifashion_clambda_fine_02.yaml：第二轮 c_lambdas 细扫及 40 轮对照计划。
+tuning_plans/ifashion_fusion_03.yaml：第三轮三视图融合权重实验计划。
+实验结果存档/Ifashion调参.txt：供人工阅读的追加式结果记录，保存各轮实验结果。
 log/ifashion_tuning/<round_id>/：进度 state.json、控制器锁、每次尝试的配置快照、
 stdout 和结构化结果。它们用于恢复执行与定位失败，不需要手动整理成另一套结果表。
 原来的模型、TensorBoard、训练日志仍由 train.py 自动生成，具体路径写入结果记录。
@@ -143,3 +145,36 @@ python -m unittest discover -s tests -p test_ifashion_experiments.py -v
 
 这些测试使用临时目录和假训练进程，覆盖实际子进程调度、重试、重跑、恢复与记录，
 不导入或运行推荐模型。当前电脑只进行此类验证和 dry-run，真实训练效果待服务器确认。
+
+九、第三轮三视图融合权重实验
+
+计划：tuning_plans/ifashion_fusion_03.yaml，round_id=stage3_fusion_03，共六组。
+modal_weight 顺序为 [UB,UI,BI]，以 [0,0.5,0.5] 为参照，两个方向采用相同的转移量：
+ui_to_ub_005：[0.05,0.45,0.50]，从 UI 向 UB 转移 0.05。
+ui_to_ub_010：[0.10,0.40,0.50]，从 UI 向 UB 转移 0.10。
+ui_to_ub_020：[0.20,0.30,0.50]，从 UI 向 UB 转移 0.20。
+bi_to_ub_005：[0.05,0.50,0.45]，从 BI 向 UB 转移 0.05。
+bi_to_ub_010：[0.10,0.50,0.40]，从 BI 向 UB 转移 0.10。
+bi_to_ub_020：[0.20,0.50,0.30]，从 BI 向 UB 转移 0.20。
+
+计划明确固定 c_lambdas=[0.35]、c_temps=[0.2]、epochs=40、anchor_cl.enabled=false，
+固定 seed=2026。层融合权重、残差、噪声和全部扩散重构参数继承基础配置。
+其中扩散重构保持开启，rebuild_k=3；本轮 UB 权重非零，重构后的 UB 图进入融合表示。
+基础 config.yaml 中的 epochs=30 和 anchor_cl.enabled=true 会被本轮计划覆盖，
+直接运行 train.py 不会自动采用本轮计划的覆盖项。
+
+在项目根目录预检查（不训练）：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_03.yaml --gpu 0 --dry-run
+
+正式前台运行：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_03.yaml --gpu 0
+
+默认使用 0 号 GPU，可通过 --gpu 指定其他卡；同一轮续跑沿用相同的 GPU 参数。
+控制台每组的备注包含权重来源、转移量和完整融合权重，状态显示、重试和续跑规则沿用前文。
+结果继续追加到实验结果存档/Ifashion调参.txt，旧记录保留；各组记录完整实际配置及最佳轮次指标。
+本轮进度独立保存在 log/ifashion_tuning/stage3_fusion_03/，不复用前两轮的成功状态。
+
+若保持第二轮相同的运行环境、数据和其余配置，可使用第二轮 clambda_035 作为零 UB 对照：
+modal_weight=[0,0.5,0.5]，c_lambda=0.35，训练 40 轮，验证选模分数为 0.5396889963。
+本计划只运行上述六组，不额外重跑零 UB 对照。
+仍按验证集 Recall@20 + Recall@40 + NDCG@20 + NDCG@40 比较，允许最终保留零 UB 权重。

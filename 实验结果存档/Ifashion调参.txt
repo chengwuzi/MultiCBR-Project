@@ -751,3 +751,1343 @@ test TOP 40: Recall=0.17865537, NDCG=0.13767615
 test TOP 80: Recall=0.22483628, NDCG=0.15141408
 训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1"}
 END_EXECUTION: 20261024T035834_da5c9f6f
+
+========================================================================
+EXECUTION_ID: 20261024T095221_3e97a246
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_015
+实验备注: c_lambda=0.15，检查第一轮 0.1 与 0.2 之间的区间，训练 40 轮。
+状态: FAILED
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T17:52:21+08:00
+结束时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+实验总耗时（含重试）: 00:00:01.235（共 1.235 秒）
+尝试次数: 3/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 2b72d84d25deeddc1c3e7990357fc8d97cbb81042f8acf7d3b99a1299c4665aa
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.15
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+尝试 1: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_015\20261024T095221_3e97a246\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:21+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:22+08:00
+  本次尝试耗时: 00:00:00.391（共 0.391 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 2: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_015\20261024T095221_3e97a246\attempt_2_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:22+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:22+08:00
+  本次尝试耗时: 00:00:00.375（共 0.375 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 3: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_015\20261024T095221_3e97a246\attempt_3_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:22+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+  本次尝试耗时: 00:00:00.406（共 0.406 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+最终原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+END_EXECUTION: 20261024T095221_3e97a246
+
+========================================================================
+EXECUTION_ID: 20261024T095223_f6aebddb
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_020
+实验备注: c_lambda=0.2，第一轮优胜参数，训练 40 轮作为本轮同训练预算的对照组。
+状态: FAILED
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+结束时间(UTC+08:00): 2026-10-24T17:52:24+08:00
+实验总耗时（含重试）: 00:00:01.125（共 1.125 秒）
+尝试次数: 3/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 3d8074988ef7523de1e3e7bc5f7fcb422927f00f9656ae11906b5b4d4f9a3eb4
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.2
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+尝试 1: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_020\20261024T095223_f6aebddb\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+  本次尝试耗时: 00:00:00.344（共 0.344 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 2: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_020\20261024T095223_f6aebddb\attempt_2_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+  本次尝试耗时: 00:00:00.344（共 0.344 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 3: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_020\20261024T095223_f6aebddb\attempt_3_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:23+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:24+08:00
+  本次尝试耗时: 00:00:00.375（共 0.375 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+最终原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+END_EXECUTION: 20261024T095223_f6aebddb
+
+========================================================================
+EXECUTION_ID: 20261024T095224_8fe9f3cc
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_025
+实验备注: c_lambda=0.25，检查第一轮 0.2 与 0.5 之间的偏低位置，训练 40 轮。
+状态: FAILED
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T17:52:24+08:00
+结束时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+实验总耗时（含重试）: 00:00:01.234（共 1.234 秒）
+尝试次数: 3/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: bb21bec6fba88679453cea46366ec660eaa77f03ffc788182844f55325db2b43
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.25
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+尝试 1: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_025\20261024T095224_8fe9f3cc\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:24+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:24+08:00
+  本次尝试耗时: 00:00:00.375（共 0.375 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 2: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_025\20261024T095224_8fe9f3cc\attempt_2_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:24+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+  本次尝试耗时: 00:00:00.359（共 0.359 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 3: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_025\20261024T095224_8fe9f3cc\attempt_3_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+  本次尝试耗时: 00:00:00.328（共 0.328 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+最终原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+END_EXECUTION: 20261024T095224_8fe9f3cc
+
+========================================================================
+EXECUTION_ID: 20261024T095225_4d2c13ce
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_035
+实验备注: c_lambda=0.35，检查第一轮 0.2 与 0.5 之间的中间位置，训练 40 轮。
+状态: FAILED
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+结束时间(UTC+08:00): 2026-10-24T17:52:26+08:00
+实验总耗时（含重试）: 00:00:01.125（共 1.125 秒）
+尝试次数: 3/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 802254b25b2de33491afcaabffa851f2811b5654877c585542a83c53c8ccc40e
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+尝试 1: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_035\20261024T095225_4d2c13ce\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+  本次尝试耗时: 00:00:00.359（共 0.359 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 2: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_035\20261024T095225_4d2c13ce\attempt_2_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:25+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:26+08:00
+  本次尝试耗时: 00:00:00.360（共 0.360 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 3: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_035\20261024T095225_4d2c13ce\attempt_3_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:26+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:26+08:00
+  本次尝试耗时: 00:00:00.360（共 0.360 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+最终原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+END_EXECUTION: 20261024T095225_4d2c13ce
+
+========================================================================
+EXECUTION_ID: 20261024T095226_bcb84bc4
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_045
+实验备注: c_lambda=0.45，检查第一轮 0.2 与 0.5 之间的偏高位置，训练 40 轮。
+状态: FAILED
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T17:52:26+08:00
+结束时间(UTC+08:00): 2026-10-24T17:52:27+08:00
+实验总耗时（含重试）: 00:00:01.156（共 1.156 秒）
+尝试次数: 3/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 150dd44c7accea0bba00c0c9ae40ea636d7c859b6a9f56d1adf295dd2bc1a296
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.45
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+尝试 1: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_045\20261024T095226_bcb84bc4\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:26+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:27+08:00
+  本次尝试耗时: 00:00:00.343（共 0.343 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 2: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_045\20261024T095226_bcb84bc4\attempt_2_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:27+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:27+08:00
+  本次尝试耗时: 00:00:00.375（共 0.375 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+尝试 3: FAILED；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_045\20261024T095226_bcb84bc4\attempt_3_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:52:27+08:00
+  结束时间(UTC+08:00): 2026-10-24T17:52:27+08:00
+  本次尝试耗时: 00:00:00.375（共 0.375 秒）
+原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+最终原因: Training exited with code 1
+stdout tail:
+Traceback (most recent call last):
+  File "C:\Users\admin\PycharmProjects\MultiCBR-Project\train.py", line 14, in <module>
+    import scipy.sparse as sp
+ModuleNotFoundError: No module named 'scipy'
+
+END_EXECUTION: 20261024T095226_bcb84bc4
+
+========================================================================
+EXECUTION_ID: 20261024T095552_cf47fe70
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_015
+实验备注: c_lambda=0.15，检查第一轮 0.1 与 0.2 之间的区间，训练 40 轮。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T17:55:52+08:00
+结束时间(UTC+08:00): 2026-10-24T19:32:21+08:00
+实验总耗时（含重试）: 01:36:27.141（共 5787.141 秒）
+尝试次数: 1/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 2b72d84d25deeddc1c3e7990357fc8d97cbb81042f8acf7d3b99a1299c4665aa
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.15
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T095552_cf47fe70_clambda_015_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.15
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_015\20261024T095552_cf47fe70\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T17:55:52+08:00
+  结束时间(UTC+08:00): 2026-10-24T19:32:21+08:00
+  本次尝试耗时: 01:36:27.093（共 5787.093 秒）
+best_epoch: 24 (从0计数)
+最佳训练轮次: 25
+验证选模分数: 0.5299946630
+val TOP 10: Recall=0.10240900, NDCG=0.07742077
+val TOP 20: Recall=0.14290319, NDCG=0.09076610
+val TOP 40: Recall=0.19220724, NDCG=0.10411813
+val TOP 80: Recall=0.25165532, NDCG=0.11761952
+test TOP 10: Recall=0.10433084, NDCG=0.10467065
+test TOP 20: Recall=0.14452092, NDCG=0.12076146
+test TOP 40: Recall=0.19412977, NDCG=0.13819842
+test TOP 80: Recall=0.25365218, NDCG=0.15590294
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T095552_cf47fe70_clambda_015_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_25c3edecd0c5", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T095552_cf47fe70_clambda_015_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_25c3edecd0c5", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T095552_cf47fe70_clambda_015_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_25c3edecd0c5", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T095552_cf47fe70_clambda_015_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_25c3edecd0c5"}
+END_EXECUTION: 20261024T095552_cf47fe70
+
+========================================================================
+EXECUTION_ID: 20261024T113221_d7ab5870
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_020
+实验备注: c_lambda=0.2，第一轮优胜参数，训练 40 轮作为本轮同训练预算的对照组。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T19:32:21+08:00
+结束时间(UTC+08:00): 2026-10-24T21:08:03+08:00
+实验总耗时（含重试）: 01:35:41.313（共 5741.313 秒）
+尝试次数: 1/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 3d8074988ef7523de1e3e7bc5f7fcb422927f00f9656ae11906b5b4d4f9a3eb4
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.2
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T113221_d7ab5870_clambda_020_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.2
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_020\20261024T113221_d7ab5870\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T19:32:21+08:00
+  结束时间(UTC+08:00): 2026-10-24T21:08:03+08:00
+  本次尝试耗时: 01:35:41.281（共 5741.281 秒）
+best_epoch: 39 (从0计数)
+最佳训练轮次: 40
+验证选模分数: 0.5371526492
+val TOP 10: Recall=0.10474087, NDCG=0.07995527
+val TOP 20: Recall=0.14428035, NDCG=0.09300951
+val TOP 40: Recall=0.19354768, NDCG=0.10631511
+val TOP 80: Recall=0.25060942, NDCG=0.11930248
+test TOP 10: Recall=0.10586011, NDCG=0.10698939
+test TOP 20: Recall=0.14591146, NDCG=0.12306188
+test TOP 40: Recall=0.19541836, NDCG=0.14045394
+test TOP 80: Recall=0.25358110, NDCG=0.15776066
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T113221_d7ab5870_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_d80a560133e8", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T113221_d7ab5870_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_d80a560133e8", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T113221_d7ab5870_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_d80a560133e8", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T113221_d7ab5870_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_d80a560133e8"}
+END_EXECUTION: 20261024T113221_d7ab5870
+
+========================================================================
+EXECUTION_ID: 20261024T130803_9e43a41b
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_025
+实验备注: c_lambda=0.25，检查第一轮 0.2 与 0.5 之间的偏低位置，训练 40 轮。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T21:08:03+08:00
+结束时间(UTC+08:00): 2026-10-24T22:42:02+08:00
+实验总耗时（含重试）: 01:33:59.407（共 5639.407 秒）
+尝试次数: 1/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: bb21bec6fba88679453cea46366ec660eaa77f03ffc788182844f55325db2b43
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.25
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T130803_9e43a41b_clambda_025_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.25
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_025\20261024T130803_9e43a41b\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T21:08:03+08:00
+  结束时间(UTC+08:00): 2026-10-24T22:42:02+08:00
+  本次尝试耗时: 01:33:59.391（共 5639.391 秒）
+best_epoch: 39 (从0计数)
+最佳训练轮次: 40
+验证选模分数: 0.5384771738
+val TOP 10: Recall=0.10655098, NDCG=0.08131616
+val TOP 20: Recall=0.14521335, NDCG=0.09409356
+val TOP 40: Recall=0.19233409, NDCG=0.10683617
+val TOP 80: Recall=0.24928797, NDCG=0.11980058
+test TOP 10: Recall=0.10719074, NDCG=0.10868189
+test TOP 20: Recall=0.14669796, NDCG=0.12455721
+test TOP 40: Recall=0.19504709, NDCG=0.14154148
+test TOP 80: Recall=0.25195707, NDCG=0.15847724
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T130803_9e43a41b_clambda_025_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_0b233acbf7f8", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T130803_9e43a41b_clambda_025_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_0b233acbf7f8", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T130803_9e43a41b_clambda_025_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_0b233acbf7f8", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T130803_9e43a41b_clambda_025_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_0b233acbf7f8"}
+END_EXECUTION: 20261024T130803_9e43a41b
+
+========================================================================
+EXECUTION_ID: 20261024T144202_1dc877b9
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_035
+实验备注: c_lambda=0.35，检查第一轮 0.2 与 0.5 之间的中间位置，训练 40 轮。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-24T22:42:02+08:00
+结束时间(UTC+08:00): 2026-10-25T00:17:47+08:00
+实验总耗时（含重试）: 01:35:44.547（共 5744.547 秒）
+尝试次数: 1/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 802254b25b2de33491afcaabffa851f2811b5654877c585542a83c53c8ccc40e
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T144202_1dc877b9_clambda_035_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_035\20261024T144202_1dc877b9\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T22:42:02+08:00
+  结束时间(UTC+08:00): 2026-10-25T00:17:47+08:00
+  本次尝试耗时: 01:35:44.516（共 5744.516 秒）
+best_epoch: 24 (从0计数)
+最佳训练轮次: 25
+验证选模分数: 0.5396889963
+val TOP 10: Recall=0.10663342, NDCG=0.08267367
+val TOP 20: Recall=0.14548975, NDCG=0.09548758
+val TOP 40: Recall=0.19089936, NDCG=0.10781231
+val TOP 80: Recall=0.24455422, NDCG=0.12000317
+test TOP 10: Recall=0.10858004, NDCG=0.11105580
+test TOP 20: Recall=0.14634148, NDCG=0.12619018
+test TOP 40: Recall=0.19239311, NDCG=0.14235533
+test TOP 80: Recall=0.24665723, NDCG=0.15848478
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T144202_1dc877b9_clambda_035_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_6545635364ae", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T144202_1dc877b9_clambda_035_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_6545635364ae", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T144202_1dc877b9_clambda_035_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_6545635364ae", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T144202_1dc877b9_clambda_035_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_6545635364ae"}
+END_EXECUTION: 20261024T144202_1dc877b9
+
+========================================================================
+EXECUTION_ID: 20261024T161747_dcafb532
+轮次: stage1_clambda_fine_02
+轮次备注: 第一阶段第二轮细扫：c_lambda 搜索 0.15、0.2、0.25、0.35、0.45，训练 40 轮；0.2 为第一轮优胜参数的同轮数对照组；关闭融合前对比，温度固定为 0.2。第一轮训练 30 轮，跨轮结果仅供参考。
+实验: clambda_045
+实验备注: c_lambda=0.45，检查第一轮 0.2 与 0.5 之间的偏高位置，训练 40 轮。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T00:17:47+08:00
+结束时间(UTC+08:00): 2026-10-25T01:51:29+08:00
+实验总耗时（含重试）: 01:33:42.688（共 5622.688 秒）
+尝试次数: 1/3
+代码版本: c485fc71d7503328014f779dde17365adc53baba
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 150dd44c7accea0bba00c0c9ae40ea636d7c859b6a9f56d1adf295dd2bc1a296
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.45
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T161747_dcafb532_clambda_045_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.45
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage1_clambda_fine_02\clambda_045\20261024T161747_dcafb532\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T00:17:47+08:00
+  结束时间(UTC+08:00): 2026-10-25T01:51:29+08:00
+  本次尝试耗时: 01:33:42.625（共 5622.625 秒）
+best_epoch: 24 (从0计数)
+最佳训练轮次: 25
+验证选模分数: 0.5377008786
+val TOP 10: Recall=0.10715719, NDCG=0.08329049
+val TOP 20: Recall=0.14481072, NDCG=0.09569541
+val TOP 40: Recall=0.18945979, NDCG=0.10773496
+val TOP 80: Recall=0.24024421, NDCG=0.11929622
+test TOP 10: Recall=0.10855499, NDCG=0.11178783
+test TOP 20: Recall=0.14540673, NDCG=0.12654838
+test TOP 40: Recall=0.19067887, NDCG=0.14244293
+test TOP 80: Recall=0.24247455, NDCG=0.15784167
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741"}
+END_EXECUTION: 20261024T161747_dcafb532

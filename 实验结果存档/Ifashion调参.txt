@@ -1,0 +1,753 @@
+
+========================================================================
+EXECUTION_ID: 20261024T015515_a86b0a40
+轮次: stage1_clambda_coarse_01
+轮次备注: 第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。
+实验: clambda_005
+实验备注: c_lambda=0.05，当前参考值的一半。
+状态: INTERRUPTED
+GPU: 1
+开始时间(UTC+08:00): 2026-10-24T09:55:15+08:00
+结束时间(UTC+08:00): 2026-10-24T09:56:52+08:00
+实验总耗时（含重试）: 00:01:36.748（共 96.748 秒）
+尝试次数: 1/3
+代码版本: 3e6932b27e8b6a0291e7a0731faf14b622a0c4e2
+训练源码摘要: e877bd62a233db51c5845c3cacd048e0692b7d1c494f13bf934bdb580930dec2
+配置指纹: 91ed1d495d135cd890e8f080a33f59baa546282812b712ffa792af8c4419583b
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.05
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+尝试 1: INTERRUPTED；日志: /code/25-chenglong/ReCoBR-iFashion-TiaoCan/MultiCBR-Project/log/ifashion_tuning/stage1_clambda_coarse_01/clambda_005/20261024T015515_a86b0a40/attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T09:55:15+08:00
+  结束时间(UTC+08:00): 2026-10-24T09:56:52+08:00
+  本次尝试耗时: 00:01:36.710（共 96.710 秒）
+最终原因: Controller stopped; next resume starts this experiment from epoch 0
+END_EXECUTION: 20261024T015515_a86b0a40
+
+========================================================================
+EXECUTION_ID: 20261024T015837_dea1fe4f
+轮次: stage1_clambda_coarse_01
+轮次备注: 第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。
+实验: clambda_005
+实验备注: c_lambda=0.05，当前参考值的一半。
+状态: SUCCESS
+GPU: 1
+开始时间(UTC+08:00): 2026-10-24T09:58:37+08:00
+结束时间(UTC+08:00): 2026-10-24T10:28:17+08:00
+实验总耗时（含重试）: 00:29:40.206（共 1780.206 秒）
+尝试次数: 1/3
+代码版本: 3e6932b27e8b6a0291e7a0731faf14b622a0c4e2
+训练源码摘要: e877bd62a233db51c5845c3cacd048e0692b7d1c494f13bf934bdb580930dec2
+配置指纹: 91ed1d495d135cd890e8f080a33f59baa546282812b712ffa792af8c4419583b
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.05
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '1'
+info: tune_20261024T015837_dea1fe4f_clambda_005_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.05
+c_temp: 0.2
+尝试 1: SUCCESS；日志: /code/25-chenglong/ReCoBR-iFashion-TiaoCan/MultiCBR-Project/log/ifashion_tuning/stage1_clambda_coarse_01/clambda_005/20261024T015837_dea1fe4f/attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T09:58:37+08:00
+  结束时间(UTC+08:00): 2026-10-24T10:28:17+08:00
+  本次尝试耗时: 00:29:40.124（共 1780.124 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.4670595775
+val TOP 10: Recall=0.08514739, NDCG=0.06015994
+val TOP 20: Recall=0.12559281, NDCG=0.07352615
+val TOP 40: Recall=0.17972948, NDCG=0.08821114
+val TOP 80: Recall=0.24454503, NDCG=0.10295192
+test TOP 10: Recall=0.08616568, NDCG=0.08160302
+test TOP 20: Recall=0.12746846, NDCG=0.09838354
+test TOP 40: Recall=0.18028098, NDCG=0.11694148
+test TOP 80: Recall=0.24604827, NDCG=0.13652497
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T015837_dea1fe4f_clambda_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_1cb3fcc44dbc", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T015837_dea1fe4f_clambda_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_1cb3fcc44dbc", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T015837_dea1fe4f_clambda_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_1cb3fcc44dbc", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T015837_dea1fe4f_clambda_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_1cb3fcc44dbc"}
+END_EXECUTION: 20261024T015837_dea1fe4f
+
+========================================================================
+EXECUTION_ID: 20261024T022817_8474ef3e
+轮次: stage1_clambda_coarse_01
+轮次备注: 第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。
+实验: clambda_010
+实验备注: c_lambda=0.1，参考点。
+状态: SUCCESS
+GPU: 1
+开始时间(UTC+08:00): 2026-10-24T10:28:17+08:00
+结束时间(UTC+08:00): 2026-10-24T10:57:53+08:00
+实验总耗时（含重试）: 00:29:36.136（共 1776.136 秒）
+尝试次数: 1/3
+代码版本: 3e6932b27e8b6a0291e7a0731faf14b622a0c4e2
+训练源码摘要: e877bd62a233db51c5845c3cacd048e0692b7d1c494f13bf934bdb580930dec2
+配置指纹: f1c8054659852292c6a76ee90e1ccd309e9583ee741630a2a8dacc7f6521f596
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.1
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '1'
+info: tune_20261024T022817_8474ef3e_clambda_010_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.1
+c_temp: 0.2
+尝试 1: SUCCESS；日志: /code/25-chenglong/ReCoBR-iFashion-TiaoCan/MultiCBR-Project/log/ifashion_tuning/stage1_clambda_coarse_01/clambda_010/20261024T022817_8474ef3e/attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T10:28:17+08:00
+  结束时间(UTC+08:00): 2026-10-24T10:57:53+08:00
+  本次尝试耗时: 00:29:36.062（共 1776.062 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5204591868
+val TOP 10: Recall=0.09916574, NDCG=0.07378365
+val TOP 20: Recall=0.14003328, NDCG=0.08727462
+val TOP 40: Recall=0.19185974, NDCG=0.10129156
+val TOP 80: Recall=0.25301248, NDCG=0.11521956
+test TOP 10: Recall=0.10156969, NDCG=0.10019035
+test TOP 20: Recall=0.14291894, NDCG=0.11682302
+test TOP 40: Recall=0.19377438, NDCG=0.13467040
+test TOP 80: Recall=0.25477089, NDCG=0.15285111
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T022817_8474ef3e_clambda_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_dd1fd2858891", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T022817_8474ef3e_clambda_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_dd1fd2858891", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T022817_8474ef3e_clambda_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_dd1fd2858891", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T022817_8474ef3e_clambda_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_dd1fd2858891"}
+END_EXECUTION: 20261024T022817_8474ef3e
+
+========================================================================
+EXECUTION_ID: 20261024T025753_754155a8
+轮次: stage1_clambda_coarse_01
+轮次备注: 第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。
+实验: clambda_020
+实验备注: c_lambda=0.2，参考值的两倍。
+状态: SUCCESS
+GPU: 1
+开始时间(UTC+08:00): 2026-10-24T10:57:53+08:00
+结束时间(UTC+08:00): 2026-10-24T11:28:47+08:00
+实验总耗时（含重试）: 00:30:53.527（共 1853.527 秒）
+尝试次数: 1/3
+代码版本: 3e6932b27e8b6a0291e7a0731faf14b622a0c4e2
+训练源码摘要: e877bd62a233db51c5845c3cacd048e0692b7d1c494f13bf934bdb580930dec2
+配置指纹: e8657de6eeb06e642cc8426e4cf930643a06eda1c0655ee1fc50b01bf0f1abe7
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.2
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '1'
+info: tune_20261024T025753_754155a8_clambda_020_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.2
+c_temp: 0.2
+尝试 1: SUCCESS；日志: /code/25-chenglong/ReCoBR-iFashion-TiaoCan/MultiCBR-Project/log/ifashion_tuning/stage1_clambda_coarse_01/clambda_020/20261024T025753_754155a8/attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T10:57:53+08:00
+  结束时间(UTC+08:00): 2026-10-24T11:28:47+08:00
+  本次尝试耗时: 00:30:53.454（共 1853.454 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5369227201
+val TOP 10: Recall=0.10504873, NDCG=0.08011554
+val TOP 20: Recall=0.14428404, NDCG=0.09309506
+val TOP 40: Recall=0.19320121, NDCG=0.10634241
+val TOP 80: Recall=0.25181098, NDCG=0.11964406
+test TOP 10: Recall=0.10647193, NDCG=0.10702110
+test TOP 20: Recall=0.14569424, NDCG=0.12272578
+test TOP 40: Recall=0.19468758, NDCG=0.13990479
+test TOP 80: Recall=0.25284365, NDCG=0.15722930
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T025753_754155a8_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_2ec12a31f53e", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T025753_754155a8_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_2ec12a31f53e", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T025753_754155a8_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_2ec12a31f53e", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T025753_754155a8_clambda_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_2ec12a31f53e"}
+END_EXECUTION: 20261024T025753_754155a8
+
+========================================================================
+EXECUTION_ID: 20261024T032847_5210fd37
+轮次: stage1_clambda_coarse_01
+轮次备注: 第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。
+实验: clambda_050
+实验备注: c_lambda=0.5，参考值的五倍。
+状态: SUCCESS
+GPU: 1
+开始时间(UTC+08:00): 2026-10-24T11:28:47+08:00
+结束时间(UTC+08:00): 2026-10-24T11:58:34+08:00
+实验总耗时（含重试）: 00:29:47.109（共 1787.109 秒）
+尝试次数: 1/3
+代码版本: 3e6932b27e8b6a0291e7a0731faf14b622a0c4e2
+训练源码摘要: e877bd62a233db51c5845c3cacd048e0692b7d1c494f13bf934bdb580930dec2
+配置指纹: 3370202484deb719d6b27b238b12d5e26f394d931e1a2c1a53027a86b98d4e30
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.5
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '1'
+info: tune_20261024T032847_5210fd37_clambda_050_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.5
+c_temp: 0.2
+尝试 1: SUCCESS；日志: /code/25-chenglong/ReCoBR-iFashion-TiaoCan/MultiCBR-Project/log/ifashion_tuning/stage1_clambda_coarse_01/clambda_050/20261024T032847_5210fd37/attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T11:28:47+08:00
+  结束时间(UTC+08:00): 2026-10-24T11:58:34+08:00
+  本次尝试耗时: 00:29:47.023（共 1787.023 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5354285884
+val TOP 10: Recall=0.10710193, NDCG=0.08365199
+val TOP 20: Recall=0.14406634, NDCG=0.09582221
+val TOP 40: Recall=0.18785326, NDCG=0.10768678
+val TOP 80: Recall=0.23879348, NDCG=0.11923418
+test TOP 10: Recall=0.10805780, NDCG=0.11142814
+test TOP 20: Recall=0.14536143, NDCG=0.12639138
+test TOP 40: Recall=0.18886760, NDCG=0.14168458
+test TOP 80: Recall=0.24050141, NDCG=0.15702021
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T032847_5210fd37_clambda_050_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_8237fc56ca76", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T032847_5210fd37_clambda_050_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_8237fc56ca76", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T032847_5210fd37_clambda_050_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_8237fc56ca76", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T032847_5210fd37_clambda_050_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_8237fc56ca76"}
+END_EXECUTION: 20261024T032847_5210fd37
+
+========================================================================
+EXECUTION_ID: 20261024T035834_da5c9f6f
+轮次: stage1_clambda_coarse_01
+轮次备注: 第一阶段第一轮粗扫：关闭融合前对比，只搜索融合后对比权重，温度固定为 0.2。
+实验: clambda_100
+实验备注: c_lambda=1.0，参考值的十倍。
+状态: SUCCESS
+GPU: 1
+开始时间(UTC+08:00): 2026-10-24T11:58:34+08:00
+结束时间(UTC+08:00): 2026-10-24T12:28:12+08:00
+实验总耗时（含重试）: 00:29:37.763（共 1777.763 秒）
+尝试次数: 1/3
+代码版本: 3e6932b27e8b6a0291e7a0731faf14b622a0c4e2
+训练源码摘要: e877bd62a233db51c5845c3cacd048e0692b7d1c494f13bf934bdb580930dec2
+配置指纹: db67fda4c539cb80e29e9aa0e613428e0312fb22c8816392c6bdc65a0c82d1ff
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.0
+  - 0.5
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 1.0
+c_temps:
+- 0.2
+epochs: 30
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '1'
+info: tune_20261024T035834_da5c9f6f_clambda_100_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 1.0
+c_temp: 0.2
+尝试 1: SUCCESS；日志: /code/25-chenglong/ReCoBR-iFashion-TiaoCan/MultiCBR-Project/log/ifashion_tuning/stage1_clambda_coarse_01/clambda_100/20261024T035834_da5c9f6f/attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-24T11:58:34+08:00
+  结束时间(UTC+08:00): 2026-10-24T12:28:12+08:00
+  本次尝试耗时: 00:29:37.681（共 1777.681 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5128983549
+val TOP 10: Recall=0.10399658, NDCG=0.08209521
+val TOP 20: Recall=0.13795224, NDCG=0.09331161
+val TOP 40: Recall=0.17759994, NDCG=0.10403456
+val TOP 80: Recall=0.22249805, NDCG=0.11425752
+test TOP 10: Recall=0.10560243, NDCG=0.11049156
+test TOP 20: Recall=0.13893726, NDCG=0.12375216
+test TOP 40: Recall=0.17865537, NDCG=0.13767615
+test TOP 80: Recall=0.22483628, NDCG=0.15141408
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T035834_da5c9f6f_clambda_100_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_a2be354894c1"}
+END_EXECUTION: 20261024T035834_da5c9f6f

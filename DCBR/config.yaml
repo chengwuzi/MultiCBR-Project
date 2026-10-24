@@ -1,0 +1,40 @@
+# Author settings: raw/configs/overall.yaml + raw/configs/models/DCBR.yaml.
+# Protocol adaptation only: root dataset, ReCoBR top-K and validation selection.
+iFashion:
+  data_path: ./datasets  # Relative to the project root, independent of shell cwd.
+  embedding_size: 64
+  batch_size_train: 2048
+  batch_size_test: 2048
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  lr: 1.0e-3
+  test_interval: 5
+  seed: 0  # Author train.py default; override explicitly with --seed if needed.
+
+  dims: [1000]
+  norm: false
+  time_emb_dim: 10
+  steps: 140
+  noise_scale: 0.1
+  noise_min: 0.0001
+  noise_max: 0.02
+  sampling_noise: false
+  sampling_steps: 0
+  rebuild_k: 1
+  lambda_0: 2.0
+
+  num_layers: 2
+  upsilon_UB: 0.05
+  upsilon_UI: 0.0
+  upsilon_BI: 0.2
+  xi_UB: [0.5, 0.5, 0.0]
+  xi_UI: [0.3, 0.4, 0.3]
+  xi_BI: [0.5, 0.5, 0.0]
+  omega: 0.5
+
+  gamma_1: 0.3
+  gamma_2: 0.2
+  tau: 0.08
+  lambda_1: 0.3
+  lambda_2: 1.0e-6
+  epochs: 50

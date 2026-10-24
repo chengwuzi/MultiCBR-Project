@@ -21,6 +21,9 @@ from models.model import ReCoBR, LatentDiffusionRebuilder
 from utility import Datasets, load_external_embedding_tensor, print_statistics
 
 
+SELECTION_RULE = "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+
+
 def get_cmd():
     parser = argparse.ArgumentParser()
     parser.add_argument("-g", "--gpu", default="0", type=str, help="which gpu to use")
@@ -268,6 +271,9 @@ def create_recobr_latent_rebuild_components(conf, dataset, device):
 
 
 def run_recobr_training(conf, dataset, device):
+    # Include the protocol in saved configurations and the run-path hash so an
+    # old sum-based run cannot silently share this run's checkpoint/log paths.
+    conf["selection_rule"] = SELECTION_RULE
     anchor_cl_conf = conf.get("anchor_cl", {})
     if anchor_cl_conf.get("enabled", False):
         print("=" * 20 + " Pre-fusion Anchor CL Enabled " + "=" * 20)
@@ -474,7 +480,8 @@ def run_recobr_training(conf, dataset, device):
 
 
 def main(args=None):
-    conf = yaml.safe_load(open("./config.yaml", encoding="utf-8"))
+    with open("./config.yaml", encoding="utf-8") as config_file:
+        conf = yaml.safe_load(config_file)
     print("load config file done!")
 
     if args is None:
@@ -555,23 +562,23 @@ def write_log(run, log_path, topk, step, metrics):
     print("-" * 20)
 
 
+def is_better_validation(current, best):
+    return (current["recall"][20] > best["recall"][20]
+            and current["ndcg"][20] > best["ndcg"][20])
+
+
 def log_metrics(conf, model, metrics, run, log_path, checkpoint_model_path, checkpoint_conf_path, epoch, batch_anchor, best_metrics, best_perform, best_epoch):
     for topk in conf["topk"]:
         write_log(run, log_path, topk, batch_anchor, metrics)
 
     log = open(log_path, "a")
 
-    print("Best model criterion: validation Recall@20 + Recall@40 + NDCG@20 + NDCG@40")
+    print("Best model criterion: " + SELECTION_RULE)
 
-    def get_score(metric_dict):
-        return metric_dict["recall"][20] + metric_dict["recall"][40] + metric_dict["ndcg"][20] + metric_dict["ndcg"][40]
-
-    curr_score = get_score(metrics["val"])
-    best_score = get_score(best_metrics["val"])
-
-    if curr_score > best_score:
+    if is_better_validation(metrics["val"], best_metrics["val"]):
         torch.save(model.state_dict(), checkpoint_model_path)
         dump_conf = dict(conf)
+        dump_conf["selection_rule"] = SELECTION_RULE
         del dump_conf["device"]
         with open(checkpoint_conf_path, "w", encoding="utf-8") as conf_file:
             json.dump(dump_conf, conf_file)

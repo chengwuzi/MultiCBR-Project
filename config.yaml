@@ -68,6 +68,17 @@ NetEase:
 
 
 iFashion:
+  # 本次调参已于 2026-10-25 结束；以下为已完成实验中按验证综合分数选定的配置。
+  # 轮次: stage3_fusion_04；实验 ID: ui_to_bi_010。
+  # EXECUTION_ID: 20261025T082203_9dec4c53。
+  # 验证选模分数: 0.5638427481（val Recall@20 + Recall@40 + NDCG@20 + NDCG@40）。
+  # val@20: Recall=0.15337706, NDCG=0.09792502；val@40: Recall=0.20153946, NDCG=0.11100121。
+  # 最佳轮次: 第 30 轮（best_epoch=29，从 0 计数）；完整训练预算保持 40 轮。
+  # test@10: Recall=0.11244437, NDCG=0.11269867。
+  # test@20: Recall=0.15333284, NDCG=0.12911472。
+  # test@40: Recall=0.20203943, NDCG=0.14622128。
+  # test@80: Recall=0.25767797, NDCG=0.16277068。
+  # 配置与结果详情见 项目文档/工作事项.txt 的收尾记录及 实验结果存档/Ifashion调参.txt。
   data_path: './datasets'
   batch_size_train: 2048
   batch_size_test: 2048
@@ -75,7 +86,7 @@ iFashion:
   neg_num: 1
   seed: 2026
 
-  # Current iFashion tuning baseline; experiment plans override per-round settings.
+  # 当前选定配置；历史实验计划保留各自的覆盖项。
   aug_type: "Noise"
   ed_interval: 1
   embedding_sizes: [64]

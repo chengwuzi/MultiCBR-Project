@@ -43,8 +43,9 @@ iFashion:
 # MealRec+L model settings from raw/configs/models/DCBR.yaml; shared settings
 # from raw/configs/overall.yaml, unified top-K and seed 0. User sets 90 epochs
 # for Youshu instead of the author's 150-epoch MealRec+L training budget.
-# 用户结论：DCBR-Youshu 调参暂时结束，保留 90 轮、seed=0。
-# 当前优胜：lambda_0=2000、lambda_1=0.02、omega=0.3、tau=0.25、gamma=(0.3,0.2)。
+# 前两轮结束后用户曾决定收尾；现补充youshu_round_03_k搜索K=[1,3,5,7,9,11]，保留90轮、seed=0。
+# 下列为既有K=1条件下的优胜及新K轮次的固定基准，尚无新K搜索结果。
+# 既有优胜：lambda_0=2000、lambda_1=0.02、omega=0.3、tau=0.25、gamma=(0.3,0.2)。
 # 轮次 ID：youshu_round_02；实验 ID：tau_025。
 # EXECUTION_ID: 20261025T121254_2673b424
 # 最佳检查点：第 80 轮（best_epoch=79，从 0 计数）；完整训练预算仍为 90 轮。
@@ -94,14 +95,15 @@ Youshu:
 
 # NetEase 初始配置：本工程综合设置，尚无正式实验结果，不是作者报告的 NetEase 配置。
 # 扩散整组采用作者 MealRec+H/L 共同设置：steps=5、noise_scale=1、lambda_0=1000；
-# DNN结构、方差端点和rebuild_k保持作者设置，不套用ReCoBR的潜在扩散或关闭DCBR核心扩散。
+# DNN结构及方差端点保持作者设置；rebuild_k=1为初值，修订版先搜K，不关闭DCBR核心扩散。
 # lambda_1=0.02参考作者MealRec+H及已完成的DCBR-Youshu经验；gamma=(0.3,0.2)采用作者MealRec+L/iFashion设置。
 # 噪声及UI/BI逐层权重参考用户已完成搜参的ReCoBR-NetEase中对应传播机制；最优值仍需DCBR验证。
 # UB图及其作用不同，xi_UB保留DCBR作者MealRec+L值，不直接采用ReCoBR的UB逐层权重。
 # omega=0.4由ReCoBR的UI/BI权重0.2/0.3归一化提出，仅为工程初值，不是三视图融合的等价转换。
 # tau=0.2同时参考ReCoBR-NetEase和DCBR作者两个MealRec配置；lambda_2=1e-5采用DCBR作者值。
 # 初始训练预算按用户要求为40轮；seed=4096与ReCoBR-NetEase一致，固定种子，不作为搜索项。
-# 已安排netease_round_01共19个新实验；轮次内固定完整初值，按验证Recall@20优先、NDCG@20次优逐阶段选参。
+# 用户已停止旧netease_round_01；修订版netease_round_01_k共24个新实验，初始对照后先搜K再搜其余五参数。
+# 总入口run_k_search.py先完成Youshu的5个新K实验，再启动NetEase；两轮均按验证Recall@20优先、NDCG@20次优选参。
 # 下列仍为初始配置，运行不会自动覆盖为优胜值；单独训练显式传入 --experiment-case second。
 NetEase:
   data_path: ./datasets

@@ -2400,3 +2400,801 @@ rounds:
     success: false
     fingerprint: null
     execution_ids: []
+- id: youshu_round_03_k
+  dataset: Youshu
+  selection_rule: validation_recall20_then_ndcg20
+  note: Youshu补充K搜索：K=[1,3,5,7,9,11]，新增5个训练实验，复用tau_025作为K=1历史对照，不重复训练。固定当前优胜配置其他参数、90轮、seed=0。按完整精度验证Recall@20优先，相同再比较验证NDCG@20；完全平局保留已有对照。测试指标仅报告。本轮网格为用户确认的工程补充，不冒充作者原有搜索范围。
+  overrides:
+    data_path: ./datasets
+    embedding_size: 64
+    batch_size_train: 2048
+    batch_size_test: 2048
+    topk:
+    - 10
+    - 20
+    - 40
+    - 80
+    neg_num: 1
+    lr: 0.001
+    test_interval: 5
+    seed: 0
+    dims:
+    - 1000
+    norm: false
+    time_emb_dim: 10
+    steps: 5
+    noise_scale: 1.0
+    noise_min: 0.0001
+    noise_max: 0.02
+    sampling_noise: false
+    sampling_steps: 0
+    rebuild_k: 1
+    lambda_0: 2000.0
+    num_layers: 2
+    upsilon_UB: 0.05
+    upsilon_UI: 0.0
+    upsilon_BI: 0.1
+    xi_UB:
+    - 0.6
+    - 0.3
+    - 0.1
+    xi_UI:
+    - 0.4
+    - 0.6
+    - 0.0
+    xi_BI:
+    - 0.5
+    - 0.4
+    - 0.1
+    omega: 0.3
+    gamma_1: 0.3
+    gamma_2: 0.2
+    tau: 0.25
+    lambda_1: 0.02
+    lambda_2: 1.0e-05
+    epochs: 90
+  stages:
+  - id: rebuild_k
+    candidates:
+    - baseline_k1
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+  experiments:
+  - id: baseline_k1
+    note: 复用既有tau_025的K=1完整训练结果，不重复训练。核查原始历史、配置、源码、数据摘要及产物；仅在数据文件摘要相同时允许data_path迁移，其余配置必须一致。
+    overrides: {}
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    reference:
+      round_id: youshu_round_02
+      experiment_id: tau_025
+      execution_id: 20261025T121254_2673b424
+      fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+      allow_data_path_relocation: true
+  - id: k_03
+    note: rebuild_k=3；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
+    overrides:
+      rebuild_k: 3
+    inherit_best:
+      candidates:
+      - baseline_k1
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_05
+    note: rebuild_k=5；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
+    overrides:
+      rebuild_k: 5
+    inherit_best:
+      candidates:
+      - baseline_k1
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_07
+    note: rebuild_k=7；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
+    overrides:
+      rebuild_k: 7
+    inherit_best:
+      candidates:
+      - baseline_k1
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_09
+    note: rebuild_k=9；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
+    overrides:
+      rebuild_k: 9
+    inherit_best:
+      candidates:
+      - baseline_k1
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_11
+    note: rebuild_k=11；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
+    overrides:
+      rebuild_k: 11
+    inherit_best:
+      candidates:
+      - baseline_k1
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+- id: netease_round_01_k
+  dataset: NetEase
+  selection_rule: validation_recall20_then_ndcg20
+  note: 用户停止旧19实验计划后的NetEase首轮修订版，须在Youshu补充K轮次全部有效完成后启动。共24个新实验：初始K=1对照，再搜K=[3,5,7,9,11]，再依次lambda_1、lambda_0、omega、tau、lambda_2。固定40轮、seed=4096；逐阶段继承完整优胜配置，仅覆盖当前参数。完整精度验证Recall@20优先，相同再比验证NDCG@20；完全平局保留已有对照，测试只用于报告。
+  overrides:
+    data_path: ./datasets
+    embedding_size: 64
+    batch_size_train: 2048
+    batch_size_test: 2048
+    topk:
+    - 10
+    - 20
+    - 40
+    - 80
+    neg_num: 1
+    lr: 0.001
+    test_interval: 5
+    seed: 4096
+    dims:
+    - 1000
+    norm: false
+    time_emb_dim: 10
+    steps: 5
+    noise_scale: 1.0
+    noise_min: 0.0001
+    noise_max: 0.02
+    sampling_noise: false
+    sampling_steps: 0
+    rebuild_k: 1
+    lambda_0: 1000.0
+    num_layers: 2
+    upsilon_UB: 0.0
+    upsilon_UI: 0.0
+    upsilon_BI: 0.2
+    xi_UB:
+    - 0.6
+    - 0.3
+    - 0.1
+    xi_UI:
+    - 0.25
+    - 0.65
+    - 0.1
+    xi_BI:
+    - 0.4
+    - 0.4
+    - 0.2
+    omega: 0.4
+    gamma_1: 0.3
+    gamma_2: 0.2
+    tau: 0.2
+    lambda_1: 0.02
+    lambda_2: 1.0e-05
+    epochs: 40
+  stages:
+  - id: rebuild_k
+    candidates:
+    - initial
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+  - id: lambda_1
+    candidates:
+    - initial
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+  - id: lambda_0
+    candidates:
+    - initial
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+  - id: omega
+    candidates:
+    - initial
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+    - omega_02
+    - omega_03
+    - omega_05
+    - omega_06
+  - id: tau
+    candidates:
+    - initial
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+    - omega_02
+    - omega_03
+    - omega_05
+    - omega_06
+    - tau_010
+    - tau_015
+    - tau_025
+    - tau_030
+  - id: lambda_2
+    candidates:
+    - initial
+    - k_03
+    - k_05
+    - k_07
+    - k_09
+    - k_11
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+    - omega_02
+    - omega_03
+    - omega_05
+    - omega_06
+    - tau_010
+    - tau_015
+    - tau_025
+    - tau_030
+    - lambda2_1e6
+    - lambda2_1e7
+  experiments:
+  - id: initial
+    note: 完整初始参照实验，rebuild_k=1，40轮、seed=4096；本实验同时作为K=1候选，不额外重跑K=1。当前K=1仅为作者设置及迁移初值，尚不认定为新数据集最优。
+    overrides: {}
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_03
+    note: rebuild_k=3；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      rebuild_k: 3
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_05
+    note: rebuild_k=5；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      rebuild_k: 5
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_07
+    note: rebuild_k=7；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      rebuild_k: 7
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_09
+    note: rebuild_k=9；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      rebuild_k: 9
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: k_11
+    note: rebuild_k=11；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      rebuild_k: 11
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_0005
+    note: lambda_1=0.005；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_1: 0.005
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_001
+    note: lambda_1=0.01；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_1: 0.01
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_003
+    note: lambda_1=0.03；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_1: 0.03
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_005
+    note: lambda_1=0.05；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_1: 0.05
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_0100
+    note: lambda_0=100；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_0: 100
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_0500
+    note: lambda_0=500；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_0: 500
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_2000
+    note: lambda_0=2000；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_0: 2000
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_10000
+    note: lambda_0=10000；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_0: 10000
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_02
+    note: omega=0.2；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      omega: 0.2
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_03
+    note: omega=0.3；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      omega: 0.3
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_05
+    note: omega=0.5；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      omega: 0.5
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_06
+    note: omega=0.6；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      omega: 0.6
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_010
+    note: tau=0.1；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      tau: 0.1
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_015
+    note: tau=0.15；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      tau: 0.15
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_025
+    note: tau=0.25；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      tau: 0.25
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_030
+    note: tau=0.3；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      tau: 0.3
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda2_1e6
+    note: lambda_2=1e-06；与已有1e-5对照共同覆盖论文的全部三个候选。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_2: 1.0e-06
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda2_1e7
+    note: lambda_2=1e-07；与已有1e-5对照共同覆盖论文的全部三个候选。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
+    overrides:
+      lambda_2: 1.0e-07
+    inherit_best:
+      candidates:
+      - initial
+      - k_03
+      - k_05
+      - k_07
+      - k_09
+      - k_11
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []

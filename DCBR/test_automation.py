@@ -245,7 +245,7 @@ class AutomationTests(unittest.TestCase):
 
     def test_reviewed_first_round_has_exactly_nine_experiments(self):
         plan = runner.load_plan(HERE / "搜参配置.yaml")
-        self.assertEqual([r["id"] for r in plan["rounds"]],
+        self.assertEqual([r["id"] for r in plan["rounds"][:3]],
                          ["youshu_round_01", "youshu_round_02", "netease_round_01"])
         round_ = plan["rounds"][0]
         items = round_["experiments"]

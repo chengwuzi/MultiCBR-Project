@@ -222,8 +222,11 @@ def load_plan(path, gpu=None, device=None):
                     raise ValueError("inherit_best needs unique earlier candidate IDs and the round selection_rule")
             reference = item.get("reference")
             if reference is not None:
-                require_fields(reference, {"round_id", "experiment_id", "execution_id", "fingerprint"},
+                require_fields(reference, {"round_id", "experiment_id", "execution_id", "fingerprint",
+                                           "allow_data_path_relocation"},
                                {"round_id", "experiment_id", "execution_id", "fingerprint"}, "reference")
+                if type(reference.get("allow_data_path_relocation", False)) is not bool:
+                    raise ValueError("allow_data_path_relocation must be boolean")
                 if inherit is not None or reference["round_id"] == rid or reference["round_id"] not in seen_rounds:
                     raise ValueError("A reference must identify an earlier round and cannot inherit_best")
                 for key in ("round_id", "experiment_id", "execution_id"):
@@ -481,8 +484,15 @@ def check_reference(record, item, round_, plan):
         return False
     try:
         ref = item["reference"]
+        expected = dict(item["template_config"])
+        original = dict(record["config"])
+        if ref.get("allow_data_path_relocation", False):
+            # Dataset identity is still checked by all six file hashes below.
+            # Original fingerprints and artifacts retain their original config.
+            expected.pop("data_path", None)
+            original.pop("data_path", None)
         if (any(record[key] != ref[key] for key in ("round_id", "experiment_id", "execution_id", "fingerprint"))
-                or record["dataset"] != round_["dataset"] or record["config"] != item["template_config"]
+                or record["dataset"] != round_["dataset"] or original != expected
                 or record["sources"]["train.py"] != plan["sources"]["train.py"]
                 or record["data_files"] != round_["data_files"]
                 or any(record[key] != plan["settings"][key] for key in ("gpu", "device"))):
@@ -498,7 +508,7 @@ def check_reference(record, item, round_, plan):
         # still pass the original success checks, including full-precision JSON.
         plan.setdefault("_verified_success", {})
         historical_plan = dict(plan, sources=record["sources"])
-        proxy = {"id": record["experiment_id"], "config": item["template_config"],
+        proxy = {"id": record["experiment_id"], "config": record["config"],
                  "fingerprint": record["fingerprint"]}
         return check_success(record, proxy, round_, historical_plan)
     except (OSError, ValueError, KeyError, TypeError, IndexError):
@@ -517,6 +527,9 @@ def resolve_reference(plan, round_, item, state):
     evidence = {"reference": copy.deepcopy(ref), "sources": record["sources"],
                 "metrics": record["training_record"]["result"]["metrics"],
                 "artifact_hashes": record["training_record"]["artifact_hashes"]}
+    if ref.get("allow_data_path_relocation", False):
+        evidence["original_data_path"] = record["config"]["data_path"]
+        evidence["resolved_data_path"] = item["template_config"]["data_path"]
     item["dependency_selection"] = evidence
     item["fingerprint"] = experiment_fingerprint(item["config"], round_["dataset"], plan["sources"],
                                                  round_["data_files"], plan["settings"], evidence,

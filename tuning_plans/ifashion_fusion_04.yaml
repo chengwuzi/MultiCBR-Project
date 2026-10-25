@@ -1,0 +1,33 @@
+version: 1
+round_id: stage3_fusion_04
+note: "第四轮三视图融合权重实验：以第三轮最优 [UB,UI,BI]=[0.10,0.40,0.50] 为起点，UB 固定 0.10，从 UI 向 BI 转移 0.05/0.10/0.15；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。"
+base_config: config.yaml
+seed: 2026
+
+gpu: "0"
+max_attempts: 3 # 首次运行 + 两次重试；再次启动时，未成功组重新获得三次机会。
+result_file: "实验结果存档/Ifashion调参.txt"
+
+common_overrides:
+  epochs: 40
+  c_lambdas: [0.35]
+  c_temps: [0.2]
+  anchor_cl:
+    enabled: false
+
+experiments:
+  - id: ui_to_bi_005
+    note: "以 [0.10,0.40,0.50] 为起点，UI 向 BI 转移 0.05；[UB,UI,BI]=[0.10,0.35,0.55]，UB 保持 0.10。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.10, 0.35, 0.55]
+  - id: ui_to_bi_010
+    note: "以 [0.10,0.40,0.50] 为起点，UI 向 BI 转移 0.10；[UB,UI,BI]=[0.10,0.30,0.60]，UB 保持 0.10。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.10, 0.30, 0.60]
+  - id: ui_to_bi_015
+    note: "以 [0.10,0.40,0.50] 为起点，UI 向 BI 转移 0.15；[UB,UI,BI]=[0.10,0.25,0.65]，UB 保持 0.10。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.10, 0.25, 0.65]

@@ -6,6 +6,7 @@ run_ifashion_experiments.py：串行调度、结果校验、重试、续跑和�
 tuning_plans/ifashion_clambda_coarse_01.yaml：已经确定的第一轮实验计划。
 tuning_plans/ifashion_clambda_fine_02.yaml：第二轮 c_lambdas 细扫及 40 轮对照计划。
 tuning_plans/ifashion_fusion_03.yaml：第三轮三视图融合权重实验计划。
+tuning_plans/ifashion_fusion_04.yaml：第四轮固定 UB=0.10、从 UI 向 BI 转移权重的实验计划。
 实验结果存档/Ifashion调参.txt：供人工阅读的追加式结果记录，保存各轮实验结果。
 log/ifashion_tuning/<round_id>/：进度 state.json、控制器锁、每次尝试的配置快照、
 stdout 和结构化结果。它们用于恢复执行与定位失败，不需要手动整理成另一套结果表。
@@ -21,7 +22,7 @@ clambda_050：c_lambdas=[0.5]
 clambda_100：c_lambdas=[1.0]
 
 所有组共同覆盖 anchor_cl.enabled=false、c_temps=[0.2]，固定 seed=2026。
-其余值继承 config.yaml 中的 iFashion 配置，包括当前 epochs=30。
+计划明确固定 epochs=30、modal_weight=[0,0.5,0.5]，其余值继承 config.yaml 中的 iFashion 配置。
 扩散重构保持开启，rebuild_k=3，其余扩散参数固定。
 本轮 UB 融合权重为 0、两项残差系数为 0，且 anchor_cl 关闭，因此扩散模块虽然训练、
 重构并消耗算力，重构图目前没有影响推荐目标的有效路径；保留此设置用于保持已定实验方案。
@@ -160,7 +161,7 @@ bi_to_ub_020：[0.20,0.50,0.30]，从 BI 向 UB 转移 0.20。
 计划明确固定 c_lambdas=[0.35]、c_temps=[0.2]、epochs=40、anchor_cl.enabled=false，
 固定 seed=2026。层融合权重、残差、噪声和全部扩散重构参数继承基础配置。
 其中扩散重构保持开启，rebuild_k=3；本轮 UB 权重非零，重构后的 UB 图进入融合表示。
-基础 config.yaml 中的 epochs=30 和 anchor_cl.enabled=true 会被本轮计划覆盖，
+本轮计划显式固定 epochs=40 和 anchor_cl.enabled=false，不依赖基础配置的默认值，
 直接运行 train.py 不会自动采用本轮计划的覆盖项。
 
 在项目根目录预检查（不训练）：
@@ -178,3 +179,40 @@ python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_03.yam
 modal_weight=[0,0.5,0.5]，c_lambda=0.35，训练 40 轮，验证选模分数为 0.5396889963。
 本计划只运行上述六组，不额外重跑零 UB 对照。
 仍按验证集 Recall@20 + Recall@40 + NDCG@20 + NDCG@40 比较，允许最终保留零 UB 权重。
+
+十、第四轮固定 UB、从 UI 向 BI 转移权重
+
+计划：tuning_plans/ifashion_fusion_04.yaml，round_id=stage3_fusion_04，共三组。
+起点为第三轮最优 modal_weight=[0.10,0.40,0.50]，顺序仍为 [UB,UI,BI]。
+UB 固定为 0.10；三组分别从该起点的 UI 向 BI 转移权重，不是在上一组结果上累加：
+ui_to_bi_005：[0.10,0.35,0.55]，转移 0.05。
+ui_to_bi_010：[0.10,0.30,0.60]，转移 0.10。
+ui_to_bi_015：[0.10,0.25,0.65]，转移 0.15。
+
+计划明确固定 c_lambdas=[0.35]、c_temps=[0.2]、epochs=40、anchor_cl.enabled=false，
+固定 seed=2026。其余训练设置继承基础配置，层融合权重、残差、噪声和扩散重构参数不变。
+扩散重构保持开启、rebuild_k=3；本轮考察 UB 占比不变时提高 BI、降低 UI 的影响。
+
+在项目根目录预检查（不训练）：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_04.yaml --gpu 0 --dry-run
+
+正式前台运行：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_04.yaml --gpu 0
+
+默认使用 0 号 GPU，可通过 --gpu 指定其他卡；同一轮续跑沿用相同的 GPU 参数。
+本轮进度独立保存在 log/ifashion_tuning/stage3_fusion_04/，不复用第三轮的成功状态。
+每组最多三次尝试；再次启动默认跳过成功组，对失败或中断组重新给予最多三次尝试。
+结果继续追加到实验结果存档/Ifashion调参.txt，既有各轮记录保留。
+
+若保持第三轮相同的运行环境、数据和其余配置，对照组沿用第三轮 ui_to_ub_010：
+modal_weight=[0.10,0.40,0.50]，验证选模分数为 0.5616796687，最佳训练轮次为第 30 轮。
+本计划只运行上述三组，不额外重跑对照组。
+仍按验证集 Recall@20 + Recall@40 + NDCG@20 + NDCG@40 比较，不保证新三组必然优于起点。
+
+十一、当前基础配置与历史计划
+
+config.yaml 中 iFashion 已同步第三轮优胜基线：modal_weight=[0.10,0.40,0.50]、
+c_lambdas=[0.35]、c_temps=[0.2]、epochs=40、anchor_cl.enabled=false。
+第四轮候选融合权重由 ifashion_fusion_04.yaml 单独覆盖，尚未写入基础配置。
+第一轮计划显式保留 epochs=30 和 modal_weight=[0,0.5,0.5]，第二轮计划显式保留
+epochs=40 和 modal_weight=[0,0.5,0.5]，避免基础默认值更新后改变历史实验设置。

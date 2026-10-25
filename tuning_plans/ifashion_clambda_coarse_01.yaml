@@ -8,6 +8,9 @@ max_attempts: 3 # 首次运行 + 两次重试；再次启动时，未成功组�
 result_file: "实验结果存档/Ifashion调参.txt"
 
 common_overrides:
+  epochs: 30
+  fusion_weights:
+    modal_weight: [0.0, 0.5, 0.5]
   anchor_cl:
     enabled: false
   c_temps: [0.2]

@@ -10,6 +10,8 @@ result_file: "实验结果存档/Ifashion调参.txt"
 
 common_overrides:
   epochs: 40
+  fusion_weights:
+    modal_weight: [0.0, 0.5, 0.5]
   anchor_cl:
     enabled: false
   c_temps: [0.2]

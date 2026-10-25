@@ -75,7 +75,7 @@ iFashion:
   neg_num: 1
   seed: 2026
 
-  # Initial settings for the unified CBR path; retune after migration.
+  # Current iFashion tuning baseline; experiment plans override per-round settings.
   aug_type: "Noise"
   ed_interval: 1
   embedding_sizes: [64]
@@ -87,7 +87,7 @@ iFashion:
   BI_ratios: [0.2]
 
   fusion_weights:
-    modal_weight: [0.0, 0.5, 0.5]
+    modal_weight: [0.1, 0.4, 0.5]
     UB_layer: [0.5, 0.5, 0.0]
     UI_layer: [0.3, 0.4, 0.3]
     BI_layer: [0.5, 0.5, 0.0]
@@ -97,7 +97,7 @@ iFashion:
   c_lambdas: [0.35]
   c_temps: [0.2]
 
-  epochs: 30
+  epochs: 40
   test_interval: 5
 
   latent_rebuild:
@@ -122,7 +122,7 @@ iFashion:
 
   # pre-fusion cross-view contrastive learning (UB-anchored)
   anchor_cl:
-    enabled: true
+    enabled: false
     anchor_cl_lambda: 0.07
     temp: 0.2
     user_cl: true

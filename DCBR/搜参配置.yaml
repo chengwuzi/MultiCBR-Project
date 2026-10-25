@@ -1,0 +1,102 @@
+# Reviewed first round: baseline + four lambda_1 values + four dependent lambda_0 values.
+# Runtime status/success/fingerprint/execution_ids are maintained by the runner.
+version: 1
+base_config: DCBR/config.yaml
+work_dir: DCBR/log/tuning
+result_file: DCBR/搜参结果.txt
+defaults:
+  gpu: '0'
+  device: cuda
+  max_attempts: 3
+  retry_delay_seconds: 5
+  console_interval_seconds: 30
+  stream_output: false
+rounds:
+  - id: youshu_round_01
+    dataset: Youshu
+    note: >-
+      第一轮共9组，均训练90轮、种子0。先跑MealRec+L迁移初始对照，再固定lambda_0=1000搜索
+      lambda_1=[0.002,0.005,0.02,0.05]；从前5组中按验证Recall@20优先、NDCG@20次优自动选定配置，
+      继承该配置搜索lambda_0=[100,500,2000,10000]。完全平局保留声明顺序在前者。
+      lambda_1=0.002/0.005和lambda_0=500/2000为用户确认的工程补充搜索点；测试指标不参与选择。
+    overrides:
+      epochs: 90
+      seed: 0
+      lambda_1: 0.01
+      lambda_0: 1000.0
+    experiments:
+      - id: initial
+        note: 初始配置对照，lambda_1=0.01、lambda_0=1000；模型参数沿用MealRec+L，预算按用户要求为90轮。
+        overrides: {}
+        status: PENDING
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda1_0002
+        note: lambda_1=0.002，初始值0.01的1/5；工程补充搜索点；lambda_0固定1000。
+        overrides: {lambda_1: 0.002}
+        status: PENDING
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda1_0005
+        note: lambda_1=0.005，初始值0.01的1/2；工程补充搜索点；lambda_0固定1000。
+        overrides: {lambda_1: 0.005}
+        status: PENDING
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda1_002
+        note: lambda_1=0.02，初始值0.01的2倍；论文候选值；lambda_0固定1000。
+        overrides: {lambda_1: 0.02}
+        status: PENDING
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda1_005
+        note: lambda_1=0.05，初始值0.01的5倍；论文候选值；lambda_0固定1000。
+        overrides: {lambda_1: 0.05}
+        status: PENDING
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda0_0100
+        note: lambda_0=100，初始值1000的1/10；论文候选值；继承前5组中验证优胜的完整配置。
+        inherit_best:
+          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
+          rule: validation_recall20_then_ndcg20
+        overrides: {lambda_0: 100.0}
+        status: BLOCKED
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda0_0500
+        note: lambda_0=500，初始值1000的1/2；工程补充搜索点；继承前5组中验证优胜的完整配置。
+        inherit_best:
+          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
+          rule: validation_recall20_then_ndcg20
+        overrides: {lambda_0: 500.0}
+        status: BLOCKED
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda0_2000
+        note: lambda_0=2000，初始值1000的2倍；工程补充搜索点；继承前5组中验证优胜的完整配置。
+        inherit_best:
+          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
+          rule: validation_recall20_then_ndcg20
+        overrides: {lambda_0: 2000.0}
+        status: BLOCKED
+        success: false
+        fingerprint: null
+        execution_ids: []
+      - id: lambda0_10000
+        note: lambda_0=10000，初始值1000的10倍；论文候选值；继承前5组中验证优胜的完整配置。
+        inherit_best:
+          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
+          rule: validation_recall20_then_ndcg20
+        overrides: {lambda_0: 10000.0}
+        status: BLOCKED
+        success: false
+        fingerprint: null
+        execution_ids: []

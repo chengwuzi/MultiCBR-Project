@@ -788,7 +788,8 @@ def serializable_config(conf):
 def append_experiment_record(path, record):
     result = record.get("result")
     lines = ["", "=" * 72, "EXECUTION_ID: " + record["execution_id"],
-             "实验类别: 第一种情况（作者已有数据集配置）", "模型: DCBR", "数据集: " + record["dataset"],
+             "实验类别: " + ("第二种情况（新数据集参数搜索）" if record.get("experiment_case") == "second"
+                           else "第一种情况（作者已有数据集配置）"), "模型: DCBR", "数据集: " + record["dataset"],
              "实验备注: " + record["note"], "状态: " + record["status"],
              "开始时间(UTC+08:00): " + record["started_at"], "结束时间(UTC+08:00): " + record["ended_at"],
              f"耗时（秒）: {record['duration_seconds']:.3f}",
@@ -833,6 +834,7 @@ class RunLog:
 
 
 def run_training(conf, args):
+    experiment_case = args.experiment_case or ("second" if conf["dataset"] == "Youshu" else "first")
     conf["selection_rule"] = SELECTION_RULE
     execution_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + "_" + uuid.uuid4().hex[:8]
     directory = resolve_project_path(args.output_dir) / conf["dataset"] / execution_id
@@ -850,7 +852,9 @@ def run_training(conf, args):
         commit = "unknown"
     source_hash = file_hash(Path(__file__))
     config_hash = hashlib.sha256(json.dumps(serializable_config(conf), sort_keys=True).encode()).hexdigest()
-    record = {"execution_id": execution_id, "dataset": conf["dataset"], "note": args.note,
+    record = {"execution_id": execution_id, "dataset": conf["dataset"],
+              "experiment_case": experiment_case,
+              "note": args.note or f"DCBR {conf['dataset']} under the shared evaluation protocol",
               "status": "RUNNING", "started_at": timestamp(), "gpu": args.gpu,
               "device": str(conf["device"]), "git_commit": commit, "source_hash": source_hash,
               "config_hash": config_hash, "config": serializable_config(conf), "artifacts": artifacts}
@@ -869,7 +873,7 @@ def run_training(conf, args):
         record["data_files"] = dataset.data_files
         with Path(artifacts["config"]).open("w", encoding="utf-8") as stream:
             yaml.safe_dump({conf["dataset"]: record["config"]}, stream, allow_unicode=True, sort_keys=False)
-        log.write("DCBR first-case experiment " + execution_id)
+        log.write(f"DCBR {experiment_case}-case experiment " + execution_id)
         log.write("Actual configuration:\n" + yaml.safe_dump(record["config"], sort_keys=False))
         log.write("Dataset: " + json.dumps(dataset.graph_statistics))
         log.write("Checkpoint selection: " + SELECTION_RULE)
@@ -944,7 +948,9 @@ def run_training(conf, args):
                 log.write(f"Saved best checkpoint at epoch {epoch + 1}")
         if best_result is None:
             raise RuntimeError("Validation Recall@20 and NDCG@20 never both exceeded zero; no best checkpoint was selected")
-        record.update(status="SUCCESS", completed=True, result=best_result)
+        record["artifact_hashes"] = {key: file_hash(artifacts[key])
+                                    for key in ("checkpoint_model", "checkpoint_config", "config")}
+        record.update(status="SUCCESS", completed=True, completed_epochs=conf["epochs"], result=best_result)
         log.write("Best result: " + json.dumps(best_result))
     except BaseException as error:
         record.update(status="INTERRUPTED" if isinstance(error, KeyboardInterrupt) else "FAILED",
@@ -959,7 +965,8 @@ def run_training(conf, args):
         atomic_json(artifacts["result_json"], record)
         if args.result_json:
             atomic_json(Path(args.result_json).resolve(), record)
-        append_experiment_record(resolve_project_path(args.record_file), record)
+        default_record = MODEL_DIR / ("搜参结果.txt" if experiment_case == "second" else "实验记录.txt")
+        append_experiment_record(resolve_project_path(args.record_file or default_record), record)
     return record
 
 
@@ -1006,11 +1013,13 @@ def get_cmd(argv=None):
     parser.add_argument("-e", "--epochs", type=int)
     parser.add_argument("--data-path", dest="data_path")
     parser.add_argument("-i", "--info", default="")
-    parser.add_argument("--note", default="DCBR iFashion author configuration under the shared ReCoBR protocol")
+    parser.add_argument("--note", default=None)
+    parser.add_argument("--experiment-case", choices=["first", "second"], default=None,
+                        help="Record category; defaults to second for Youshu, first otherwise")
     parser.add_argument("--num-workers", type=int, default=None)
     parser.add_argument("--quiet", action="store_true")
     parser.add_argument("--output-dir", default=str(MODEL_DIR / "log"))
-    parser.add_argument("--record-file", default=str(MODEL_DIR / "实验记录.txt"))
+    parser.add_argument("--record-file", default=None, help="Defaults to the TXT for the experiment category")
     parser.add_argument("--result-json", help="Optional additional machine-readable result path")
     mode = parser.add_mutually_exclusive_group()
     mode.add_argument("--check-config", action="store_true", help="Validate configuration and paths, without training or writing")

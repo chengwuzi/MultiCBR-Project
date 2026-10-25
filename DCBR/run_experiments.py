@@ -223,10 +223,13 @@ def load_plan(path, gpu=None, device=None):
             reference = item.get("reference")
             if reference is not None:
                 require_fields(reference, {"round_id", "experiment_id", "execution_id", "fingerprint",
-                                           "allow_data_path_relocation"},
+                                           "allow_data_path_relocation", "result_file"},
                                {"round_id", "experiment_id", "execution_id", "fingerprint"}, "reference")
                 if type(reference.get("allow_data_path_relocation", False)) is not bool:
                     raise ValueError("allow_data_path_relocation must be boolean")
+                if "result_file" in reference and (not isinstance(reference["result_file"], str)
+                                                  or not reference["result_file"].strip()):
+                    raise ValueError("reference result_file must be a nonempty path")
                 if inherit is not None or reference["round_id"] == rid or reference["round_id"] not in seen_rounds:
                     raise ValueError("A reference must identify an earlier round and cannot inherit_best")
                 for key in ("round_id", "experiment_id", "execution_id"):
@@ -478,12 +481,107 @@ def metric_field(rule):
     return "validation" if rule == CROSS_RULE else "test"
 
 
+def read_result_reference(item, round_, plan):
+    """Read an explicitly requested historical TXT result, without its old artifacts.
+
+    Only the complete pinned execution block is used. Validation @20 comes from
+    its full-precision selection JSON; the other metrics retain report precision.
+    This is reference evidence, never a newly completed training execution.
+    """
+    ref = item["reference"]
+    path = resolve_path(ref["result_file"])
+    stat = path.stat()
+    key = (str(path), ref["execution_id"], stat.st_size, stat.st_mtime_ns)
+    cache = plan.setdefault("_result_reference_cache", {})
+    if key not in cache:
+        text = path.read_text(encoding="utf-8-sig")
+        pattern = (r"^EXECUTION_ID: " + re.escape(ref["execution_id"]) + r"\r?\n"
+                   r"(?:(?!^EXECUTION_ID: ).)*?^END_EXECUTION: "
+                   + re.escape(ref["execution_id"]) + r"\r?$")
+        blocks = re.findall(pattern, text, re.MULTILINE | re.DOTALL)
+        if len(blocks) != 1:
+            raise ValueError("Result TXT needs exactly one complete pinned execution block")
+        block = blocks[0]
+
+        def field(name):
+            values = re.findall(r"^" + re.escape(name) + r": ([^\r\n]*)\r?$", block, re.MULTILINE)
+            if len(values) != 1:
+                raise ValueError(f"Missing or duplicate result TXT field: {name}")
+            return values[0]
+
+        config_text = re.search(r"^完整配置:\r?\n(.*?)^(?:计时说明|前置实验选择依据|跨配置选择规则):",
+                                block, re.MULTILINE | re.DOTALL)
+        if config_text is None:
+            raise ValueError("Result TXT is missing its complete configuration")
+        actual = yaml.safe_load(config_text[1])
+        selection = json.loads(field("验证选模指标"))
+        metrics = {split: {metric: {} for metric in ("recall", "ndcg")} for split in ("val", "test")}
+        for split, k, recall, ndcg in re.findall(
+                r"^(val|test) TOP (\d+): Recall=([^,\r\n]+), NDCG=([^\r\n]+)\r?$", block, re.MULTILINE):
+            if k in metrics[split]["recall"]:
+                raise ValueError("Duplicate result TXT metric")
+            metrics[split]["recall"][k] = float(recall)
+            metrics[split]["ndcg"][k] = float(ndcg)
+        for metric in ("recall", "ndcg"):
+            full = selection[metric + "@20"]
+            if (type(full) not in (int, float) or not math.isfinite(full) or not 0 < full <= 1
+                    or abs(full - metrics["val"][metric]["20"]) > 5.1e-9):
+                raise ValueError("Invalid or inconsistent full-precision validation @20")
+            metrics["val"][metric]["20"] = full
+        epoch_match = re.fullmatch(r"(\d+)（从0计数）", field("best_epoch"))
+        if epoch_match is None:
+            raise ValueError("Invalid result TXT best epoch")
+        epoch = int(epoch_match[1])
+        cache[key] = {
+            "round_id": field("轮次"), "experiment_id": field("实验"),
+            "execution_id": ref["execution_id"], "fingerprint": field("配置及数据指纹"),
+            "dataset": field("数据集"), "status": field("状态"),
+            "gpu": field("GPU"), "device": field("设备"),
+            "sources": json.loads(field("源码摘要")), "data_files": json.loads(field("数据文件摘要")),
+            "config": actual, "selection_rule": field("选模规则"),
+            "training_record": {"result": {"best_epoch": epoch, "best_epoch_1based": int(field("最佳训练轮次")),
+                                           "selection_metrics": selection, "metrics": metrics},
+                                "artifacts": json.loads(field("训练产物"))},
+            "reference_evidence": {"kind": "result_text", "path": str(path),
+                                   "execution_block_sha256": hashlib.sha256(block.encode("utf-8")).hexdigest(),
+                                   "artifacts_verified": False,
+                                   "metric_precision": "validation @20 full precision; other metrics as printed"}}
+    record = cache[key]
+    actual = record["config"]
+    if (any(record[k] != ref[k] for k in ("round_id", "experiment_id", "execution_id", "fingerprint"))
+            or record["status"] != "SUCCESS" or record["dataset"] != round_["dataset"]
+            or actual.get("dataset") != round_["dataset"] or actual.get("model") != "DCBR"
+            or record["selection_rule"] != RULE or actual.get("selection_rule") != RULE
+            or record["sources"]["train.py"] != plan["sources"]["train.py"]
+            or record["data_files"] != round_["data_files"]):
+        raise ValueError("Result TXT identity, source, data or protocol mismatch")
+    for k, value in item["template_config"].items():
+        if k == "data_path" and ref.get("allow_data_path_relocation", False):
+            continue
+        if k not in actual or actual[k] != value:
+            raise ValueError(f"Result TXT configuration mismatch: {k}")
+    result = record["training_record"]["result"]
+    epoch = result["best_epoch"]
+    if not (0 <= epoch < actual["epochs"] and result["best_epoch_1based"] == epoch + 1
+            and (epoch + 1) % actual["test_interval"] == 0):
+        raise ValueError("Invalid result TXT best epoch")
+    for split in ("val", "test"):
+        for metric in ("recall", "ndcg"):
+            for k in actual["topk"]:
+                value = result["metrics"][split][metric][str(k)]
+                if not math.isfinite(value) or not 0 <= value <= 1:
+                    raise ValueError("Invalid result TXT metric")
+    return copy.deepcopy(record)
+
+
 def check_reference(record, item, round_, plan):
     """Reuse a pinned execution, allowing only a controller-source version change."""
     if record is None:
         return False
     try:
         ref = item["reference"]
+        if "result_file" in ref:
+            return record == read_result_reference(item, round_, plan)
         expected = dict(item["template_config"])
         original = dict(record["config"])
         if ref.get("allow_data_path_relocation", False):
@@ -511,22 +609,30 @@ def check_reference(record, item, round_, plan):
         proxy = {"id": record["experiment_id"], "config": record["config"],
                  "fingerprint": record["fingerprint"]}
         return check_success(record, proxy, round_, historical_plan)
-    except (OSError, ValueError, KeyError, TypeError, IndexError):
+    except (OSError, ValueError, KeyError, TypeError, IndexError, AttributeError, yaml.YAMLError):
         return False
 
 
 def resolve_reference(plan, round_, item, state):
     ref = item["reference"]
-    record = next((r for r in state["executions"] if r.get("execution_id") == ref["execution_id"]
-                   and r.get("round_id") == ref["round_id"] and r.get("experiment_id") == ref["experiment_id"]), None)
+    if "result_file" in ref:
+        # Explicit TXT references do not require history.json or old checkpoints.
+        # Keep parse failures visible instead of silently falling back to history.
+        record = read_result_reference(item, round_, plan)
+    else:
+        record = next((r for r in state["executions"] if r.get("execution_id") == ref["execution_id"]
+                       and r.get("round_id") == ref["round_id"] and r.get("experiment_id") == ref["experiment_id"]), None)
     item.update(_reference_record=record, config=copy.deepcopy(item["template_config"]),
                 fingerprint=None, dependency_selection=None, blocked_by=[])
     if not check_reference(record, item, round_, plan):
         item.update(config=None, blocked_by=["reference:" + ref["execution_id"]])
         return
     evidence = {"reference": copy.deepcopy(ref), "sources": record["sources"],
-                "metrics": record["training_record"]["result"]["metrics"],
-                "artifact_hashes": record["training_record"]["artifact_hashes"]}
+                "metrics": record["training_record"]["result"]["metrics"]}
+    if "result_file" in ref:
+        evidence["reference_evidence"] = record["reference_evidence"]
+    else:
+        evidence["artifact_hashes"] = record["training_record"]["artifact_hashes"]
     if ref.get("allow_data_path_relocation", False):
         evidence["original_data_path"] = record["config"]["data_path"]
         evidence["resolved_data_path"] = item["template_config"]["data_path"]
@@ -932,12 +1038,15 @@ def write_round_summary(plan, round_, state):
                   metric_field(rule): selection_metrics(record["training_record"], rule)}
         if item.get("reference"):
             result["reference"] = item["reference"]
+            if "reference_evidence" in record:
+                result["reference_evidence"] = record["reference_evidence"]
         return result
 
     def best(pairs):
         winner, record = max(pairs, key=lambda pair: configuration_key(pair[1]["training_record"], rule))
         return dict(candidate(winner, record), config=winner["config"],
-                    checkpoint=record["training_record"]["artifacts"]["checkpoint_model"])
+                    checkpoint=None if "reference_evidence" in record else
+                    record["training_record"]["artifacts"]["checkpoint_model"])
 
     summary = {"round_id": round_["id"], "dataset": round_["dataset"], "complete": complete,
                "planned": len(round_["experiments"]), "valid_successes": len(verified),

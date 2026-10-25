@@ -2403,7 +2403,7 @@ rounds:
 - id: youshu_round_03_k
   dataset: Youshu
   selection_rule: validation_recall20_then_ndcg20
-  note: Youshu补充K搜索：K=[1,3,5,7,9,11]，新增5个训练实验，复用tau_025作为K=1历史对照，不重复训练。固定当前优胜配置其他参数、90轮、seed=0。按完整精度验证Recall@20优先，相同再比较验证NDCG@20；完全平局保留已有对照。测试指标仅报告。本轮网格为用户确认的工程补充，不冒充作者原有搜索范围。
+  note: Youshu补充K搜索：K=[1,3,5,7,9,11]，新增5个训练实验，直接读取搜参结果.txt中的tau_025作为K=1历史对照，不依赖旧history或检查点，不重复训练。固定当前优胜配置其他参数、90轮、seed=0。按完整精度验证Recall@20优先，相同再比较验证NDCG@20；完全平局保留已有对照。测试指标仅报告。本轮网格为用户确认的工程补充，不冒充作者原有搜索范围。
   overrides:
     data_path: ./datasets
     embedding_size: 64
@@ -2464,7 +2464,7 @@ rounds:
     - k_11
   experiments:
   - id: baseline_k1
-    note: 复用既有tau_025的K=1完整训练结果，不重复训练。核查原始历史、配置、源码、数据摘要及产物；仅在数据文件摘要相同时允许data_path迁移，其余配置必须一致。
+    note: 直接读取搜参结果.txt中指定tau_025执行块的配置和指标作为K=1对照，不重复训练。验证@20取未舍入选模指标；核对身份、配置、模型源码和数据摘要，不检查旧产物路径。其余指标保留文档显示精度，引用来源写入依赖及轮次汇总。
     overrides: {}
     status: PENDING
     success: false
@@ -2476,6 +2476,7 @@ rounds:
       execution_id: 20261025T121254_2673b424
       fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
       allow_data_path_relocation: true
+      result_file: DCBR/搜参结果.txt
   - id: k_03
     note: rebuild_k=3；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
     overrides:

@@ -123,7 +123,7 @@ class KSearchTests(unittest.TestCase):
             with contextlib.redirect_stdout(stream), contextlib.redirect_stderr(stream):
                 return port.main(command[5:])
 
-    def make_plan_with_historical_control(self, root):
+    def make_plan_with_historical_control(self, root, result_text=False):
         fixture = reference.ReproductionTests()
         fixture.base = reference.ReproductionTests.base
         fixture_path = fixture.make_tiny_data(root)
@@ -159,6 +159,11 @@ class KSearchTests(unittest.TestCase):
         original = copy.deepcopy(runner.load_state(root / 'work/history.json')['executions'][0])
         y['experiments'][0]['reference'].update({k: original[k] for k in
                                                ('round_id', 'experiment_id', 'execution_id', 'fingerprint')})
+        if result_text:
+            y['experiments'][0]['reference']['result_file'] = str(root / 'search.txt')
+        else:
+            # Keep dedicated legacy artifact-reference tests on their original path.
+            y['experiments'][0]['reference'].pop('result_file', None)
         # The current dataset path moves; the original result/config/artifacts
         # remain immutable and available at their original artifact locations.
         shutil.copytree(root / 'data/Youshu', root / 'relocated/Youshu')
@@ -200,7 +205,8 @@ class KSearchTests(unittest.TestCase):
     def test_ordered_29_trial_pipeline_interrupt_failure_resume_and_summaries(self):
         with tempfile.TemporaryDirectory(prefix='dcbr-k-chain-') as temp:
             root = Path(temp)
-            path, original = self.make_plan_with_historical_control(root)
+            path, original = self.make_plan_with_historical_control(root, result_text=True)
+            Path(original['training_record']['artifacts']['checkpoint_model']).unlink()
             controls = {'interrupt': True, 'fail': True}
             def worker(command, attempt, record, *args):
                 if record['round_id'] == pipeline.ROUNDS[0] and record['experiment_id'] == 'k_05' and controls['interrupt']:

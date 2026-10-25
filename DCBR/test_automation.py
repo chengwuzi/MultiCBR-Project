@@ -52,12 +52,13 @@ class AutomationTests(unittest.TestCase):
         path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
         return path
 
-    def test_youshu_initial_configuration_is_mealrec_l_with_user_budget(self):
+    def test_youshu_configuration_is_mealrec_l_with_selected_baseline(self):
         overall = yaml.safe_load((HERE / "raw/configs/overall.yaml").read_text())
         author = yaml.safe_load((HERE / "raw/configs/models/DCBR.yaml").read_text())["MealRec+L"]
         expected = dict(overall, **author, seed=0)
         expected["topk"] = [10, 20, 40, 80]
         expected["epochs"] = 90  # User-specified Youshu budget, not the author's MealRec+L budget.
+        expected.update(lambda_1=0.02, lambda_0=2000.0)  # User-selected round-01 baseline.
         actual = yaml.safe_load((HERE / "config.yaml").read_text(encoding="utf-8"))["Youshu"]
         self.assertEqual(actual, expected)
 

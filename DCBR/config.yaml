@@ -43,6 +43,8 @@ iFashion:
 # MealRec+L model settings from raw/configs/models/DCBR.yaml; shared settings
 # from raw/configs/overall.yaml, unified top-K and seed 0. User sets 90 epochs
 # for Youshu instead of the author's 150-epoch MealRec+L training budget.
+# Current baseline: lambda_1=0.02, lambda_0=2000, explicitly selected by the
+# user after round 01 using test Recall@20. Historical round plans stay fixed.
 Youshu:
   data_path: ./datasets
   embedding_size: 64
@@ -63,7 +65,7 @@ Youshu:
   sampling_noise: false
   sampling_steps: 0
   rebuild_k: 1
-  lambda_0: 1.0e+3
+  lambda_0: 2000.0
   num_layers: 2
   upsilon_UB: 0.05
   upsilon_UI: 0.0
@@ -75,6 +77,6 @@ Youshu:
   gamma_1: 0.3
   gamma_2: 0.2
   tau: 0.2
-  lambda_1: 0.01
+  lambda_1: 0.02
   lambda_2: 1.0e-5
   epochs: 90

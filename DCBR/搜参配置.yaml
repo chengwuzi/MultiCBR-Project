@@ -1,5 +1,3 @@
-# Reviewed first round: baseline + four lambda_1 values + four dependent lambda_0 values.
-# Runtime status/success/fingerprint/execution_ids are maintained by the runner.
 version: 1
 base_config: DCBR/config.yaml
 work_dir: DCBR/log/tuning
@@ -12,91 +10,736 @@ defaults:
   console_interval_seconds: 30
   stream_output: false
 rounds:
-  - id: youshu_round_01
-    dataset: Youshu
-    note: >-
-      第一轮共9组，均训练90轮、种子0。先跑MealRec+L迁移初始对照，再固定lambda_0=1000搜索
-      lambda_1=[0.002,0.005,0.02,0.05]；从前5组中按验证Recall@20优先、NDCG@20次优自动选定配置，
-      继承该配置搜索lambda_0=[100,500,2000,10000]。完全平局保留声明顺序在前者。
-      lambda_1=0.002/0.005和lambda_0=500/2000为用户确认的工程补充搜索点；测试指标不参与选择。
-    overrides:
-      epochs: 90
+- id: youshu_round_01
+  dataset: Youshu
+  note: 第一轮共9组，均训练90轮、种子0。先跑MealRec+L迁移初始对照，再固定lambda_0=1000搜索 lambda_1=[0.002,0.005,0.02,0.05]；从前5组中按验证Recall@20优先、NDCG@20次优自动选定配置，
+    继承该配置搜索lambda_0=[100,500,2000,10000]。完全平局保留声明顺序在前者。 lambda_1=0.002/0.005和lambda_0=500/2000为用户确认的工程补充搜索点；测试指标不参与选择。
+  overrides:
+    epochs: 90
+    seed: 0
+    lambda_1: 0.01
+    lambda_0: 1000.0
+  experiments:
+  - id: initial
+    note: 初始配置对照，lambda_1=0.01、lambda_0=1000；模型参数沿用MealRec+L，预算按用户要求为90轮。
+    overrides: {}
+    status: SUCCESS
+    success: true
+    fingerprint: dc71ef8d0f30191e29032f1da00efb669220a646f73de794ddf246e44f17784f
+    execution_ids:
+    - 20261025T083642_37901fd9
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
       seed: 0
-      lambda_1: 0.01
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
       lambda_0: 1000.0
-    experiments:
-      - id: initial
-        note: 初始配置对照，lambda_1=0.01、lambda_0=1000；模型参数沿用MealRec+L，预算按用户要求为90轮。
-        overrides: {}
-        status: PENDING
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda1_0002
-        note: lambda_1=0.002，初始值0.01的1/5；工程补充搜索点；lambda_0固定1000。
-        overrides: {lambda_1: 0.002}
-        status: PENDING
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda1_0005
-        note: lambda_1=0.005，初始值0.01的1/2；工程补充搜索点；lambda_0固定1000。
-        overrides: {lambda_1: 0.005}
-        status: PENDING
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda1_002
-        note: lambda_1=0.02，初始值0.01的2倍；论文候选值；lambda_0固定1000。
-        overrides: {lambda_1: 0.02}
-        status: PENDING
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda1_005
-        note: lambda_1=0.05，初始值0.01的5倍；论文候选值；lambda_0固定1000。
-        overrides: {lambda_1: 0.05}
-        status: PENDING
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda0_0100
-        note: lambda_0=100，初始值1000的1/10；论文候选值；继承前5组中验证优胜的完整配置。
-        inherit_best:
-          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
-          rule: validation_recall20_then_ndcg20
-        overrides: {lambda_0: 100.0}
-        status: BLOCKED
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda0_0500
-        note: lambda_0=500，初始值1000的1/2；工程补充搜索点；继承前5组中验证优胜的完整配置。
-        inherit_best:
-          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
-          rule: validation_recall20_then_ndcg20
-        overrides: {lambda_0: 500.0}
-        status: BLOCKED
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda0_2000
-        note: lambda_0=2000，初始值1000的2倍；工程补充搜索点；继承前5组中验证优胜的完整配置。
-        inherit_best:
-          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
-          rule: validation_recall20_then_ndcg20
-        overrides: {lambda_0: 2000.0}
-        status: BLOCKED
-        success: false
-        fingerprint: null
-        execution_ids: []
-      - id: lambda0_10000
-        note: lambda_0=10000，初始值1000的10倍；论文候选值；继承前5组中验证优胜的完整配置。
-        inherit_best:
-          candidates: [initial, lambda1_0002, lambda1_0005, lambda1_002, lambda1_005]
-          rule: validation_recall20_then_ndcg20
-        overrides: {lambda_0: 10000.0}
-        status: BLOCKED
-        success: false
-        fingerprint: null
-        execution_ids: []
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.01
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection: null
+    blocked_by: []
+  - id: lambda1_0002
+    note: lambda_1=0.002，初始值0.01的1/5；工程补充搜索点；lambda_0固定1000。
+    overrides:
+      lambda_1: 0.002
+    status: SUCCESS
+    success: true
+    fingerprint: b070da54d937cc94209bc8e035c42459fcc5e7b3f42ac611aaa506e8b4d45583
+    execution_ids:
+    - 20261025T084516_4e8b374b
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.002
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection: null
+    blocked_by: []
+  - id: lambda1_0005
+    note: lambda_1=0.005，初始值0.01的1/2；工程补充搜索点；lambda_0固定1000。
+    overrides:
+      lambda_1: 0.005
+    status: SUCCESS
+    success: true
+    fingerprint: 66f180404771c0a49e4296a640792ea056eb8ee095a35b82799d8394087e7010
+    execution_ids:
+    - 20261025T085347_7835cc7e
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection: null
+    blocked_by: []
+  - id: lambda1_002
+    note: lambda_1=0.02，初始值0.01的2倍；论文候选值；lambda_0固定1000。
+    overrides:
+      lambda_1: 0.02
+    status: SUCCESS
+    success: true
+    fingerprint: f5348364d77eed16774922b45e89454f2665f3ef81b1b0f626583aae7432f6d1
+    execution_ids:
+    - 20261025T090154_97408b2d
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection: null
+    blocked_by: []
+  - id: lambda1_005
+    note: lambda_1=0.05，初始值0.01的5倍；论文候选值；lambda_0固定1000。
+    overrides:
+      lambda_1: 0.05
+    status: SUCCESS
+    success: true
+    fingerprint: bb9f7d730365e7dc6525cefcff2f5ca8e19dfdd3afce98d2a6b503569d5a0ea1
+    execution_ids:
+    - 20261025T091041_a4bff49b
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.05
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection: null
+    blocked_by: []
+  - id: lambda0_0100
+    note: lambda_0=100，初始值1000的1/10；论文候选值；继承前5组中验证优胜的完整配置。
+    inherit_best:
+      candidates:
+      - initial
+      - lambda1_0002
+      - lambda1_0005
+      - lambda1_002
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 100.0
+    status: SUCCESS
+    success: true
+    fingerprint: c97219e83dd192080e28939fb72f78c7d05d349819a0b0a9cb369752a931ae11
+    execution_ids:
+    - 20261025T091857_c65aacfa
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_002
+      winner_execution_id: 20261025T090154_97408b2d
+      winner_validation:
+        recall@20: 0.24810438294715276
+        ndcg@20: 0.12130132934941598
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T083642_37901fd9
+        fingerprint: dc71ef8d0f30191e29032f1da00efb669220a646f73de794ddf246e44f17784f
+        validation:
+          recall@20: 0.23915254799809638
+          ndcg@20: 0.11534590751748505
+      - experiment_id: lambda1_0002
+        execution_id: 20261025T084516_4e8b374b
+        fingerprint: b070da54d937cc94209bc8e035c42459fcc5e7b3f42ac611aaa506e8b4d45583
+        validation:
+          recall@20: 0.22549178061270964
+          ndcg@20: 0.10514038436595714
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T085347_7835cc7e
+        fingerprint: 66f180404771c0a49e4296a640792ea056eb8ee095a35b82799d8394087e7010
+        validation:
+          recall@20: 0.22895753170115274
+          ndcg@20: 0.10797496356042344
+      - experiment_id: lambda1_002
+        execution_id: 20261025T090154_97408b2d
+        fingerprint: f5348364d77eed16774922b45e89454f2665f3ef81b1b0f626583aae7432f6d1
+        validation:
+          recall@20: 0.24810438294715276
+          ndcg@20: 0.12130132934941598
+      - experiment_id: lambda1_005
+        execution_id: 20261025T091041_a4bff49b
+        fingerprint: bb9f7d730365e7dc6525cefcff2f5ca8e19dfdd3afce98d2a6b503569d5a0ea1
+        validation:
+          recall@20: 0.1436542770112435
+          ndcg@20: 0.06794597861653205
+    blocked_by: []
+  - id: lambda0_0500
+    note: lambda_0=500，初始值1000的1/2；工程补充搜索点；继承前5组中验证优胜的完整配置。
+    inherit_best:
+      candidates:
+      - initial
+      - lambda1_0002
+      - lambda1_0005
+      - lambda1_002
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 500.0
+    status: SUCCESS
+    success: true
+    fingerprint: 28cff3835d2e7f0fb4fa60988c7476131a5841a8e0404bfacbd3ed646e039bd9
+    execution_ids:
+    - 20261025T092712_04bfefb1
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 500.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_002
+      winner_execution_id: 20261025T090154_97408b2d
+      winner_validation:
+        recall@20: 0.24810438294715276
+        ndcg@20: 0.12130132934941598
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T083642_37901fd9
+        fingerprint: dc71ef8d0f30191e29032f1da00efb669220a646f73de794ddf246e44f17784f
+        validation:
+          recall@20: 0.23915254799809638
+          ndcg@20: 0.11534590751748505
+      - experiment_id: lambda1_0002
+        execution_id: 20261025T084516_4e8b374b
+        fingerprint: b070da54d937cc94209bc8e035c42459fcc5e7b3f42ac611aaa506e8b4d45583
+        validation:
+          recall@20: 0.22549178061270964
+          ndcg@20: 0.10514038436595714
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T085347_7835cc7e
+        fingerprint: 66f180404771c0a49e4296a640792ea056eb8ee095a35b82799d8394087e7010
+        validation:
+          recall@20: 0.22895753170115274
+          ndcg@20: 0.10797496356042344
+      - experiment_id: lambda1_002
+        execution_id: 20261025T090154_97408b2d
+        fingerprint: f5348364d77eed16774922b45e89454f2665f3ef81b1b0f626583aae7432f6d1
+        validation:
+          recall@20: 0.24810438294715276
+          ndcg@20: 0.12130132934941598
+      - experiment_id: lambda1_005
+        execution_id: 20261025T091041_a4bff49b
+        fingerprint: bb9f7d730365e7dc6525cefcff2f5ca8e19dfdd3afce98d2a6b503569d5a0ea1
+        validation:
+          recall@20: 0.1436542770112435
+          ndcg@20: 0.06794597861653205
+    blocked_by: []
+  - id: lambda0_2000
+    note: lambda_0=2000，初始值1000的2倍；工程补充搜索点；继承前5组中验证优胜的完整配置。
+    inherit_best:
+      candidates:
+      - initial
+      - lambda1_0002
+      - lambda1_0005
+      - lambda1_002
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 2000.0
+    status: SUCCESS
+    success: true
+    fingerprint: 0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3
+    execution_ids:
+    - 20261025T093608_5009e405
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_002
+      winner_execution_id: 20261025T090154_97408b2d
+      winner_validation:
+        recall@20: 0.24810438294715276
+        ndcg@20: 0.12130132934941598
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T083642_37901fd9
+        fingerprint: dc71ef8d0f30191e29032f1da00efb669220a646f73de794ddf246e44f17784f
+        validation:
+          recall@20: 0.23915254799809638
+          ndcg@20: 0.11534590751748505
+      - experiment_id: lambda1_0002
+        execution_id: 20261025T084516_4e8b374b
+        fingerprint: b070da54d937cc94209bc8e035c42459fcc5e7b3f42ac611aaa506e8b4d45583
+        validation:
+          recall@20: 0.22549178061270964
+          ndcg@20: 0.10514038436595714
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T085347_7835cc7e
+        fingerprint: 66f180404771c0a49e4296a640792ea056eb8ee095a35b82799d8394087e7010
+        validation:
+          recall@20: 0.22895753170115274
+          ndcg@20: 0.10797496356042344
+      - experiment_id: lambda1_002
+        execution_id: 20261025T090154_97408b2d
+        fingerprint: f5348364d77eed16774922b45e89454f2665f3ef81b1b0f626583aae7432f6d1
+        validation:
+          recall@20: 0.24810438294715276
+          ndcg@20: 0.12130132934941598
+      - experiment_id: lambda1_005
+        execution_id: 20261025T091041_a4bff49b
+        fingerprint: bb9f7d730365e7dc6525cefcff2f5ca8e19dfdd3afce98d2a6b503569d5a0ea1
+        validation:
+          recall@20: 0.1436542770112435
+          ndcg@20: 0.06794597861653205
+    blocked_by: []
+  - id: lambda0_10000
+    note: lambda_0=10000，初始值1000的10倍；论文候选值；继承前5组中验证优胜的完整配置。
+    inherit_best:
+      candidates:
+      - initial
+      - lambda1_0002
+      - lambda1_0005
+      - lambda1_002
+      - lambda1_005
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 10000.0
+    status: SUCCESS
+    success: true
+    fingerprint: 304cada3fae5843b86d8af4422ac8dd40e2fe0eb263326ce0fa4a91e7232fa19
+    execution_ids:
+    - 20261025T094505_d5264fe4
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 10000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_002
+      winner_execution_id: 20261025T090154_97408b2d
+      winner_validation:
+        recall@20: 0.24810438294715276
+        ndcg@20: 0.12130132934941598
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T083642_37901fd9
+        fingerprint: dc71ef8d0f30191e29032f1da00efb669220a646f73de794ddf246e44f17784f
+        validation:
+          recall@20: 0.23915254799809638
+          ndcg@20: 0.11534590751748505
+      - experiment_id: lambda1_0002
+        execution_id: 20261025T084516_4e8b374b
+        fingerprint: b070da54d937cc94209bc8e035c42459fcc5e7b3f42ac611aaa506e8b4d45583
+        validation:
+          recall@20: 0.22549178061270964
+          ndcg@20: 0.10514038436595714
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T085347_7835cc7e
+        fingerprint: 66f180404771c0a49e4296a640792ea056eb8ee095a35b82799d8394087e7010
+        validation:
+          recall@20: 0.22895753170115274
+          ndcg@20: 0.10797496356042344
+      - experiment_id: lambda1_002
+        execution_id: 20261025T090154_97408b2d
+        fingerprint: f5348364d77eed16774922b45e89454f2665f3ef81b1b0f626583aae7432f6d1
+        validation:
+          recall@20: 0.24810438294715276
+          ndcg@20: 0.12130132934941598
+      - experiment_id: lambda1_005
+        execution_id: 20261025T091041_a4bff49b
+        fingerprint: bb9f7d730365e7dc6525cefcff2f5ca8e19dfdd3afce98d2a6b503569d5a0ea1
+        validation:
+          recall@20: 0.1436542770112435
+          ndcg@20: 0.06794597861653205
+    blocked_by: []

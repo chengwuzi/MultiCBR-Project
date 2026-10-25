@@ -91,3 +91,50 @@ Youshu:
   lambda_1: 0.02
   lambda_2: 1.0e-5
   epochs: 90
+
+# NetEase 初始配置：本工程综合设置，尚无正式实验结果，不是作者报告的 NetEase 配置。
+# 扩散整组采用作者 MealRec+H/L 共同设置：steps=5、noise_scale=1、lambda_0=1000；
+# DNN结构、方差端点和rebuild_k保持作者设置，不套用ReCoBR的潜在扩散或关闭DCBR核心扩散。
+# lambda_1=0.02参考作者MealRec+H及已完成的DCBR-Youshu经验；gamma=(0.3,0.2)采用作者MealRec+L/iFashion设置。
+# 噪声及UI/BI逐层权重参考用户已完成搜参的ReCoBR-NetEase中对应传播机制；最优值仍需DCBR验证。
+# UB图及其作用不同，xi_UB保留DCBR作者MealRec+L值，不直接采用ReCoBR的UB逐层权重。
+# omega=0.4由ReCoBR的UI/BI权重0.2/0.3归一化提出，仅为工程初值，不是三视图融合的等价转换。
+# tau=0.2同时参考ReCoBR-NetEase和DCBR作者两个MealRec配置；lambda_2=1e-5采用DCBR作者值。
+# 初始训练预算按用户要求为40轮；seed=4096与ReCoBR-NetEase一致，固定种子，不作为搜索项。
+# 已安排netease_round_01共19个新实验；轮次内固定完整初值，按验证Recall@20优先、NDCG@20次优逐阶段选参。
+# 下列仍为初始配置，运行不会自动覆盖为优胜值；单独训练显式传入 --experiment-case second。
+NetEase:
+  data_path: ./datasets
+  embedding_size: 64
+  batch_size_train: 2048
+  batch_size_test: 2048
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  lr: 1.0e-3
+  test_interval: 5
+  seed: 4096
+  dims: [1000]
+  norm: false
+  time_emb_dim: 10
+  steps: 5
+  noise_scale: 1.0
+  noise_min: 0.0001
+  noise_max: 0.02
+  sampling_noise: false
+  sampling_steps: 0
+  rebuild_k: 1
+  lambda_0: 1000.0
+  num_layers: 2
+  upsilon_UB: 0.0
+  upsilon_UI: 0.0
+  upsilon_BI: 0.2
+  xi_UB: [0.6, 0.3, 0.1]
+  xi_UI: [0.25, 0.65, 0.1]
+  xi_BI: [0.4, 0.4, 0.2]
+  omega: 0.4
+  gamma_1: 0.3
+  gamma_2: 0.2
+  tau: 0.2
+  lambda_1: 0.02
+  lambda_2: 1.0e-5
+  epochs: 40

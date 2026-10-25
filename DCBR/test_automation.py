@@ -245,7 +245,8 @@ class AutomationTests(unittest.TestCase):
 
     def test_reviewed_first_round_has_exactly_nine_experiments(self):
         plan = runner.load_plan(HERE / "搜参配置.yaml")
-        self.assertEqual(len(plan["rounds"]), 2)
+        self.assertEqual([r["id"] for r in plan["rounds"]],
+                         ["youshu_round_01", "youshu_round_02", "netease_round_01"])
         round_ = plan["rounds"][0]
         items = round_["experiments"]
         self.assertEqual(len(items), 9)
@@ -619,6 +620,131 @@ class AutomationTests(unittest.TestCase):
             self.assertFalse(summary['complete'])
             self.assertIsNone(summary['best'])
             self.assertTrue(all(s['best'] is None for s in summary['stages']))
+
+    def test_netease_plan_preserves_budget_controls_and_parameter_sources(self):
+        plan = runner.load_plan(HERE / '搜参配置.yaml')
+        round_ = next(r for r in plan['rounds'] if r['id'] == 'netease_round_01')
+        items = round_['experiments']
+        base = runner.read_yaml(HERE / 'config.yaml')['NetEase']
+        self.assertEqual(round_['dataset'], 'NetEase')
+        self.assertEqual(round_['selection_rule'], runner.CROSS_RULE)
+        self.assertEqual(len(items), 19)
+        self.assertFalse(any(i['reference'] for i in items))
+        self.assertEqual(items[0]['template_config'], dict(base, data_path=str(runner.resolve_path(base['data_path']))))
+        expected = [('lambda_1', [.005, .01, .03, .05]),
+                    ('lambda_0', [100, 500, 2000, 10000]),
+                    ('omega', [.2, .3, .5, .6]), ('tau', [.1, .15, .25, .3]),
+                    ('lambda_2', [1e-6, 1e-7])]
+        start = 1
+        for stage, (key, values) in zip(round_['stages'], expected):
+            end = start + len(values)
+            with self.subTest(parameter=key):
+                self.assertEqual(stage['id'], key)
+                self.assertEqual(stage['candidates'], [i['id'] for i in items[:end]])
+                self.assertEqual([i['overrides'] for i in items[start:end]], [{key: v} for v in values])
+                for item in items[start:end]:
+                    self.assertEqual(item['inherit_best'],
+                                     {'candidates': [i['id'] for i in items[:start]], 'rule': runner.CROSS_RULE})
+                if key != 'lambda_2':
+                    self.assertEqual(sum(v < base[key] for v in values), 2)
+                    self.assertEqual(sum(v > base[key] for v in values), 2)
+            start = end
+        self.assertTrue(all(i['template_config']['seed'] == 4096 and i['template_config']['epochs'] == 40
+                            and i['template_config']['test_interval'] == 5 for i in items))
+        runner.resolve_dependencies(plan, round_, runner.empty_state())
+        self.assertIsNotNone(items[0]['config'])
+        self.assertTrue(all(i['config'] is None and i['fingerprint'] is None for i in items[1:]))
+
+    def test_netease_five_stage_validation_selection_and_failure_propagation(self):
+        plan = runner.load_plan(HERE / '搜参配置.yaml')
+        round_ = next(r for r in plan['rounds'] if r['id'] == 'netease_round_01')
+        items = round_['experiments']
+        # Recall dominates NDCG, NDCG breaks Recall ties, exact ties retain the
+        # earlier control. Deliberately opposite test scores must have no effect.
+        metrics = [(.1, .1), (.11, .01), (.11, .02), (.11, .02), (.10, .99),
+                   (.11, .02), (.10, .9), (.10, .8), (.10, .7),
+                   (.12, .02), (.11, .9), (.11, .8), (.11, .7),
+                   (.12, .03), (.12, .03), (.11, .9), (.11, .8),
+                   (.12, .03), (.11, .99)]
+        state = runner.empty_state()
+        valid = lambda record, *args: record is not None and record['status'] == 'SUCCESS'
+        expected_parent = {1: 0, 5: 2, 9: 2, 13: 9, 17: 13}
+        with patch.object(runner, 'check_success', side_effect=valid):
+            for index, (item, (recall, ndcg)) in enumerate(zip(items, metrics)):
+                runner.resolve_dependencies(plan, round_, state)
+                if index in expected_parent:
+                    parent = state['executions'][expected_parent[index]]
+                    self.assertEqual(item['dependency_selection']['winner_execution_id'], parent['execution_id'])
+                    self.assertEqual(item['config'], dict(parent['config'], **item['overrides']))
+                self.assertIsNotNone(item['config'])
+                state['executions'].append({'round_id': round_['id'], 'experiment_id': item['id'],
+                    'execution_id': f'netease_{index}', 'fingerprint': item['fingerprint'], 'status': 'SUCCESS',
+                    'config': copy.deepcopy(item['config']),
+                    'training_record': {'result': {'metrics': {
+                        'val': {'recall': {'20': recall}, 'ndcg': {'20': ndcg}},
+                        'test': {'recall': {'20': 1 - recall}, 'ndcg': {'20': 1 - ndcg}}}}}})
+            winner = max(state['executions'], key=lambda r: runner.validation_key(r['training_record']))
+            self.assertEqual(winner['experiment_id'], 'tau_010')
+            self.assertEqual({k: winner['config'][k] for k in ('lambda_1', 'lambda_0', 'omega', 'tau', 'lambda_2')},
+                             dict(lambda_1=.01, lambda_0=1000., omega=.2, tau=.1, lambda_2=1e-5))
+            state['executions'][0]['status'] = 'FAILED'
+            runner.resolve_dependencies(plan, round_, state)
+            self.assertTrue(all(i['config'] is None and 'initial' in i['blocked_by'] for i in items[1:]))
+
+    def test_netease_nineteen_trial_training_summary_and_resume(self):
+        with tempfile.TemporaryDirectory(prefix='dcbr-netease-') as temp:
+            root = Path(temp)
+            path = self.make_plan(root)
+            document = runner.read_yaml(path)
+            base_path = Path(document['base_config'])
+            tiny = runner.read_yaml(base_path)['Youshu']
+            data = root / 'data/Youshu'
+            data.rename(root / 'data/NetEase')
+            (root / 'data/NetEase/Youshu_data_size.txt').rename(root / 'data/NetEase/NetEase_data_size.txt')
+            base = runner.read_yaml(HERE / 'config.yaml')['NetEase']
+            # Only reduce compute/data for the fixture; retain production
+            # candidates, seed, stage ordering and all five dependency groups.
+            fixture = {k: tiny[k] for k in ('data_path', 'batch_size_train', 'batch_size_test',
+                        'epochs', 'test_interval', 'steps', 'dims', 'embedding_size')}
+            base.update(fixture)
+            base_path.write_text(yaml.safe_dump({'NetEase': base}), encoding='utf-8')
+            reviewed = copy.deepcopy(next(r for r in runner.read_yaml(HERE / '搜参配置.yaml')['rounds']
+                                          if r['id'] == 'netease_round_01'))
+            reviewed['overrides'].update(fixture)
+            document['rounds'] = [reviewed]
+            path.write_text(yaml.safe_dump(document, allow_unicode=True, sort_keys=False), encoding='utf-8')
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(runner.run(path, 'netease_round_01'), 0)
+            state = runner.load_state(root / 'work/history.json')
+            records = state['executions']
+            self.assertEqual(len(records), 19)
+            self.assertTrue(all(r['status'] == 'SUCCESS' and len(r['attempts']) == 1 for r in records))
+            self.assertTrue(all(r['config']['seed'] == 4096 and r['config']['epochs'] == 2 for r in records))
+            for record, item in zip(records[1:], reviewed['experiments'][1:]):
+                candidates = [r for r in records if r['experiment_id'] in item['inherit_best']['candidates']]
+                winner = max(candidates, key=lambda r: runner.validation_key(r['training_record']))
+                self.assertEqual(record['dependency_selection']['winner_execution_id'], winner['execution_id'])
+                self.assertEqual(record['config'], dict(winner['config'], **item['overrides']))
+                self.assertEqual(record['training_record']['experiment_case'], 'second')
+            summary = json.loads((root / 'work/NetEase/netease_round_01/round_summary.json').read_text(encoding='utf-8'))
+            self.assertTrue(summary['complete'])
+            self.assertEqual(summary['valid_successes'], 19)
+            self.assertEqual(summary['configuration_selection_rule'], runner.CROSS_RULE)
+            self.assertEqual([s['id'] for s in summary['stages']], ['lambda_1', 'lambda_0', 'omega', 'tau', 'lambda_2'])
+            for stage in summary['stages']:
+                candidates = [r for r in records if r['experiment_id'] in
+                              next(s['candidates'] for s in reviewed['stages'] if s['id'] == stage['id'])]
+                winner = max(candidates, key=lambda r: runner.validation_key(r['training_record']))
+                self.assertTrue(stage['complete'])
+                self.assertEqual(stage['best']['execution_id'], winner['execution_id'])
+            self.assertEqual(summary['best']['execution_id'], summary['stages'][-1]['best']['execution_id'])
+            report = (root / 'search.txt').read_bytes()
+            self.assertEqual(report.count(b'END_EXECUTION:'), 19)
+            # Resuming a completed round must not rerun or append duplicate results.
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(runner.run(path, 'netease_round_01'), 0)
+            self.assertEqual(len(runner.load_state(root / 'work/history.json')['executions']), 19)
+            self.assertEqual((root / 'search.txt').read_bytes(), report)
 
     def test_second_round_rejects_rule_mismatch_and_bad_references(self):
         original = runner.read_yaml(HERE / '搜参配置.yaml')

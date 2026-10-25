@@ -2144,3 +2144,259 @@ rounds:
         test:
           recall@20: 0.26364238876956425
     blocked_by: []
+- id: netease_round_01
+  dataset: NetEase
+  selection_rule: validation_recall20_then_ndcg20
+  note: NetEase第一轮共19个新实验：初始对照1个，按lambda_1、lambda_0、omega、tau顺序每项4个，再跑lambda_2另两个论文候选。每阶段保留此前优胜对照，完整继承优胜配置后只覆盖当前参数。按完整精度验证Recall@20优先、完全相同再比较验证NDCG@20，两项完全平局保留声明顺序在前者。测试指标不参与选参。固定40轮、seed=4096，轮次完整初值固定于overrides，历史Youshu不作为引用对照。
+  overrides:
+    data_path: ./datasets
+    embedding_size: 64
+    batch_size_train: 2048
+    batch_size_test: 2048
+    topk: [10, 20, 40, 80]
+    neg_num: 1
+    lr: 0.001
+    test_interval: 5
+    seed: 4096
+    dims: [1000]
+    norm: false
+    time_emb_dim: 10
+    steps: 5
+    noise_scale: 1.0
+    noise_min: 0.0001
+    noise_max: 0.02
+    sampling_noise: false
+    sampling_steps: 0
+    rebuild_k: 1
+    lambda_0: 1000.0
+    num_layers: 2
+    upsilon_UB: 0.0
+    upsilon_UI: 0.0
+    upsilon_BI: 0.2
+    xi_UB: [0.6, 0.3, 0.1]
+    xi_UI: [0.25, 0.65, 0.1]
+    xi_BI: [0.4, 0.4, 0.2]
+    omega: 0.4
+    gamma_1: 0.3
+    gamma_2: 0.2
+    tau: 0.2
+    lambda_1: 0.02
+    lambda_2: 1.0e-5
+    epochs: 40
+  stages:
+  - id: lambda_1
+    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+  - id: lambda_0
+    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+  - id: omega
+    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+  - id: tau
+    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030]
+  - id: lambda_2
+    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030, lambda2_1e6, lambda2_1e7]
+  experiments:
+  - id: initial
+    note: NetEase完整初始配置对照；综合作者MealRec扩散设置、DCBR-Youshu经验及ReCoBR-NetEase对应传播设置，属于工程初值。训练40轮、固定seed=4096。
+    overrides: {}
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_0005
+    note: lambda_1=0.005；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_1: 0.005
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_001
+    note: lambda_1=0.01；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_1: 0.01
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_003
+    note: lambda_1=0.03；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_1: 0.03
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda1_005
+    note: lambda_1=0.05；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_1: 0.05
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_0100
+    note: lambda_0=100；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 100
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_0500
+    note: lambda_0=500；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 500
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_2000
+    note: lambda_0=2000；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 2000
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda0_10000
+    note: lambda_0=10000；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_0: 10000
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_02
+    note: omega=0.2；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      omega: 0.2
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_03
+    note: omega=0.3；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      omega: 0.3
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_05
+    note: omega=0.5；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      omega: 0.5
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: omega_06
+    note: omega=0.6；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      omega: 0.6
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_010
+    note: tau=0.1；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      tau: 0.1
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_015
+    note: tau=0.15；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      tau: 0.15
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_025
+    note: tau=0.25；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      tau: 0.25
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: tau_030
+    note: tau=0.3；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      tau: 0.3
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda2_1e6
+    note: lambda_2=1.0e-6；与已有1e-5对照一起覆盖论文正则系数全部三个候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_2: 1.0e-6
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+  - id: lambda2_1e7
+    note: lambda_2=1.0e-7；与已有1e-5对照一起覆盖论文正则系数全部三个候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
+    inherit_best:
+      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030]
+      rule: validation_recall20_then_ndcg20
+    overrides:
+      lambda_2: 1.0e-7
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []

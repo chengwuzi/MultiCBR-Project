@@ -1082,3 +1082,1987 @@ END_EXECUTION: 20261025T094505_d5264fe4
   "updated_at": "2026-10-25T17:53:47+08:00"
 }
 END_ROUND_SUMMARY: a1c5e0845d4154858a64bb83c200d3ebfd566620956e1984118faf856baa68ab
+
+========================================================================
+EXECUTION_ID: 20261025T111424_749d1285
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: omega_01
+实验备注: omega=0.1；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T19:14:24+08:00
+结束时间(UTC+08:00): 2026-10-25T19:22:31+08:00
+实验总耗时（秒，含重试）: 486.609
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.1
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.2
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T111424_749d1285_omega_01_a1
+quiet: true
+num_workers: 0
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T19:14:24+08:00
+  结束时间: 2026-10-25T19:22:31+08:00
+  耗时（秒）: 486.172
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_01\20261025T111424_749d1285\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_01\20261025T111424_749d1285\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_01\20261025T111424_749d1285\attempt_1_result.json
+best_epoch: 59（从0计数）
+最佳训练轮次: 60
+验证选模指标: {"ndcg@20": 0.12293339323538226, "recall@20": 0.2526643268962936}
+val TOP 10: Recall=0.17605476, NDCG=0.10161850
+val TOP 20: Recall=0.25266433, NDCG=0.12293339
+val TOP 40: Recall=0.34427265, NDCG=0.14414393
+val TOP 80: Recall=0.45153003, NDCG=0.16500935
+test TOP 10: Recall=0.17768740, NDCG=0.11954137
+test TOP 20: Recall=0.25389777, NDCG=0.14127302
+test TOP 40: Recall=0.35075113, NDCG=0.16761529
+test TOP 80: Recall=0.45974050, NDCG=0.19265779
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_01\\20261025T111424_749d1285\\attempt_1_artifacts\\Youshu\\20261025T111428_e1fca4dd\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_01\\20261025T111424_749d1285\\attempt_1_artifacts\\Youshu\\20261025T111428_e1fca4dd\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_01\\20261025T111424_749d1285\\attempt_1_artifacts\\Youshu\\20261025T111428_e1fca4dd\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_01\\20261025T111424_749d1285\\attempt_1_artifacts\\Youshu\\20261025T111428_e1fca4dd\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_01\\20261025T111424_749d1285\\attempt_1_artifacts\\Youshu\\20261025T111428_e1fca4dd\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_01\\20261025T111424_749d1285\\attempt_1_artifacts\\Youshu\\20261025T111428_e1fca4dd\\tensorboard"}
+END_EXECUTION: 20261025T111424_749d1285
+
+========================================================================
+EXECUTION_ID: 20261025T112231_b6649eae
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: omega_03
+实验备注: omega=0.3；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T19:22:31+08:00
+结束时间(UTC+08:00): 2026-10-25T19:31:20+08:00
+实验总耗时（秒，含重试）: 528.547
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.2
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T112231_b6649eae_omega_03_a1
+quiet: true
+num_workers: 0
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T19:22:32+08:00
+  结束时间: 2026-10-25T19:31:20+08:00
+  耗时（秒）: 527.984
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_03\20261025T112231_b6649eae\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_03\20261025T112231_b6649eae\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_03\20261025T112231_b6649eae\attempt_1_result.json
+best_epoch: 89（从0计数）
+最佳训练轮次: 90
+验证选模指标: {"ndcg@20": 0.13453329588441118, "recall@20": 0.2713538785768788}
+val TOP 10: Recall=0.19256545, NDCG=0.11205441
+val TOP 20: Recall=0.27135388, NDCG=0.13453330
+val TOP 40: Recall=0.36509251, NDCG=0.15643111
+val TOP 80: Recall=0.47333290, NDCG=0.17736931
+test TOP 10: Recall=0.18709724, NDCG=0.13107444
+test TOP 20: Recall=0.26627425, NDCG=0.15382782
+test TOP 40: Recall=0.36628798, NDCG=0.18080003
+test TOP 80: Recall=0.48165207, NDCG=0.20723596
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\tensorboard"}
+END_EXECUTION: 20261025T112231_b6649eae
+
+========================================================================
+EXECUTION_ID: 20261025T113121_9a525e49
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: omega_05
+实验备注: omega=0.5；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T19:31:21+08:00
+结束时间(UTC+08:00): 2026-10-25T19:39:41+08:00
+实验总耗时（秒，含重试）: 500.547
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.5
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.2
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T113121_9a525e49_omega_05_a1
+quiet: true
+num_workers: 0
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T19:31:21+08:00
+  结束时间: 2026-10-25T19:39:41+08:00
+  耗时（秒）: 500.0
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_05\20261025T113121_9a525e49\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_05\20261025T113121_9a525e49\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_05\20261025T113121_9a525e49\attempt_1_result.json
+best_epoch: 84（从0计数）
+最佳训练轮次: 85
+验证选模指标: {"ndcg@20": 0.13597124208667544, "recall@20": 0.2682854902828896}
+val TOP 10: Recall=0.18991442, NDCG=0.11401023
+val TOP 20: Recall=0.26828549, NDCG=0.13597124
+val TOP 40: Recall=0.35083094, NDCG=0.15527826
+val TOP 80: Recall=0.43681826, NDCG=0.17202788
+test TOP 10: Recall=0.17921138, NDCG=0.12757894
+test TOP 20: Recall=0.25833325, NDCG=0.15038787
+test TOP 40: Recall=0.34260898, NDCG=0.17380815
+test TOP 80: Recall=0.43319959, NDCG=0.19454386
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_05\\20261025T113121_9a525e49\\attempt_1_artifacts\\Youshu\\20261025T113125_b9b9f012\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_05\\20261025T113121_9a525e49\\attempt_1_artifacts\\Youshu\\20261025T113125_b9b9f012\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_05\\20261025T113121_9a525e49\\attempt_1_artifacts\\Youshu\\20261025T113125_b9b9f012\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_05\\20261025T113121_9a525e49\\attempt_1_artifacts\\Youshu\\20261025T113125_b9b9f012\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_05\\20261025T113121_9a525e49\\attempt_1_artifacts\\Youshu\\20261025T113125_b9b9f012\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_05\\20261025T113121_9a525e49\\attempt_1_artifacts\\Youshu\\20261025T113125_b9b9f012\\tensorboard"}
+END_EXECUTION: 20261025T113121_9a525e49
+
+========================================================================
+EXECUTION_ID: 20261025T113942_8d17df0c
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: omega_07
+实验备注: omega=0.7；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T19:39:42+08:00
+结束时间(UTC+08:00): 2026-10-25T19:47:59+08:00
+实验总耗时（秒，含重试）: 496.5
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.7
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.2
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T113942_8d17df0c_omega_07_a1
+quiet: true
+num_workers: 0
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T19:39:42+08:00
+  结束时间: 2026-10-25T19:47:58+08:00
+  耗时（秒）: 495.954
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_07\20261025T113942_8d17df0c\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_07\20261025T113942_8d17df0c\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_07\20261025T113942_8d17df0c\attempt_1_result.json
+best_epoch: 89（从0计数）
+最佳训练轮次: 90
+验证选模指标: {"ndcg@20": 0.10551750438364021, "recall@20": 0.21193226062997686}
+val TOP 10: Recall=0.15075409, NDCG=0.08836784
+val TOP 20: Recall=0.21193226, NDCG=0.10551750
+val TOP 40: Recall=0.28070188, NDCG=0.12165626
+val TOP 80: Recall=0.36262989, NDCG=0.13765907
+test TOP 10: Recall=0.14568527, NDCG=0.10309204
+test TOP 20: Recall=0.20583432, NDCG=0.12059990
+test TOP 40: Recall=0.27959734, NDCG=0.14062440
+test TOP 80: Recall=0.35539163, NDCG=0.15848843
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_07\\20261025T113942_8d17df0c\\attempt_1_artifacts\\Youshu\\20261025T113947_af03ddcb\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_07\\20261025T113942_8d17df0c\\attempt_1_artifacts\\Youshu\\20261025T113947_af03ddcb\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_07\\20261025T113942_8d17df0c\\attempt_1_artifacts\\Youshu\\20261025T113947_af03ddcb\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_07\\20261025T113942_8d17df0c\\attempt_1_artifacts\\Youshu\\20261025T113947_af03ddcb\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_07\\20261025T113942_8d17df0c\\attempt_1_artifacts\\Youshu\\20261025T113947_af03ddcb\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_07\\20261025T113942_8d17df0c\\attempt_1_artifacts\\Youshu\\20261025T113947_af03ddcb\\tensorboard"}
+END_EXECUTION: 20261025T113942_8d17df0c
+
+========================================================================
+EXECUTION_ID: 20261025T114759_4c63e87c
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: omega_10
+实验备注: omega=1.0；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T19:47:59+08:00
+结束时间(UTC+08:00): 2026-10-25T19:56:09+08:00
+实验总耗时（秒，含重试）: 489.172
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 1.0
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.2
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T114759_4c63e87c_omega_10_a1
+quiet: true
+num_workers: 0
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T19:48:00+08:00
+  结束时间: 2026-10-25T19:56:08+08:00
+  耗时（秒）: 488.641
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_10\20261025T114759_4c63e87c\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_10\20261025T114759_4c63e87c\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\omega_10\20261025T114759_4c63e87c\attempt_1_result.json
+best_epoch: 29（从0计数）
+最佳训练轮次: 30
+验证选模指标: {"ndcg@20": 0.02710740378516153, "recall@20": 0.06638665052635036}
+val TOP 10: Recall=0.03964486, NDCG=0.01962297
+val TOP 20: Recall=0.06638665, NDCG=0.02710740
+val TOP 40: Recall=0.10999279, NDCG=0.03693424
+val TOP 80: Recall=0.17907729, NDCG=0.05022836
+test TOP 10: Recall=0.03921070, NDCG=0.02436270
+test TOP 20: Recall=0.06264159, NDCG=0.03154133
+test TOP 40: Recall=0.10521939, NDCG=0.04269988
+test TOP 80: Recall=0.17084134, NDCG=0.05770399
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_10\\20261025T114759_4c63e87c\\attempt_1_artifacts\\Youshu\\20261025T114804_66879240\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_10\\20261025T114759_4c63e87c\\attempt_1_artifacts\\Youshu\\20261025T114804_66879240\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_10\\20261025T114759_4c63e87c\\attempt_1_artifacts\\Youshu\\20261025T114804_66879240\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_10\\20261025T114759_4c63e87c\\attempt_1_artifacts\\Youshu\\20261025T114804_66879240\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_10\\20261025T114759_4c63e87c\\attempt_1_artifacts\\Youshu\\20261025T114804_66879240\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_10\\20261025T114759_4c63e87c\\attempt_1_artifacts\\Youshu\\20261025T114804_66879240\\tensorboard"}
+END_EXECUTION: 20261025T114759_4c63e87c
+
+========================================================================
+EXECUTION_ID: 20261025T115614_4738c53b
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: tau_010
+实验备注: tau=0.1；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T19:56:14+08:00
+结束时间(UTC+08:00): 2026-10-25T20:04:31+08:00
+实验总耗时（秒，含重试）: 496.922
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.1
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T115614_4738c53b_tau_010_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "omega_03", "winner_execution_id": "20261025T112231_b6649eae", "winner_test": {"recall@20": 0.2662742488406002}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T19:56:14+08:00
+  结束时间: 2026-10-25T20:04:31+08:00
+  耗时（秒）: 496.328
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_010\20261025T115614_4738c53b\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_010\20261025T115614_4738c53b\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_010\20261025T115614_4738c53b\attempt_1_result.json
+best_epoch: 69（从0计数）
+最佳训练轮次: 70
+验证选模指标: {"ndcg@20": 0.13345297207176463, "recall@20": 0.27404046711304497}
+val TOP 10: Recall=0.19112393, NDCG=0.11011907
+val TOP 20: Recall=0.27404047, NDCG=0.13345297
+val TOP 40: Recall=0.37066122, NDCG=0.15589830
+val TOP 80: Recall=0.48498380, NDCG=0.17799997
+test TOP 10: Recall=0.18752272, NDCG=0.13085166
+test TOP 20: Recall=0.26680041, NDCG=0.15351393
+test TOP 40: Recall=0.37340280, NDCG=0.18216333
+test TOP 80: Recall=0.48317435, NDCG=0.20760588
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_010\\20261025T115614_4738c53b\\attempt_1_artifacts\\Youshu\\20261025T115618_687a9545\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_010\\20261025T115614_4738c53b\\attempt_1_artifacts\\Youshu\\20261025T115618_687a9545\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_010\\20261025T115614_4738c53b\\attempt_1_artifacts\\Youshu\\20261025T115618_687a9545\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_010\\20261025T115614_4738c53b\\attempt_1_artifacts\\Youshu\\20261025T115618_687a9545\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_010\\20261025T115614_4738c53b\\attempt_1_artifacts\\Youshu\\20261025T115618_687a9545\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_010\\20261025T115614_4738c53b\\attempt_1_artifacts\\Youshu\\20261025T115618_687a9545\\tensorboard"}
+END_EXECUTION: 20261025T115614_4738c53b
+
+========================================================================
+EXECUTION_ID: 20261025T120436_d5729aa1
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: tau_015
+实验备注: tau=0.15；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:04:36+08:00
+结束时间(UTC+08:00): 2026-10-25T20:12:49+08:00
+实验总耗时（秒，含重试）: 492.188
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.15
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T120436_d5729aa1_tau_015_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "omega_03", "winner_execution_id": "20261025T112231_b6649eae", "winner_test": {"recall@20": 0.2662742488406002}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:04:37+08:00
+  结束时间: 2026-10-25T20:12:48+08:00
+  耗时（秒）: 491.437
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_015\20261025T120436_d5729aa1\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_015\20261025T120436_d5729aa1\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_015\20261025T120436_d5729aa1\attempt_1_result.json
+best_epoch: 89（从0计数）
+最佳训练轮次: 90
+验证选模指标: {"ndcg@20": 0.13467286043209012, "recall@20": 0.27150609518233565}
+val TOP 10: Recall=0.18859452, NDCG=0.11097816
+val TOP 20: Recall=0.27150610, NDCG=0.13467286
+val TOP 40: Recall=0.36315048, NDCG=0.15593899
+val TOP 80: Recall=0.45524051, NDCG=0.17392039
+test TOP 10: Recall=0.19036834, NDCG=0.13083488
+test TOP 20: Recall=0.26607809, NDCG=0.15281886
+test TOP 40: Recall=0.35956168, NDCG=0.17856097
+test TOP 80: Recall=0.45773556, NDCG=0.20119664
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_015\\20261025T120436_d5729aa1\\attempt_1_artifacts\\Youshu\\20261025T120441_3dd0e7fe\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_015\\20261025T120436_d5729aa1\\attempt_1_artifacts\\Youshu\\20261025T120441_3dd0e7fe\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_015\\20261025T120436_d5729aa1\\attempt_1_artifacts\\Youshu\\20261025T120441_3dd0e7fe\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_015\\20261025T120436_d5729aa1\\attempt_1_artifacts\\Youshu\\20261025T120441_3dd0e7fe\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_015\\20261025T120436_d5729aa1\\attempt_1_artifacts\\Youshu\\20261025T120441_3dd0e7fe\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_015\\20261025T120436_d5729aa1\\attempt_1_artifacts\\Youshu\\20261025T120441_3dd0e7fe\\tensorboard"}
+END_EXECUTION: 20261025T120436_d5729aa1
+
+========================================================================
+EXECUTION_ID: 20261025T121254_2673b424
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: tau_025
+实验备注: tau=0.25；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:12:54+08:00
+结束时间(UTC+08:00): 2026-10-25T20:21:09+08:00
+实验总耗时（秒，含重试）: 494.375
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.25
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T121254_2673b424_tau_025_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "omega_03", "winner_execution_id": "20261025T112231_b6649eae", "winner_test": {"recall@20": 0.2662742488406002}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:12:55+08:00
+  结束时间: 2026-10-25T20:21:09+08:00
+  耗时（秒）: 493.672
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_025\20261025T121254_2673b424\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_025\20261025T121254_2673b424\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_025\20261025T121254_2673b424\attempt_1_result.json
+best_epoch: 79（从0计数）
+最佳训练轮次: 80
+验证选模指标: {"ndcg@20": 0.13257031635724037, "recall@20": 0.2693115420017584}
+val TOP 10: Recall=0.18814579, NDCG=0.10977742
+val TOP 20: Recall=0.26931154, NDCG=0.13257032
+val TOP 40: Recall=0.36338330, NDCG=0.15437512
+val TOP 80: Recall=0.47174884, NDCG=0.17534358
+test TOP 10: Recall=0.18877672, NDCG=0.13052631
+test TOP 20: Recall=0.26858404, NDCG=0.15328094
+test TOP 40: Recall=0.36555822, NDCG=0.17974274
+test TOP 80: Recall=0.47092039, NDCG=0.20420190
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\tensorboard"}
+END_EXECUTION: 20261025T121254_2673b424
+
+========================================================================
+EXECUTION_ID: 20261025T122114_d9b74265
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: tau_030
+实验备注: tau=0.3；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:21:14+08:00
+结束时间(UTC+08:00): 2026-10-25T20:29:24+08:00
+实验总耗时（秒，含重试）: 489.859
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.3
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T122114_d9b74265_tau_030_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "omega_03", "winner_execution_id": "20261025T112231_b6649eae", "winner_test": {"recall@20": 0.2662742488406002}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:21:15+08:00
+  结束时间: 2026-10-25T20:29:24+08:00
+  耗时（秒）: 489.172
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_030\20261025T122114_d9b74265\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_030\20261025T122114_d9b74265\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\tau_030\20261025T122114_d9b74265\attempt_1_result.json
+best_epoch: 74（从0计数）
+最佳训练轮次: 75
+验证选模指标: {"ndcg@20": 0.13155143250481185, "recall@20": 0.2664199060747534}
+val TOP 10: Recall=0.18965304, NDCG=0.11003808
+val TOP 20: Recall=0.26641991, NDCG=0.13155143
+val TOP 40: Recall=0.36251910, NDCG=0.15364936
+val TOP 80: Recall=0.46557867, NDCG=0.17365671
+test TOP 10: Recall=0.18889112, NDCG=0.13026679
+test TOP 20: Recall=0.26364239, NDCG=0.15145879
+test TOP 40: Recall=0.36014994, NDCG=0.17779895
+test TOP 80: Recall=0.47280813, NDCG=0.20343306
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_030\\20261025T122114_d9b74265\\attempt_1_artifacts\\Youshu\\20261025T122119_1949d6d7\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_030\\20261025T122114_d9b74265\\attempt_1_artifacts\\Youshu\\20261025T122119_1949d6d7\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_030\\20261025T122114_d9b74265\\attempt_1_artifacts\\Youshu\\20261025T122119_1949d6d7\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_030\\20261025T122114_d9b74265\\attempt_1_artifacts\\Youshu\\20261025T122119_1949d6d7\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_030\\20261025T122114_d9b74265\\attempt_1_artifacts\\Youshu\\20261025T122119_1949d6d7\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_030\\20261025T122114_d9b74265\\attempt_1_artifacts\\Youshu\\20261025T122119_1949d6d7\\tensorboard"}
+END_EXECUTION: 20261025T122114_d9b74265
+
+========================================================================
+EXECUTION_ID: 20261025T122930_a05e0875
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: gamma_010_040
+实验备注: gamma_1=0.1、gamma_2=0.4，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:29:30+08:00
+结束时间(UTC+08:00): 2026-10-25T20:37:44+08:00
+实验总耗时（秒，含重试）: 493.938
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 03094348a4247d57f55bf8e2eab33f0ad9832e1dc7771a3d54322e1c6d801fc3
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.1
+gamma_2: 0.4
+tau: 0.25
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T122930_a05e0875_gamma_010_040_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "tau_025", "winner_execution_id": "20261025T121254_2673b424", "winner_test": {"recall@20": 0.26858403965523614}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}, {"experiment_id": "tau_010", "execution_id": "20261025T115614_4738c53b", "fingerprint": "15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7", "test": {"recall@20": 0.266800406334488}}, {"experiment_id": "tau_015", "execution_id": "20261025T120436_d5729aa1", "fingerprint": "ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294", "test": {"recall@20": 0.26607808651010423}}, {"experiment_id": "tau_025", "execution_id": "20261025T121254_2673b424", "fingerprint": "fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa", "test": {"recall@20": 0.26858403965523614}}, {"experiment_id": "tau_030", "execution_id": "20261025T122114_d9b74265", "fingerprint": "7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd", "test": {"recall@20": 0.26364238876956425}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:29:30+08:00
+  结束时间: 2026-10-25T20:37:44+08:00
+  耗时（秒）: 493.203
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_010_040\20261025T122930_a05e0875\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_010_040\20261025T122930_a05e0875\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_010_040\20261025T122930_a05e0875\attempt_1_result.json
+best_epoch: 54（从0计数）
+最佳训练轮次: 55
+验证选模指标: {"ndcg@20": 0.13309364538009041, "recall@20": 0.26946630603600774}
+val TOP 10: Recall=0.18689591, NDCG=0.10978432
+val TOP 20: Recall=0.26946631, NDCG=0.13309365
+val TOP 40: Recall=0.36519644, NDCG=0.15520784
+val TOP 80: Recall=0.47367622, NDCG=0.17636829
+test TOP 10: Recall=0.18761459, NDCG=0.12871263
+test TOP 20: Recall=0.26430510, NDCG=0.15075693
+test TOP 40: Recall=0.36181336, NDCG=0.17757638
+test TOP 80: Recall=0.47762243, NDCG=0.20395907
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_010_040\\20261025T122930_a05e0875\\attempt_1_artifacts\\Youshu\\20261025T122934_6cb3c94c\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_010_040\\20261025T122930_a05e0875\\attempt_1_artifacts\\Youshu\\20261025T122934_6cb3c94c\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_010_040\\20261025T122930_a05e0875\\attempt_1_artifacts\\Youshu\\20261025T122934_6cb3c94c\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_010_040\\20261025T122930_a05e0875\\attempt_1_artifacts\\Youshu\\20261025T122934_6cb3c94c\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_010_040\\20261025T122930_a05e0875\\attempt_1_artifacts\\Youshu\\20261025T122934_6cb3c94c\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_010_040\\20261025T122930_a05e0875\\attempt_1_artifacts\\Youshu\\20261025T122934_6cb3c94c\\tensorboard"}
+END_EXECUTION: 20261025T122930_a05e0875
+
+========================================================================
+EXECUTION_ID: 20261025T123749_11db53e4
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: gamma_020_030
+实验备注: gamma_1=0.2、gamma_2=0.3，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:37:49+08:00
+结束时间(UTC+08:00): 2026-10-25T20:45:58+08:00
+实验总耗时（秒，含重试）: 488.734
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 93cb84cb216e33a8f49416587a1cc055bf5e0e1af687695331a762873cc2220f
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.2
+gamma_2: 0.3
+tau: 0.25
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T123749_11db53e4_gamma_020_030_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "tau_025", "winner_execution_id": "20261025T121254_2673b424", "winner_test": {"recall@20": 0.26858403965523614}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}, {"experiment_id": "tau_010", "execution_id": "20261025T115614_4738c53b", "fingerprint": "15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7", "test": {"recall@20": 0.266800406334488}}, {"experiment_id": "tau_015", "execution_id": "20261025T120436_d5729aa1", "fingerprint": "ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294", "test": {"recall@20": 0.26607808651010423}}, {"experiment_id": "tau_025", "execution_id": "20261025T121254_2673b424", "fingerprint": "fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa", "test": {"recall@20": 0.26858403965523614}}, {"experiment_id": "tau_030", "execution_id": "20261025T122114_d9b74265", "fingerprint": "7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd", "test": {"recall@20": 0.26364238876956425}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:37:50+08:00
+  结束时间: 2026-10-25T20:45:58+08:00
+  耗时（秒）: 487.985
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_020_030\20261025T123749_11db53e4\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_020_030\20261025T123749_11db53e4\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_020_030\20261025T123749_11db53e4\attempt_1_result.json
+best_epoch: 64（从0计数）
+最佳训练轮次: 65
+验证选模指标: {"ndcg@20": 0.1334044703683083, "recall@20": 0.27207924603368433}
+val TOP 10: Recall=0.19209756, NDCG=0.11092222
+val TOP 20: Recall=0.27207925, NDCG=0.13340447
+val TOP 40: Recall=0.36705693, NDCG=0.15543677
+val TOP 80: Recall=0.47522353, NDCG=0.17632142
+test TOP 10: Recall=0.18736272, NDCG=0.12951067
+test TOP 20: Recall=0.26546519, NDCG=0.15193546
+test TOP 40: Recall=0.36523080, NDCG=0.17882834
+test TOP 80: Recall=0.47601167, NDCG=0.20448306
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_020_030\\20261025T123749_11db53e4\\attempt_1_artifacts\\Youshu\\20261025T123754_e444cc34\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_020_030\\20261025T123749_11db53e4\\attempt_1_artifacts\\Youshu\\20261025T123754_e444cc34\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_020_030\\20261025T123749_11db53e4\\attempt_1_artifacts\\Youshu\\20261025T123754_e444cc34\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_020_030\\20261025T123749_11db53e4\\attempt_1_artifacts\\Youshu\\20261025T123754_e444cc34\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_020_030\\20261025T123749_11db53e4\\attempt_1_artifacts\\Youshu\\20261025T123754_e444cc34\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_020_030\\20261025T123749_11db53e4\\attempt_1_artifacts\\Youshu\\20261025T123754_e444cc34\\tensorboard"}
+END_EXECUTION: 20261025T123749_11db53e4
+
+========================================================================
+EXECUTION_ID: 20261025T124603_0e4b72de
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: gamma_025_025
+实验备注: gamma_1=0.25、gamma_2=0.25，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:46:03+08:00
+结束时间(UTC+08:00): 2026-10-25T20:54:17+08:00
+实验总耗时（秒，含重试）: 493.422
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: f9a24379fcafa735ad483dfdb5f313da23c65b799aa413ee341f664c03802143
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.25
+gamma_2: 0.25
+tau: 0.25
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T124603_0e4b72de_gamma_025_025_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "tau_025", "winner_execution_id": "20261025T121254_2673b424", "winner_test": {"recall@20": 0.26858403965523614}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}, {"experiment_id": "tau_010", "execution_id": "20261025T115614_4738c53b", "fingerprint": "15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7", "test": {"recall@20": 0.266800406334488}}, {"experiment_id": "tau_015", "execution_id": "20261025T120436_d5729aa1", "fingerprint": "ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294", "test": {"recall@20": 0.26607808651010423}}, {"experiment_id": "tau_025", "execution_id": "20261025T121254_2673b424", "fingerprint": "fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa", "test": {"recall@20": 0.26858403965523614}}, {"experiment_id": "tau_030", "execution_id": "20261025T122114_d9b74265", "fingerprint": "7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd", "test": {"recall@20": 0.26364238876956425}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:46:04+08:00
+  结束时间: 2026-10-25T20:54:16+08:00
+  耗时（秒）: 492.594
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_025_025\20261025T124603_0e4b72de\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_025_025\20261025T124603_0e4b72de\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_025_025\20261025T124603_0e4b72de\attempt_1_result.json
+best_epoch: 64（从0计数）
+最佳训练轮次: 65
+验证选模指标: {"ndcg@20": 0.1328494274040137, "recall@20": 0.27109880566637273}
+val TOP 10: Recall=0.18898424, NDCG=0.10989780
+val TOP 20: Recall=0.27109881, NDCG=0.13284943
+val TOP 40: Recall=0.36668986, NDCG=0.15499662
+val TOP 80: Recall=0.47438150, NDCG=0.17594891
+test TOP 10: Recall=0.18368921, NDCG=0.12731588
+test TOP 20: Recall=0.26446734, NDCG=0.15047079
+test TOP 40: Recall=0.36433092, NDCG=0.17725853
+test TOP 80: Recall=0.47443119, NDCG=0.20271187
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_025_025\\20261025T124603_0e4b72de\\attempt_1_artifacts\\Youshu\\20261025T124607_92ca44a0\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_025_025\\20261025T124603_0e4b72de\\attempt_1_artifacts\\Youshu\\20261025T124607_92ca44a0\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_025_025\\20261025T124603_0e4b72de\\attempt_1_artifacts\\Youshu\\20261025T124607_92ca44a0\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_025_025\\20261025T124603_0e4b72de\\attempt_1_artifacts\\Youshu\\20261025T124607_92ca44a0\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_025_025\\20261025T124603_0e4b72de\\attempt_1_artifacts\\Youshu\\20261025T124607_92ca44a0\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_025_025\\20261025T124603_0e4b72de\\attempt_1_artifacts\\Youshu\\20261025T124607_92ca44a0\\tensorboard"}
+END_EXECUTION: 20261025T124603_0e4b72de
+
+========================================================================
+EXECUTION_ID: 20261025T125422_f423e24d
+实验类别: 第二种情况（新数据集参数搜索）
+模型: DCBR
+数据集: Youshu
+轮次: youshu_round_02
+轮次备注: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+实验: gamma_040_010
+实验备注: gamma_1=0.4、gamma_2=0.1，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+状态: SUCCESS
+GPU: 0
+设备: cuda
+开始时间(UTC+08:00): 2026-10-25T20:54:22+08:00
+结束时间(UTC+08:00): 2026-10-25T21:03:20+08:00
+实验总耗时（秒，含重试）: 537.438
+尝试次数: 1/3
+代码版本: 0c03273f1ed4e8e9482f93d3b078929070dac58d
+源码摘要: {"run_experiments.py": "2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5", "train.py": "efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379"}
+配置及数据指纹: 7373d175fc7885e0f8629be23884ac42d7854851487ecb895136c90796ae477c
+数据文件摘要: {"Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f", "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf", "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073", "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c", "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d", "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260"}
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.3
+gamma_1: 0.4
+gamma_2: 0.1
+tau: 0.25
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 90
+dataset: Youshu
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 8039
+num_bundles: 4771
+num_items: 32770
+gpu: '0'
+info: tune_20261025T125422_f423e24d_gamma_040_010_a1
+quiet: true
+num_workers: 0
+前置实验选择依据: {"rule": "test_recall20", "tie_break": "first experiment in declared order", "winner_experiment_id": "tau_025", "winner_execution_id": "20261025T121254_2673b424", "winner_test": {"recall@20": 0.26858403965523614}, "candidates": [{"experiment_id": "baseline_omega0", "execution_id": "20261025T093608_5009e405", "fingerprint": "ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7", "test": {"recall@20": 0.2556611963847716}}, {"experiment_id": "omega_01", "execution_id": "20261025T111424_749d1285", "fingerprint": "714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9", "test": {"recall@20": 0.25389777232199434}}, {"experiment_id": "omega_03", "execution_id": "20261025T112231_b6649eae", "fingerprint": "abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff", "test": {"recall@20": 0.2662742488406002}}, {"experiment_id": "omega_05", "execution_id": "20261025T113121_9a525e49", "fingerprint": "d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1", "test": {"recall@20": 0.2583332480752577}}, {"experiment_id": "omega_07", "execution_id": "20261025T113942_8d17df0c", "fingerprint": "b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231", "test": {"recall@20": 0.20583432459597573}}, {"experiment_id": "omega_10", "execution_id": "20261025T114759_4c63e87c", "fingerprint": "437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee", "test": {"recall@20": 0.0626415872783345}}, {"experiment_id": "tau_010", "execution_id": "20261025T115614_4738c53b", "fingerprint": "15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7", "test": {"recall@20": 0.266800406334488}}, {"experiment_id": "tau_015", "execution_id": "20261025T120436_d5729aa1", "fingerprint": "ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294", "test": {"recall@20": 0.26607808651010423}}, {"experiment_id": "tau_025", "execution_id": "20261025T121254_2673b424", "fingerprint": "fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa", "test": {"recall@20": 0.26858403965523614}}, {"experiment_id": "tau_030", "execution_id": "20261025T122114_d9b74265", "fingerprint": "7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd", "test": {"recall@20": 0.26364238876956425}}]}
+跨配置选择规则: test_recall20
+尝试 1: SUCCESS
+  开始时间: 2026-10-25T20:54:23+08:00
+  结束时间: 2026-10-25T21:03:20+08:00
+  耗时（秒）: 536.516
+  日志: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_040_010\20261025T125422_f423e24d\attempt_1_stdout.txt
+  配置快照: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_040_010\20261025T125422_f423e24d\attempt_1_config.yaml
+  结果: C:\Users\admin\PycharmProjects\ReCoBR-TY\DCBR\log\tuning\Youshu\youshu_round_02\gamma_040_010\20261025T125422_f423e24d\attempt_1_result.json
+best_epoch: 79（从0计数）
+最佳训练轮次: 80
+验证选模指标: {"ndcg@20": 0.1323943839116691, "recall@20": 0.27076312777721306}
+val TOP 10: Recall=0.18996001, NDCG=0.10969609
+val TOP 20: Recall=0.27076313, NDCG=0.13239438
+val TOP 40: Recall=0.36339082, NDCG=0.15378973
+val TOP 80: Recall=0.47146102, NDCG=0.17470069
+test TOP 10: Recall=0.18656902, NDCG=0.12850012
+test TOP 20: Recall=0.26725133, NDCG=0.15142919
+test TOP 40: Recall=0.36547494, NDCG=0.17801522
+test TOP 80: Recall=0.47311286, NDCG=0.20274252
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_040_010\\20261025T125422_f423e24d\\attempt_1_artifacts\\Youshu\\20261025T125427_070c5335\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_040_010\\20261025T125422_f423e24d\\attempt_1_artifacts\\Youshu\\20261025T125427_070c5335\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_040_010\\20261025T125422_f423e24d\\attempt_1_artifacts\\Youshu\\20261025T125427_070c5335\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_040_010\\20261025T125422_f423e24d\\attempt_1_artifacts\\Youshu\\20261025T125427_070c5335\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_040_010\\20261025T125422_f423e24d\\attempt_1_artifacts\\Youshu\\20261025T125427_070c5335\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\gamma_040_010\\20261025T125422_f423e24d\\attempt_1_artifacts\\Youshu\\20261025T125427_070c5335\\tensorboard"}
+END_EXECUTION: 20261025T125422_f423e24d
+
+========================================================================
+轮次汇总: youshu_round_02
+跨配置规则: test_recall20；完全平局保留声明顺序在前者。
+本轮明确使用测试集Recall@20选参，测试成绩已参与配置选择，不属于独立测试评估。
+{
+  "round_id": "youshu_round_02",
+  "dataset": "Youshu",
+  "complete": true,
+  "planned": 14,
+  "valid_successes": 14,
+  "configuration_selection_rule": "test_recall20",
+  "checkpoint_selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "candidates": [
+    {
+      "experiment_id": "baseline_omega0",
+      "execution_id": "20261025T093608_5009e405",
+      "test": {
+        "recall@20": 0.2556611963847716
+      },
+      "reference": {
+        "round_id": "youshu_round_01",
+        "experiment_id": "lambda0_2000",
+        "execution_id": "20261025T093608_5009e405",
+        "fingerprint": "0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3"
+      }
+    },
+    {
+      "experiment_id": "omega_01",
+      "execution_id": "20261025T111424_749d1285",
+      "test": {
+        "recall@20": 0.25389777232199434
+      }
+    },
+    {
+      "experiment_id": "omega_03",
+      "execution_id": "20261025T112231_b6649eae",
+      "test": {
+        "recall@20": 0.2662742488406002
+      }
+    },
+    {
+      "experiment_id": "omega_05",
+      "execution_id": "20261025T113121_9a525e49",
+      "test": {
+        "recall@20": 0.2583332480752577
+      }
+    },
+    {
+      "experiment_id": "omega_07",
+      "execution_id": "20261025T113942_8d17df0c",
+      "test": {
+        "recall@20": 0.20583432459597573
+      }
+    },
+    {
+      "experiment_id": "omega_10",
+      "execution_id": "20261025T114759_4c63e87c",
+      "test": {
+        "recall@20": 0.0626415872783345
+      }
+    },
+    {
+      "experiment_id": "tau_010",
+      "execution_id": "20261025T115614_4738c53b",
+      "test": {
+        "recall@20": 0.266800406334488
+      }
+    },
+    {
+      "experiment_id": "tau_015",
+      "execution_id": "20261025T120436_d5729aa1",
+      "test": {
+        "recall@20": 0.26607808651010423
+      }
+    },
+    {
+      "experiment_id": "tau_025",
+      "execution_id": "20261025T121254_2673b424",
+      "test": {
+        "recall@20": 0.26858403965523614
+      }
+    },
+    {
+      "experiment_id": "tau_030",
+      "execution_id": "20261025T122114_d9b74265",
+      "test": {
+        "recall@20": 0.26364238876956425
+      }
+    },
+    {
+      "experiment_id": "gamma_010_040",
+      "execution_id": "20261025T122930_a05e0875",
+      "test": {
+        "recall@20": 0.26430510185424766
+      }
+    },
+    {
+      "experiment_id": "gamma_020_030",
+      "execution_id": "20261025T123749_11db53e4",
+      "test": {
+        "recall@20": 0.26546519267555024
+      }
+    },
+    {
+      "experiment_id": "gamma_025_025",
+      "execution_id": "20261025T124603_0e4b72de",
+      "test": {
+        "recall@20": 0.2644673380025056
+      }
+    },
+    {
+      "experiment_id": "gamma_040_010",
+      "execution_id": "20261025T125422_f423e24d",
+      "test": {
+        "recall@20": 0.26725133217118324
+      }
+    }
+  ],
+  "best": {
+    "experiment_id": "tau_025",
+    "execution_id": "20261025T121254_2673b424",
+    "test": {
+      "recall@20": 0.26858403965523614
+    },
+    "config": {
+      "data_path": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\datasets",
+      "embedding_size": 64,
+      "batch_size_train": 2048,
+      "batch_size_test": 2048,
+      "topk": [
+        10,
+        20,
+        40,
+        80
+      ],
+      "neg_num": 1,
+      "lr": 0.001,
+      "test_interval": 5,
+      "seed": 0,
+      "dims": [
+        1000
+      ],
+      "norm": false,
+      "time_emb_dim": 10,
+      "steps": 5,
+      "noise_scale": 1.0,
+      "noise_min": 0.0001,
+      "noise_max": 0.02,
+      "sampling_noise": false,
+      "sampling_steps": 0,
+      "rebuild_k": 1,
+      "lambda_0": 2000.0,
+      "num_layers": 2,
+      "upsilon_UB": 0.05,
+      "upsilon_UI": 0.0,
+      "upsilon_BI": 0.1,
+      "xi_UB": [
+        0.6,
+        0.3,
+        0.1
+      ],
+      "xi_UI": [
+        0.4,
+        0.6,
+        0.0
+      ],
+      "xi_BI": [
+        0.5,
+        0.4,
+        0.1
+      ],
+      "omega": 0.3,
+      "gamma_1": 0.3,
+      "gamma_2": 0.2,
+      "tau": 0.25,
+      "lambda_1": 0.02,
+      "lambda_2": 1e-05,
+      "epochs": 90
+    },
+    "checkpoint": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\best.pt"
+  },
+  "training_planned": 13,
+  "reference_count": 1,
+  "stages": [
+    {
+      "id": "omega",
+      "complete": true,
+      "candidates": [
+        {
+          "experiment_id": "baseline_omega0",
+          "execution_id": "20261025T093608_5009e405",
+          "test": {
+            "recall@20": 0.2556611963847716
+          },
+          "reference": {
+            "round_id": "youshu_round_01",
+            "experiment_id": "lambda0_2000",
+            "execution_id": "20261025T093608_5009e405",
+            "fingerprint": "0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3"
+          }
+        },
+        {
+          "experiment_id": "omega_01",
+          "execution_id": "20261025T111424_749d1285",
+          "test": {
+            "recall@20": 0.25389777232199434
+          }
+        },
+        {
+          "experiment_id": "omega_03",
+          "execution_id": "20261025T112231_b6649eae",
+          "test": {
+            "recall@20": 0.2662742488406002
+          }
+        },
+        {
+          "experiment_id": "omega_05",
+          "execution_id": "20261025T113121_9a525e49",
+          "test": {
+            "recall@20": 0.2583332480752577
+          }
+        },
+        {
+          "experiment_id": "omega_07",
+          "execution_id": "20261025T113942_8d17df0c",
+          "test": {
+            "recall@20": 0.20583432459597573
+          }
+        },
+        {
+          "experiment_id": "omega_10",
+          "execution_id": "20261025T114759_4c63e87c",
+          "test": {
+            "recall@20": 0.0626415872783345
+          }
+        }
+      ],
+      "best": {
+        "experiment_id": "omega_03",
+        "execution_id": "20261025T112231_b6649eae",
+        "test": {
+          "recall@20": 0.2662742488406002
+        },
+        "config": {
+          "data_path": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\datasets",
+          "embedding_size": 64,
+          "batch_size_train": 2048,
+          "batch_size_test": 2048,
+          "topk": [
+            10,
+            20,
+            40,
+            80
+          ],
+          "neg_num": 1,
+          "lr": 0.001,
+          "test_interval": 5,
+          "seed": 0,
+          "dims": [
+            1000
+          ],
+          "norm": false,
+          "time_emb_dim": 10,
+          "steps": 5,
+          "noise_scale": 1.0,
+          "noise_min": 0.0001,
+          "noise_max": 0.02,
+          "sampling_noise": false,
+          "sampling_steps": 0,
+          "rebuild_k": 1,
+          "lambda_0": 2000.0,
+          "num_layers": 2,
+          "upsilon_UB": 0.05,
+          "upsilon_UI": 0.0,
+          "upsilon_BI": 0.1,
+          "xi_UB": [
+            0.6,
+            0.3,
+            0.1
+          ],
+          "xi_UI": [
+            0.4,
+            0.6,
+            0.0
+          ],
+          "xi_BI": [
+            0.5,
+            0.4,
+            0.1
+          ],
+          "omega": 0.3,
+          "gamma_1": 0.3,
+          "gamma_2": 0.2,
+          "tau": 0.2,
+          "lambda_1": 0.02,
+          "lambda_2": 1e-05,
+          "epochs": 90
+        },
+        "checkpoint": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\omega_03\\20261025T112231_b6649eae\\attempt_1_artifacts\\Youshu\\20261025T112236_201d3c45\\best.pt"
+      }
+    },
+    {
+      "id": "tau",
+      "complete": true,
+      "candidates": [
+        {
+          "experiment_id": "baseline_omega0",
+          "execution_id": "20261025T093608_5009e405",
+          "test": {
+            "recall@20": 0.2556611963847716
+          },
+          "reference": {
+            "round_id": "youshu_round_01",
+            "experiment_id": "lambda0_2000",
+            "execution_id": "20261025T093608_5009e405",
+            "fingerprint": "0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3"
+          }
+        },
+        {
+          "experiment_id": "omega_01",
+          "execution_id": "20261025T111424_749d1285",
+          "test": {
+            "recall@20": 0.25389777232199434
+          }
+        },
+        {
+          "experiment_id": "omega_03",
+          "execution_id": "20261025T112231_b6649eae",
+          "test": {
+            "recall@20": 0.2662742488406002
+          }
+        },
+        {
+          "experiment_id": "omega_05",
+          "execution_id": "20261025T113121_9a525e49",
+          "test": {
+            "recall@20": 0.2583332480752577
+          }
+        },
+        {
+          "experiment_id": "omega_07",
+          "execution_id": "20261025T113942_8d17df0c",
+          "test": {
+            "recall@20": 0.20583432459597573
+          }
+        },
+        {
+          "experiment_id": "omega_10",
+          "execution_id": "20261025T114759_4c63e87c",
+          "test": {
+            "recall@20": 0.0626415872783345
+          }
+        },
+        {
+          "experiment_id": "tau_010",
+          "execution_id": "20261025T115614_4738c53b",
+          "test": {
+            "recall@20": 0.266800406334488
+          }
+        },
+        {
+          "experiment_id": "tau_015",
+          "execution_id": "20261025T120436_d5729aa1",
+          "test": {
+            "recall@20": 0.26607808651010423
+          }
+        },
+        {
+          "experiment_id": "tau_025",
+          "execution_id": "20261025T121254_2673b424",
+          "test": {
+            "recall@20": 0.26858403965523614
+          }
+        },
+        {
+          "experiment_id": "tau_030",
+          "execution_id": "20261025T122114_d9b74265",
+          "test": {
+            "recall@20": 0.26364238876956425
+          }
+        }
+      ],
+      "best": {
+        "experiment_id": "tau_025",
+        "execution_id": "20261025T121254_2673b424",
+        "test": {
+          "recall@20": 0.26858403965523614
+        },
+        "config": {
+          "data_path": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\datasets",
+          "embedding_size": 64,
+          "batch_size_train": 2048,
+          "batch_size_test": 2048,
+          "topk": [
+            10,
+            20,
+            40,
+            80
+          ],
+          "neg_num": 1,
+          "lr": 0.001,
+          "test_interval": 5,
+          "seed": 0,
+          "dims": [
+            1000
+          ],
+          "norm": false,
+          "time_emb_dim": 10,
+          "steps": 5,
+          "noise_scale": 1.0,
+          "noise_min": 0.0001,
+          "noise_max": 0.02,
+          "sampling_noise": false,
+          "sampling_steps": 0,
+          "rebuild_k": 1,
+          "lambda_0": 2000.0,
+          "num_layers": 2,
+          "upsilon_UB": 0.05,
+          "upsilon_UI": 0.0,
+          "upsilon_BI": 0.1,
+          "xi_UB": [
+            0.6,
+            0.3,
+            0.1
+          ],
+          "xi_UI": [
+            0.4,
+            0.6,
+            0.0
+          ],
+          "xi_BI": [
+            0.5,
+            0.4,
+            0.1
+          ],
+          "omega": 0.3,
+          "gamma_1": 0.3,
+          "gamma_2": 0.2,
+          "tau": 0.25,
+          "lambda_1": 0.02,
+          "lambda_2": 1e-05,
+          "epochs": 90
+        },
+        "checkpoint": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\best.pt"
+      }
+    },
+    {
+      "id": "gamma",
+      "complete": true,
+      "candidates": [
+        {
+          "experiment_id": "baseline_omega0",
+          "execution_id": "20261025T093608_5009e405",
+          "test": {
+            "recall@20": 0.2556611963847716
+          },
+          "reference": {
+            "round_id": "youshu_round_01",
+            "experiment_id": "lambda0_2000",
+            "execution_id": "20261025T093608_5009e405",
+            "fingerprint": "0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3"
+          }
+        },
+        {
+          "experiment_id": "omega_01",
+          "execution_id": "20261025T111424_749d1285",
+          "test": {
+            "recall@20": 0.25389777232199434
+          }
+        },
+        {
+          "experiment_id": "omega_03",
+          "execution_id": "20261025T112231_b6649eae",
+          "test": {
+            "recall@20": 0.2662742488406002
+          }
+        },
+        {
+          "experiment_id": "omega_05",
+          "execution_id": "20261025T113121_9a525e49",
+          "test": {
+            "recall@20": 0.2583332480752577
+          }
+        },
+        {
+          "experiment_id": "omega_07",
+          "execution_id": "20261025T113942_8d17df0c",
+          "test": {
+            "recall@20": 0.20583432459597573
+          }
+        },
+        {
+          "experiment_id": "omega_10",
+          "execution_id": "20261025T114759_4c63e87c",
+          "test": {
+            "recall@20": 0.0626415872783345
+          }
+        },
+        {
+          "experiment_id": "tau_010",
+          "execution_id": "20261025T115614_4738c53b",
+          "test": {
+            "recall@20": 0.266800406334488
+          }
+        },
+        {
+          "experiment_id": "tau_015",
+          "execution_id": "20261025T120436_d5729aa1",
+          "test": {
+            "recall@20": 0.26607808651010423
+          }
+        },
+        {
+          "experiment_id": "tau_025",
+          "execution_id": "20261025T121254_2673b424",
+          "test": {
+            "recall@20": 0.26858403965523614
+          }
+        },
+        {
+          "experiment_id": "tau_030",
+          "execution_id": "20261025T122114_d9b74265",
+          "test": {
+            "recall@20": 0.26364238876956425
+          }
+        },
+        {
+          "experiment_id": "gamma_010_040",
+          "execution_id": "20261025T122930_a05e0875",
+          "test": {
+            "recall@20": 0.26430510185424766
+          }
+        },
+        {
+          "experiment_id": "gamma_020_030",
+          "execution_id": "20261025T123749_11db53e4",
+          "test": {
+            "recall@20": 0.26546519267555024
+          }
+        },
+        {
+          "experiment_id": "gamma_025_025",
+          "execution_id": "20261025T124603_0e4b72de",
+          "test": {
+            "recall@20": 0.2644673380025056
+          }
+        },
+        {
+          "experiment_id": "gamma_040_010",
+          "execution_id": "20261025T125422_f423e24d",
+          "test": {
+            "recall@20": 0.26725133217118324
+          }
+        }
+      ],
+      "best": {
+        "experiment_id": "tau_025",
+        "execution_id": "20261025T121254_2673b424",
+        "test": {
+          "recall@20": 0.26858403965523614
+        },
+        "config": {
+          "data_path": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\datasets",
+          "embedding_size": 64,
+          "batch_size_train": 2048,
+          "batch_size_test": 2048,
+          "topk": [
+            10,
+            20,
+            40,
+            80
+          ],
+          "neg_num": 1,
+          "lr": 0.001,
+          "test_interval": 5,
+          "seed": 0,
+          "dims": [
+            1000
+          ],
+          "norm": false,
+          "time_emb_dim": 10,
+          "steps": 5,
+          "noise_scale": 1.0,
+          "noise_min": 0.0001,
+          "noise_max": 0.02,
+          "sampling_noise": false,
+          "sampling_steps": 0,
+          "rebuild_k": 1,
+          "lambda_0": 2000.0,
+          "num_layers": 2,
+          "upsilon_UB": 0.05,
+          "upsilon_UI": 0.0,
+          "upsilon_BI": 0.1,
+          "xi_UB": [
+            0.6,
+            0.3,
+            0.1
+          ],
+          "xi_UI": [
+            0.4,
+            0.6,
+            0.0
+          ],
+          "xi_BI": [
+            0.5,
+            0.4,
+            0.1
+          ],
+          "omega": 0.3,
+          "gamma_1": 0.3,
+          "gamma_2": 0.2,
+          "tau": 0.25,
+          "lambda_1": 0.02,
+          "lambda_2": 1e-05,
+          "epochs": 90
+        },
+        "checkpoint": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\tuning\\Youshu\\youshu_round_02\\tau_025\\20261025T121254_2673b424\\attempt_1_artifacts\\Youshu\\20261025T121259_24ae1672\\best.pt"
+      }
+    }
+  ],
+  "updated_at": "2026-10-25T21:03:22+08:00"
+}
+END_ROUND_SUMMARY: 7f6bd81cb8bf3b92cec0c177d6aa5c296b26e8f3adcf2685e29940a87c92511b

@@ -19,6 +19,8 @@ rounds:
     seed: 0
     lambda_1: 0.01
     lambda_0: 1000.0
+    omega: 0.0
+    tau: 0.2
   experiments:
   - id: initial
     note: 初始配置对照，lambda_1=0.01、lambda_0=1000；模型参数沿用MealRec+L，预算按用户要求为90轮。
@@ -803,66 +805,395 @@ rounds:
       experiment_id: lambda0_2000
       execution_id: 20261025T093608_5009e405
       fingerprint: 0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: REFERENCED
+    success: true
+    fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+    execution_ids:
+    - 20261025T093608_5009e405
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      reference:
+        round_id: youshu_round_01
+        experiment_id: lambda0_2000
+        execution_id: 20261025T093608_5009e405
+        fingerprint: 0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3
+      sources:
+        train.py: efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379
+        run_experiments.py: 15fb8ceffa34ccf990e733825e3b9501b29e3e1a6c14dab3620ba7c3e841421c
+      metrics:
+        val:
+          recall:
+            '10': 0.1797624454582088
+            '20': 0.24816526855798782
+            '40': 0.3412611311293406
+            '80': 0.45045611970365834
+          ndcg:
+            '10': 0.10281838239468043
+            '20': 0.12223666372553808
+            '40': 0.14363649399871156
+            '80': 0.16476850132557055
+        test:
+          recall:
+            '10': 0.17921262369159108
+            '20': 0.2556611963847716
+            '40': 0.3447389541424864
+            '80': 0.45747155295549596
+          ndcg:
+            '10': 0.12216172342406773
+            '20': 0.14389653800507984
+            '40': 0.16854117890796616
+            '80': 0.19403824930297398
+      artifact_hashes:
+        checkpoint_model: b062712e57985fd8a0a84c9bca46b6873d116e02bcad8b7a280e4e16cee3e47a
+        checkpoint_config: 15e85522aa5e5c67ef81d886ed1cf23d37bb906fbb2bee8ed8613b548c5783fb
+        config: f038abbfa7330fde5d0f8637a1fd6400a584efcd15b2d370b6d2647515308c64
     blocked_by: []
   - id: omega_01
     note: omega=0.1；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
     overrides:
       omega: 0.1
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
+    status: SUCCESS
+    success: true
+    fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+    execution_ids:
+    - 20261025T111424_749d1285
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.1
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
     dependency_selection: null
     blocked_by: []
   - id: omega_03
     note: omega=0.3；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
     overrides:
       omega: 0.3
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
+    status: SUCCESS
+    success: true
+    fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+    execution_ids:
+    - 20261025T112231_b6649eae
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
     dependency_selection: null
     blocked_by: []
   - id: omega_05
     note: omega=0.5；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
     overrides:
       omega: 0.5
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
+    status: SUCCESS
+    success: true
+    fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+    execution_ids:
+    - 20261025T113121_9a525e49
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.5
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
     dependency_selection: null
     blocked_by: []
   - id: omega_07
     note: omega=0.7；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
     overrides:
       omega: 0.7
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
+    status: SUCCESS
+    success: true
+    fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+    execution_ids:
+    - 20261025T113942_8d17df0c
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.7
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
     dependency_selection: null
     blocked_by: []
   - id: omega_10
     note: omega=1.0；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
     overrides:
       omega: 1.0
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
+    status: SUCCESS
+    success: true
+    fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+    execution_ids:
+    - 20261025T114759_4c63e87c
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 1.0
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
     dependency_selection: null
     blocked_by: []
   - id: tau_010
@@ -878,12 +1209,98 @@ rounds:
       rule: test_recall20
     overrides:
       tau: 0.1
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+    execution_ids:
+    - 20261025T115614_4738c53b
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.1
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: omega_03
+      winner_execution_id: 20261025T112231_b6649eae
+      winner_test:
+        recall@20: 0.2662742488406002
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
     blocked_by: []
   - id: tau_015
     note: tau=0.15；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
@@ -898,12 +1315,98 @@ rounds:
       rule: test_recall20
     overrides:
       tau: 0.15
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294
+    execution_ids:
+    - 20261025T120436_d5729aa1
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.15
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: omega_03
+      winner_execution_id: 20261025T112231_b6649eae
+      winner_test:
+        recall@20: 0.2662742488406002
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
     blocked_by: []
   - id: tau_025
     note: tau=0.25；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
@@ -918,12 +1421,98 @@ rounds:
       rule: test_recall20
     overrides:
       tau: 0.25
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+    execution_ids:
+    - 20261025T121254_2673b424
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: omega_03
+      winner_execution_id: 20261025T112231_b6649eae
+      winner_test:
+        recall@20: 0.2662742488406002
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
     blocked_by: []
   - id: tau_030
     note: tau=0.3；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
@@ -938,12 +1527,98 @@ rounds:
       rule: test_recall20
     overrides:
       tau: 0.3
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: 7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd
+    execution_ids:
+    - 20261025T122114_d9b74265
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.3
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: omega_03
+      winner_execution_id: 20261025T112231_b6649eae
+      winner_test:
+        recall@20: 0.2662742488406002
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
     blocked_by: []
   - id: gamma_010_040
     note: gamma_1=0.1、gamma_2=0.4，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
@@ -963,12 +1638,118 @@ rounds:
     overrides:
       gamma_1: 0.1
       gamma_2: 0.4
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: 03094348a4247d57f55bf8e2eab33f0ad9832e1dc7771a3d54322e1c6d801fc3
+    execution_ids:
+    - 20261025T122930_a05e0875
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.1
+      gamma_2: 0.4
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: tau_025
+      winner_execution_id: 20261025T121254_2673b424
+      winner_test:
+        recall@20: 0.26858403965523614
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
+      - experiment_id: tau_010
+        execution_id: 20261025T115614_4738c53b
+        fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+        test:
+          recall@20: 0.266800406334488
+      - experiment_id: tau_015
+        execution_id: 20261025T120436_d5729aa1
+        fingerprint: ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294
+        test:
+          recall@20: 0.26607808651010423
+      - experiment_id: tau_025
+        execution_id: 20261025T121254_2673b424
+        fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+        test:
+          recall@20: 0.26858403965523614
+      - experiment_id: tau_030
+        execution_id: 20261025T122114_d9b74265
+        fingerprint: 7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd
+        test:
+          recall@20: 0.26364238876956425
     blocked_by: []
   - id: gamma_020_030
     note: gamma_1=0.2、gamma_2=0.3，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
@@ -988,12 +1769,118 @@ rounds:
     overrides:
       gamma_1: 0.2
       gamma_2: 0.3
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: 93cb84cb216e33a8f49416587a1cc055bf5e0e1af687695331a762873cc2220f
+    execution_ids:
+    - 20261025T123749_11db53e4
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.2
+      gamma_2: 0.3
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: tau_025
+      winner_execution_id: 20261025T121254_2673b424
+      winner_test:
+        recall@20: 0.26858403965523614
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
+      - experiment_id: tau_010
+        execution_id: 20261025T115614_4738c53b
+        fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+        test:
+          recall@20: 0.266800406334488
+      - experiment_id: tau_015
+        execution_id: 20261025T120436_d5729aa1
+        fingerprint: ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294
+        test:
+          recall@20: 0.26607808651010423
+      - experiment_id: tau_025
+        execution_id: 20261025T121254_2673b424
+        fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+        test:
+          recall@20: 0.26858403965523614
+      - experiment_id: tau_030
+        execution_id: 20261025T122114_d9b74265
+        fingerprint: 7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd
+        test:
+          recall@20: 0.26364238876956425
     blocked_by: []
   - id: gamma_025_025
     note: gamma_1=0.25、gamma_2=0.25，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
@@ -1013,12 +1900,118 @@ rounds:
     overrides:
       gamma_1: 0.25
       gamma_2: 0.25
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: f9a24379fcafa735ad483dfdb5f313da23c65b799aa413ee341f664c03802143
+    execution_ids:
+    - 20261025T124603_0e4b72de
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.25
+      gamma_2: 0.25
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: tau_025
+      winner_execution_id: 20261025T121254_2673b424
+      winner_test:
+        recall@20: 0.26858403965523614
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
+      - experiment_id: tau_010
+        execution_id: 20261025T115614_4738c53b
+        fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+        test:
+          recall@20: 0.266800406334488
+      - experiment_id: tau_015
+        execution_id: 20261025T120436_d5729aa1
+        fingerprint: ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294
+        test:
+          recall@20: 0.26607808651010423
+      - experiment_id: tau_025
+        execution_id: 20261025T121254_2673b424
+        fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+        test:
+          recall@20: 0.26858403965523614
+      - experiment_id: tau_030
+        execution_id: 20261025T122114_d9b74265
+        fingerprint: 7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd
+        test:
+          recall@20: 0.26364238876956425
     blocked_by: []
   - id: gamma_040_010
     note: gamma_1=0.4、gamma_2=0.1，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
@@ -1038,10 +2031,116 @@ rounds:
     overrides:
       gamma_1: 0.4
       gamma_2: 0.1
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
-    resolved_config: null
-    dependency_selection: null
+    status: SUCCESS
+    success: true
+    fingerprint: 7373d175fc7885e0f8629be23884ac42d7854851487ecb895136c90796ae477c
+    execution_ids:
+    - 20261025T125422_f423e24d
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.4
+      gamma_2: 0.1
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: test_recall20
+      tie_break: first experiment in declared order
+      winner_experiment_id: tau_025
+      winner_execution_id: 20261025T121254_2673b424
+      winner_test:
+        recall@20: 0.26858403965523614
+      candidates:
+      - experiment_id: baseline_omega0
+        execution_id: 20261025T093608_5009e405
+        fingerprint: ddadff22f0366def696d129afe3fb2840dfdc52910c5ff71ba18d547da0bb6b7
+        test:
+          recall@20: 0.2556611963847716
+      - experiment_id: omega_01
+        execution_id: 20261025T111424_749d1285
+        fingerprint: 714b2676e6c4f675320d0808ef087e97dfa0e0e2c1544d6e3b1da303f1e6b1e9
+        test:
+          recall@20: 0.25389777232199434
+      - experiment_id: omega_03
+        execution_id: 20261025T112231_b6649eae
+        fingerprint: abb4b09180e5dd75e6ce96da19e22309ceee3cd173171c788a492b641540ceff
+        test:
+          recall@20: 0.2662742488406002
+      - experiment_id: omega_05
+        execution_id: 20261025T113121_9a525e49
+        fingerprint: d528fb4c7281c56079734d19b3bf2c37c577dd51741f70f4d666f3b183987ed1
+        test:
+          recall@20: 0.2583332480752577
+      - experiment_id: omega_07
+        execution_id: 20261025T113942_8d17df0c
+        fingerprint: b9c50c2795233eca889eddff1999688f86482d87dda6150322201ac88f11e231
+        test:
+          recall@20: 0.20583432459597573
+      - experiment_id: omega_10
+        execution_id: 20261025T114759_4c63e87c
+        fingerprint: 437d49c199f1360109998c37518310c2004453ffbafd2d1832cf38f75efcb1ee
+        test:
+          recall@20: 0.0626415872783345
+      - experiment_id: tau_010
+        execution_id: 20261025T115614_4738c53b
+        fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+        test:
+          recall@20: 0.266800406334488
+      - experiment_id: tau_015
+        execution_id: 20261025T120436_d5729aa1
+        fingerprint: ba651db89f648b70a2af766cefa427391abb9509ee03359d0e291264c6e5e294
+        test:
+          recall@20: 0.26607808651010423
+      - experiment_id: tau_025
+        execution_id: 20261025T121254_2673b424
+        fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+        test:
+          recall@20: 0.26858403965523614
+      - experiment_id: tau_030
+        execution_id: 20261025T122114_d9b74265
+        fingerprint: 7c279a4a65d25f1785f3c90660fee9dfb2e4771e2041956a8c2e12a03bc017dd
+        test:
+          recall@20: 0.26364238876956425
     blocked_by: []

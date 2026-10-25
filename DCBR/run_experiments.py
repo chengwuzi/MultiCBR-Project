@@ -29,6 +29,8 @@ PROJECT_ROOT = MODEL_DIR.parent
 TERMINAL = {"SUCCESS", "FAILED", "INTERRUPTED"}
 RULE = "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
 CROSS_RULE = "validation_recall20_then_ndcg20"
+TEST_RULE = "test_recall20"
+CONFIGURATION_RULES = {CROSS_RULE, TEST_RULE}
 DATA_NAMES = ("user_bundle_train", "user_bundle_tune", "user_bundle_test", "user_item", "bundle_item")
 MANAGED = {"status", "success", "fingerprint", "execution_ids", "resolved_config",
            "dependency_selection", "blocked_by"}
@@ -130,11 +132,13 @@ def source_fingerprints():
             "run_experiments.py": file_hash(Path(__file__))}
 
 
-def experiment_fingerprint(conf, dataset, sources, data, settings, selection=None):
+def experiment_fingerprint(conf, dataset, sources, data, settings, selection=None, configuration_rule=CROSS_RULE):
     signature = {"config": conf, "dataset": dataset, "sources": sources, "data": data,
                  "gpu": settings["gpu"], "device": settings["device"], "selection_rule": RULE}
     if selection is not None:
         signature["dependency_selection"] = selection
+    if configuration_rule != CROSS_RULE:
+        signature["configuration_selection_rule"] = configuration_rule
     return digest(signature)
 
 
@@ -169,7 +173,7 @@ def load_plan(path, gpu=None, device=None):
     sources = source_fingerprints()
     data_cache = {}
     for raw_round in plan["rounds"]:
-        require_fields(raw_round, {"id", "dataset", "note", "overrides", "experiments"},
+        require_fields(raw_round, {"id", "dataset", "note", "overrides", "experiments", "selection_rule", "stages"},
                        {"id", "dataset", "note", "experiments"}, "round")
         rid = identifier(raw_round["id"], "round id")
         if rid in seen_rounds:
@@ -180,6 +184,9 @@ def load_plan(path, gpu=None, device=None):
             raise ValueError(f"No base configuration for {dataset}")
         if not isinstance(raw_round["note"], str) or not raw_round["note"].strip():
             raise ValueError("Round note is required")
+        selection_rule = raw_round.get("selection_rule", CROSS_RULE)
+        if not isinstance(selection_rule, str) or selection_rule not in CONFIGURATION_RULES:
+            raise ValueError("Unsupported round configuration selection_rule")
         base = merge_config(base_configs[dataset], raw_round.get("overrides", {}))
         base["data_path"] = str(resolve_path(base["data_path"]))
         # The shared protocol is not a search dimension.
@@ -194,7 +201,7 @@ def load_plan(path, gpu=None, device=None):
         experiments = []
         seen_experiments = set()
         for item in raw_round["experiments"]:
-            require_fields(item, {"id", "note", "overrides", "inherit_best"} | MANAGED,
+            require_fields(item, {"id", "note", "overrides", "inherit_best", "reference"} | MANAGED,
                            {"id", "note"}, "experiment")
             eid = identifier(item["id"], "experiment id")
             if eid in seen_experiments:
@@ -209,19 +216,45 @@ def load_plan(path, gpu=None, device=None):
             if inherit is not None:
                 require_fields(inherit, {"candidates", "rule"}, {"candidates", "rule"}, "inherit_best")
                 candidates = inherit["candidates"]
-                if (inherit["rule"] != CROSS_RULE or not isinstance(candidates, list) or not candidates
+                if (inherit["rule"] != selection_rule or not isinstance(candidates, list) or not candidates
                         or any(not isinstance(value, str) for value in candidates)
                         or len(set(candidates)) != len(candidates) or set(candidates) - seen_experiments):
-                    raise ValueError("inherit_best needs unique earlier candidate IDs and validation_recall20_then_ndcg20")
+                    raise ValueError("inherit_best needs unique earlier candidate IDs and the round selection_rule")
+            reference = item.get("reference")
+            if reference is not None:
+                require_fields(reference, {"round_id", "experiment_id", "execution_id", "fingerprint"},
+                               {"round_id", "experiment_id", "execution_id", "fingerprint"}, "reference")
+                if inherit is not None or reference["round_id"] == rid or reference["round_id"] not in seen_rounds:
+                    raise ValueError("A reference must identify an earlier round and cannot inherit_best")
+                for key in ("round_id", "experiment_id", "execution_id"):
+                    identifier(reference[key], "reference " + key)
+                if not isinstance(reference["fingerprint"], str) or not re.fullmatch(r"[0-9a-f]{64}", reference["fingerprint"]):
+                    raise ValueError("A reference needs a pinned SHA256 fingerprint")
             seen_experiments.add(eid)
             experiments.append({"id": eid, "note": item["note"], "config": conf,
                                 "template_config": copy.deepcopy(conf),
                                 "overrides": copy.deepcopy(overrides), "inherit_best": copy.deepcopy(inherit),
+                                "reference": copy.deepcopy(reference),
                                 "dependency_selection": None, "blocked_by": [],
-                                "fingerprint": experiment_fingerprint(conf, dataset, sources, data, settings)
-                                if inherit is None else None})
+                                "fingerprint": experiment_fingerprint(conf, dataset, sources, data, settings,
+                                                                      configuration_rule=selection_rule)
+                                if inherit is None and reference is None else None})
+        stages = raw_round.get("stages", [])
+        if not isinstance(stages, list):
+            raise ValueError("stages must be a list")
+        stage_ids = set()
+        for stage in stages:
+            require_fields(stage, {"id", "candidates"}, {"id", "candidates"}, "stage")
+            sid = identifier(stage["id"], "stage id")
+            candidates = stage["candidates"]
+            if (sid in stage_ids or not isinstance(candidates, list) or not candidates
+                    or any(not isinstance(eid, str) for eid in candidates)
+                    or len(set(candidates)) != len(candidates) or set(candidates) - seen_experiments):
+                raise ValueError("Stages need unique IDs and existing unique candidate IDs")
+            stage_ids.add(sid)
         rounds.append({"id": rid, "dataset": dataset, "note": raw_round["note"],
-                       "experiments": experiments, "data_files": data})
+                       "experiments": experiments, "data_files": data,
+                       "selection_rule": selection_rule, "stages": copy.deepcopy(stages)})
     return {"document": plan, "path": Path(path).resolve(), "settings": settings, "rounds": rounds,
             "work_dir": resolve_path(plan["work_dir"]), "result_file": resolve_path(plan["result_file"]),
             "sources": sources}
@@ -321,6 +354,8 @@ def load_state(path):
 
 
 def latest_execution(state, round_id, experiment):
+    if experiment.get("reference"):
+        return experiment.get("_reference_record")
     if experiment["fingerprint"] is None:
         return None
     return next((record for record in reversed(state["executions"])
@@ -383,6 +418,8 @@ def validate_result(path, expected, dataset, sources, data, info, gpu, device, c
 
 
 def check_success(record, experiment, round_, plan):
+    if experiment.get("reference"):
+        return check_reference(record, experiment, round_, plan)
     if record is None or record["status"] != "SUCCESS":
         return False
     try:
@@ -417,9 +454,81 @@ def validation_key(training_record):
     return values
 
 
+def configuration_key(training_record, rule):
+    if rule == CROSS_RULE:
+        return validation_key(training_record)
+    if rule != TEST_RULE:
+        raise ValueError("Unsupported configuration selection rule")
+    value = training_record["result"]["metrics"]["test"]["recall"]["20"]
+    if type(value) not in (int, float) or not math.isfinite(value) or not 0 <= value <= 1:
+        raise ValueError("Invalid cross-configuration test Recall@20")
+    # No NDCG tie-break for this explicitly authorized test-based round.
+    return (value,)
+
+
+def selection_metrics(training_record, rule):
+    names = ("recall@20", "ndcg@20") if rule == CROSS_RULE else ("recall@20",)
+    return dict(zip(names, configuration_key(training_record, rule)))
+
+
+def metric_field(rule):
+    return "validation" if rule == CROSS_RULE else "test"
+
+
+def check_reference(record, item, round_, plan):
+    """Reuse a pinned execution, allowing only a controller-source version change."""
+    if record is None:
+        return False
+    try:
+        ref = item["reference"]
+        if (any(record[key] != ref[key] for key in ("round_id", "experiment_id", "execution_id", "fingerprint"))
+                or record["dataset"] != round_["dataset"] or record["config"] != item["template_config"]
+                or record["sources"]["train.py"] != plan["sources"]["train.py"]
+                or record["data_files"] != round_["data_files"]
+                or any(record[key] != plan["settings"][key] for key in ("gpu", "device"))):
+            return False
+        signature = experiment_fingerprint(record["config"], record["dataset"], record["sources"],
+                                           record["data_files"], record,
+                                           record.get("dependency_selection"),
+                                           record.get("configuration_selection_rule", CROSS_RULE))
+        if signature != record["fingerprint"]:
+            return False
+        # The old controller source is evidence, not a reason to rerun identical
+        # model training. Its model source, data, settings and all artifacts must
+        # still pass the original success checks, including full-precision JSON.
+        plan.setdefault("_verified_success", {})
+        historical_plan = dict(plan, sources=record["sources"])
+        proxy = {"id": record["experiment_id"], "config": item["template_config"],
+                 "fingerprint": record["fingerprint"]}
+        return check_success(record, proxy, round_, historical_plan)
+    except (OSError, ValueError, KeyError, TypeError, IndexError):
+        return False
+
+
+def resolve_reference(plan, round_, item, state):
+    ref = item["reference"]
+    record = next((r for r in state["executions"] if r.get("execution_id") == ref["execution_id"]
+                   and r.get("round_id") == ref["round_id"] and r.get("experiment_id") == ref["experiment_id"]), None)
+    item.update(_reference_record=record, config=copy.deepcopy(item["template_config"]),
+                fingerprint=None, dependency_selection=None, blocked_by=[])
+    if not check_reference(record, item, round_, plan):
+        item.update(config=None, blocked_by=["reference:" + ref["execution_id"]])
+        return
+    evidence = {"reference": copy.deepcopy(ref), "sources": record["sources"],
+                "metrics": record["training_record"]["result"]["metrics"],
+                "artifact_hashes": record["training_record"]["artifact_hashes"]}
+    item["dependency_selection"] = evidence
+    item["fingerprint"] = experiment_fingerprint(item["config"], round_["dataset"], plan["sources"],
+                                                 round_["data_files"], plan["settings"], evidence,
+                                                 round_["selection_rule"])
+
+
 def resolve_dependencies(plan, round_, state):
     earlier = {}
+    rule = round_["selection_rule"]
     for item in round_["experiments"]:
+        if item.get("reference"):
+            resolve_reference(plan, round_, item, state)
         inherit = item.get("inherit_best")
         if inherit is not None:
             candidates = []
@@ -433,34 +542,35 @@ def resolve_dependencies(plan, round_, state):
                     candidates.append((parent, record))
             item.update(config=None, fingerprint=None, dependency_selection=None, blocked_by=missing)
             if not missing:
-                # max retains the first candidate on an exact two-metric tie.
-                # Require candidates to follow declaration order below.
+                # Earlier controls precede new trials, so an exact tie keeps
+                # the existing control. NDCG is not read by test_recall20.
                 candidates.sort(key=lambda pair: list(earlier).index(pair[0]["id"]))
-                winner, winner_record = max(candidates, key=lambda pair: validation_key(pair[1]["training_record"]))
-                selection = {"rule": CROSS_RULE, "tie_break": "first experiment in declared order",
+                winner, winner_record = max(candidates, key=lambda pair: configuration_key(pair[1]["training_record"], rule))
+                selection = {"rule": rule, "tie_break": "first experiment in declared order",
                              "winner_experiment_id": winner["id"],
                              "winner_execution_id": winner_record["execution_id"],
-                             "winner_validation": dict(zip(("recall@20", "ndcg@20"),
-                                                           validation_key(winner_record["training_record"]))),
+                             "winner_" + metric_field(rule): selection_metrics(winner_record["training_record"], rule),
                              "candidates": [{"experiment_id": parent["id"], "execution_id": record["execution_id"],
                                              "fingerprint": parent["fingerprint"],
-                                             "validation": dict(zip(("recall@20", "ndcg@20"),
-                                                                    validation_key(record["training_record"])))}
+                                             metric_field(rule): selection_metrics(record["training_record"], rule)}
                                             for parent, record in candidates]}
                 conf = merge_config(winner["config"], item["overrides"])
                 item.update(config=conf, dependency_selection=selection,
                             fingerprint=experiment_fingerprint(conf, round_["dataset"], plan["sources"],
-                                                               round_["data_files"], plan["settings"], selection))
+                                                               round_["data_files"], plan["settings"], selection, rule))
         earlier[item["id"]] = item
 
 
 def select_experiments(plan, round_, state, mode, only):
     resolve_dependencies(plan, round_, state)
     ids = {item["id"] for item in round_["experiments"]}
-    if (mode == "selected" and (not only or set(only) - ids)) or (mode != "selected" and only):
+    reference_ids = {item["id"] for item in round_["experiments"] if item.get("reference")}
+    if (mode == "selected" and (not only or set(only) - ids or set(only) & reference_ids)) or (mode != "selected" and only):
         raise ValueError("--mode selected requires valid experiment IDs in --only; other modes reject --only")
     selected = []
     for item in round_["experiments"]:
+        if item.get("reference"):
+            continue  # A reference is never trained, even in --mode all.
         previous = latest_execution(state, round_["id"], item)
         valid = check_success(previous, item, round_, plan)
         if (mode == "all" or mode == "selected" and item["id"] in only
@@ -484,11 +594,13 @@ def sync_plan(plan, state):
     if declarative(current) != declarative(plan["document"]):
         raise RuntimeError("Search plan was edited during execution; history is saved. Restore/review it before resuming")
     for raw_round, round_ in zip(current["rounds"], plan["rounds"]):
+        if plan.get("active_round_id") and round_["id"] != plan["active_round_id"]:
+            continue  # Preserve historical rounds' synchronized states verbatim.
         resolve_dependencies(plan, round_, state)
         for item, experiment in zip(raw_round["experiments"], round_["experiments"]):
             previous = latest_execution(state, round_["id"], experiment)
             valid = check_success(previous, experiment, round_, plan)
-            status = previous["status"] if previous else "PENDING"
+            status = "REFERENCED" if experiment.get("reference") and valid else previous["status"] if previous else "PENDING"
             if experiment.get("blocked_by"):
                 status = "BLOCKED"
             if status == "SUCCESS" and not valid:
@@ -497,8 +609,9 @@ def sync_plan(plan, state):
                         resolved_config=copy.deepcopy(experiment["config"]),
                         dependency_selection=copy.deepcopy(experiment.get("dependency_selection")),
                         blocked_by=experiment.get("blocked_by", []),
-                        execution_ids=[r["execution_id"] for r in state["executions"]
-                                       if r["round_id"] == round_["id"] and r["experiment_id"] == item["id"]])
+                        execution_ids=[previous["execution_id"]] if experiment.get("reference") and valid else
+                        [r["execution_id"] for r in state["executions"]
+                         if r["round_id"] == round_["id"] and r["experiment_id"] == item["id"]])
     atomic_text(plan["path"], yaml.safe_dump(current, allow_unicode=True, sort_keys=False))
 
 
@@ -525,7 +638,8 @@ def append_report(path, record):
         if record.get("timing_note"):
             lines.append("计时说明: " + record["timing_note"])
         if record.get("dependency_selection"):
-            lines.append("前置实验选择依据（仅验证集）: " + json.dumps(record["dependency_selection"], ensure_ascii=False))
+            lines.append("前置实验选择依据: " + json.dumps(record["dependency_selection"], ensure_ascii=False))
+        lines.append("跨配置选择规则: " + record.get("configuration_selection_rule", CROSS_RULE))
         for attempt in record["attempts"]:
             lines.extend([f"尝试 {attempt['number']}: {attempt['status']}",
                           "  开始时间: " + attempt["started_at"], "  结束时间: " + attempt.get("ended_at", "未知"),
@@ -589,13 +703,17 @@ def show_progress(round_, plan, rows, current=""):
     for item in round_["experiments"]:
         if rows.get(item["id"]) in {"WAITING", "BLOCKED"}:
             rows[item["id"]] = "BLOCKED" if item.get("blocked_by") else "WAITING"
+        if item.get("reference"):
+            rows[item["id"]] = "BLOCKED" if item.get("blocked_by") else "REFERENCED"
     counts = {status: sum(value == status for value in rows.values())
-              for status in ("WAITING", "RUNNING", "RETRY", "SUCCESS", "FAILED", "INTERRUPTED", "SKIPPED", "BLOCKED")}
+              for status in ("WAITING", "RUNNING", "RETRY", "SUCCESS", "FAILED", "INTERRUPTED", "SKIPPED", "BLOCKED", "REFERENCED")}
     print(f"\n[{timestamp()}] {round_['dataset']} | 轮次 {round_['id']} | GPU {plan['settings']['gpu']} | {current}", flush=True)
     print(f"轮次备注: {round_['note']}", flush=True)
-    print("计划 {} | 本次 {} | 跳过 {} | 成功 {} | 失败 {} | 中断 {} | 运行 {} | 等待 {} | 等待前置结果 {}".format(
-        len(rows), len(rows) - counts["SKIPPED"], counts["SKIPPED"], counts["SUCCESS"], counts["FAILED"],
+    print("候选 {} | 本次训练 {} | 跳过 {} | 成功 {} | 失败 {} | 中断 {} | 运行 {} | 等待 {} | 等待前置结果 {}".format(
+        len(rows), len(rows) - counts["SKIPPED"] - sum(bool(i.get("reference")) for i in round_["experiments"]), counts["SKIPPED"], counts["SUCCESS"], counts["FAILED"],
         counts["INTERRUPTED"], counts["RUNNING"], counts["WAITING"] + counts["RETRY"], counts["BLOCKED"]), flush=True)
+    if any(item.get("reference") for item in round_["experiments"]):
+        print(f"历史对照 {counts['REFERENCED']} 已复核引用，不启动训练；跨配置规则 {round_['selection_rule']}", flush=True)
     for item in round_["experiments"]:
         print(f"  {item['id']}: {rows[item['id']]} | {item['note']}", flush=True)
 
@@ -677,6 +795,7 @@ def execute_experiment(plan, round_, item, state, history_path, rows):
               "git_commit": commit, "config": item["config"], "gpu": plan["settings"]["gpu"],
               "device": plan["settings"]["device"], "host": socket.gethostname(), "status": "RUNNING",
               "runner_settings": copy.deepcopy(plan["settings"]),
+              "configuration_selection_rule": round_["selection_rule"],
               "dependency_selection": copy.deepcopy(item.get("dependency_selection")),
               "started_at": timestamp(), "max_attempts": plan["settings"]["max_attempts"], "attempts": [],
               "directory": str(directory), "report_file": str(plan["result_file"])}
@@ -794,20 +913,36 @@ def write_round_summary(plan, round_, state):
         if check_success(record, item, round_, plan):
             verified.append((item, record))
     complete = len(verified) == len(round_["experiments"])
+    rule = round_["selection_rule"]
+    def candidate(item, record):
+        result = {"experiment_id": item["id"], "execution_id": record["execution_id"],
+                  metric_field(rule): selection_metrics(record["training_record"], rule)}
+        if item.get("reference"):
+            result["reference"] = item["reference"]
+        return result
+
+    def best(pairs):
+        winner, record = max(pairs, key=lambda pair: configuration_key(pair[1]["training_record"], rule))
+        return dict(candidate(winner, record), config=winner["config"],
+                    checkpoint=record["training_record"]["artifacts"]["checkpoint_model"])
+
     summary = {"round_id": round_["id"], "dataset": round_["dataset"], "complete": complete,
                "planned": len(round_["experiments"]), "valid_successes": len(verified),
-               "configuration_selection_rule": CROSS_RULE, "checkpoint_selection_rule": RULE,
-               "candidates": [{"experiment_id": item["id"], "execution_id": record["execution_id"],
-                               "validation": dict(zip(("recall@20", "ndcg@20"),
-                                                      validation_key(record["training_record"])))}
-                              for item, record in verified], "best": None}
+               "configuration_selection_rule": rule, "checkpoint_selection_rule": RULE,
+               "candidates": [candidate(item, record) for item, record in verified], "best": None}
+    if any(item.get("reference") for item in round_["experiments"]):
+        summary.update(training_planned=sum(not item.get("reference") for item in round_["experiments"]),
+                       reference_count=sum(bool(item.get("reference")) for item in round_["experiments"]))
     if complete:
-        winner, record = max(verified, key=lambda pair: validation_key(pair[1]["training_record"]))
-        summary["best"] = {"experiment_id": winner["id"], "execution_id": record["execution_id"],
-                           "config": winner["config"],
-                           "validation": dict(zip(("recall@20", "ndcg@20"),
-                                                  validation_key(record["training_record"]))),
-                           "checkpoint": record["training_record"]["artifacts"]["checkpoint_model"]}
+        summary["best"] = best(verified)
+    if round_["stages"]:
+        summary["stages"] = []
+        for stage in round_["stages"]:
+            pairs = [(item, record) for item, record in verified if item["id"] in stage["candidates"]]
+            done = len(pairs) == len(stage["candidates"])
+            summary["stages"].append({"id": stage["id"], "complete": done,
+                                      "candidates": [candidate(item, record) for item, record in pairs],
+                                      "best": best(pairs) if done else None})
     summary_id = digest(summary)
     summary["updated_at"] = timestamp()
     path = plan["work_dir"] / round_["dataset"] / round_["id"] / "round_summary.json"
@@ -817,7 +952,9 @@ def write_round_summary(plan, round_, state):
         old = plan["result_file"].read_text(encoding="utf-8") if plan["result_file"].exists() else ""
         if end not in old.splitlines():
             text = "\n" + "=" * 72 + "\n轮次汇总: " + round_["id"] + "\n"
-            text += "跨配置规则: 验证 Recall@20 优先，完全相同再比较验证 NDCG@20；完全平局保留声明顺序在前者。\n"
+            text += "跨配置规则: " + rule + "；完全平局保留声明顺序在前者。\n"
+            if rule == TEST_RULE:
+                text += "本轮明确使用测试集Recall@20选参，测试成绩已参与配置选择，不属于独立测试评估。\n"
             text += json.dumps(summary, ensure_ascii=False, indent=2) + "\n" + end + "\n"
             atomic_text(plan["result_file"], old + text)
     print(f"Round summary: {path} | complete={complete} | best={summary['best']}", flush=True)
@@ -829,7 +966,9 @@ def run(plan_path, round_id=None, mode="resume", only=None, dry_run=False, gpu=N
     plan = load_plan(plan_path, gpu, device)
     if list_only:
         for round_ in plan["rounds"]:
-            print(f"{round_['id']} | {round_['dataset']} | {len(round_['experiments'])} experiments | {round_['note']}")
+            training = sum(not item.get("reference") for item in round_["experiments"])
+            print(f"{round_['id']} | {round_['dataset']} | {training} training experiments | "
+                  f"{len(round_['experiments']) - training} references | {round_['note']}")
         if not plan["rounds"]:
             print("No search rounds scheduled. Add a reviewed round to the central plan first.")
         return 0
@@ -847,21 +986,32 @@ def run(plan_path, round_id=None, mode="resume", only=None, dry_run=False, gpu=N
         show_progress(round_, plan, rows)
         for item in selected:
             if item["config"] is None:
-                print(f"{item['id']}: 等待前置实验 {item['blocked_by']}；按 {CROSS_RULE} 继承获胜配置，"
+                print(f"{item['id']}: 等待前置实验 {item['blocked_by']}；按 {round_['selection_rule']} 继承获胜配置，"
                       f"再覆盖 {item['overrides']}。实际配置与指纹在前置实验成功后生成。")
             else:
                 print(f"{item['id']} fingerprint={item['fingerprint']}\n" + yaml.safe_dump(item["config"], sort_keys=False))
+        for item in round_["experiments"]:
+            if item.get("reference"):
+                print(f"历史对照 {item['id']}: {item['reference']} | "
+                      f"{'BLOCKED: 缺少或未通过历史结果/产物复核；正式运行将在训练前停止' if item['blocked_by'] else 'REFERENCED'}")
         return 0
     # Both locks: protect the central YAML (even with a changed work_dir) and
     # protect a shared execution history (even with a different plan filename).
     with file_lock(str(plan_path) + ".lock"):
         plan = load_plan(plan_path, gpu, device)
+        plan["active_round_id"] = round_id
         with file_lock(plan["work_dir"] / "controller.lock"):
             history_path = plan["work_dir"] / "history.json"
             round_ = next(r for r in plan["rounds"] if r["id"] == round_id)
             state = load_state(history_path)
             recover(state, history_path)
             selected = select_experiments(plan, round_, state, mode, only or [])
+            missing_references = [item["id"] for item in round_["experiments"]
+                                  if item.get("reference") and item.get("blocked_by")]
+            if missing_references:
+                raise ValueError(f"Historical references missing or invalid: {missing_references}. "
+                                 "Keep the original server history.json and result/checkpoint artifacts; "
+                                 "verify model/data/config/GPU/device match. References are never retrained.")
             preflight(plan, round_, selected)
             sync_plan(plan, state)
             rows = {item["id"]: ("BLOCKED" if item.get("blocked_by") else "WAITING") if item in selected
@@ -882,7 +1032,7 @@ def run(plan_path, round_id=None, mode="resume", only=None, dry_run=False, gpu=N
                     continue
                 if item.get("inherit_best"):
                     selection = item["dependency_selection"]
-                    print("前置配置已选定（仅验证集）: " + json.dumps(selection, ensure_ascii=False), flush=True)
+                    print("前置配置已选定: " + json.dumps(selection, ensure_ascii=False), flush=True)
                     preflight(plan, round_, [item])
                 statuses.append(execute_experiment(plan, round_, item, state, history_path, rows))
             summary = write_round_summary(plan, round_, state) if any(

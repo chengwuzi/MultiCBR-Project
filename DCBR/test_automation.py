@@ -107,7 +107,7 @@ class AutomationTests(unittest.TestCase):
             self.assertIn("最近输出", stdout.getvalue())
             document = runner.read_yaml(path)
             self.assertTrue(document["rounds"][0]["experiments"][0]["success"])
-            self.assertEqual(document["rounds"][1]["experiments"][0]["status"], "PENDING")
+            self.assertNotIn("status", document["rounds"][1]["experiments"][0])  # Unselected rounds remain untouched.
             trained = state["executions"][0]["training_record"]
             self.assertEqual(trained["config"]["num_users"], 6)
             self.assertEqual(trained["experiment_case"], "second")
@@ -245,7 +245,7 @@ class AutomationTests(unittest.TestCase):
 
     def test_reviewed_first_round_has_exactly_nine_experiments(self):
         plan = runner.load_plan(HERE / "搜参配置.yaml")
-        self.assertEqual(len(plan["rounds"]), 1)
+        self.assertEqual(len(plan["rounds"]), 2)
         round_ = plan["rounds"][0]
         items = round_["experiments"]
         self.assertEqual(len(items), 9)
@@ -392,6 +392,249 @@ class AutomationTests(unittest.TestCase):
                 runner.preflight(plan, round_, [child])
             self.assertIsNone(child["config"])
             self.assertIsNone(child["fingerprint"])
+
+    def test_reviewed_second_round_has_thirteen_trials_and_one_pinned_reference(self):
+        plan = runner.load_plan(HERE / "搜参配置.yaml")
+        round_ = plan["rounds"][1]
+        items = round_["experiments"]
+        self.assertEqual(round_["id"], "youshu_round_02")
+        self.assertEqual(round_["selection_rule"], runner.TEST_RULE)
+        self.assertEqual(len(items), 14)
+        self.assertEqual(items[0]["reference"]["execution_id"], "20261025T093608_5009e405")
+        historical = next(i for i in plan['document']['rounds'][0]['experiments'] if i['id'] == 'lambda0_2000')
+        comparable = dict(items[0]['template_config'], data_path=historical['resolved_config']['data_path'])
+        self.assertEqual(comparable, historical['resolved_config'])
+        historical_sources = {'train.py': 'efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379',
+                              'run_experiments.py': '15fb8ceffa34ccf990e733825e3b9501b29e3e1a6c14dab3620ba7c3e841421c'}
+        self.assertEqual(runner.experiment_fingerprint(historical['resolved_config'], 'Youshu', historical_sources,
+                         round_['data_files'], {'gpu': '0', 'device': 'cuda'}, historical['dependency_selection']),
+                         items[0]['reference']['fingerprint'])
+        self.assertEqual([i["config"]["omega"] for i in items[1:6]], [.1, .3, .5, .7, 1.])
+        self.assertEqual([i["overrides"]["tau"] for i in items[6:10]], [.1, .15, .25, .3])
+        self.assertEqual([(i["overrides"]["gamma_1"], i["overrides"]["gamma_2"]) for i in items[10:]],
+                         [(.1, .4), (.2, .3), (.25, .25), (.4, .1)])
+        self.assertTrue(all(i["config"]["epochs"] == 90 and i["config"]["seed"] == 0
+                            and i["config"]["lambda_1"] == .02 and i["config"]["lambda_0"] == 2000 for i in items))
+        self.assertTrue(all(i["inherit_best"]["candidates"] == [p["id"] for p in items[:6]] for i in items[6:10]))
+        self.assertTrue(all(i["inherit_best"]["candidates"] == [p["id"] for p in items[:10]] for i in items[10:]))
+        selected = runner.select_experiments(plan, round_, runner.empty_state(), "all", [])
+        self.assertEqual(len(selected), 13)
+        self.assertNotIn(items[0], selected)
+        self.assertEqual([s["id"] for s in round_["stages"]], ["omega", "tau", "gamma"])
+
+    def test_test_recall_rule_ignores_ndcg_validation_and_display_rounding(self):
+        def training(recall, ndcg, validation):
+            return {"result": {"metrics": {"test": {"recall": {"20": recall}, "ndcg": {"20": ndcg}},
+                                            "val": {"recall": {"20": validation}, "ndcg": {"20": validation}}}}}
+        control = training(.255661201, .01, .01)
+        tie = training(.255661201, .99, .99)
+        better = training(.255661202, .001, .001)
+        self.assertEqual(runner.configuration_key(control, runner.TEST_RULE), runner.configuration_key(tie, runner.TEST_RULE))
+        self.assertIs(max([control, tie], key=lambda r: runner.configuration_key(r, runner.TEST_RULE)), control)
+        self.assertGreater(runner.configuration_key(better, runner.TEST_RULE), runner.configuration_key(control, runner.TEST_RULE))
+        self.assertLess(runner.configuration_key(better, runner.CROSS_RULE), runner.configuration_key(tie, runner.CROSS_RULE))
+        for value in (float('nan'), float('inf'), -.1, 1.1, True):
+            with self.assertRaises(ValueError):
+                runner.configuration_key(training(value, .1, .1), runner.TEST_RULE)
+
+    def test_sequential_test_choices_propagate_and_keep_existing_controls(self):
+        with tempfile.TemporaryDirectory(prefix='dcbr-test-choice-') as temp:
+            document = runner.read_yaml(HERE / '搜参配置.yaml')
+            # This test isolates ordering from artifact checks, covered by the
+            # real reference/integration tests below.
+            document['rounds'][1]['experiments'][0].pop('reference')
+            path = Path(temp) / 'plan.yaml'
+            path.write_text(yaml.safe_dump(document, allow_unicode=True), encoding='utf-8')
+            plan = runner.load_plan(path)
+            round_ = plan['rounds'][1]
+            items = round_['experiments']
+            state = runner.empty_state()
+            def add(item, recall, ndcg):
+                state['executions'].append(dict(round_id=round_['id'], experiment_id=item['id'],
+                    execution_id='execution_' + item['id'], fingerprint=item['fingerprint'], status='SUCCESS',
+                    training_record={'result': {'metrics': {
+                        'test': {'recall': {'20': recall}, 'ndcg': {'20': ndcg}},
+                        'val': {'recall': {'20': ndcg}, 'ndcg': {'20': ndcg}}}}}))
+            valid = lambda record, *args: record is not None and record['status'] == 'SUCCESS'
+            for item, recall, ndcg in zip(items[:6], [.5, .6, .6, .4, .3, .2], [.9, .01, .99, .9, .9, .9]):
+                add(item, recall, ndcg)
+            with patch.object(runner, 'check_success', side_effect=valid):
+                runner.resolve_dependencies(plan, round_, state)
+                self.assertTrue(all(i['config']['omega'] == .1 for i in items[6:10]))
+                self.assertTrue(all(i['dependency_selection']['winner_experiment_id'] == 'omega_01' for i in items[6:10]))
+                # All four tau trials tie the omega winner in Recall, despite
+                # higher NDCG: the existing tau=.2 control must be retained.
+                for item in items[6:10]:
+                    add(item, .6, .99)
+                runner.resolve_dependencies(plan, round_, state)
+                self.assertTrue(all(i['config']['omega'] == .1 and i['config']['tau'] == .2 for i in items[10:]))
+                old = items[10]['fingerprint']
+                # Now tau=.15 wins Recall independently of its lower NDCG.
+                state['executions'][7]['training_record']['result']['metrics']['test']['recall']['20'] = .7
+                state['executions'][7]['training_record']['result']['metrics']['test']['ndcg']['20'] = .001
+                runner.resolve_dependencies(plan, round_, state)
+                self.assertTrue(all(i['config']['tau'] == .15 for i in items[10:]))
+                self.assertNotEqual(old, items[10]['fingerprint'])
+
+    def make_second_round_plan(self, root):
+        path = self.make_plan(root)
+        document = runner.read_yaml(path)
+        reviewed = copy.deepcopy(runner.read_yaml(HERE / "搜参配置.yaml")["rounds"][1])
+        reviewed["id"] = "round_02"
+        reviewed["overrides"]["epochs"] = 2
+        document["rounds"] = document["rounds"][:1]
+        document["rounds"][0]["overrides"] = copy.deepcopy(reviewed["overrides"])
+        path.write_text(yaml.safe_dump(document, allow_unicode=True, sort_keys=False), encoding='utf-8')
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(runner.run(path, 'round_01'), 0)
+        history = runner.load_state(root / 'work/history.json')
+        original = copy.deepcopy(history['executions'][0])
+        reviewed['experiments'][0]['reference'] = {key: original[key] for key in
+                                                  ('round_id', 'experiment_id', 'execution_id', 'fingerprint')}
+        document = runner.read_yaml(path)
+        document['rounds'].append(reviewed)
+        path.write_text(yaml.safe_dump(document, allow_unicode=True, sort_keys=False), encoding='utf-8')
+        return path, original
+
+    def test_historical_reference_checks_and_rejects_training_or_missing_artifacts(self):
+        with tempfile.TemporaryDirectory(prefix='dcbr-reference-') as temp:
+            root = Path(temp)
+            path, original = self.make_second_round_plan(root)
+            plan = runner.load_plan(path)
+            round_ = plan['rounds'][1]
+            item = round_['experiments'][0]
+            state = runner.load_state(root / 'work/history.json')
+            runner.resolve_dependencies(plan, round_, state)
+            self.assertFalse(item['blocked_by'])
+            self.assertTrue(runner.check_success(original, item, round_, plan))
+            # Updating only orchestration code must not require another model run.
+            plan['sources']['run_experiments.py'] = 'f' * 64
+            self.assertTrue(runner.check_reference(original, item, round_, plan))
+            for mutate in (lambda p: p['sources'].update({'train.py': 'e' * 64}),
+                           lambda p: p['settings'].update(gpu='1'),
+                           lambda p: p['settings'].update(device='cuda')):
+                bad = copy.deepcopy(plan)
+                mutate(bad)
+                self.assertFalse(runner.check_reference(original, item, round_, bad))
+            incompatible = copy.deepcopy(item)
+            incompatible['template_config']['tau'] = .6
+            self.assertFalse(runner.check_reference(original, incompatible, round_, plan))
+            with self.assertRaises(ValueError):
+                runner.select_experiments(plan, round_, state, 'selected', [item['id']])
+            # Corrupting a real artifact blocks the entire new round before any training.
+            checkpoint = Path(original['training_record']['artifacts']['checkpoint_model'])
+            checkpoint.write_bytes(checkpoint.read_bytes() + b'broken')
+            self.assertFalse(runner.check_reference(original, item, round_, plan))
+            with patch.object(runner, 'run_worker') as worker, contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Historical references missing or invalid'):
+                    runner.run(path, 'round_02')
+            worker.assert_not_called()
+            self.assertEqual(len(runner.load_state(root / 'work/history.json')['executions']), 1)
+
+    def test_missing_reference_dry_run_has_no_writes_and_actual_run_stops(self):
+        with tempfile.TemporaryDirectory(prefix='dcbr-missing-reference-') as temp:
+            root = Path(temp)
+            path, _ = self.make_second_round_plan(root)
+            history = root / 'work/history.json'
+            history.write_text(json.dumps(runner.empty_state()), encoding='utf-8')
+            before = path.read_bytes()
+            report = (root / 'search.txt').read_bytes()
+            output = io.StringIO()
+            with patch.object(runner, 'preflight'), contextlib.redirect_stdout(output):
+                self.assertEqual(runner.run(path, 'round_02', dry_run=True), 0)
+            self.assertIn('BLOCKED', output.getvalue())
+            self.assertEqual(path.read_bytes(), before)
+            self.assertEqual((root / 'search.txt').read_bytes(), report)
+            with patch.object(runner, 'run_worker') as worker, contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaisesRegex(ValueError, 'Historical references missing or invalid'):
+                    runner.run(path, 'round_02')
+            worker.assert_not_called()
+
+    def test_thirteen_trial_chain_reuses_control_inherits_and_resumes(self):
+        with tempfile.TemporaryDirectory(prefix='dcbr-thirteen-') as temp:
+            root = Path(temp)
+            path, original = self.make_second_round_plan(root)
+            first_round = copy.deepcopy(runner.read_yaml(path)['rounds'][0])
+            real = runner.run_worker
+            def interrupt_tau(command, attempt, record, *args, **kwargs):
+                if record['experiment_id'] == 'tau_015':
+                    raise KeyboardInterrupt
+                return real(command, attempt, record, *args, **kwargs)
+            with patch.object(runner, 'run_worker', side_effect=interrupt_tau), contextlib.redirect_stdout(io.StringIO()):
+                with self.assertRaises(KeyboardInterrupt):
+                    runner.run(path, 'round_02')
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(runner.run(path, 'round_02'), 0)
+            state = runner.load_state(root / 'work/history.json')
+            self.assertEqual(state['executions'][0], original)
+            self.assertEqual(runner.read_yaml(path)['rounds'][0], first_round)
+            records = [r for r in state['executions'] if r['round_id'] == 'round_02']
+            successes = [r for r in records if r['status'] == 'SUCCESS']
+            self.assertEqual(len(successes), 13)
+            self.assertEqual(len(records), 14)  # One interruption, no baseline training.
+            self.assertFalse(any(r['experiment_id'] == 'baseline_omega0' for r in records))
+            self.assertTrue(all(r['config']['seed'] == 0 and r['training_record']['config']['seed'] == 0 for r in successes))
+            omega = [original] + [r for r in successes if r['experiment_id'].startswith('omega_')]
+            winner_omega = max(omega, key=lambda r: runner.configuration_key(r['training_record'], runner.TEST_RULE))
+            tau = [r for r in successes if r['experiment_id'].startswith('tau_')]
+            winner_tau = max(omega + tau, key=lambda r: runner.configuration_key(r['training_record'], runner.TEST_RULE))
+            for record in tau:
+                self.assertEqual(record['config']['omega'], winner_omega['config']['omega'])
+                self.assertEqual(record['dependency_selection']['winner_execution_id'], winner_omega['execution_id'])
+            for record in [r for r in successes if r['experiment_id'].startswith('gamma_')]:
+                self.assertEqual(record['config']['omega'], winner_tau['config']['omega'])
+                self.assertEqual(record['config']['tau'], winner_tau['config']['tau'])
+                self.assertEqual(record['config']['gamma_1'] + record['config']['gamma_2'], .5)
+                self.assertEqual(record['dependency_selection']['winner_execution_id'], winner_tau['execution_id'])
+            summary = json.loads((root / 'work/Youshu/round_02/round_summary.json').read_text(encoding='utf-8'))
+            self.assertTrue(summary['complete'])
+            self.assertEqual(summary['training_planned'], 13)
+            self.assertEqual(summary['reference_count'], 1)
+            self.assertEqual(summary['valid_successes'], 14)
+            self.assertEqual(summary['configuration_selection_rule'], runner.TEST_RULE)
+            self.assertEqual(summary['stages'][0]['best']['execution_id'], winner_omega['execution_id'])
+            self.assertEqual(summary['stages'][1]['best']['execution_id'], winner_tau['execution_id'])
+            final = max([original] + successes, key=lambda r: runner.configuration_key(r['training_record'], runner.TEST_RULE))
+            self.assertEqual(summary['best']['execution_id'], final['execution_id'])
+            self.assertEqual(runner.read_yaml(path)['rounds'][1]['experiments'][0]['status'], 'REFERENCED')
+            report = (root / 'search.txt').read_bytes()
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(runner.run(path, 'round_02'), 0)
+            self.assertEqual((root / 'search.txt').read_bytes(), report)
+            self.assertEqual(len(runner.load_state(root / 'work/history.json')['executions']), 15)
+
+    def test_failed_omega_blocks_both_following_stages(self):
+        with tempfile.TemporaryDirectory(prefix='dcbr-omega-failed-') as temp:
+            root = Path(temp)
+            path, original = self.make_second_round_plan(root)
+            with patch.object(runner, 'preflight'), patch.object(runner, 'run_worker', return_value=8), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(runner.run(path, 'round_02'), 1)
+            state = runner.load_state(root / 'work/history.json')
+            self.assertEqual(state['executions'][0], original)
+            self.assertEqual(len(state['executions']), 6)
+            self.assertTrue(all(r['experiment_id'].startswith('omega_') and r['status'] == 'FAILED' for r in state['executions'][1:]))
+            entries = runner.read_yaml(path)['rounds'][1]['experiments']
+            self.assertTrue(all(e['status'] == 'BLOCKED' and e['resolved_config'] is None for e in entries[6:]))
+            summary = json.loads((root / 'work/Youshu/round_02/round_summary.json').read_text(encoding='utf-8'))
+            self.assertFalse(summary['complete'])
+            self.assertIsNone(summary['best'])
+            self.assertTrue(all(s['best'] is None for s in summary['stages']))
+
+    def test_second_round_rejects_rule_mismatch_and_bad_references(self):
+        original = runner.read_yaml(HERE / '搜参配置.yaml')
+        with tempfile.TemporaryDirectory(prefix='dcbr-round-schema-') as temp:
+            path = Path(temp) / 'plan.yaml'
+            for edit in (lambda r: r.update(selection_rule='unknown'),
+                         lambda r: r['experiments'][6]['inherit_best'].update(rule=runner.CROSS_RULE),
+                         lambda r: r['experiments'][0]['reference'].update(round_id='youshu_round_02'),
+                         lambda r: r['experiments'][0]['reference'].update(round_id='future'),
+                         lambda r: r['experiments'][0]['reference'].update(fingerprint='bad'),
+                         lambda r: r['stages'][0].update(candidates=['unknown'])):
+                document = copy.deepcopy(original)
+                edit(document['rounds'][1])
+                path.write_text(yaml.safe_dump(document, allow_unicode=True), encoding='utf-8')
+                with self.assertRaises(ValueError):
+                    runner.load_plan(path)
 
 
 if __name__ == "__main__":

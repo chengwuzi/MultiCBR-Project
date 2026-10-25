@@ -743,3 +743,305 @@ rounds:
           recall@20: 0.1436542770112435
           ndcg@20: 0.06794597861653205
     blocked_by: []
+- id: youshu_round_02
+  dataset: Youshu
+  selection_rule: test_recall20
+  note: 第二轮共13个新实验，均90轮、seed=0；只读引用第一轮lambda0_2000的omega=0结果，不重训。固定lambda_1=0.02、lambda_0=2000，依次搜索omega的5个值、tau的4个值、gamma的4组配对。三个阶段均按完整精度测试Recall@20选参，相同保留已有对照，否则保留声明顺序在前者，不用NDCG破平局。训练内best
+    epoch仍按验证Recall@20和NDCG@20同时严格提高选取。本轮测试成绩参与调参，不属于独立测试评估；候选离散值为用户确认的工程补充方案。
+  overrides:
+    epochs: 90
+    seed: 0
+    lambda_1: 0.02
+    lambda_0: 2000.0
+    omega: 0.0
+    tau: 0.2
+    gamma_1: 0.3
+    gamma_2: 0.2
+  stages:
+  - id: omega
+    candidates:
+    - baseline_omega0
+    - omega_01
+    - omega_03
+    - omega_05
+    - omega_07
+    - omega_10
+  - id: tau
+    candidates:
+    - baseline_omega0
+    - omega_01
+    - omega_03
+    - omega_05
+    - omega_07
+    - omega_10
+    - tau_010
+    - tau_015
+    - tau_025
+    - tau_030
+  - id: gamma
+    candidates:
+    - baseline_omega0
+    - omega_01
+    - omega_03
+    - omega_05
+    - omega_07
+    - omega_10
+    - tau_010
+    - tau_015
+    - tau_025
+    - tau_030
+    - gamma_010_040
+    - gamma_020_030
+    - gamma_025_025
+    - gamma_040_010
+  experiments:
+  - id: baseline_omega0
+    note: 只读引用第一轮lambda0_2000：omega=0、tau=0.2、gamma=(0.3,0.2)。复核原始历史、完整精度JSON及产物，不用TXT显示值代替原始精度；永不启动训练。
+    overrides: {}
+    reference:
+      round_id: youshu_round_01
+      experiment_id: lambda0_2000
+      execution_id: 20261025T093608_5009e405
+      fingerprint: 0d2fef31876434e4a8d044e0c11481f4df901bc8b92fed9b0e78124175aae2a3
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: omega_01
+    note: omega=0.1；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+    overrides:
+      omega: 0.1
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: omega_03
+    note: omega=0.3；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+    overrides:
+      omega: 0.3
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: omega_05
+    note: omega=0.5；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+    overrides:
+      omega: 0.5
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: omega_07
+    note: omega=0.7；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+    overrides:
+      omega: 0.7
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: omega_10
+    note: omega=1.0；其余配置与历史对照一致，tau=0.2、gamma=(0.3,0.2)。
+    overrides:
+      omega: 1.0
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: tau_010
+    note: tau=0.1；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      rule: test_recall20
+    overrides:
+      tau: 0.1
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: tau_015
+    note: tau=0.15；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      rule: test_recall20
+    overrides:
+      tau: 0.15
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: tau_025
+    note: tau=0.25；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      rule: test_recall20
+    overrides:
+      tau: 0.25
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: tau_030
+    note: tau=0.3；继承历史对照及5个omega实验中测试Recall@20优胜者的完整配置，仅改变tau；原tau=0.2作为已有对照不重跑。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      rule: test_recall20
+    overrides:
+      tau: 0.3
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: gamma_010_040
+    note: gamma_1=0.1、gamma_2=0.4，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
+      rule: test_recall20
+    overrides:
+      gamma_1: 0.1
+      gamma_2: 0.4
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: gamma_020_030
+    note: gamma_1=0.2、gamma_2=0.3，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
+      rule: test_recall20
+    overrides:
+      gamma_1: 0.2
+      gamma_2: 0.3
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: gamma_025_025
+    note: gamma_1=0.25、gamma_2=0.25，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
+      rule: test_recall20
+    overrides:
+      gamma_1: 0.25
+      gamma_2: 0.25
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+  - id: gamma_040_010
+    note: gamma_1=0.4、gamma_2=0.1，总和固定0.5；继承omega/tau阶段候选中测试Recall@20优胜者的完整配置，仅改变gamma比例；原(0.3,0.2)作为已有对照。
+    inherit_best:
+      candidates:
+      - baseline_omega0
+      - omega_01
+      - omega_03
+      - omega_05
+      - omega_07
+      - omega_10
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
+      rule: test_recall20
+    overrides:
+      gamma_1: 0.4
+      gamma_2: 0.1
+    status: PENDING
+    success: false
+    fingerprint: null
+    execution_ids: []
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []

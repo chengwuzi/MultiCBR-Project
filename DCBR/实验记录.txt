@@ -1,0 +1,92 @@
+
+========================================================================
+EXECUTION_ID: 20261024T200344_72e1b0be
+实验类别: 第一种情况（作者已有数据集配置）
+模型: DCBR
+数据集: iFashion
+实验备注: 情况一：iFashion作者配置，统一评测与双指标严格改善选模，完整50轮
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-25T04:03:44+08:00
+结束时间(UTC+08:00): 2026-10-25T08:23:11+08:00
+耗时（秒）: 15565.250
+GPU: 0
+运行设备: cuda:0
+代码版本: 3e67ba32ce1370892877a2d7f2114a85d4c14500
+训练源码摘要: 92ce4375ecd21d129b6ed4de18d80328d39e02bef93a4c5f51596da036d2e01c
+配置指纹: d2248b9293d0f301c22c8543eef147a4e29bb205cd70fc71d30e0358ce3edf81
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整实际配置:
+data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 140
+noise_scale: 0.1
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 2.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.2
+xi_UB:
+- 0.5
+- 0.5
+- 0.0
+xi_UI:
+- 0.3
+- 0.4
+- 0.3
+xi_BI:
+- 0.5
+- 0.5
+- 0.0
+omega: 0.5
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.08
+lambda_1: 0.3
+lambda_2: 1.0e-06
+epochs: 50
+dataset: iFashion
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+gpu: '0'
+info: ''
+quiet: false
+num_workers: 0
+best_epoch: 39（从0计数）
+最佳训练轮次: 40
+最佳验证 Recall@20: 0.1622279400
+最佳验证 NDCG@20: 0.1030823594
+val TOP 10: Recall=0.11736949, NDCG=0.08821143
+val TOP 20: Recall=0.16222794, NDCG=0.10308236
+val TOP 40: Recall=0.21471950, NDCG=0.11735679
+val TOP 80: Recall=0.27578159, NDCG=0.13130421
+test TOP 10: Recall=0.11841394, NDCG=0.11884613
+test TOP 20: Recall=0.16236546, NDCG=0.13653072
+test TOP 40: Recall=0.21544410, NDCG=0.15523595
+test TOP 80: Recall=0.27739549, NDCG=0.17377435
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\tensorboard"}
+END_EXECUTION: 20261024T200344_72e1b0be

@@ -43,9 +43,19 @@ iFashion:
 # MealRec+L model settings from raw/configs/models/DCBR.yaml; shared settings
 # from raw/configs/overall.yaml, unified top-K and seed 0. User sets 90 epochs
 # for Youshu instead of the author's 150-epoch MealRec+L training budget.
-# Selected after round 02 using test Recall@20: lambda_1=0.02, lambda_0=2000,
-# omega=0.3, tau=0.25, gamma=(0.3, 0.2). User retains 90 epochs and seed 0.
-# Selected run: tau_025, checkpoint epoch 80. Historical rounds pin old values.
+# 用户结论：DCBR-Youshu 调参暂时结束，保留 90 轮、seed=0。
+# 当前优胜：lambda_0=2000、lambda_1=0.02、omega=0.3、tau=0.25、gamma=(0.3,0.2)。
+# 轮次 ID：youshu_round_02；实验 ID：tau_025。
+# EXECUTION_ID: 20261025T121254_2673b424
+# 最佳检查点：第 80 轮（best_epoch=79，从 0 计数）；完整训练预算仍为 90 轮。
+# 跨配置按测试 Recall@20 选优；训练内仍按验证 Recall@20、NDCG@20 同时严格提高选 epoch。
+# 验证 TOP 20：Recall=0.26931154，NDCG=0.13257032。
+# 测试 TOP 10：Recall=0.18877672，NDCG=0.13052631。
+# 测试 TOP 20：Recall=0.26858404，NDCG=0.15328094。
+# 测试 TOP 40：Recall=0.36555822，NDCG=0.17974274。
+# 测试 TOP 80：Recall=0.47092039，NDCG=0.20420190。
+# 以上为同一检查点的结果，按正式 TXT 的显示精度记录；NDCG@20 并非本轮最高。
+# 完整记录：DCBR/搜参结果.txt，搜索上述 EXECUTION_ID；历史轮次保持原配置。
 Youshu:
   data_path: ./datasets
   embedding_size: 64

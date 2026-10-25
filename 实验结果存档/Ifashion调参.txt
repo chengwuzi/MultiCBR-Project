@@ -2091,3 +2091,783 @@ test TOP 40: Recall=0.19067887, NDCG=0.14244293
 test TOP 80: Recall=0.24247455, NDCG=0.15784167
 训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T161747_dcafb532_clambda_045_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.0-0.5-_bae036942741"}
 END_EXECUTION: 20261024T161747_dcafb532
+
+========================================================================
+EXECUTION_ID: 20261024T192117_e58953cb
+轮次: stage3_fusion_03
+轮次备注: 第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。
+实验: ui_to_ub_005
+实验备注: UI 向 UB 转移 0.05；[UB,UI,BI]=[0.05,0.45,0.50]，BI 保持 0.50。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T03:21:17+08:00
+结束时间(UTC+08:00): 2026-10-25T05:24:57+08:00
+实验总耗时（含重试）: 02:03:38.266（共 7418.266 秒）
+尝试次数: 1/3
+代码版本: d2e97e930b75d07dea4b183d43691f3323fc7ddd
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 8945e3c8fc221dfa95de74d015e0d24d8aa9b42f3d3e850d2978c520696077e7
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.05
+  - 0.45
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T192117_e58953cb_ui_to_ub_005_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage3_fusion_03\ui_to_ub_005\20261024T192117_e58953cb\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T03:21:17+08:00
+  结束时间(UTC+08:00): 2026-10-25T05:24:57+08:00
+  本次尝试耗时: 02:03:38.234（共 7418.234 秒）
+best_epoch: 39 (从0计数)
+最佳训练轮次: 40
+验证选模分数: 0.5558769272
+val TOP 10: Recall=0.11012992, NDCG=0.08404312
+val TOP 20: Recall=0.14994321, NDCG=0.09717842
+val TOP 40: Recall=0.19844460, NDCG=0.11031070
+val TOP 80: Recall=0.25330972, NDCG=0.12279540
+test TOP 10: Recall=0.11105405, NDCG=0.11261060
+test TOP 20: Recall=0.15158048, NDCG=0.12887583
+test TOP 40: Recall=0.20009966, NDCG=0.14592487
+test TOP 80: Recall=0.25500239, NDCG=0.16227771
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T192117_e58953cb_ui_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._38410b735467", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T192117_e58953cb_ui_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._38410b735467", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T192117_e58953cb_ui_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._38410b735467", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T192117_e58953cb_ui_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._38410b735467"}
+END_EXECUTION: 20261024T192117_e58953cb
+
+========================================================================
+EXECUTION_ID: 20261024T212457_5cb38e0c
+轮次: stage3_fusion_03
+轮次备注: 第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。
+实验: ui_to_ub_010
+实验备注: UI 向 UB 转移 0.10；[UB,UI,BI]=[0.10,0.40,0.50]，BI 保持 0.50。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T05:24:57+08:00
+结束时间(UTC+08:00): 2026-10-25T07:47:27+08:00
+实验总耗时（含重试）: 02:22:30.234（共 8550.234 秒）
+尝试次数: 1/3
+代码版本: d2e97e930b75d07dea4b183d43691f3323fc7ddd
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 0c7e5dd3e0cb4ca6378497901bce022b86550b36bcb8c636e55206ac0cd88099
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.1
+  - 0.4
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T212457_5cb38e0c_ui_to_ub_010_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage3_fusion_03\ui_to_ub_010\20261024T212457_5cb38e0c\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T05:24:57+08:00
+  结束时间(UTC+08:00): 2026-10-25T07:47:27+08:00
+  本次尝试耗时: 02:22:30.203（共 8550.203 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5616796687
+val TOP 10: Recall=0.11098611, NDCG=0.08410628
+val TOP 20: Recall=0.15180069, NDCG=0.09759618
+val TOP 40: Recall=0.20130141, NDCG=0.11098138
+val TOP 80: Recall=0.25779199, NDCG=0.12383519
+test TOP 10: Recall=0.11153824, NDCG=0.11196430
+test TOP 20: Recall=0.15247884, NDCG=0.12840385
+test TOP 40: Recall=0.20258343, NDCG=0.14598315
+test TOP 80: Recall=0.25884474, NDCG=0.16274490
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T212457_5cb38e0c_ui_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.4_ae5c4c27e4bb", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T212457_5cb38e0c_ui_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.4_ae5c4c27e4bb", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T212457_5cb38e0c_ui_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.4_ae5c4c27e4bb", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T212457_5cb38e0c_ui_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.4_ae5c4c27e4bb"}
+END_EXECUTION: 20261024T212457_5cb38e0c
+
+========================================================================
+EXECUTION_ID: 20261024T234727_35fb083a
+轮次: stage3_fusion_03
+轮次备注: 第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。
+实验: ui_to_ub_020
+实验备注: UI 向 UB 转移 0.20；[UB,UI,BI]=[0.20,0.30,0.50]，BI 保持 0.50。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T07:47:27+08:00
+结束时间(UTC+08:00): 2026-10-25T09:33:45+08:00
+实验总耗时（含重试）: 01:46:17.406（共 6377.406 秒）
+尝试次数: 1/3
+代码版本: d2e97e930b75d07dea4b183d43691f3323fc7ddd
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 90a50636f6d00ddf64d873f240a471d28a36068482862a80115de7d077dd8ae8
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.2
+  - 0.3
+  - 0.5
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261024T234727_35fb083a_ui_to_ub_020_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage3_fusion_03\ui_to_ub_020\20261024T234727_35fb083a\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T07:47:27+08:00
+  结束时间(UTC+08:00): 2026-10-25T09:33:45+08:00
+  本次尝试耗时: 01:46:17.391（共 6377.391 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5338822079
+val TOP 10: Recall=0.10413433, NDCG=0.07797229
+val TOP 20: Recall=0.14434080, NDCG=0.09126803
+val TOP 40: Recall=0.19365556, NDCG=0.10461783
+val TOP 80: Recall=0.25130651, NDCG=0.11772886
+test TOP 10: Recall=0.10483531, NDCG=0.10481682
+test TOP 20: Recall=0.14540439, NDCG=0.12115572
+test TOP 40: Recall=0.19506085, NDCG=0.13858168
+test TOP 80: Recall=0.25342252, NDCG=0.15599152
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261024T234727_35fb083a_ui_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.3_e1ba1a232010", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261024T234727_35fb083a_ui_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.3_e1ba1a232010", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261024T234727_35fb083a_ui_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.3_e1ba1a232010", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261024T234727_35fb083a_ui_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.3_e1ba1a232010"}
+END_EXECUTION: 20261024T234727_35fb083a
+
+========================================================================
+EXECUTION_ID: 20261025T013345_f00c2ca8
+轮次: stage3_fusion_03
+轮次备注: 第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。
+实验: bi_to_ub_005
+实验备注: BI 向 UB 转移 0.05；[UB,UI,BI]=[0.05,0.50,0.45]，UI 保持 0.50。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T09:33:45+08:00
+结束时间(UTC+08:00): 2026-10-25T11:07:48+08:00
+实验总耗时（含重试）: 01:34:03.141（共 5643.141 秒）
+尝试次数: 1/3
+代码版本: d2e97e930b75d07dea4b183d43691f3323fc7ddd
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 12bf89faf241e4b397296a5a75a7fa111afacaf5e744856f4f8c2b8ad70f091f
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.05
+  - 0.5
+  - 0.45
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261025T013345_f00c2ca8_bi_to_ub_005_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage3_fusion_03\bi_to_ub_005\20261025T013345_f00c2ca8\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T09:33:45+08:00
+  结束时间(UTC+08:00): 2026-10-25T11:07:48+08:00
+  本次尝试耗时: 01:34:03.109（共 5643.109 秒）
+best_epoch: 39 (从0计数)
+最佳训练轮次: 40
+验证选模分数: 0.5509138776
+val TOP 10: Recall=0.10842940, NDCG=0.08316363
+val TOP 20: Recall=0.14834776, NDCG=0.09635583
+val TOP 40: Recall=0.19675957, NDCG=0.10945071
+val TOP 80: Recall=0.25118958, NDCG=0.12182416
+test TOP 10: Recall=0.10953699, NDCG=0.11128405
+test TOP 20: Recall=0.14965091, NDCG=0.12739408
+test TOP 40: Recall=0.19737992, NDCG=0.14416177
+test TOP 80: Recall=0.25295926, NDCG=0.16071174
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261025T013345_f00c2ca8_bi_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._cbde8e65295a", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261025T013345_f00c2ca8_bi_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._cbde8e65295a", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261025T013345_f00c2ca8_bi_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._cbde8e65295a", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261025T013345_f00c2ca8_bi_to_ub_005_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.05-0._cbde8e65295a"}
+END_EXECUTION: 20261025T013345_f00c2ca8
+
+========================================================================
+EXECUTION_ID: 20261025T030748_bcaf3fea
+轮次: stage3_fusion_03
+轮次备注: 第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。
+实验: bi_to_ub_010
+实验备注: BI 向 UB 转移 0.10；[UB,UI,BI]=[0.10,0.50,0.40]，UI 保持 0.50。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T11:07:48+08:00
+结束时间(UTC+08:00): 2026-10-25T12:40:31+08:00
+实验总耗时（含重试）: 01:32:43.344（共 5563.344 秒）
+尝试次数: 1/3
+代码版本: d2e97e930b75d07dea4b183d43691f3323fc7ddd
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 2528cd8ed796e39e234a2d409fbf363fec68079c205d4c46eec6264d51f65168
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.1
+  - 0.5
+  - 0.4
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261025T030748_bcaf3fea_bi_to_ub_010_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage3_fusion_03\bi_to_ub_010\20261025T030748_bcaf3fea\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T11:07:48+08:00
+  结束时间(UTC+08:00): 2026-10-25T12:40:31+08:00
+  本次尝试耗时: 01:32:43.328（共 5563.328 秒）
+best_epoch: 29 (从0计数)
+最佳训练轮次: 30
+验证选模分数: 0.5508802085
+val TOP 10: Recall=0.10741380, NDCG=0.08200024
+val TOP 20: Recall=0.14858714, NDCG=0.09559277
+val TOP 40: Recall=0.19777630, NDCG=0.10892401
+val TOP 80: Recall=0.25479365, NDCG=0.12186879
+test TOP 10: Recall=0.10924427, NDCG=0.10987602
+test TOP 20: Recall=0.14949332, NDCG=0.12599886
+test TOP 40: Recall=0.19828625, NDCG=0.14315291
+test TOP 80: Recall=0.25503482, NDCG=0.16006776
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261025T030748_bcaf3fea_bi_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.5_3f30278c88fe", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261025T030748_bcaf3fea_bi_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.5_3f30278c88fe", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261025T030748_bcaf3fea_bi_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.5_3f30278c88fe", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261025T030748_bcaf3fea_bi_to_ub_010_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.1-0.5_3f30278c88fe"}
+END_EXECUTION: 20261025T030748_bcaf3fea
+
+========================================================================
+EXECUTION_ID: 20261025T044031_d5cc6afe
+轮次: stage3_fusion_03
+轮次备注: 第三轮三视图融合权重粗扫：权重顺序为 [UB,UI,BI]；三组从 UI 向 UB 转移 0.05/0.10/0.20，三组从 BI 向 UB 转移相同权重；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。
+实验: bi_to_ub_020
+实验备注: BI 向 UB 转移 0.20；[UB,UI,BI]=[0.20,0.50,0.30]，UI 保持 0.50。
+状态: SUCCESS
+GPU: 0
+开始时间(UTC+08:00): 2026-10-25T12:40:31+08:00
+结束时间(UTC+08:00): 2026-10-25T14:13:14+08:00
+实验总耗时（含重试）: 01:32:40.859（共 5560.859 秒）
+尝试次数: 1/3
+代码版本: d2e97e930b75d07dea4b183d43691f3323fc7ddd
+训练源码摘要: 2b7b04ef10eda804c7e81d64e6a0d706bff068d18a5aca009bad56c2eb942b1a
+配置指纹: 05a06e217755cdbf5847a08cd395224c4174bd16f1db5ff1b465fef7c60a313f
+完整实际配置:
+data_path: ./datasets
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+seed: 2026
+aug_type: Noise
+ed_interval: 1
+embedding_sizes:
+- 64
+num_layerss:
+- 2
+UB_ratios:
+- 0.05
+UI_ratios:
+- 0.0
+BI_ratios:
+- 0.2
+fusion_weights:
+  modal_weight:
+  - 0.2
+  - 0.5
+  - 0.3
+  UB_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+  UI_layer:
+  - 0.3
+  - 0.4
+  - 0.3
+  BI_layer:
+  - 0.5
+  - 0.5
+  - 0.0
+lrs:
+- 0.001
+l2_regs:
+- 1.0e-05
+c_lambdas:
+- 0.35
+c_temps:
+- 0.2
+epochs: 40
+test_interval: 5
+latent_rebuild:
+  enabled: true
+  rebuild_k: 3
+  latent_diffusion_user_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-user-04261842.pt
+  latent_diffusion_bundle_embedding_path: ./datasets/iFashion_UB_emb/iFashion_UB-bundle-04261842.pt
+  latent_diffusion_hidden_dim: 128
+  latent_diffusion_time_dim: 16
+  latent_diffusion_denoiser_layers: 2
+  latent_diffusion_dropout: 0.1
+  latent_diffusion_num_steps: 12
+  latent_diffusion_beta_start: 0.0001
+  latent_diffusion_beta_end: 0.02
+  latent_diffusion_set_loss_weight: 0.05
+  latent_diffusion_lr: 0.001
+  latent_diffusion_weight_decay: 1.0e-05
+  latent_diffusion_batch_size: 1024
+  latent_diffusion_infer_batch_size: 256
+  latent_diffusion_reset_after_epoch: -1
+  latent_diffusion_reset_optimizer: false
+anchor_cl:
+  enabled: false
+  anchor_cl_lambda: 0.07
+  temp: 0.2
+  user_cl: true
+  bundle_cl: true
+  ub_ui_user_weight: 1.0
+  ub_bi_user_weight: 1.0
+  ub_ui_bundle_weight: 1.0
+  ub_bi_bundle_weight: 1.0
+ui_bundle_user_agg_beta: 0
+bi_user_bundle_agg_beta: 0
+dataset: iFashion
+model: AnchorViewBundleNet
+gpu: '0'
+info: tune_20261025T044031_d5cc6afe_bi_to_ub_020_a1
+num_users: 53897
+num_bundles: 27694
+num_items: 42563
+lr: 0.001
+l2_reg: 1.0e-05
+embedding_size: 64
+UB_ratio: 0.05
+UI_ratio: 0.0
+BI_ratio: 0.2
+num_layers: 2
+c_lambda: 0.35
+c_temp: 0.2
+尝试 1: SUCCESS；日志: C:\Users\admin\PycharmProjects\MultiCBR-Project\log\ifashion_tuning\stage3_fusion_03\bi_to_ub_020\20261025T044031_d5cc6afe\attempt_1_stdout.txt
+  开始时间(UTC+08:00): 2026-10-25T12:40:31+08:00
+  结束时间(UTC+08:00): 2026-10-25T14:13:14+08:00
+  本次尝试耗时: 01:32:40.828（共 5560.828 秒）
+best_epoch: 39 (从0计数)
+最佳训练轮次: 40
+验证选模分数: 0.5334351014
+val TOP 10: Recall=0.10360133, NDCG=0.07763627
+val TOP 20: Recall=0.14414832, NDCG=0.09101590
+val TOP 40: Recall=0.19379544, NDCG=0.10447545
+val TOP 80: Recall=0.25301329, NDCG=0.11795101
+test TOP 10: Recall=0.10486808, NDCG=0.10472783
+test TOP 20: Recall=0.14482078, NDCG=0.12082687
+test TOP 40: Recall=0.19503793, NDCG=0.13851328
+test TOP 80: Recall=0.25443525, NDCG=0.15620181
+训练产物: {"log": "./log/iFashion/AnchorViewBundleNet/tune_20261025T044031_d5cc6afe_bi_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.5_02965c1ca3be", "tensorboard": "./runs/iFashion/AnchorViewBundleNet/tune_20261025T044031_d5cc6afe_bi_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.5_02965c1ca3be", "checkpoint_model": "./checkpoints/iFashion/AnchorViewBundleNet/model/tune_20261025T044031_d5cc6afe_bi_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.5_02965c1ca3be", "checkpoint_config": "./checkpoints/iFashion/AnchorViewBundleNet/conf/tune_20261025T044031_d5cc6afe_bi_to_ub_020_a1_Noise_Neg_1_2048_0.001_1e-05_64_0.05_0.0_0.2_2_0.2-0.5_02965c1ca3be"}
+END_EXECUTION: 20261025T044031_d5cc6afe

@@ -87,7 +87,7 @@ iFashion:
   BI_ratios: [0.2]
 
   fusion_weights:
-    modal_weight: [0.1, 0.4, 0.5]
+    modal_weight: [0.1, 0.3, 0.6]
     UB_layer: [0.5, 0.5, 0.0]
     UI_layer: [0.3, 0.4, 0.3]
     BI_layer: [0.5, 0.5, 0.0]

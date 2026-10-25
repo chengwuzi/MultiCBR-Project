@@ -7,6 +7,7 @@ tuning_plans/ifashion_clambda_coarse_01.yaml：已经确定的第一轮实验计
 tuning_plans/ifashion_clambda_fine_02.yaml：第二轮 c_lambdas 细扫及 40 轮对照计划。
 tuning_plans/ifashion_fusion_03.yaml：第三轮三视图融合权重实验计划。
 tuning_plans/ifashion_fusion_04.yaml：第四轮固定 UB=0.10、从 UI 向 BI 转移权重的实验计划。
+tuning_plans/ifashion_rebuild_k_05.yaml：第五轮固定第四轮最优融合权重、搜索重构 Top-K 的实验计划。
 实验结果存档/Ifashion调参.txt：供人工阅读的追加式结果记录，保存各轮实验结果。
 log/ifashion_tuning/<round_id>/：进度 state.json、控制器锁、每次尝试的配置快照、
 stdout 和结构化结果。它们用于恢复执行与定位失败，不需要手动整理成另一套结果表。
@@ -211,8 +212,40 @@ modal_weight=[0.10,0.40,0.50]，验证选模分数为 0.5616796687，最佳训�
 
 十一、当前基础配置与历史计划
 
-config.yaml 中 iFashion 已同步第三轮优胜基线：modal_weight=[0.10,0.40,0.50]、
+config.yaml 中 iFashion 已同步第四轮优胜基线：modal_weight=[0.10,0.30,0.60]、
 c_lambdas=[0.35]、c_temps=[0.2]、epochs=40、anchor_cl.enabled=false。
-第四轮候选融合权重由 ifashion_fusion_04.yaml 单独覆盖，尚未写入基础配置。
+基础 rebuild_k 仍为 3，第五轮候选值由 ifashion_rebuild_k_05.yaml 单独覆盖，尚未选定新的基础值。
 第一轮计划显式保留 epochs=30 和 modal_weight=[0,0.5,0.5]，第二轮计划显式保留
 epochs=40 和 modal_weight=[0,0.5,0.5]，避免基础默认值更新后改变历史实验设置。
+
+十二、第五轮扩散重构 Top-K 实验
+
+计划：tuning_plans/ifashion_rebuild_k_05.yaml，round_id=stage4_rebuild_k_05，共四组。
+固定第四轮最优融合权重 [UB,UI,BI]=[0.10,0.30,0.60]，只调整 latent_rebuild.rebuild_k：
+执行顺序为 9 → 7 → 5 → 1：
+rebuild_k_009：rebuild_k=9。
+rebuild_k_007：rebuild_k=7。
+rebuild_k_005：rebuild_k=5。
+rebuild_k_001：rebuild_k=1。
+
+rebuild_k 表示每个用户从已有训练交互的 bundle 中最多保留多少个，构建重构后的 UB 图；
+已有交互少于 k 时保留全部已有交互，不从未交互 bundle 中补足数量。
+本轮只比较保留数量的影响，不同时调整扩散学习率、步数、集合损失权重或其他训练设置。
+明确固定 c_lambdas=[0.35]、c_temps=[0.2]、epochs=40、anchor_cl.enabled=false、seed=2026，
+并保持 latent_rebuild.enabled=true。其余重构参数、层融合权重、噪声及残差继承基础配置。
+
+在项目根目录预检查（不训练）：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_rebuild_k_05.yaml --gpu 0 --dry-run
+
+正式前台运行：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_rebuild_k_05.yaml --gpu 0
+
+默认使用 0 号 GPU，可通过 --gpu 指定其他卡；同一轮续跑沿用相同的 GPU 参数。
+本轮进度独立保存在 log/ifashion_tuning/stage4_rebuild_k_05/，不复用前四轮的成功状态。
+结果继续追加到实验结果存档/Ifashion调参.txt，保留原有记录；备注标明本轮 k 值及固定融合权重。
+每组最多三次尝试；再次启动跳过成功组，失败或中断组重新获得最多三次尝试。
+
+若保持第四轮相同的运行环境、数据和其余配置，对照组沿用第四轮 ui_to_bi_010：
+rebuild_k=3，modal_weight=[0.10,0.30,0.60]，验证选模分数为 0.5638427481，最佳训练轮次为第 30 轮。
+本计划只运行上述四组，不额外重跑 k=3；最终按 k=1、3、5、7、9 查看趋势。
+仍按验证集 Recall@20 + Recall@40 + NDCG@20 + NDCG@40 比较，允许最终保留 k=3。

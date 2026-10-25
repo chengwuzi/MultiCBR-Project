@@ -1,0 +1,42 @@
+version: 1
+round_id: stage4_rebuild_k_05
+note: "第五轮扩散重构 Top-K 实验：固定第四轮最优 [UB,UI,BI]=[0.10,0.30,0.60]，按 rebuild_k=9/7/5/1 的顺序执行，结合已有 k=3 对照观察趋势；固定 c_lambda=0.35、温度=0.2、40 轮，关闭融合前对比。"
+base_config: config.yaml
+seed: 2026
+
+gpu: "0"
+max_attempts: 3 # 首次运行 + 两次重试；再次启动时，未成功组重新获得三次机会。
+result_file: "实验结果存档/Ifashion调参.txt"
+
+common_overrides:
+  epochs: 40
+  c_lambdas: [0.35]
+  c_temps: [0.2]
+  anchor_cl:
+    enabled: false
+  fusion_weights:
+    modal_weight: [0.10, 0.30, 0.60]
+  latent_rebuild:
+    enabled: true
+
+experiments:
+  - id: rebuild_k_009
+    note: "rebuild_k=9，每个用户从已有训练交互中最多保留 9 个 bundle；融合权重固定 [0.10,0.30,0.60]。"
+    overrides:
+      latent_rebuild:
+        rebuild_k: 9
+  - id: rebuild_k_007
+    note: "rebuild_k=7，每个用户从已有训练交互中最多保留 7 个 bundle；融合权重固定 [0.10,0.30,0.60]。"
+    overrides:
+      latent_rebuild:
+        rebuild_k: 7
+  - id: rebuild_k_005
+    note: "rebuild_k=5，每个用户从已有训练交互中最多保留 5 个 bundle；融合权重固定 [0.10,0.30,0.60]。"
+    overrides:
+      latent_rebuild:
+        rebuild_k: 5
+  - id: rebuild_k_001
+    note: "rebuild_k=1，每个用户从已有训练交互中最多保留 1 个 bundle；融合权重固定 [0.10,0.30,0.60]。"
+    overrides:
+      latent_rebuild:
+        rebuild_k: 1

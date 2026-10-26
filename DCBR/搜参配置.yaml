@@ -6723,3 +6723,2013 @@ rounds:
           recall@20: 0.04801527374285504
           ndcg@20: 0.019370758243406568
     blocked_by: []
+
+- id: youshu_round_04_coverage
+  dataset: Youshu
+  note: Youshu覆盖补搜：1个全历史验证优胜TXT引用（不重训）+49个新实验，共11阶段。依次扩搜lambda_1(8)、omega(7)，补lambda_2(2)、UI/BI/UB扰动各4、UI/BI/UB逐层权重各4，最后扩散steps(4)、noise_scale(4)。每阶段保留此前优胜，完整继承后只改当前参数。固定90轮、seed=0；验证Recall@20优先、完全相同再比较验证NDCG@20，完全平局保留声明顺序在前者；测试只报告。不改变数据/评测/模型机制，不修改raw。
+  selection_rule: validation_recall20_then_ndcg20
+  overrides:
+    data_path: ./datasets
+    embedding_size: 64
+    batch_size_train: 2048
+    batch_size_test: 2048
+    topk:
+    - 10
+    - 20
+    - 40
+    - 80
+    neg_num: 1
+    lr: 0.001
+    test_interval: 5
+    seed: 0
+    dims:
+    - 1000
+    norm: false
+    time_emb_dim: 10
+    steps: 5
+    noise_scale: 1.0
+    noise_min: 0.0001
+    noise_max: 0.02
+    sampling_noise: false
+    sampling_steps: 0
+    rebuild_k: 1
+    lambda_0: 2000.0
+    num_layers: 2
+    upsilon_UB: 0.05
+    upsilon_UI: 0.0
+    upsilon_BI: 0.1
+    xi_UB:
+    - 0.6
+    - 0.3
+    - 0.1
+    xi_UI:
+    - 0.4
+    - 0.6
+    - 0.0
+    xi_BI:
+    - 0.5
+    - 0.4
+    - 0.1
+    omega: 0.3
+    gamma_1: 0.3
+    gamma_2: 0.2
+    tau: 0.1
+    lambda_1: 0.02
+    lambda_2: 1.0e-05
+    epochs: 90
+  experiments:
+  - id: baseline_best
+    note: 复用全历史验证Recall@20优胜tau_010完整配置；直接读取既有TXT的未舍入验证@20，不重复训练，不依赖旧history或检查点。引用来源和产物未复核的事实保留在记录中。
+    overrides: {}
+    reference:
+      round_id: youshu_round_02
+      experiment_id: tau_010
+      execution_id: 20261025T115614_4738c53b
+      fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
+      allow_data_path_relocation: true
+      result_file: DCBR/搜参结果.txt
+    status: PENDING
+    success: false
+  - id: lambda1_0001
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.001
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_0005
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.005
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_001
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.01
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_003
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.03
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_005
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.05
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_010
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_020
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda1_040
+    note: 已搜参数扩展1：旧轮lambda_1由0.02增至0.05时验证Recall@20从0.2481降至0.1437，影响明显；在新完整背景下扩大到0.001至0.4。0.001/0.005/0.1为工程补充点，其余为论文候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_1；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_1: 0.4
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_00
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_01
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_02
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_04
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 0.4
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_06
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 0.6
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_08
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 0.8
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: omega_10
+    note: 已搜参数扩展2：旧轮omega=0.3、0.7、1的验证Recall@20约为0.2714、0.2119、0.0664，影响明显。原轮已触及合法范围[0,1]两端，本轮保留两端并补中间点，不越界；离散网格为工程设计；完整继承此前全部候选中的优胜配置，只覆盖omega；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      omega: 1.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda2_1e6
+    note: 补齐Youshu未搜的L2正则：新增论文候选1e-6、1e-7，保留1e-5对照，覆盖论文三个候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_2；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_2: 1.0e-06
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: lambda2_1e7
+    note: 补齐Youshu未搜的L2正则：新增论文候选1e-6、1e-7，保留1e-5对照，覆盖论文三个候选；完整继承此前全部候选中的优胜配置，只覆盖lambda_2；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      lambda_2: 1.0e-07
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ui_0025
+    note: UI视图表示扰动幅度；原值0作为对照。论文允许[0,1]内搜索，本离散网格为工程补充；不是边删除概率；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UI: 0.025
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ui_005
+    note: UI视图表示扰动幅度；原值0作为对照。论文允许[0,1]内搜索，本离散网格为工程补充；不是边删除概率；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UI: 0.05
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ui_010
+    note: UI视图表示扰动幅度；原值0作为对照。论文允许[0,1]内搜索，本离散网格为工程补充；不是边删除概率；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UI: 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ui_020
+    note: UI视图表示扰动幅度；原值0作为对照。论文允许[0,1]内搜索，本离散网格为工程补充；不是边删除概率；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UI: 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_bi_000
+    note: BI视图及相关聚合表示的扰动幅度；原值0.1作为对照。0.3可参考作者MealRec+H，其他点在论文区间内，离散网格为工程补充；完整继承此前全部候选中的优胜配置，只覆盖upsilon_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_BI: 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_bi_005
+    note: BI视图及相关聚合表示的扰动幅度；原值0.1作为对照。0.3可参考作者MealRec+H，其他点在论文区间内，离散网格为工程补充；完整继承此前全部候选中的优胜配置，只覆盖upsilon_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_BI: 0.05
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_bi_020
+    note: BI视图及相关聚合表示的扰动幅度；原值0.1作为对照。0.3可参考作者MealRec+H，其他点在论文区间内，离散网格为工程补充；完整继承此前全部候选中的优胜配置，只覆盖upsilon_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_BI: 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_bi_030
+    note: BI视图及相关聚合表示的扰动幅度；原值0.1作为对照。0.3可参考作者MealRec+H，其他点在论文区间内，离散网格为工程补充；完整继承此前全部候选中的优胜配置，只覆盖upsilon_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_BI: 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ub_000
+    note: 重建UB视图的表示扰动幅度；原值0.05作为对照。0也见作者MealRec+H，离散网格为工程补充；不改变重建图或关闭对比模块；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UB: 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ub_001
+    note: 重建UB视图的表示扰动幅度；原值0.05作为对照。0也见作者MealRec+H，离散网格为工程补充；不改变重建图或关闭对比模块；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UB: 0.01
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ub_010
+    note: 重建UB视图的表示扰动幅度；原值0.05作为对照。0也见作者MealRec+H，离散网格为工程补充；不改变重建图或关闭对比模块；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UB: 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: upsilon_ub_020
+    note: 重建UB视图的表示扰动幅度；原值0.05作为对照。0也见作者MealRec+H，离散网格为工程补充；不改变重建图或关闭对比模块；完整继承此前全部候选中的优胜配置，只覆盖upsilon_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      upsilon_UB: 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ui_shallow
+    note: UI逐层权重按[初始,一阶,二阶]整体搜索，原[0.4,0.6,0]作为对照；各组非负且和为1。mixed参考作者iFashion，其他为机制驱动的工程补充；完整继承此前全部候选中的优胜配置，只覆盖xi_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UI: &id001
+      - 0.6
+      - 0.3
+      - 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ui_mixed
+    note: UI逐层权重按[初始,一阶,二阶]整体搜索，原[0.4,0.6,0]作为对照；各组非负且和为1。mixed参考作者iFashion，其他为机制驱动的工程补充；完整继承此前全部候选中的优胜配置，只覆盖xi_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UI: &id002
+      - 0.3
+      - 0.4
+      - 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ui_deep
+    note: UI逐层权重按[初始,一阶,二阶]整体搜索，原[0.4,0.6,0]作为对照；各组非负且和为1。mixed参考作者iFashion，其他为机制驱动的工程补充；完整继承此前全部候选中的优胜配置，只覆盖xi_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UI: &id003
+      - 0.2
+      - 0.3
+      - 0.5
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ui_equal
+    note: UI逐层权重按[初始,一阶,二阶]整体搜索，原[0.4,0.6,0]作为对照；各组非负且和为1。mixed参考作者iFashion，其他为机制驱动的工程补充；完整继承此前全部候选中的优胜配置，只覆盖xi_UI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UI: &id004
+      - 0.3333333333333333
+      - 0.3333333333333333
+      - 0.3333333333333333
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_bi_shallow
+    note: BI逐层权重按[初始,一阶,二阶]整体搜索，原[0.5,0.4,0.1]作为对照；各组非负且和为1，属于工程补充网格；完整继承此前全部候选中的优胜配置，只覆盖xi_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_BI: *id001
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_bi_mixed
+    note: BI逐层权重按[初始,一阶,二阶]整体搜索，原[0.5,0.4,0.1]作为对照；各组非负且和为1，属于工程补充网格；完整继承此前全部候选中的优胜配置，只覆盖xi_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_BI: *id002
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_bi_deep
+    note: BI逐层权重按[初始,一阶,二阶]整体搜索，原[0.5,0.4,0.1]作为对照；各组非负且和为1，属于工程补充网格；完整继承此前全部候选中的优胜配置，只覆盖xi_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_BI: *id003
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_bi_equal
+    note: BI逐层权重按[初始,一阶,二阶]整体搜索，原[0.5,0.4,0.1]作为对照；各组非负且和为1，属于工程补充网格；完整继承此前全部候选中的优胜配置，只覆盖xi_BI；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_BI: *id004
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ub_first
+    note: UB逐层权重按[初始,一阶,二阶]整体搜索，原[0.6,0.3,0.1]作为对照；first参考作者iFashion，其他为工程补充，各组非负且和为1；完整继承此前全部候选中的优胜配置，只覆盖xi_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UB:
+      - 0.5
+      - 0.5
+      - 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ub_mixed
+    note: UB逐层权重按[初始,一阶,二阶]整体搜索，原[0.6,0.3,0.1]作为对照；first参考作者iFashion，其他为工程补充，各组非负且和为1；完整继承此前全部候选中的优胜配置，只覆盖xi_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UB:
+      - 0.3
+      - 0.4
+      - 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ub_deep
+    note: UB逐层权重按[初始,一阶,二阶]整体搜索，原[0.6,0.3,0.1]作为对照；first参考作者iFashion，其他为工程补充，各组非负且和为1；完整继承此前全部候选中的优胜配置，只覆盖xi_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UB:
+      - 0.2
+      - 0.3
+      - 0.5
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: xi_ub_equal
+    note: UB逐层权重按[初始,一阶,二阶]整体搜索，原[0.6,0.3,0.1]作为对照；first参考作者iFashion，其他为工程补充，各组非负且和为1；完整继承此前全部候选中的优胜配置，只覆盖xi_UB；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      xi_UB: *id004
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: steps_002
+    note: 仅搜索扩散总步数，原5作为对照；候选为工程补充，不冒充作者离散网格。sampling_steps仍为0，反向过程仍执行steps次；完整继承此前全部候选中的优胜配置，只覆盖steps；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      steps: 2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: steps_010
+    note: 仅搜索扩散总步数，原5作为对照；候选为工程补充，不冒充作者离散网格。sampling_steps仍为0，反向过程仍执行steps次；完整继承此前全部候选中的优胜配置，只覆盖steps；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      steps: 10
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: steps_020
+    note: 仅搜索扩散总步数，原5作为对照；候选为工程补充，不冒充作者离散网格。sampling_steps仍为0，反向过程仍执行steps次；完整继承此前全部候选中的优胜配置，只覆盖steps；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      steps: 20
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: steps_050
+    note: 仅搜索扩散总步数，原5作为对照；候选为工程补充，不冒充作者离散网格。sampling_steps仍为0，反向过程仍执行steps次；完整继承此前全部候选中的优胜配置，只覆盖steps；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      steps: 50
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: noise_scale_01
+    note: 仅搜索扩散噪声规模，原1作为对照；0.1参考作者iFashion，0.3/0.5/2为工程补充。噪声端点、采样、隐藏结构等扩散参数保持固定；完整继承此前全部候选中的优胜配置，只覆盖noise_scale；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      noise_scale: 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      - steps_002
+      - steps_010
+      - steps_020
+      - steps_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: noise_scale_03
+    note: 仅搜索扩散噪声规模，原1作为对照；0.1参考作者iFashion，0.3/0.5/2为工程补充。噪声端点、采样、隐藏结构等扩散参数保持固定；完整继承此前全部候选中的优胜配置，只覆盖noise_scale；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      noise_scale: 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      - steps_002
+      - steps_010
+      - steps_020
+      - steps_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: noise_scale_05
+    note: 仅搜索扩散噪声规模，原1作为对照；0.1参考作者iFashion，0.3/0.5/2为工程补充。噪声端点、采样、隐藏结构等扩散参数保持固定；完整继承此前全部候选中的优胜配置，只覆盖noise_scale；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      noise_scale: 0.5
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      - steps_002
+      - steps_010
+      - steps_020
+      - steps_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: noise_scale_20
+    note: 仅搜索扩散噪声规模，原1作为对照；0.1参考作者iFashion，0.3/0.5/2为工程补充。噪声端点、采样、隐藏结构等扩散参数保持固定；完整继承此前全部候选中的优胜配置，只覆盖noise_scale；本阶段各候选共用同一个前阶段优胜，不互相继承。
+    overrides:
+      noise_scale: 2.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - lambda1_0001
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda1_010
+      - lambda1_020
+      - lambda1_040
+      - omega_00
+      - omega_01
+      - omega_02
+      - omega_04
+      - omega_06
+      - omega_08
+      - omega_10
+      - lambda2_1e6
+      - lambda2_1e7
+      - upsilon_ui_0025
+      - upsilon_ui_005
+      - upsilon_ui_010
+      - upsilon_ui_020
+      - upsilon_bi_000
+      - upsilon_bi_005
+      - upsilon_bi_020
+      - upsilon_bi_030
+      - upsilon_ub_000
+      - upsilon_ub_001
+      - upsilon_ub_010
+      - upsilon_ub_020
+      - xi_ui_shallow
+      - xi_ui_mixed
+      - xi_ui_deep
+      - xi_ui_equal
+      - xi_bi_shallow
+      - xi_bi_mixed
+      - xi_bi_deep
+      - xi_bi_equal
+      - xi_ub_first
+      - xi_ub_mixed
+      - xi_ub_deep
+      - xi_ub_equal
+      - steps_002
+      - steps_010
+      - steps_020
+      - steps_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  stages:
+  - id: lambda1
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+  - id: omega
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+  - id: lambda2
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+  - id: upsilon_ui
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+  - id: upsilon_bi
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+  - id: upsilon_ub
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+    - upsilon_ub_000
+    - upsilon_ub_001
+    - upsilon_ub_010
+    - upsilon_ub_020
+  - id: xi_ui
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+    - upsilon_ub_000
+    - upsilon_ub_001
+    - upsilon_ub_010
+    - upsilon_ub_020
+    - xi_ui_shallow
+    - xi_ui_mixed
+    - xi_ui_deep
+    - xi_ui_equal
+  - id: xi_bi
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+    - upsilon_ub_000
+    - upsilon_ub_001
+    - upsilon_ub_010
+    - upsilon_ub_020
+    - xi_ui_shallow
+    - xi_ui_mixed
+    - xi_ui_deep
+    - xi_ui_equal
+    - xi_bi_shallow
+    - xi_bi_mixed
+    - xi_bi_deep
+    - xi_bi_equal
+  - id: xi_ub
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+    - upsilon_ub_000
+    - upsilon_ub_001
+    - upsilon_ub_010
+    - upsilon_ub_020
+    - xi_ui_shallow
+    - xi_ui_mixed
+    - xi_ui_deep
+    - xi_ui_equal
+    - xi_bi_shallow
+    - xi_bi_mixed
+    - xi_bi_deep
+    - xi_bi_equal
+    - xi_ub_first
+    - xi_ub_mixed
+    - xi_ub_deep
+    - xi_ub_equal
+  - id: steps
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+    - upsilon_ub_000
+    - upsilon_ub_001
+    - upsilon_ub_010
+    - upsilon_ub_020
+    - xi_ui_shallow
+    - xi_ui_mixed
+    - xi_ui_deep
+    - xi_ui_equal
+    - xi_bi_shallow
+    - xi_bi_mixed
+    - xi_bi_deep
+    - xi_bi_equal
+    - xi_ub_first
+    - xi_ub_mixed
+    - xi_ub_deep
+    - xi_ub_equal
+    - steps_002
+    - steps_010
+    - steps_020
+    - steps_050
+  - id: noise_scale
+    candidates:
+    - baseline_best
+    - lambda1_0001
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda1_010
+    - lambda1_020
+    - lambda1_040
+    - omega_00
+    - omega_01
+    - omega_02
+    - omega_04
+    - omega_06
+    - omega_08
+    - omega_10
+    - lambda2_1e6
+    - lambda2_1e7
+    - upsilon_ui_0025
+    - upsilon_ui_005
+    - upsilon_ui_010
+    - upsilon_ui_020
+    - upsilon_bi_000
+    - upsilon_bi_005
+    - upsilon_bi_020
+    - upsilon_bi_030
+    - upsilon_ub_000
+    - upsilon_ub_001
+    - upsilon_ub_010
+    - upsilon_ub_020
+    - xi_ui_shallow
+    - xi_ui_mixed
+    - xi_ui_deep
+    - xi_ui_equal
+    - xi_bi_shallow
+    - xi_bi_mixed
+    - xi_bi_deep
+    - xi_bi_equal
+    - xi_ub_first
+    - xi_ub_mixed
+    - xi_ub_deep
+    - xi_ub_equal
+    - steps_002
+    - steps_010
+    - steps_020
+    - steps_050
+    - noise_scale_01
+    - noise_scale_03
+    - noise_scale_05
+    - noise_scale_20

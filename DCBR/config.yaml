@@ -39,35 +39,34 @@ iFashion:
   lambda_2: 1.0e-6
   epochs: 50
 
-# Engineering initialization, not an author-reported Youshu configuration.
-# MealRec+L model settings from raw/configs/models/DCBR.yaml; shared settings
-# from raw/configs/overall.yaml, unified top-K and seed 0. User sets 90 epochs
-# for Youshu instead of the author's 150-epoch MealRec+L training budget.
-# 前两轮结束后用户曾决定收尾；现补充youshu_round_03_k搜索K=[1,3,5,7,9,11]，保留90轮、seed=0。
-# 下列为既有K=1条件下的优胜及新K轮次的固定基准，尚无新K搜索结果。
-# 既有优胜：lambda_0=2000、lambda_1=0.02、omega=0.3、tau=0.25、gamma=(0.3,0.2)。
-# 轮次 ID：youshu_round_02；实验 ID：tau_025。
-# EXECUTION_ID: 20261025T121254_2673b424
-# 最佳检查点：第 80 轮（best_epoch=79，从 0 计数）；完整训练预算仍为 90 轮。
-# 跨配置按测试 Recall@20 选优；训练内仍按验证 Recall@20、NDCG@20 同时严格提高选 epoch。
-# 验证 TOP 20：Recall=0.26931154，NDCG=0.13257032。
-# 测试 TOP 10：Recall=0.18877672，NDCG=0.13052631。
-# 测试 TOP 20：Recall=0.26858404，NDCG=0.15328094。
-# 测试 TOP 40：Recall=0.36555822，NDCG=0.17974274。
-# 测试 TOP 80：Recall=0.47092039，NDCG=0.20420190。
-# 以上为同一检查点的结果，按正式 TXT 的显示精度记录；NDCG@20 并非本轮最高。
-# 完整记录：DCBR/搜参结果.txt，搜索上述 EXECUTION_ID；历史轮次保持原配置。
+# Youshu工程配置；初始来源为作者MealRec+L，现按已完成历史的完整精度验证指标修正。
+# 选参：验证Recall@20优先，完全相同再比验证NDCG@20；训练内仍用双指标同时严格提高选epoch。
+# 历史验证优胜：youshu_round_02 / tau_010；不是仅指最近K搜索轮次优胜。
+# EXECUTION_ID: 20261025T115614_4738c53b；best_epoch=69，即第70轮；完整预算90轮、seed=0。
+# lambda_1=0.02、lambda_0=2000、K=1、omega=0.3、tau=0.1、gamma=(0.3,0.2)、lambda_2=1e-5。
+# 验证@20：Recall=0.27404046711304497，NDCG=0.13345297207176463。
+# 测试@10：Recall=0.18752272，NDCG=0.13085166；@20：Recall=0.26680041，NDCG=0.15351393。
+# 测试@40：Recall=0.37340280，NDCG=0.18216333；@80：Recall=0.48317435，NDCG=0.20760588。
+# 最新K轮k_11的验证Recall@20=0.2739693866303016，略低于上述历史配置；不混称全历史验证最优。
+# 旧轮曾按测试指标作配置选择，其历史规则保留原样；本次补搜统一使用验证指标，测试只报告。
+# 新增youshu_round_04_coverage：复用该条TXT历史对照，新增49个实验，逐阶段完整继承优胜。
+# 当前值是本轮起点；搜索运行只回写计划状态和结果，不自动覆盖本基础配置。
 Youshu:
   data_path: ./datasets
   embedding_size: 64
   batch_size_train: 2048
   batch_size_test: 2048
-  topk: [10, 20, 40, 80]
+  topk:
+  - 10
+  - 20
+  - 40
+  - 80
   neg_num: 1
-  lr: 1.0e-3
+  lr: 0.001
   test_interval: 5
   seed: 0
-  dims: [1000]
+  dims:
+  - 1000
   norm: false
   time_emb_dim: 10
   steps: 5
@@ -82,15 +81,24 @@ Youshu:
   upsilon_UB: 0.05
   upsilon_UI: 0.0
   upsilon_BI: 0.1
-  xi_UB: [0.6, 0.3, 0.1]
-  xi_UI: [0.4, 0.6, 0.0]
-  xi_BI: [0.5, 0.4, 0.1]
+  xi_UB:
+  - 0.6
+  - 0.3
+  - 0.1
+  xi_UI:
+  - 0.4
+  - 0.6
+  - 0.0
+  xi_BI:
+  - 0.5
+  - 0.4
+  - 0.1
   omega: 0.3
   gamma_1: 0.3
   gamma_2: 0.2
-  tau: 0.25
+  tau: 0.1
   lambda_1: 0.02
-  lambda_2: 1.0e-5
+  lambda_2: 1.0e-05
   epochs: 90
 
 # NetEase 初始配置：本工程综合设置，尚无正式实验结果，不是作者报告的 NetEase 配置。

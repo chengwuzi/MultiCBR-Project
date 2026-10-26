@@ -7,10 +7,10 @@
 - `train.py`：独立包含 DCBR、DNN、GaussianDiffusion、数据加载、训练、评测和结果保存，不在运行时导入 `raw` 或根目录训练器。
 - `config.yaml`：iFashion、Meal-H、Meal-L 沿用各自的作者配置；Youshu 保存已确认的优胜配置及结果注释；NetEase 保存工程初始配置。
 - `实验记录.txt`：追加保存第一种情况的运行，包括 iFashion、Meal-H、Meal-L；已经保存一次完整 iFashion 50 轮训练的成功记录。
-- `搜参配置.yaml`：保留已有三轮计划，追加 Youshu 的 K 补充轮次和 NetEase 首轮修订版；当前共安排 29 个新实验及一个历史引用。
+- `搜参配置.yaml`：保留既有 Youshu、NetEase 轮次；新增 Youshu 覆盖补搜 `youshu_round_04_coverage`，含 49 个新实验和 1 个历史优胜引用。
 - `run_experiments.py`：串行执行指定轮次，管理重试、重跑、历史恢复、配置状态和结果汇总；控制进程不导入 torch 或模型。
 - `run_k_search.py`：先完成并复核 Youshu K 搜索，再启动 NetEase 初始对照、K 搜索及后续五阶段；中断或失败后用同一命令恢复。
-- `搜参结果.txt`：第二种情况独立汇总，已同步 Youshu 两轮结果；NetEase 正式运行后向同一文件追加实验结果及轮次汇总。
+- `搜参结果.txt`：第二种情况独立汇总，保留已同步的 Youshu 三轮及 NetEase 结果；新轮运行继续追加，不清空历史。
 - `test_reproduction.py`：与原始实现及 ReCoBR 评测的数值对照、小数据训练与检查点重载测试。
 - `test_automation.py`：临时小数据下的自动执行、重试、成功跳过、指纹失效、中断恢复、文件锁及结果完整性检查。
 - `test_k_search.py`：K 图结构、历史对照路径迁移、六阶段继承、跨数据集顺序、29 实验流程与恢复检查。
@@ -317,3 +317,51 @@ python -u DCBR/run_experiments.py --round youshu_round_02 -g 0
 ```powershell
 python -m unittest discover -s DCBR -p "test_*.py" -v
 ```
+
+## Youshu 第四轮：遗漏参数覆盖补搜
+
+当前基础配置已按全部已完成 Youshu 实验的未舍入验证 Recall@20 优先、NDCG@20 次优修正为 `youshu_round_02/tau_010`，执行 ID 为 `20261025T115614_4738c53b`：K=1、tau=0.1、lambda_1=0.02、lambda_0=2000、omega=0.3、gamma=(0.3,0.2)、lambda_2=1e-5，90轮、seed=0。验证 Recall@20=0.27404046711304497、NDCG@20=0.13345297207176463；该检查点的测试 Recall@20=0.26680041、NDCG@20=0.15351393。最近 K 轮的 k_11 属于该轮优胜，不能混称全部历史验证最优。
+
+轮次 `youshu_round_04_coverage` 复用这条完整 TXT 作为 `baseline_best`，不重训，不依赖旧 history 或检查点；会核对身份、配置、数据摘要和训练源码，保留引用来源及旧产物未复核的说明。新增 **49 个训练实验**，共 **50 个候选、11 个阶段**：
+
+| 阶段 | 新候选 | 新实验数 |
+|---|---|---:|
+| lambda_1 | 0.001、0.005、0.01、0.03、0.05、0.10、0.20、0.40 | 8 |
+| omega | 0、0.1、0.2、0.4、0.6、0.8、1 | 7 |
+| lambda_2 | 1e-6、1e-7 | 2 |
+| upsilon_UI | 0.025、0.05、0.1、0.2 | 4 |
+| upsilon_BI | 0、0.05、0.2、0.3 | 4 |
+| upsilon_UB | 0、0.01、0.1、0.2 | 4 |
+| xi_UI | [0.6,0.3,0.1]、[0.3,0.4,0.3]、[0.2,0.3,0.5]、均衡 | 4 |
+| xi_BI | [0.6,0.3,0.1]、[0.3,0.4,0.3]、[0.2,0.3,0.5]、均衡 | 4 |
+| xi_UB | [0.5,0.5,0]、[0.3,0.4,0.3]、[0.2,0.3,0.5]、均衡 | 4 |
+| steps | 2、10、20、50 | 4 |
+| noise_scale | 0.1、0.3、0.5、2 | 4 |
+
+lambda_1 和 omega 是依据旧实验中较大的验证指标变化选出的两个回查参数。omega 原轮已触及合法范围 [0,1]，本轮保持两端并补充中间值，不越过可行边界。lambda_1=0.001、0.005、0.1 属于工程补充，其他本轮 lambda_1 值为论文候选；lambda_2 两项补齐作者网格。扰动和层权重候选位于论文声明区间，具体离散网格由本工程设计，部分点参考作者配置。扩散步数网格为工程补充；noise_scale=0.1 参考作者 iFashion，其余新增点为工程设计。
+
+xi 的顺序是 [初始表示、一阶传播、二阶传播]，均衡为 [1/3,1/3,1/3]，所有候选非负且和为1。upsilon 是表示扰动幅度，不是边删除概率。扩散只搜索 steps、noise_scale，保持 dims、norm、time_emb_dim、noise_min、noise_max、sampling_steps、sampling_noise 不变；`sampling_steps=0` 不等于关闭扩散，仍执行 `steps` 次反向过程。
+
+每阶段候选共用同一个前阶段优胜完整配置，仅覆盖当前一个参数；本阶段候选互不继承。前阶段优胜始终继续参与选优，因此没有新值改善时保留对照。各阶段 `stages.candidates` 累计保存此前候选，便于报告连续选优；后续阶段不会重置前面选定的参数。
+
+固定90轮、seed=0、64维嵌入、两层传播、batch_size=2048、单负样本、每5轮评测及公共数据协议。跨配置按未舍入验证 Recall@20、再 NDCG@20 选优，完全平局保留声明顺序在前者；测试仅报告。训练内 best epoch 规则保持验证双指标同时严格提高。历史按测试选参的轮次保留原说明，不改写其选择事实。
+
+在项目根目录运行本轮，勿使用旧的跨数据集 `run_k_search.py` 入口：
+
+```powershell
+# 快速预览历史对照和首个新实验；不训练、不回写状态
+python DCBR/run_experiments.py --round youshu_round_04_coverage --mode selected --only lambda1_0001 --dry-run
+
+# 自动完成全部49个新实验，保持历史对照、不重复训练
+python -u DCBR/run_experiments.py --round youshu_round_04_coverage -g 0
+```
+
+仍使用原 `DCBR/搜参配置.yaml`、`DCBR/搜参结果.txt` 和 `DCBR/log/tuning`，旧轮次与结果保留不覆盖，运行不自动更新基础配置。新轮参数均可由现有控制器执行，无需修改 DCBR 训练实现，也不修改 ReCoBR 或 raw。
+
+本轮关键检查可单独运行：
+
+```powershell
+python -B -m unittest discover -s DCBR -p test_youshu_coverage.py -v
+```
+
+检查涵盖实际历史引用、全部候选的训练入口配置校验、合成指标下的11阶段完整继承、无提升时保留对照和汇总。未启动正式训练，不运行繁琐的中断或故障注入检查。

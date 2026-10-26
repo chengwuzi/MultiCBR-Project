@@ -58,7 +58,7 @@ class AutomationTests(unittest.TestCase):
         expected = dict(overall, **author, seed=0)
         expected["topk"] = [10, 20, 40, 80]
         expected["epochs"] = 90  # User-specified Youshu budget, not the author's MealRec+L budget.
-        expected.update(lambda_1=0.02, lambda_0=2000.0, omega=0.3, tau=0.25)  # User-selected round-02 configuration.
+        expected.update(lambda_1=0.02, lambda_0=2000.0, omega=0.3, tau=0.1)  # Full-history validation winner tau_010; K=1.
         actual = yaml.safe_load((HERE / "config.yaml").read_text(encoding="utf-8"))["Youshu"]
         self.assertEqual(actual, expected)
 

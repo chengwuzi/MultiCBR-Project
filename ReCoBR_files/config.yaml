@@ -1,8 +1,8 @@
-# ReCoBR在Meal-H、Meal-L上的初始配置，由本目录train.py及搜参入口读取。
-# 所有相对路径均以项目根目录为准；这些是待验证的工程初值，不是已获得的优胜配置。
+# ReCoBR在Meal-H、Meal-L上的配置，由本目录train.py及搜参入口读取。
+# 所有相对路径均以项目根目录为准；Meal-H保留工程初值，Meal-L已更新为首轮验证优胜配置。
 # 当前第一轮：初始对照及c_lambda阶段关闭扩散；从K搜索开始开启，此后保持开启。
 # 融合前UB锚定对比全程关闭，融合后对比学习保持启用。
-# 基础配置用于无扩散初始对照；各阶段模块状态及搜索范围由对应数据集的计划明确指定。
+# 已登记轮次在计划overrides中冻结完整初值；各阶段模块状态及搜索范围由计划明确指定。
 # 其余参数调完后，再单独研究是否启用融合前对比及其权重，不自动切换模块。
 # 根目录训练入口和config.yaml保持原状；本文件由ReCoBR_files/train.py独立加载。
 
@@ -74,6 +74,11 @@ Meal-H:
   bi_user_bundle_agg_beta: 0.0
 
 Meal-L:
+  # 当前优胜来源：meal_l_round_01 / fusion_fine_ub_to_bi。
+  # 执行ID：20261026T153105_103c613c；按验证Recall@20优先、相同再比验证NDCG@20选定。
+  # best_epoch=9（第10轮）；150轮预算、seed=2026，扩散开启、融合前对比关闭。
+  # val@20：Recall=0.2327171947337963，NDCG=0.12788282606336807。
+  # test@20：Recall=0.19877750，NDCG=0.11496223；测试仅报告，不参与选参。
   data_path: ./datasets
   batch_size_train: 2048
   batch_size_test: 2048
@@ -86,28 +91,27 @@ Meal-L:
   embedding_sizes: [64]
   num_layerss: [2]
 
-  # 融合及UB层系数参考Youshu，UI/BI层系数参考iFashion，采用较小的UB/UI扰动。
-  # 这些是按数据结构提出的迁移初值，不是作者给出的Meal-L配置或已验证优胜值。
+  # modal_weight采用首轮优胜比例[UB,UI,BI]；层系数和扰动幅度仍沿用本轮固定设置。
   UB_ratios: [0.05]
   UI_ratios: [0.0]
   BI_ratios: [0.1]
   fusion_weights:
-    modal_weight: [0.35, 0.15, 0.5]
+    modal_weight: [0.15, 0.6, 0.25]
     UB_layer: [0.7, 0.2, 0.1]
     UI_layer: [0.3, 0.4, 0.3]
     BI_layer: [0.5, 0.5, 0.0]
 
   lrs: [1.0e-3]
   l2_regs: [1.0e-5]
-  c_lambdas: [0.04]
+  c_lambdas: [0.01]
   c_temps: [0.2]
   epochs: 150
   test_interval: 5
 
   latent_rebuild:
-    enabled: false
-    # 同样只筛选已有训练边；K=7约保留64.76%的训练边，保护短历史用户。
-    rebuild_k: 7
+    enabled: true
+    # 只筛选已有训练边，保留min(K,该用户训练交互数)条；本轮优胜K=1。
+    rebuild_k: 1
     latent_diffusion_user_embedding_path: ./datasets/Meal-L_UB_emb/MealRec+L-user-10261921.pt
     latent_diffusion_bundle_embedding_path: ./datasets/Meal-L_UB_emb/MealRec+L-bundle-10261921.pt
     latent_diffusion_hidden_dim: 128

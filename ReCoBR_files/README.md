@@ -2,11 +2,11 @@
 
 本目录复用根目录 `models/model.py` 的模型及 `train.py`、`utility.py` 的训练、重建和评测函数，新增独立的配置读取、实验调度与结果管理。模型计算不作改动。DCBR 和各模型的 `raw/` 不参与写入。
 
-当前阶段固定开启潜空间扩散重建，关闭融合前 UB 锚定对比（`anchor_cl.enabled=false`、`anchor_cl_lambda=0`）；保留原有融合后对比学习。单次实验、后续搜参及配置检查均执行这些约束。未来开启融合前对比须先讨论并修改阶段约束。
+当前第一轮先关闭潜空间扩散重建，运行初始对照和 `c_lambda` 搜索；固定优胜 `c_lambda` 后开启扩散搜索 K，此后保持开启。全程关闭融合前 UB 锚定对比（`anchor_cl.enabled=false`、`anchor_cl_lambda=0`），保留融合后对比学习。模块状态由实际配置和各阶段覆盖项明确保存，未来开启融合前对比须先讨论并修改阶段约束。
 
 ## 文件和结果
 
-- `config.yaml`：Meal-H、Meal-L 已讨论的工程初始配置，尚非优胜配置。
+- `config.yaml`：Meal-H、Meal-L 已讨论的工程初始配置，扩散关闭，尚非优胜配置。
 - `Meal-H/搜参配置.yaml`、`Meal-L/搜参配置.yaml`：各数据集的多轮计划，按轮次 ID 选择；每项有 ID、备注、覆盖配置，运行时回写状态、是否成功、执行 ID、实际配置和依赖选择信息。运行中不要手工编辑正在使用的计划；控制器会检测计划变化并停止覆盖。
 - 各数据集目录中的 `搜参结果.txt`：按执行 ID 追加实验结果，包含北京时间（精确到秒）、耗时、配置、备注、重试、best epoch、验证/测试全部 topk 指标、指纹、日志和产物路径；还追加轮次和阶段汇总。
 - 各数据集目录中的 `log/tuning/history.json`：机器可读的完整执行历史。每次执行另存 `execution.json`、实际输入配置、源码快照、各次尝试的 stdout 和结果 JSON。训练产物中有 `best.pt`、配置、TensorBoard 和训练日志。
@@ -14,7 +14,23 @@
 - `run_experiments.py`：独立子进程串行调度，不导入 torch，不预占 CUDA。
 - `recobr_config.py`：共享的校验、递归配置覆盖、数据/预训练嵌入/源码摘要。
 
-目前只登记 `meal_h_initial`、`meal_l_initial` 两个初始对照轮次，每轮一个实验；均为 150 轮、seed=2026。每个轮次在 `overrides` 中冻结完整初值，后续修改基础配置不会悄悄改写既有实验含义。尚未自行制定任何参数搜索网格。
+目前登记 `meal_h_round_01`、`meal_l_round_01` 两个第一轮计划，每轮 26 个实验，均为 150 轮、seed=2026。每个轮次在 `overrides` 中冻结完整初值，后续修改基础配置不会悄悄改写既有实验含义。
+
+| 阶段 | 新实验数 | 扩散 | 选优与继承 |
+|---|---:|---|---|
+| 初始对照 | 1 | 关闭 | 当前初始 `c_lambda`、原融合比例 |
+| `c_lambda` | 6 | 关闭 | 初始对照及六个候选共同选优 |
+| K | 6 | 开启 | 完整继承前阶段优胜 `c_lambda`；六个 K 全部重新训练 |
+| 融合粗搜 | 7 | 开启 | 固定优胜 `c_lambda`、K，七组比例与 K 阶段原比例共同选优 |
+| 融合细搜 | 6 | 开启 | 围绕同一个粗搜优胜，六种方向各转移 0.05；此前对照继续参与选优 |
+
+Meal-H 的 `c_lambda` 初值为 0.05，新增 `[0.01,0.02,0.04,0.10,0.20,0.40]`，K 为 `[1,3,7,13,19,35]`。Meal-L 的初值为 0.04，新增 `[0.005,0.01,0.02,0.05,0.10,0.20]`，K 为 `[1,3,5,7,11,19]`。0.005 及 K=35 是工程补充点，其他值为论文敏感性分析范围内的取值；K 网格是按数据特点选取的粗搜子集。
+
+融合权重顺序为 `[UB,UI,BI]`。七组粗搜比例为均衡 `[1/3,1/3,1/3]`、三组单视图偏重 `[0.6,0.2,0.2]` 的排列、三组双视图偏重 `[0.4,0.4,0.2]` 的排列。这套粗搜及步长 0.05 的细搜属于工程设计。
+
+细搜用 `fusion_transfer: {from: UB, to: UI, amount: 0.05}` 等六种有向转移定义；待前置候选全部成功后，脚本选择同一个粗搜优胜，完整继承再调整权重，并在依赖记录中保存原比例、转移方向和实际比例。六个细搜实验互不继承，不因前一个细搜结果改变搜索中心。
+
+`stages` 分别报告各阶段优胜；`final_candidates` 只包含 K、融合粗搜和融合细搜的 19 个开启扩散配置。无扩散结果保留作对照，不会被汇总为这轮最终优胜，即使其验证指标更高。无扩散对照中的 K 字段没有实际参与重建，不能作为开启扩散的 K 对照复用。
 
 ## 运行
 
@@ -24,15 +40,15 @@
 # 列出轮次；预览不修改计划、结果和历史，也不启动训练
 python ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --list
 python ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-L/搜参配置.yaml --list
-python ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_initial --dry-run
-python ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-L/搜参配置.yaml --round meal_l_initial --dry-run
+python ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_round_01 --dry-run
+python ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-L/搜参配置.yaml --round meal_l_round_01 --dry-run
 
 # 正式运行指定轮次，物理 GPU 0 在独立子进程中映射为 cuda:0
-python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_initial -g 0
-python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-L/搜参配置.yaml --round meal_l_initial -g 0
+python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_round_01 -g 0
+python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-L/搜参配置.yaml --round meal_l_round_01 -g 0
 ```
 
-每次命令只执行指定计划中的指定轮次。可在两个 IDE 窗口的控制台分别运行上面两条正式命令，同时执行 Meal-H、Meal-L；每个数据集内部仍串行运行实验并按依赖继承优胜配置。两个控制台可以共用同一份工程代码和 GPU 0，也可通过 `-g` 分别指定 GPU。
+每次命令执行指定计划中的完整轮次，自动推进全部 26 个实验。可在两个 IDE 窗口的控制台分别运行上面两条正式命令，同时执行 Meal-H、Meal-L；每个数据集内部仍串行运行实验并按依赖继承优胜配置。两个控制台可以共用同一份工程代码和 GPU 0，也可通过 `-g` 分别指定 GPU。
 
 两套计划的 `work_dir`、`result_file` 和计划文件路径均不同，因此配置回写、history、执行锁、结果文档及训练产物相互独立。启动不同轮次也不能同时占用同一套计划或工作目录。模型、基础配置、数据及预训练嵌入只读共用，运行期间不要修改正在使用的公共文件。
 
@@ -40,11 +56,11 @@ python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-L/搜参配�
 
 ```powershell
 # 指定实验重跑：保留旧记录、创建新的执行 ID
-python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_initial --mode selected --only initial -g 0
+python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_round_01 --mode selected --only initial -g 0
 
 # 只重跑失败项；全轮重跑（历史引用对照始终不重训）
-python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_initial --mode failed -g 0
-python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_initial --mode all -g 0
+python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_round_01 --mode failed -g 0
+python -u ReCoBR_files/run_experiments.py --plan ReCoBR_files/Meal-H/搜参配置.yaml --round meal_h_round_01 --mode all -g 0
 
 # 单次配置检查和单次训练
 python ReCoBR_files/train.py -d Meal-H --check-config
@@ -84,6 +100,7 @@ experiments:
     note: 经讨论确认的 K 候选
     overrides:
       latent_rebuild:
+        enabled: true
         rebuild_k: 3
     inherit_best:
       candidates: [initial]
@@ -91,6 +108,8 @@ experiments:
   - id: next_parameter
     note: 在完整继承前阶段优胜配置后仅改变当前参数
     overrides:
+      latent_rebuild:
+        enabled: true
       c_temps: [0.3]
     inherit_best:
       candidates: [initial, k_candidate]
@@ -110,4 +129,4 @@ stages:
 python -B -m unittest discover -s ReCoBR_files -p test_search.py -v
 ```
 
-测试仅使用临时小型 CPU 数据，涵盖原训练数值一致性、重建图恢复、真实子进程连续继承、重试、跳过、重跑、失效检测与阶段约束。不会在真实 Meal-H/L 上启动正式训练，也不会写工程记录。
+日常修改只需运行相关的关键检查。本轮可用 `python -B -m unittest discover -s ReCoBR_files -p test_round_plan.py -v` 核对计划、阶段继承、动态细搜及无扩散训练；测试只使用临时小型 CPU 数据或合成指标，不启动真实 Meal-H/L 正式训练，也不写工程记录。

@@ -45,7 +45,7 @@ def fixture(root):
     conf = yaml.safe_load((HERE / "config.yaml").read_text(encoding="utf-8"))["Meal-H"]
     conf.update(data_path=str(root / "data"), batch_size_train=4, batch_size_test=3,
                 embedding_sizes=[8], epochs=2, test_interval=1)
-    conf["latent_rebuild"].update(rebuild_k=1, latent_diffusion_hidden_dim=8,
+    conf["latent_rebuild"].update(enabled=True, rebuild_k=1, latent_diffusion_hidden_dim=8,
                                 latent_diffusion_time_dim=4, latent_diffusion_denoiser_layers=1,
                                 latent_diffusion_num_steps=3, latent_diffusion_batch_size=3,
                                 latent_diffusion_infer_batch_size=3,
@@ -74,7 +74,7 @@ class SearchTests(unittest.TestCase):
 
     def test_dataset_plans_have_independent_writable_paths(self):
         writable = []
-        for dataset, round_id in (("Meal-H", "meal_h_initial"), ("Meal-L", "meal_l_initial")):
+        for dataset, round_id in (("Meal-H", "meal_h_round_01"), ("Meal-L", "meal_l_round_01")):
             path = HERE / dataset / "搜参配置.yaml"
             plan = runner.load_plan(path)
             self.assertTrue(all(r["dataset"] == dataset for r in plan["rounds"]))
@@ -95,7 +95,7 @@ class SearchTests(unittest.TestCase):
             self.assertEqual(merged["latent_rebuild"]["latent_diffusion_lr"], base["latent_rebuild"]["latent_diffusion_lr"])
             self.assertEqual(base["latent_rebuild"]["rebuild_k"], 1)
             for change in ({"lrs": [.001, .002]}, {"anchor_cl": {"enabled": True}},
-                           {"latent_rebuild": {"enabled": False}}, {"typo": 1},
+                           {"latent_rebuild": {"enabled": "yes"}}, {"typo": 1},
                            {"latent_rebuild": {"latent_diffusion_dropout": 1}}):
                 with self.assertRaises(ValueError):
                     config.normalize_config(config.merge_config(base, change), "Meal-H")

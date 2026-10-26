@@ -123,8 +123,10 @@ def normalize_config(conf, dataset):
         number(result[key], key, high=1)
     rebuild = result["latent_rebuild"]
     anchor = result["anchor_cl"]
-    if rebuild["enabled"] is not True or anchor["enabled"] is not False or anchor["anchor_cl_lambda"] != 0:
-        raise ValueError("Current study requires diffusion ON, pre-fusion anchor CL OFF (lambda=0)")
+    if type(rebuild["enabled"]) is not bool:
+        raise ValueError("latent_rebuild.enabled must be boolean")
+    if anchor["enabled"] is not False or anchor["anchor_cl_lambda"] != 0:
+        raise ValueError("Current study requires pre-fusion anchor CL OFF (lambda=0)")
     for key in ("user_cl", "bundle_cl"):
         if type(anchor[key]) is not bool:
             raise ValueError(f"{key} must be boolean")

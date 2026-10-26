@@ -43,6 +43,7 @@ MANAGED = {"status", "success", "fingerprint", "execution_ids", "resolved_config
 # round level rather than hidden among individual experiment overrides.
 ROUND_ONLY = {"seed", "epochs", "data_path", "topk", "test_interval", "batch_size_train",
               "batch_size_test", "neg_num", "embedding_sizes", "anchor_cl"}
+VIEWS = ("UB", "UI", "BI")
 
 
 def timestamp():
@@ -127,6 +128,19 @@ def experiment_fingerprint(conf, dataset, sources, data, settings, selection=Non
     return digest(signature)
 
 
+def apply_fusion_transfer(conf, transfer):
+    """Move a fixed amount between two views of the inherited coarse winner."""
+    result = copy.deepcopy(conf)
+    weights = result["fusion_weights"]["modal_weight"]
+    source = VIEWS.index(transfer["from"])
+    target = VIEWS.index(transfer["to"])
+    weights[source] = round(weights[source] - transfer["amount"], 12)
+    weights[target] = round(weights[target] + transfer["amount"], 12)
+    if min(weights) < 0:
+        raise ValueError("Fusion transfer exceeds its source view weight")
+    return result
+
+
 def load_plan(path, gpu=None, device=None):
     plan = read_yaml(path)
     require_fields(plan, {"version", "base_config", "work_dir", "result_file", "defaults", "rounds"},
@@ -158,7 +172,7 @@ def load_plan(path, gpu=None, device=None):
     sources = source_fingerprints()
     data_cache = {}
     for raw_round in plan["rounds"]:
-        require_fields(raw_round, {"id", "dataset", "note", "overrides", "experiments", "selection_rule", "stages"},
+        require_fields(raw_round, {"id", "dataset", "note", "overrides", "experiments", "selection_rule", "stages", "final_candidates"},
                        {"id", "dataset", "note", "experiments"}, "round")
         rid = identifier(raw_round["id"], "round id")
         if rid in seen_rounds:
@@ -186,7 +200,7 @@ def load_plan(path, gpu=None, device=None):
         experiments = []
         seen_experiments = set()
         for item in raw_round["experiments"]:
-            require_fields(item, {"id", "note", "overrides", "inherit_best", "reference"} | MANAGED,
+            require_fields(item, {"id", "note", "overrides", "inherit_best", "reference", "fusion_transfer"} | MANAGED,
                            {"id", "note"}, "experiment")
             eid = identifier(item["id"], "experiment id")
             if eid in seen_experiments:
@@ -196,8 +210,8 @@ def load_plan(path, gpu=None, device=None):
             overrides = item.get("overrides", {})
             if not isinstance(overrides, dict) or set(overrides) & ROUND_ONLY:
                 raise ValueError(f"Experiment {eid}: protocol/seed/budget settings must be common to the round")
-            if set(overrides.get("latent_rebuild", {})) & (set(EMBEDDING_KEYS) | {"enabled"}):
-                raise ValueError("Embedding inputs and module switches are fixed within a round")
+            if set(overrides.get("latent_rebuild", {})) & set(EMBEDDING_KEYS):
+                raise ValueError("Embedding inputs are fixed within a round")
             conf = normalize_config(merge_config(base, overrides), dataset)
             inherit = item.get("inherit_best")
             if inherit is not None:
@@ -207,6 +221,15 @@ def load_plan(path, gpu=None, device=None):
                         or any(not isinstance(value, str) for value in candidates)
                         or len(set(candidates)) != len(candidates) or set(candidates) - seen_experiments):
                     raise ValueError("inherit_best needs unique earlier candidate IDs and the round selection_rule")
+            transfer = item.get("fusion_transfer")
+            if transfer is not None:
+                require_fields(transfer, {"from", "to", "amount"}, {"from", "to", "amount"}, "fusion_transfer")
+                if (inherit is None or transfer["from"] not in VIEWS or transfer["to"] not in VIEWS
+                        or transfer["from"] == transfer["to"]
+                        or type(transfer["amount"]) not in (int, float)
+                        or not math.isfinite(transfer["amount"]) or not 0 < transfer["amount"] < 1
+                        or "modal_weight" in overrides.get("fusion_weights", {})):
+                    raise ValueError("fusion_transfer requires an inherited winner, distinct views, a valid amount and no static modal override")
             reference = item.get("reference")
             if reference is not None:
                 require_fields(reference, {"round_id", "experiment_id", "execution_id", "fingerprint",
@@ -227,6 +250,7 @@ def load_plan(path, gpu=None, device=None):
             experiments.append({"id": eid, "note": item["note"], "config": conf,
                                 "template_config": copy.deepcopy(conf),
                                 "overrides": copy.deepcopy(overrides), "inherit_best": copy.deepcopy(inherit),
+                                "fusion_transfer": copy.deepcopy(transfer),
                                 "reference": copy.deepcopy(reference),
                                 "dependency_selection": None, "blocked_by": [],
                                 "fingerprint": experiment_fingerprint(conf, dataset, sources, data, settings,
@@ -245,9 +269,15 @@ def load_plan(path, gpu=None, device=None):
                     or len(set(candidates)) != len(candidates) or set(candidates) - seen_experiments):
                 raise ValueError("Stages need unique IDs and existing unique candidate IDs")
             stage_ids.add(sid)
+        final_candidates = raw_round.get("final_candidates", [item["id"] for item in experiments])
+        if (not isinstance(final_candidates, list) or not final_candidates
+                or any(not isinstance(eid, str) for eid in final_candidates)
+                or len(set(final_candidates)) != len(final_candidates) or set(final_candidates) - seen_experiments):
+            raise ValueError("final_candidates needs existing unique experiment IDs")
         rounds.append({"id": rid, "dataset": dataset, "note": raw_round["note"],
                        "experiments": experiments, "data_files": data,
-                       "selection_rule": selection_rule, "stages": copy.deepcopy(stages)})
+                       "selection_rule": selection_rule, "stages": copy.deepcopy(stages),
+                       "final_candidates": copy.deepcopy(final_candidates)})
     return {"document": plan, "path": Path(path).resolve(), "settings": settings, "rounds": rounds,
             "work_dir": resolve_path(plan["work_dir"]), "result_file": resolve_path(plan["result_file"]),
             "sources": sources}
@@ -655,7 +685,14 @@ def resolve_dependencies(plan, round_, state):
                                              "fingerprint": parent["fingerprint"],
                                              metric_field(rule): selection_metrics(record["training_record"], rule)}
                                             for parent, record in candidates]}
-                conf = normalize_config(merge_config(winner["config"], item["overrides"]), round_["dataset"])
+                conf = merge_config(winner["config"], item["overrides"])
+                if item.get("fusion_transfer"):
+                    base_weights = copy.deepcopy(conf["fusion_weights"]["modal_weight"])
+                    conf = apply_fusion_transfer(conf, item["fusion_transfer"])
+                    selection["fusion_adjustment"] = {"transfer": item["fusion_transfer"],
+                                                       "base_modal_weight": base_weights,
+                                                       "resolved_modal_weight": conf["fusion_weights"]["modal_weight"]}
+                conf = normalize_config(conf, round_["dataset"])
                 item.update(config=conf, dependency_selection=selection,
                             fingerprint=experiment_fingerprint(conf, round_["dataset"], plan["sources"],
                                                                round_["data_files"], plan["settings"], selection, rule))
@@ -1033,12 +1070,14 @@ def write_round_summary(plan, round_, state):
     summary = {"round_id": round_["id"], "dataset": round_["dataset"], "complete": complete,
                "planned": len(round_["experiments"]), "valid_successes": len(verified),
                "configuration_selection_rule": rule, "checkpoint_selection_rule": RULE,
-               "candidates": [candidate(item, record) for item, record in verified], "best": None}
+               "candidates": [candidate(item, record) for item, record in verified], "best": None,
+               "final_candidates": round_["final_candidates"]}
     if any(item.get("reference") for item in round_["experiments"]):
         summary.update(training_planned=sum(not item.get("reference") for item in round_["experiments"]),
                        reference_count=sum(bool(item.get("reference")) for item in round_["experiments"]))
     if complete:
-        summary["best"] = best(verified)
+        summary["best"] = best([(item, record) for item, record in verified
+                                if item["id"] in round_["final_candidates"]])
     if round_["stages"]:
         summary["stages"] = []
         for stage in round_["stages"]:
@@ -1090,6 +1129,8 @@ def run(plan_path, round_id=None, mode="resume", only=None, dry_run=False, gpu=N
             if item["config"] is None:
                 print(f"{item['id']}: 等待前置实验 {item['blocked_by']}；按 {round_['selection_rule']} 继承获胜配置，"
                       f"再覆盖 {item['overrides']}。实际配置与指纹在前置实验成功后生成。")
+                if item.get("fusion_transfer"):
+                    print(f"  融合细搜：围绕前置候选的同一个优胜配置执行 {item['fusion_transfer']}")
             else:
                 print(f"{item['id']} fingerprint={item['fingerprint']}\n" + yaml.safe_dump(item["config"], sort_keys=False))
         for item in round_["experiments"]:

@@ -1,7 +1,8 @@
 # ReCoBR在Meal-H、Meal-L上的初始配置，由本目录train.py及搜参入口读取。
 # 所有相对路径均以项目根目录为准；这些是待验证的工程初值，不是已获得的优胜配置。
-# 当前阶段：开启潜空间扩散重建，关闭融合前UB锚定对比学习；融合后对比学习保持启用。
-# 后续参数搜索保持上述模块状态，anchor_cl中的参数不作为当前搜索项。
+# 当前第一轮：初始对照及c_lambda阶段关闭扩散；从K搜索开始开启，此后保持开启。
+# 融合前UB锚定对比全程关闭，融合后对比学习保持启用。
+# 基础配置用于无扩散初始对照；各阶段模块状态及搜索范围由对应数据集的计划明确指定。
 # 其余参数调完后，再单独研究是否启用融合前对比及其权重，不自动切换模块。
 # 根目录训练入口和config.yaml保持原状；本文件由ReCoBR_files/train.py独立加载。
 
@@ -36,7 +37,7 @@ Meal-H:
   test_interval: 5
 
   latent_rebuild:
-    enabled: true
+    enabled: false
     # 在训练历史内筛选，保留min(K,该用户训练交互数)条边；K=13约保留37.71%的训练边。
     rebuild_k: 13
     latent_diffusion_user_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-user-10261919.pt
@@ -104,7 +105,7 @@ Meal-L:
   test_interval: 5
 
   latent_rebuild:
-    enabled: true
+    enabled: false
     # 同样只筛选已有训练边；K=7约保留64.76%的训练边，保护短历史用户。
     rebuild_k: 7
     latent_diffusion_user_embedding_path: ./datasets/Meal-L_UB_emb/MealRec+L-user-10261921.pt

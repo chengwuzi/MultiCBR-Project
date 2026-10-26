@@ -68,23 +68,26 @@ def train_one(reference, conf, dataset, artifacts, log, record):
     optimizer = torch.optim.Adam(model.parameters(), lr=conf["lr"], weight_decay=conf["l2_reg"])
     rebuilder, diffusion_optimizer = reference.create_recobr_latent_rebuild_components(conf, dataset, conf["device"])
     rebuild_conf = conf["latent_rebuild"]
+    graph = dataset.graphs[0]
     best_val = {"recall": {20: 0.0}, "ndcg": {20: 0.0}}
     best = None
     batch_count = len(dataset.train_loader)
     with SummaryWriter(artifacts["tensorboard"]) as writer:
         for epoch in range(conf["epochs"]):
             start = time.monotonic()
-            if (rebuild_conf["latent_diffusion_reset_after_epoch"] >= 0
-                    and epoch == rebuild_conf["latent_diffusion_reset_after_epoch"] + 1):
-                rebuilder, diffusion_optimizer = reference.reset_latent_diffusion_rebuilder(
-                    rebuild_conf, rebuilder, diffusion_optimizer)
-            diffusion_loss = reference.train_latent_diffusion_epoch(
-                rebuilder, diffusion_optimizer, dataset, rebuild_conf, conf["device"])
-            graph = reference.rebuild_ub_graph_with_latent_diffusion(
-                rebuilder, dataset, rebuild_conf, conf["device"])
-            if not math.isfinite(diffusion_loss):
-                raise FloatingPointError("Non-finite diffusion loss")
-            model.set_ub_graph(graph)
+            diffusion_loss = None
+            if rebuild_conf["enabled"]:
+                if (rebuild_conf["latent_diffusion_reset_after_epoch"] >= 0
+                        and epoch == rebuild_conf["latent_diffusion_reset_after_epoch"] + 1):
+                    rebuilder, diffusion_optimizer = reference.reset_latent_diffusion_rebuilder(
+                        rebuild_conf, rebuilder, diffusion_optimizer)
+                diffusion_loss = reference.train_latent_diffusion_epoch(
+                    rebuilder, diffusion_optimizer, dataset, rebuild_conf, conf["device"])
+                graph = reference.rebuild_ub_graph_with_latent_diffusion(
+                    rebuilder, dataset, rebuild_conf, conf["device"])
+                if not math.isfinite(diffusion_loss):
+                    raise FloatingPointError("Non-finite diffusion loss")
+                model.set_ub_graph(graph)
             sums = [0.0] * 4
             model.train(True)
             for index, batch in enumerate(tqdm(dataset.train_loader, desc=f"Epoch {epoch+1}/{conf['epochs']}",
@@ -106,10 +109,12 @@ def train_one(reference, conf, dataset, artifacts, log, record):
                     sums[i] += scalar
                     writer.add_scalar(name, scalar, step)
             record["completed_epochs"] = epoch + 1
-            writer.add_scalar("latent_rebuild/loss_epoch", diffusion_loss, epoch)
-            writer.add_scalar("latent_rebuild/edges", graph.nnz, epoch)
+            if diffusion_loss is not None:
+                writer.add_scalar("latent_rebuild/loss_epoch", diffusion_loss, epoch)
+                writer.add_scalar("latent_rebuild/edges", graph.nnz, epoch)
+            diffusion_status = f"diffusion={diffusion_loss:.8f}" if diffusion_loss is not None else "diffusion=OFF"
             log(f"Epoch {epoch+1}/{conf['epochs']} losses={[v/batch_count for v in sums]} "
-                f"diffusion={diffusion_loss:.8f} rebuilt_edges={graph.nnz} seconds={time.monotonic()-start:.3f}")
+                f"{diffusion_status} propagation_edges={graph.nnz} seconds={time.monotonic()-start:.3f}")
             if (epoch + 1) % conf["test_interval"]:
                 continue
             metrics = {"val": reference.test(model, dataset.val_loader, conf),
@@ -130,8 +135,8 @@ def train_one(reference, conf, dataset, artifacts, log, record):
                 # Persist it with the state so re-evaluation uses this checkpoint's graph.
                 payload = {"config": conf, "result": best, "model_state": model.state_dict(),
                            "ub_graph": graph, "optimizer_state": optimizer.state_dict(),
-                           "diffusion_state": rebuilder.state_dict(),
-                           "diffusion_optimizer_state": diffusion_optimizer.state_dict(),
+                           "diffusion_state": rebuilder.state_dict() if rebuilder is not None else None,
+                           "diffusion_optimizer_state": diffusion_optimizer.state_dict() if diffusion_optimizer is not None else None,
                            "data_files": record["data_files"], "sources": record["sources"]}
                 temporary = Path(artifacts["checkpoint_model"] + ".tmp")
                 try:

@@ -1,4 +1,4 @@
-# Meal-H independent plan, execution history and results.
+# Meal-H 独立搜参计划；配置定义和脚本管理的运行状态集中保存。
 version: 1
 base_config: ReCoBR_files/config.yaml
 work_dir: ReCoBR_files/Meal-H/log/tuning
@@ -11,11 +11,9 @@ defaults:
   console_interval_seconds: 30
   stream_output: false
 rounds:
-- id: meal_h_initial
+- id: meal_h_round_01
   dataset: Meal-H
-  note: Initial engineering baseline only; full initial configuration frozen here.
-    Diffusion ON; pre-fusion anchor CL OFF; post-fusion CL retained. Fixed seed=2026,
-    epochs=150. No parameter grid has been agreed yet.
+  note: 第一轮共26个新实验：无扩散初始对照1个；无扩散c_lambda上下各3值；固定优胜c_lambda后开启扩散搜6个K；固定优胜c_lambda和K后融合比例粗搜7组、围绕同一个粗搜优胜细搜6组（每次在两个视图间转移0.05）。从K阶段起始终开启扩散，融合前对比全程关闭。固定150轮、seed=2026。阶段选优按未舍入验证Recall@20优先、完全相同再比验证NDCG@20，完全平局保留声明顺序在前者。测试仅报告。最终优胜只从扩散开启后的19个配置中选择。
   selection_rule: validation_recall20_then_ndcg20
   overrides:
     data_path: ./datasets
@@ -68,7 +66,7 @@ rounds:
     epochs: 150
     test_interval: 5
     latent_rebuild:
-      enabled: true
+      enabled: false
       rebuild_k: 13
       latent_diffusion_user_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-user-10261919.pt
       latent_diffusion_bundle_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-bundle-10261919.pt
@@ -100,8 +98,557 @@ rounds:
     bi_user_bundle_agg_beta: 0.0
   experiments:
   - id: initial
-    note: Initial baseline; use validation for checkpoint and configuration selection,
-      test metrics reported only.
+    note: 无扩散初始对照；保留当前c_lambda、K字段及原融合比例。K此时不生效，不能复用为开启扩散后的K对照。
     overrides: {}
     status: PENDING
     success: false
+  - id: cl_001
+    note: 关闭扩散，c_lambda=0.01；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
+    overrides:
+      c_lambdas:
+      - 0.01
+      latent_rebuild:
+        enabled: false
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: cl_002
+    note: 关闭扩散，c_lambda=0.02；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
+    overrides:
+      c_lambdas:
+      - 0.02
+      latent_rebuild:
+        enabled: false
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: cl_004
+    note: 关闭扩散，c_lambda=0.04；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
+    overrides:
+      c_lambdas:
+      - 0.04
+      latent_rebuild:
+        enabled: false
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: cl_010
+    note: 关闭扩散，c_lambda=0.1；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
+    overrides:
+      c_lambdas:
+      - 0.1
+      latent_rebuild:
+        enabled: false
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: cl_020
+    note: 关闭扩散，c_lambda=0.2；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
+    overrides:
+      c_lambdas:
+      - 0.2
+      latent_rebuild:
+        enabled: false
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: cl_040
+    note: 关闭扩散，c_lambda=0.4；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
+    overrides:
+      c_lambdas:
+      - 0.4
+      latent_rebuild:
+        enabled: false
+    inherit_best:
+      candidates:
+      - initial
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: k_01
+    note: 开启扩散，K=1；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
+    overrides:
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 1
+    inherit_best:
+      candidates:
+      - initial
+      - cl_001
+      - cl_002
+      - cl_004
+      - cl_010
+      - cl_020
+      - cl_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: k_03
+    note: 开启扩散，K=3；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
+    overrides:
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 3
+    inherit_best:
+      candidates:
+      - initial
+      - cl_001
+      - cl_002
+      - cl_004
+      - cl_010
+      - cl_020
+      - cl_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: k_07
+    note: 开启扩散，K=7；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
+    overrides:
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 7
+    inherit_best:
+      candidates:
+      - initial
+      - cl_001
+      - cl_002
+      - cl_004
+      - cl_010
+      - cl_020
+      - cl_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: k_13
+    note: 开启扩散，K=13；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
+    overrides:
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+    inherit_best:
+      candidates:
+      - initial
+      - cl_001
+      - cl_002
+      - cl_004
+      - cl_010
+      - cl_020
+      - cl_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: k_19
+    note: 开启扩散，K=19；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
+    overrides:
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 19
+    inherit_best:
+      candidates:
+      - initial
+      - cl_001
+      - cl_002
+      - cl_004
+      - cl_010
+      - cl_020
+      - cl_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: k_35
+    note: 开启扩散，K=35；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
+    overrides:
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 35
+    inherit_best:
+      candidates:
+      - initial
+      - cl_001
+      - cl_002
+      - cl_004
+      - cl_010
+      - cl_020
+      - cl_040
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_equal
+    note: 融合粗搜：均衡；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.3333333333333333
+        - 0.3333333333333333
+        - 0.3333333333333333
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_ub
+    note: 融合粗搜：偏重UB；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.6
+        - 0.2
+        - 0.2
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_ui
+    note: 融合粗搜：偏重UI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.2
+        - 0.6
+        - 0.2
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_bi
+    note: 融合粗搜：偏重BI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.2
+        - 0.2
+        - 0.6
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_ub_ui
+    note: 融合粗搜：偏重UB和UI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.4
+        - 0.4
+        - 0.2
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_ub_bi
+    note: 融合粗搜：偏重UB和BI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.4
+        - 0.2
+        - 0.4
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_ui_bi
+    note: 融合粗搜：偏重UI和BI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
+    overrides:
+      latent_rebuild:
+        enabled: true
+      fusion_weights:
+        modal_weight:
+        - 0.2
+        - 0.4
+        - 0.4
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+  - id: fusion_fine_ub_to_ui
+    note: 融合细搜：从UB向UI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
+    overrides:
+      latent_rebuild:
+        enabled: true
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      - fusion_equal
+      - fusion_ub
+      - fusion_ui
+      - fusion_bi
+      - fusion_ub_ui
+      - fusion_ub_bi
+      - fusion_ui_bi
+      rule: validation_recall20_then_ndcg20
+    fusion_transfer:
+      from: UB
+      to: UI
+      amount: 0.05
+    status: PENDING
+    success: false
+  - id: fusion_fine_ub_to_bi
+    note: 融合细搜：从UB向BI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
+    overrides:
+      latent_rebuild:
+        enabled: true
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      - fusion_equal
+      - fusion_ub
+      - fusion_ui
+      - fusion_bi
+      - fusion_ub_ui
+      - fusion_ub_bi
+      - fusion_ui_bi
+      rule: validation_recall20_then_ndcg20
+    fusion_transfer:
+      from: UB
+      to: BI
+      amount: 0.05
+    status: PENDING
+    success: false
+  - id: fusion_fine_ui_to_ub
+    note: 融合细搜：从UI向UB转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
+    overrides:
+      latent_rebuild:
+        enabled: true
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      - fusion_equal
+      - fusion_ub
+      - fusion_ui
+      - fusion_bi
+      - fusion_ub_ui
+      - fusion_ub_bi
+      - fusion_ui_bi
+      rule: validation_recall20_then_ndcg20
+    fusion_transfer:
+      from: UI
+      to: UB
+      amount: 0.05
+    status: PENDING
+    success: false
+  - id: fusion_fine_ui_to_bi
+    note: 融合细搜：从UI向BI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
+    overrides:
+      latent_rebuild:
+        enabled: true
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      - fusion_equal
+      - fusion_ub
+      - fusion_ui
+      - fusion_bi
+      - fusion_ub_ui
+      - fusion_ub_bi
+      - fusion_ui_bi
+      rule: validation_recall20_then_ndcg20
+    fusion_transfer:
+      from: UI
+      to: BI
+      amount: 0.05
+    status: PENDING
+    success: false
+  - id: fusion_fine_bi_to_ub
+    note: 融合细搜：从BI向UB转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
+    overrides:
+      latent_rebuild:
+        enabled: true
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      - fusion_equal
+      - fusion_ub
+      - fusion_ui
+      - fusion_bi
+      - fusion_ub_ui
+      - fusion_ub_bi
+      - fusion_ui_bi
+      rule: validation_recall20_then_ndcg20
+    fusion_transfer:
+      from: BI
+      to: UB
+      amount: 0.05
+    status: PENDING
+    success: false
+  - id: fusion_fine_bi_to_ui
+    note: 融合细搜：从BI向UI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
+    overrides:
+      latent_rebuild:
+        enabled: true
+    inherit_best:
+      candidates:
+      - k_01
+      - k_03
+      - k_07
+      - k_13
+      - k_19
+      - k_35
+      - fusion_equal
+      - fusion_ub
+      - fusion_ui
+      - fusion_bi
+      - fusion_ub_ui
+      - fusion_ub_bi
+      - fusion_ui_bi
+      rule: validation_recall20_then_ndcg20
+    fusion_transfer:
+      from: BI
+      to: UI
+      amount: 0.05
+    status: PENDING
+    success: false
+  stages:
+  - id: cl_no_diffusion
+    candidates:
+    - initial
+    - cl_001
+    - cl_002
+    - cl_004
+    - cl_010
+    - cl_020
+    - cl_040
+  - id: k_diffusion
+    candidates:
+    - k_01
+    - k_03
+    - k_07
+    - k_13
+    - k_19
+    - k_35
+  - id: fusion_coarse
+    candidates:
+    - k_01
+    - k_03
+    - k_07
+    - k_13
+    - k_19
+    - k_35
+    - fusion_equal
+    - fusion_ub
+    - fusion_ui
+    - fusion_bi
+    - fusion_ub_ui
+    - fusion_ub_bi
+    - fusion_ui_bi
+  - id: fusion_fine
+    candidates: &id001
+    - k_01
+    - k_03
+    - k_07
+    - k_13
+    - k_19
+    - k_35
+    - fusion_equal
+    - fusion_ub
+    - fusion_ui
+    - fusion_bi
+    - fusion_ub_ui
+    - fusion_ub_bi
+    - fusion_ui_bi
+    - fusion_fine_ub_to_ui
+    - fusion_fine_ub_to_bi
+    - fusion_fine_ui_to_ub
+    - fusion_fine_ui_to_bi
+    - fusion_fine_bi_to_ub
+    - fusion_fine_bi_to_ui
+  final_candidates: *id001

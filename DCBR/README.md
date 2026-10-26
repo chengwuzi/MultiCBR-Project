@@ -1,12 +1,12 @@
 # DCBR：统一协议复现与新数据集搜参
 
-本目录外层是独立移植实现；`raw/` 保留 Jiuqiang Li 的 DCBR 作者开源项目，仅供对照。目前包括第一种情况的 iFashion，以及第二种情况的 Youshu、NetEase 配置和分轮实验管理。ReCoBR 模型保持不变，公共选模规则已按用户要求统一。
+本目录外层是独立移植实现；`raw/` 保留 Jiuqiang Li 的 DCBR 作者开源项目，仅供对照。目前包括第一种情况的 iFashion、Meal-H（作者 MealRec+H）、Meal-L（作者 MealRec+L），以及第二种情况的 Youshu、NetEase 配置和分轮实验管理。ReCoBR 模型保持不变，公共选模规则已按用户要求统一。
 
 ## 文件与依据
 
 - `train.py`：独立包含 DCBR、DNN、GaussianDiffusion、数据加载、训练、评测和结果保存，不在运行时导入 `raw` 或根目录训练器。
-- `config.yaml`：iFashion 沿用作者对应配置；Youshu 保存已确认的优胜配置及结果注释；NetEase 保存工程初始配置。
-- `实验记录.txt`：追加保存第一种情况的运行；已经保存一次完整 iFashion 50 轮训练的成功记录。
+- `config.yaml`：iFashion、Meal-H、Meal-L 沿用各自的作者配置；Youshu 保存已确认的优胜配置及结果注释；NetEase 保存工程初始配置。
+- `实验记录.txt`：追加保存第一种情况的运行，包括 iFashion、Meal-H、Meal-L；已经保存一次完整 iFashion 50 轮训练的成功记录。
 - `搜参配置.yaml`：保留已有三轮计划，追加 Youshu 的 K 补充轮次和 NetEase 首轮修订版；当前共安排 29 个新实验及一个历史引用。
 - `run_experiments.py`：串行执行指定轮次，管理重试、重跑、历史恢复、配置状态和结果汇总；控制进程不导入 torch 或模型。
 - `run_k_search.py`：先完成并复核 Youshu K 搜索，再启动 NetEase 初始对照、K 搜索及后续五阶段；中断或失败后用同一命令恢复。
@@ -53,6 +53,37 @@ python -u DCBR/train.py -d iFashion -g 0 --device cuda --note "DCBR iFashion 作
 也可以进入 `DCBR` 后运行 `python -u train.py ...`；默认配置位置以及数据、产物路径不依赖当前工作目录。显式传入的 `--config`、`--evaluate`、`--result-json` 按当前目录解释；配置中的 `data_path` 和 `--output-dir`、`--record-file` 的相对路径按项目根目录解释。
 
 可用参数包括 `--seed`、`--epochs`、`--num-workers`、`--quiet`、`--config`、`--data-path`、`--output-dir`、`--record-file` 和 `--result-json`。任何实验参数覆盖都会写入实际配置。单独指定 `--epochs` 时，仍需达到至少一次评测间隔；不要把不同训练预算下的结果当作完全相同条件的实验。
+
+## Meal-H / Meal-L 作者配置复现
+
+两个数据集属于第一种情况：保持作者 `raw/configs/overall.yaml` 和 `raw/configs/models/DCBR.yaml` 的对应模型参数与训练预算，先完整运行，不进行搜参。目录名保留为 `datasets/Meal-H`、`datasets/Meal-L`；原来的 `MealRec+H_data_size.txt`、`MealRec+L_data_size.txt` 保留，分别新增内容逐字节相同的 `Meal-H_data_size.txt`、`Meal-L_data_size.txt`，供现有数据加载器读取。交互文件、实体编号及划分均未改动，实际读取的规模文件参与数据摘要。
+
+两者均固定 seed=0、训练150轮、每5轮评测、rebuild_k=1、扩散steps=5、noise_scale=1、lambda_0=1000。Meal-H 的 lambda_1=0.02、omega=0.1、gamma=(0.3,0.05)；Meal-L 的 lambda_1=0.01、omega=0、gamma=(0.3,0.2)。噪声及逐层系数也分别完整沿用作者对应配置。公共评测仍为 `[10,20,40,80]`，按验证Recall@20和NDCG@20同时严格提高选择同一个检查点。DCBR直接从交互数据训练；新增用户/组合预训练嵌入供后续ReCoBR工作使用。
+
+在服务器项目根目录先检查配置：
+
+```powershell
+python DCBR/train.py -d Meal-H --check-config
+python DCBR/train.py -d Meal-L --check-config
+```
+
+分别运行完整作者配置（使用GPU 0）：
+
+```powershell
+python -u DCBR/train.py -d Meal-H -g 0 --device cuda --experiment-case first --note "Author MealRec+H; 150 epochs; seed=0"
+python -u DCBR/train.py -d Meal-L -g 0 --device cuda --experiment-case first --note "Author MealRec+L; 150 epochs; seed=0"
+```
+
+两个实验分别在 `DCBR/log/Meal-H/<执行ID>/`、`DCBR/log/Meal-L/<执行ID>/` 保存实际配置、日志、TensorBoard、同一最佳轮次的检查点和结果JSON，并追加到同一个 `DCBR/实验记录.txt`。不要使用Youshu/NetEase的搜参入口启动这两个作者配置实验。
+
+论文 `25-DCBR.pdf` 表2的参考目标如下，仅为论文报告值，不是本项目新取得的结果：
+
+| 作者数据集（项目名称） | Recall@10 | NDCG@10 | Recall@20 | NDCG@20 |
+|---|---:|---:|---:|---:|
+| MealRec+H（Meal-H） | 0.4113 | 0.3159 | 0.5261 | 0.3483 |
+| MealRec+L（Meal-L） | 0.2761 | 0.1916 | 0.3611 | 0.2144 |
+
+检查已覆盖作者配置逐项一致、两个实际数据集加载和指纹、小数据下两轮训练及TXT追加、配置重放和检查点重新评测。小数据CPU检查不代表已完成上述150轮正式GPU训练，实测与论文的差距需以服务器完整运行结果判断。
 
 ## 结果与复核
 

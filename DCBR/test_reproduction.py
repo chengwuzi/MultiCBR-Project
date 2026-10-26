@@ -70,6 +70,31 @@ class ReproductionTests(unittest.TestCase):
         author["topk"] = [10, 20, 40, 80]
         self.assertEqual(author, self.base)
 
+    def test_meal_author_settings_and_real_dataset_loading(self):
+        overall = yaml.safe_load((HERE / "raw/configs/overall.yaml").read_text(encoding="utf-8"))
+        models = yaml.safe_load((HERE / "raw/configs/models/DCBR.yaml").read_text(encoding="utf-8"))
+        expected = {
+            "Meal-H": ((1575, 3817, 7280), (37413, 151148, 11451, 4677, 4677)),
+            "Meal-L": ((1928, 3578, 10589), (9445, 181087, 10734, 1181, 1181)),
+        }
+        for name, (sizes, edges) in expected.items():
+            with self.subTest(dataset=name):
+                author_name = name.replace("Meal-", "MealRec+")
+                author = dict(overall, **models[author_name], seed=0, topk=[10, 20, 40, 80])
+                configured = yaml.safe_load((HERE / "config.yaml").read_text(encoding="utf-8"))[name]
+                self.assertEqual(configured, author)
+                directory = ROOT / "datasets" / name
+                self.assertEqual((directory / (name + "_data_size.txt")).read_bytes(),
+                                 (directory / (author_name + "_data_size.txt")).read_bytes())
+                conf = port.load_config(HERE / "config.yaml", name)
+                dataset = port.Datasets(conf, num_workers=0)
+                self.assertEqual((dataset.num_users, dataset.num_bundles, dataset.num_items), sizes)
+                self.assertEqual(tuple(g["edges"] for g in dataset.graph_statistics.values()), edges)
+                self.assertIn(name + "_data_size.txt", dataset.data_files)
+                self.assertEqual(len(dataset.data_files), 6)
+                # Meal-L has users without UB training history; retain all IDs.
+                self.assertEqual(len(port.DiffusionDataset(dataset.graphs[0])), sizes[0])
+
     def reference_recobr(self):
         sys.path.insert(0, str(ROOT))
         try:
@@ -398,6 +423,56 @@ class ReproductionTests(unittest.TestCase):
             args = port.get_cmd(["--num-workers", "0"])
             with self.assertRaisesRegex(ValueError, "data fingerprints"):
                 port.evaluate_checkpoint(first["artifacts"]["checkpoint_model"], args, torch.device("cpu"))
+
+    def test_meal_first_case_training_append_and_checkpoint_replay(self):
+        with tempfile.TemporaryDirectory(prefix="dcbr-meal-") as temp:
+            root = Path(temp)
+            record_path = root / "records.txt"
+            for name in ("Meal-H", "Meal-L"):
+                with self.subTest(dataset=name):
+                    fixture = root / name
+                    config = self.make_tiny_data(fixture)
+                    tiny = yaml.safe_load(config.read_text(encoding="utf-8"))["iFashion"]
+                    directory = fixture / "data" / name
+                    (fixture / "data/iFashion").rename(directory)
+                    (directory / "iFashion_data_size.txt").rename(directory / (name + "_data_size.txt"))
+                    author_name = name.replace("Meal-", "MealRec+")
+                    (directory / (author_name + "_data_size.txt")).write_bytes(
+                        (directory / (name + "_data_size.txt")).read_bytes())
+                    conf = yaml.safe_load((HERE / "config.yaml").read_text(encoding="utf-8"))[name]
+                    # Reduce only test scale/budget; retain each author's loss,
+                    # view and diffusion-noise settings in the real runner.
+                    conf.update({k: tiny[k] for k in ("data_path", "batch_size_train", "batch_size_test",
+                                 "epochs", "test_interval", "steps", "dims", "embedding_size")})
+                    config.write_text(yaml.safe_dump({name: conf}), encoding="utf-8")
+                    args = ["--config", str(config), "-d", name, "--device", "cpu", "--quiet",
+                            "--num-workers", "0", "--record-file", str(record_path),
+                            "--output-dir", str(root / "runs"), "--note", "Meal author settings smoke test"]
+                    with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                        self.assertEqual(port.main(args), 0)
+                    result_path = next((root / "runs" / name).glob("*/result.json"))
+                    result = json.loads(result_path.read_text(encoding="utf-8"))
+                    self.assertEqual(result["status"], "SUCCESS")
+                    self.assertTrue(result["completed"])
+                    self.assertEqual(result["completed_epochs"], 2)
+                    self.assertEqual(result["experiment_case"], "first")
+                    self.assertEqual(result["dataset"], name)
+                    self.assertEqual(result["config"]["seed"], 0)
+                    self.assertEqual(result["config"]["selection_rule"], port.SELECTION_RULE)
+                    self.assertEqual(port.load_config(result["artifacts"]["config"], name)["omega"], conf["omega"])
+                    for key in ("checkpoint_model", "checkpoint_config", "config", "result_json"):
+                        self.assertTrue(Path(result["artifacts"][key]).is_file())
+                    replay_args = port.get_cmd(["--num-workers", "0"])
+                    with contextlib.redirect_stdout(io.StringIO()):
+                        replay = port.evaluate_checkpoint(result["artifacts"]["checkpoint_model"],
+                                                          replay_args, torch.device("cpu"))
+                    self.assertEqual(json.loads(json.dumps(replay["metrics"])), result["result"]["metrics"])
+            text = record_path.read_text(encoding="utf-8")
+            self.assertEqual(text.count("EXECUTION_ID:"), 2)
+            self.assertEqual(text.count("END_EXECUTION:"), 2)
+            self.assertIn("数据集: Meal-H", text)
+            self.assertIn("数据集: Meal-L", text)
+            self.assertNotIn("第二种情况", text)
 
     def test_runtime_failure_is_recorded(self):
         for exception, status in [(RuntimeError, "FAILED"), (KeyboardInterrupt, "INTERRUPTED")]:

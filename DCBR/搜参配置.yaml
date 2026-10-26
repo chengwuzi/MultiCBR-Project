@@ -2153,12 +2153,17 @@ rounds:
     embedding_size: 64
     batch_size_train: 2048
     batch_size_test: 2048
-    topk: [10, 20, 40, 80]
+    topk:
+    - 10
+    - 20
+    - 40
+    - 80
     neg_num: 1
     lr: 0.001
     test_interval: 5
     seed: 4096
-    dims: [1000]
+    dims:
+    - 1000
     norm: false
     time_emb_dim: 10
     steps: 5
@@ -2173,27 +2178,99 @@ rounds:
     upsilon_UB: 0.0
     upsilon_UI: 0.0
     upsilon_BI: 0.2
-    xi_UB: [0.6, 0.3, 0.1]
-    xi_UI: [0.25, 0.65, 0.1]
-    xi_BI: [0.4, 0.4, 0.2]
+    xi_UB:
+    - 0.6
+    - 0.3
+    - 0.1
+    xi_UI:
+    - 0.25
+    - 0.65
+    - 0.1
+    xi_BI:
+    - 0.4
+    - 0.4
+    - 0.2
     omega: 0.4
     gamma_1: 0.3
     gamma_2: 0.2
     tau: 0.2
     lambda_1: 0.02
-    lambda_2: 1.0e-5
+    lambda_2: 1.0e-05
     epochs: 40
   stages:
   - id: lambda_1
-    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+    candidates:
+    - initial
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
   - id: lambda_0
-    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+    candidates:
+    - initial
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
   - id: omega
-    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+    candidates:
+    - initial
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+    - omega_02
+    - omega_03
+    - omega_05
+    - omega_06
   - id: tau
-    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030]
+    candidates:
+    - initial
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+    - omega_02
+    - omega_03
+    - omega_05
+    - omega_06
+    - tau_010
+    - tau_015
+    - tau_025
+    - tau_030
   - id: lambda_2
-    candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030, lambda2_1e6, lambda2_1e7]
+    candidates:
+    - initial
+    - lambda1_0005
+    - lambda1_001
+    - lambda1_003
+    - lambda1_005
+    - lambda0_0100
+    - lambda0_0500
+    - lambda0_2000
+    - lambda0_10000
+    - omega_02
+    - omega_03
+    - omega_05
+    - omega_06
+    - tau_010
+    - tau_015
+    - tau_025
+    - tau_030
+    - lambda2_1e6
+    - lambda2_1e7
   experiments:
   - id: initial
     note: NetEase完整初始配置对照；综合作者MealRec扩散设置、DCBR-Youshu经验及ReCoBR-NetEase对应传播设置，属于工程初值。训练40轮、固定seed=4096。
@@ -2205,7 +2282,8 @@ rounds:
   - id: lambda1_0005
     note: lambda_1=0.005；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial]
+      candidates:
+      - initial
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_1: 0.005
@@ -2216,7 +2294,8 @@ rounds:
   - id: lambda1_001
     note: lambda_1=0.01；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial]
+      candidates:
+      - initial
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_1: 0.01
@@ -2227,7 +2306,8 @@ rounds:
   - id: lambda1_003
     note: lambda_1=0.03；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial]
+      candidates:
+      - initial
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_1: 0.03
@@ -2238,7 +2318,8 @@ rounds:
   - id: lambda1_005
     note: lambda_1=0.05；初值0.02；0.005为工程补充点，其余为论文候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial]
+      candidates:
+      - initial
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_1: 0.05
@@ -2249,7 +2330,12 @@ rounds:
   - id: lambda0_0100
     note: lambda_0=100；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_0: 100
@@ -2260,7 +2346,12 @@ rounds:
   - id: lambda0_0500
     note: lambda_0=500；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_0: 500
@@ -2271,7 +2362,12 @@ rounds:
   - id: lambda0_2000
     note: lambda_0=2000；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_0: 2000
@@ -2282,7 +2378,12 @@ rounds:
   - id: lambda0_10000
     note: lambda_0=10000；初值1000；100、10000为论文候选，500、2000为沿用Youshu的工程补充点。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
       rule: validation_recall20_then_ndcg20
     overrides:
       lambda_0: 10000
@@ -2293,7 +2394,16 @@ rounds:
   - id: omega_02
     note: omega=0.2；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
       rule: validation_recall20_then_ndcg20
     overrides:
       omega: 0.2
@@ -2304,7 +2414,16 @@ rounds:
   - id: omega_03
     note: omega=0.3；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
       rule: validation_recall20_then_ndcg20
     overrides:
       omega: 0.3
@@ -2315,7 +2434,16 @@ rounds:
   - id: omega_05
     note: omega=0.5；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
       rule: validation_recall20_then_ndcg20
     overrides:
       omega: 0.5
@@ -2326,7 +2454,16 @@ rounds:
   - id: omega_06
     note: omega=0.6；初值0.4；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
       rule: validation_recall20_then_ndcg20
     overrides:
       omega: 0.6
@@ -2337,7 +2474,20 @@ rounds:
   - id: tau_010
     note: tau=0.1；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
       rule: validation_recall20_then_ndcg20
     overrides:
       tau: 0.1
@@ -2348,7 +2498,20 @@ rounds:
   - id: tau_015
     note: tau=0.15；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
       rule: validation_recall20_then_ndcg20
     overrides:
       tau: 0.15
@@ -2359,7 +2522,20 @@ rounds:
   - id: tau_025
     note: tau=0.25；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
       rule: validation_recall20_then_ndcg20
     overrides:
       tau: 0.25
@@ -2370,7 +2546,20 @@ rounds:
   - id: tau_030
     note: tau=0.3；初值0.2；围绕初值上下各取两个，具体网格为本工程补充方案。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
       rule: validation_recall20_then_ndcg20
     overrides:
       tau: 0.3
@@ -2381,10 +2570,27 @@ rounds:
   - id: lambda2_1e6
     note: lambda_2=1.0e-6；与已有1e-5对照一起覆盖论文正则系数全部三个候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
       rule: validation_recall20_then_ndcg20
     overrides:
-      lambda_2: 1.0e-6
+      lambda_2: 1.0e-06
     status: PENDING
     success: false
     fingerprint: null
@@ -2392,10 +2598,27 @@ rounds:
   - id: lambda2_1e7
     note: lambda_2=1.0e-7；与已有1e-5对照一起覆盖论文正则系数全部三个候选。全部前置候选有效成功后按验证规则继承完整优胜配置，仅覆盖本参数；当前对照继续参与阶段选优。
     inherit_best:
-      candidates: [initial, lambda1_0005, lambda1_001, lambda1_003, lambda1_005, lambda0_0100, lambda0_0500, lambda0_2000, lambda0_10000, omega_02, omega_03, omega_05, omega_06, tau_010, tau_015, tau_025, tau_030]
+      candidates:
+      - initial
+      - lambda1_0005
+      - lambda1_001
+      - lambda1_003
+      - lambda1_005
+      - lambda0_0100
+      - lambda0_0500
+      - lambda0_2000
+      - lambda0_10000
+      - omega_02
+      - omega_03
+      - omega_05
+      - omega_06
+      - tau_010
+      - tau_015
+      - tau_025
+      - tau_030
       rule: validation_recall20_then_ndcg20
     overrides:
-      lambda_2: 1.0e-7
+      lambda_2: 1.0e-07
     status: PENDING
     success: false
     fingerprint: null
@@ -2466,10 +2689,11 @@ rounds:
   - id: baseline_k1
     note: 直接读取搜参结果.txt中指定tau_025执行块的配置和指标作为K=1对照，不重复训练。验证@20取未舍入选模指标；核对身份、配置、模型源码和数据摘要，不检查旧产物路径。其余指标保留文档显示精度，引用来源写入依赖及轮次汇总。
     overrides: {}
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: REFERENCED
+    success: true
+    fingerprint: eed25f2b0138351cfc26f73b7dddbc9ec81da954a59ffacb01422702626bf337
+    execution_ids:
+    - 20261025T121254_2673b424
     reference:
       round_id: youshu_round_02
       experiment_id: tau_025
@@ -2477,6 +2701,98 @@ rounds:
       fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
       allow_data_path_relocation: true
       result_file: DCBR/搜参结果.txt
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      reference:
+        round_id: youshu_round_02
+        experiment_id: tau_025
+        execution_id: 20261025T121254_2673b424
+        fingerprint: fa022c1b6f6e05c79e6d54c0cad2c533d287acd184da469274b8e5291a5239aa
+        allow_data_path_relocation: true
+        result_file: DCBR/搜参结果.txt
+      sources:
+        run_experiments.py: 2b250e695127131314623d5b4a82ba04921b884f0acc572af39a6d7e734747a5
+        train.py: efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379
+      metrics:
+        val:
+          recall:
+            '10': 0.18814579
+            '20': 0.2693115420017584
+            '40': 0.3633833
+            '80': 0.47174884
+          ndcg:
+            '10': 0.10977742
+            '20': 0.13257031635724037
+            '40': 0.15437512
+            '80': 0.17534358
+        test:
+          recall:
+            '10': 0.18877672
+            '20': 0.26858404
+            '40': 0.36555822
+            '80': 0.47092039
+          ndcg:
+            '10': 0.13052631
+            '20': 0.15328094
+            '40': 0.17974274
+            '80': 0.2042019
+      reference_evidence:
+        kind: result_text
+        path: C:\Users\admin\PycharmProjects\MultiCBR-Project\DCBR\搜参结果.txt
+        execution_block_sha256: 99e0dbbb962e9af1cb62edc24e315a3fc076544bdda8bbfde7c31123cfccc891
+        artifacts_verified: false
+        metric_precision: validation @20 full precision; other metrics as printed
+      original_data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      resolved_data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+    blocked_by: []
   - id: k_03
     note: rebuild_k=3；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
     overrides:
@@ -2485,10 +2801,76 @@ rounds:
       candidates:
       - baseline_k1
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 684d1d3d30ef1da54d4504bf3f8c1f34a0aed695db46a7c168dcd6fd4bea07bc
+    execution_ids:
+    - 20261025T175334_e7ead0cd
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 3
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: baseline_k1
+      winner_execution_id: 20261025T121254_2673b424
+      winner_validation:
+        recall@20: 0.2693115420017584
+        ndcg@20: 0.13257031635724037
+      candidates:
+      - experiment_id: baseline_k1
+        execution_id: 20261025T121254_2673b424
+        fingerprint: eed25f2b0138351cfc26f73b7dddbc9ec81da954a59ffacb01422702626bf337
+        validation:
+          recall@20: 0.2693115420017584
+          ndcg@20: 0.13257031635724037
+    blocked_by: []
   - id: k_05
     note: rebuild_k=5；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
     overrides:
@@ -2497,10 +2879,76 @@ rounds:
       candidates:
       - baseline_k1
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 0c1948b49271b6d20ee688992d421d6bce9bffbe5c810237bd283e4aaf63c127
+    execution_ids:
+    - 20261025T180158_fa831b57
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 5
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: baseline_k1
+      winner_execution_id: 20261025T121254_2673b424
+      winner_validation:
+        recall@20: 0.2693115420017584
+        ndcg@20: 0.13257031635724037
+      candidates:
+      - experiment_id: baseline_k1
+        execution_id: 20261025T121254_2673b424
+        fingerprint: eed25f2b0138351cfc26f73b7dddbc9ec81da954a59ffacb01422702626bf337
+        validation:
+          recall@20: 0.2693115420017584
+          ndcg@20: 0.13257031635724037
+    blocked_by: []
   - id: k_07
     note: rebuild_k=7；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
     overrides:
@@ -2509,10 +2957,76 @@ rounds:
       candidates:
       - baseline_k1
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: e3945c57d992fd5b0a55633d0a2660fa515a4f7fbd730520d057b68388a55ed5
+    execution_ids:
+    - 20261025T181113_a7057312
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 7
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: baseline_k1
+      winner_execution_id: 20261025T121254_2673b424
+      winner_validation:
+        recall@20: 0.2693115420017584
+        ndcg@20: 0.13257031635724037
+      candidates:
+      - experiment_id: baseline_k1
+        execution_id: 20261025T121254_2673b424
+        fingerprint: eed25f2b0138351cfc26f73b7dddbc9ec81da954a59ffacb01422702626bf337
+        validation:
+          recall@20: 0.2693115420017584
+          ndcg@20: 0.13257031635724037
+    blocked_by: []
   - id: k_09
     note: rebuild_k=9；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
     overrides:
@@ -2521,10 +3035,76 @@ rounds:
       candidates:
       - baseline_k1
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 314773246947a0f218a3affcadf70d716b523bdf840eeec8f6311f7a16a8c569
+    execution_ids:
+    - 20261025T182028_445cb185
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 9
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: baseline_k1
+      winner_execution_id: 20261025T121254_2673b424
+      winner_validation:
+        recall@20: 0.2693115420017584
+        ndcg@20: 0.13257031635724037
+      candidates:
+      - experiment_id: baseline_k1
+        execution_id: 20261025T121254_2673b424
+        fingerprint: eed25f2b0138351cfc26f73b7dddbc9ec81da954a59ffacb01422702626bf337
+        validation:
+          recall@20: 0.2693115420017584
+          ndcg@20: 0.13257031635724037
+    blocked_by: []
   - id: k_11
     note: rebuild_k=11；继承已复核K=1对照完整配置，仅修改K，固定90轮、seed=0。用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。
     overrides:
@@ -2533,10 +3113,76 @@ rounds:
       candidates:
       - baseline_k1
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 39aaa301bd436045193cd94f15168d35600ae799ec10bca56bbc269a70a93ca4
+    execution_ids:
+    - 20261025T182937_fb4f67e9
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 0
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 11
+      lambda_0: 2000.0
+      num_layers: 2
+      upsilon_UB: 0.05
+      upsilon_UI: 0.0
+      upsilon_BI: 0.1
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.4
+      - 0.6
+      - 0.0
+      xi_BI:
+      - 0.5
+      - 0.4
+      - 0.1
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 90
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: baseline_k1
+      winner_execution_id: 20261025T121254_2673b424
+      winner_validation:
+        recall@20: 0.2693115420017584
+        ndcg@20: 0.13257031635724037
+      candidates:
+      - experiment_id: baseline_k1
+        execution_id: 20261025T121254_2673b424
+        fingerprint: eed25f2b0138351cfc26f73b7dddbc9ec81da954a59ffacb01422702626bf337
+        validation:
+          recall@20: 0.2693115420017584
+          ndcg@20: 0.13257031635724037
+    blocked_by: []
 - id: netease_round_01_k
   dataset: NetEase
   selection_rule: validation_recall20_then_ndcg20
@@ -2701,10 +3347,62 @@ rounds:
   - id: initial
     note: 完整初始参照实验，rebuild_k=1，40轮、seed=4096；本实验同时作为K=1候选，不额外重跑K=1。当前K=1仅为作者设置及迁移初值，尚不认定为新数据集最优。
     overrides: {}
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+    execution_ids:
+    - 20261025T183951_7facd4fe
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection: null
+    blocked_by: []
   - id: k_03
     note: rebuild_k=3；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2713,10 +3411,76 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+    execution_ids:
+    - 20261025T190514_222baca8
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 3
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+    blocked_by: []
   - id: k_05
     note: rebuild_k=5；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2725,10 +3489,76 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+    execution_ids:
+    - 20261025T193043_977f9ac9
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 5
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+    blocked_by: []
   - id: k_07
     note: rebuild_k=7；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2737,10 +3567,76 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+    execution_ids:
+    - 20261025T195608_83edec60
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 7
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+    blocked_by: []
   - id: k_09
     note: rebuild_k=9；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2749,10 +3645,76 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+    execution_ids:
+    - 20261025T201927_244ddd5e
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 9
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+    blocked_by: []
   - id: k_11
     note: rebuild_k=11；用户确认的工程补充网格，作者原配置为1，未给出该离散搜索网格。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2761,10 +3723,76 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+    execution_ids:
+    - 20261025T204254_89908c06
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 11
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.02
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+    blocked_by: []
   - id: lambda1_0005
     note: lambda_1=0.005；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2778,10 +3806,106 @@ rounds:
       - k_09
       - k_11
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+    execution_ids:
+    - 20261025T210826_58b87ab7
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+    blocked_by: []
   - id: lambda1_001
     note: lambda_1=0.01；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2795,10 +3919,106 @@ rounds:
       - k_09
       - k_11
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+    execution_ids:
+    - 20261025T213129_afd7c613
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.01
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+    blocked_by: []
   - id: lambda1_003
     note: lambda_1=0.03；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2812,10 +4032,106 @@ rounds:
       - k_09
       - k_11
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+    execution_ids:
+    - 20261025T215649_29532ae9
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.03
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+    blocked_by: []
   - id: lambda1_005
     note: lambda_1=0.05；0.005为工程补充点；0.01、0.03、0.05为论文候选，沿用已确认方案。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2829,10 +4145,106 @@ rounds:
       - k_09
       - k_11
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+    execution_ids:
+    - 20261025T222215_fcff5589
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 1000.0
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.05
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261025T183951_7facd4fe
+      winner_validation:
+        recall@20: 0.04052026245807023
+        ndcg@20: 0.019304857251967882
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+    blocked_by: []
   - id: lambda0_0100
     note: lambda_0=100；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2850,10 +4262,130 @@ rounds:
       - lambda1_003
       - lambda1_005
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+    execution_ids:
+    - 20261025T224733_8440c873
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_0005
+      winner_execution_id: 20261025T210826_58b87ab7
+      winner_validation:
+        recall@20: 0.04882368956320974
+        ndcg@20: 0.020340130056638987
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+    blocked_by: []
   - id: lambda0_0500
     note: lambda_0=500；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2871,10 +4403,130 @@ rounds:
       - lambda1_003
       - lambda1_005
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+    execution_ids:
+    - 20261025T231036_af734d97
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 500
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_0005
+      winner_execution_id: 20261025T210826_58b87ab7
+      winner_validation:
+        recall@20: 0.04882368956320974
+        ndcg@20: 0.020340130056638987
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+    blocked_by: []
   - id: lambda0_2000
     note: lambda_0=2000；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2892,10 +4544,130 @@ rounds:
       - lambda1_003
       - lambda1_005
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+    execution_ids:
+    - 20261025T233555_914d2e74
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 2000
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_0005
+      winner_execution_id: 20261025T210826_58b87ab7
+      winner_validation:
+        recall@20: 0.04882368956320974
+        ndcg@20: 0.020340130056638987
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+    blocked_by: []
   - id: lambda0_10000
     note: lambda_0=10000；100、10000为论文候选；500、2000为沿用Youshu的工程补充点。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2913,10 +4685,130 @@ rounds:
       - lambda1_003
       - lambda1_005
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+    execution_ids:
+    - 20261026T000135_f109862e
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 10000
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda1_0005
+      winner_execution_id: 20261025T210826_58b87ab7
+      winner_validation:
+        recall@20: 0.04882368956320974
+        ndcg@20: 0.020340130056638987
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+    blocked_by: []
   - id: omega_02
     note: omega=0.2；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2938,10 +4830,154 @@ rounds:
       - lambda0_2000
       - lambda0_10000
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+    execution_ids:
+    - 20261026T002735_038b4c78
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.2
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+    blocked_by: []
   - id: omega_03
     note: omega=0.3；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2963,10 +4999,154 @@ rounds:
       - lambda0_2000
       - lambda0_10000
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+    execution_ids:
+    - 20261026T005306_c0449fae
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.3
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+    blocked_by: []
   - id: omega_05
     note: omega=0.5；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -2988,10 +5168,154 @@ rounds:
       - lambda0_2000
       - lambda0_10000
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+    execution_ids:
+    - 20261026T011619_94bcb24f
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.5
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+    blocked_by: []
   - id: omega_06
     note: omega=0.6；本工程提出的离散网格，围绕初值0.4上下各取两个。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3013,10 +5337,154 @@ rounds:
       - lambda0_2000
       - lambda0_10000
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+    execution_ids:
+    - 20261026T013933_ec7115cc
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.6
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.2
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+    blocked_by: []
   - id: tau_010
     note: tau=0.1；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3042,10 +5510,178 @@ rounds:
       - omega_05
       - omega_06
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: f58a07d41eb1219fd759009c99912919fd1688356f3b63bc844c6866f03dd832
+    execution_ids:
+    - 20261026T020518_25952691
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.1
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+      - experiment_id: omega_02
+        execution_id: 20261026T002735_038b4c78
+        fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+        validation:
+          recall@20: 0.04803594819049643
+          ndcg@20: 0.020150452942393364
+      - experiment_id: omega_03
+        execution_id: 20261026T005306_c0449fae
+        fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+        validation:
+          recall@20: 0.047936409193508514
+          ndcg@20: 0.020418149252824886
+      - experiment_id: omega_05
+        execution_id: 20261026T011619_94bcb24f
+        fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+        validation:
+          recall@20: 0.04719276780815326
+          ndcg@20: 0.020051281305630213
+      - experiment_id: omega_06
+        execution_id: 20261026T013933_ec7115cc
+        fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+        validation:
+          recall@20: 0.04068831024306941
+          ndcg@20: 0.018217666531994775
+    blocked_by: []
   - id: tau_015
     note: tau=0.15；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3071,10 +5707,178 @@ rounds:
       - omega_05
       - omega_06
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: e76018b460aff78e7c5a92c874fcb2306571e5631988f4fedb7d90937051d192
+    execution_ids:
+    - 20261026T022937_bdd02910
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.15
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+      - experiment_id: omega_02
+        execution_id: 20261026T002735_038b4c78
+        fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+        validation:
+          recall@20: 0.04803594819049643
+          ndcg@20: 0.020150452942393364
+      - experiment_id: omega_03
+        execution_id: 20261026T005306_c0449fae
+        fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+        validation:
+          recall@20: 0.047936409193508514
+          ndcg@20: 0.020418149252824886
+      - experiment_id: omega_05
+        execution_id: 20261026T011619_94bcb24f
+        fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+        validation:
+          recall@20: 0.04719276780815326
+          ndcg@20: 0.020051281305630213
+      - experiment_id: omega_06
+        execution_id: 20261026T013933_ec7115cc
+        fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+        validation:
+          recall@20: 0.04068831024306941
+          ndcg@20: 0.018217666531994775
+    blocked_by: []
   - id: tau_025
     note: tau=0.25；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3100,10 +5904,178 @@ rounds:
       - omega_05
       - omega_06
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: e8aaca793cc64fe5df18a40fe8705dd8760bde06a3e93ea55621bfafbaa2728f
+    execution_ids:
+    - 20261026T025640_c1e00026
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.25
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+      - experiment_id: omega_02
+        execution_id: 20261026T002735_038b4c78
+        fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+        validation:
+          recall@20: 0.04803594819049643
+          ndcg@20: 0.020150452942393364
+      - experiment_id: omega_03
+        execution_id: 20261026T005306_c0449fae
+        fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+        validation:
+          recall@20: 0.047936409193508514
+          ndcg@20: 0.020418149252824886
+      - experiment_id: omega_05
+        execution_id: 20261026T011619_94bcb24f
+        fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+        validation:
+          recall@20: 0.04719276780815326
+          ndcg@20: 0.020051281305630213
+      - experiment_id: omega_06
+        execution_id: 20261026T013933_ec7115cc
+        fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+        validation:
+          recall@20: 0.04068831024306941
+          ndcg@20: 0.018217666531994775
+    blocked_by: []
   - id: tau_030
     note: tau=0.3；本工程提出的离散网格，围绕初值0.2上下各取两个；温度必须大于0。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3129,10 +6101,178 @@ rounds:
       - omega_05
       - omega_06
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: cd24922cc3a9dfb7962b7f7c36e82bdf6be2723f92a97fa60c54e8cc06c17bd0
+    execution_ids:
+    - 20261026T032344_2d2d3146
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.3
+      lambda_1: 0.005
+      lambda_2: 1.0e-05
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: lambda0_0100
+      winner_execution_id: 20261025T224733_8440c873
+      winner_validation:
+        recall@20: 0.04891799174130858
+        ndcg@20: 0.020517542557439757
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+      - experiment_id: omega_02
+        execution_id: 20261026T002735_038b4c78
+        fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+        validation:
+          recall@20: 0.04803594819049643
+          ndcg@20: 0.020150452942393364
+      - experiment_id: omega_03
+        execution_id: 20261026T005306_c0449fae
+        fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+        validation:
+          recall@20: 0.047936409193508514
+          ndcg@20: 0.020418149252824886
+      - experiment_id: omega_05
+        execution_id: 20261026T011619_94bcb24f
+        fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+        validation:
+          recall@20: 0.04719276780815326
+          ndcg@20: 0.020051281305630213
+      - experiment_id: omega_06
+        execution_id: 20261026T013933_ec7115cc
+        fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+        validation:
+          recall@20: 0.04068831024306941
+          ndcg@20: 0.018217666531994775
+    blocked_by: []
   - id: lambda2_1e6
     note: lambda_2=1e-06；与已有1e-5对照共同覆盖论文的全部三个候选。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3162,10 +6302,202 @@ rounds:
       - tau_025
       - tau_030
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 76b602653b74da591c796b31c29ea3be3c102f9d164ff92341b0d561ad16ae59
+    execution_ids:
+    - 20261026T034839_53578245
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.15
+      lambda_1: 0.005
+      lambda_2: 1.0e-06
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: tau_015
+      winner_execution_id: 20261026T022937_bdd02910
+      winner_validation:
+        recall@20: 0.049823996732775044
+        ndcg@20: 0.0217049190881405
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+      - experiment_id: omega_02
+        execution_id: 20261026T002735_038b4c78
+        fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+        validation:
+          recall@20: 0.04803594819049643
+          ndcg@20: 0.020150452942393364
+      - experiment_id: omega_03
+        execution_id: 20261026T005306_c0449fae
+        fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+        validation:
+          recall@20: 0.047936409193508514
+          ndcg@20: 0.020418149252824886
+      - experiment_id: omega_05
+        execution_id: 20261026T011619_94bcb24f
+        fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+        validation:
+          recall@20: 0.04719276780815326
+          ndcg@20: 0.020051281305630213
+      - experiment_id: omega_06
+        execution_id: 20261026T013933_ec7115cc
+        fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+        validation:
+          recall@20: 0.04068831024306941
+          ndcg@20: 0.018217666531994775
+      - experiment_id: tau_010
+        execution_id: 20261026T020518_25952691
+        fingerprint: f58a07d41eb1219fd759009c99912919fd1688356f3b63bc844c6866f03dd832
+        validation:
+          recall@20: 0.049748889465266094
+          ndcg@20: 0.022262400603132112
+      - experiment_id: tau_015
+        execution_id: 20261026T022937_bdd02910
+        fingerprint: e76018b460aff78e7c5a92c874fcb2306571e5631988f4fedb7d90937051d192
+        validation:
+          recall@20: 0.049823996732775044
+          ndcg@20: 0.0217049190881405
+      - experiment_id: tau_025
+        execution_id: 20261026T025640_c1e00026
+        fingerprint: e8aaca793cc64fe5df18a40fe8705dd8760bde06a3e93ea55621bfafbaa2728f
+        validation:
+          recall@20: 0.04814678746062014
+          ndcg@20: 0.019406743723514
+      - experiment_id: tau_030
+        execution_id: 20261026T032344_2d2d3146
+        fingerprint: cd24922cc3a9dfb7962b7f7c36e82bdf6be2723f92a97fa60c54e8cc06c17bd0
+        validation:
+          recall@20: 0.04801527374285504
+          ndcg@20: 0.019370758243406568
+    blocked_by: []
   - id: lambda2_1e7
     note: lambda_2=1e-07；与已有1e-5对照共同覆盖论文的全部三个候选。前置候选全部有效成功后继承完整优胜配置，仅覆盖本参数；对照继续参与选优，固定40轮、seed=4096。
     overrides:
@@ -3195,7 +6527,199 @@ rounds:
       - tau_025
       - tau_030
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
-    fingerprint: null
-    execution_ids: []
+    status: SUCCESS
+    success: true
+    fingerprint: 742fb8f0cd2d270b2228c7a4be74889b0aebda7f9a361b58b632302de93bf2b9
+    execution_ids:
+    - 20261026T041551_f9b4cd63
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+      embedding_size: 64
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      lr: 0.001
+      test_interval: 5
+      seed: 4096
+      dims:
+      - 1000
+      norm: false
+      time_emb_dim: 10
+      steps: 5
+      noise_scale: 1.0
+      noise_min: 0.0001
+      noise_max: 0.02
+      sampling_noise: false
+      sampling_steps: 0
+      rebuild_k: 1
+      lambda_0: 100
+      num_layers: 2
+      upsilon_UB: 0.0
+      upsilon_UI: 0.0
+      upsilon_BI: 0.2
+      xi_UB:
+      - 0.6
+      - 0.3
+      - 0.1
+      xi_UI:
+      - 0.25
+      - 0.65
+      - 0.1
+      xi_BI:
+      - 0.4
+      - 0.4
+      - 0.2
+      omega: 0.4
+      gamma_1: 0.3
+      gamma_2: 0.2
+      tau: 0.15
+      lambda_1: 0.005
+      lambda_2: 1.0e-07
+      epochs: 40
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: tau_015
+      winner_execution_id: 20261026T022937_bdd02910
+      winner_validation:
+        recall@20: 0.049823996732775044
+        ndcg@20: 0.0217049190881405
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261025T183951_7facd4fe
+        fingerprint: 67121a182f3b7de234b7c641687a98de2c2b3311c8ecfb114a94eb47e0b2cb77
+        validation:
+          recall@20: 0.04052026245807023
+          ndcg@20: 0.019304857251967882
+      - experiment_id: k_03
+        execution_id: 20261025T190514_222baca8
+        fingerprint: 29fc609b136e8df12e39b4b29e423826908fb7500072ad490b46d0e86f81fee3
+        validation:
+          recall@20: 0.03873932754374019
+          ndcg@20: 0.018043286550298705
+      - experiment_id: k_05
+        execution_id: 20261025T193043_977f9ac9
+        fingerprint: a34ca9a17c50e7e2275e84bf91399be77628a44c67e7d0fe88061d564c7edf5c
+        validation:
+          recall@20: 0.03810313271564452
+          ndcg@20: 0.017558697935854163
+      - experiment_id: k_07
+        execution_id: 20261025T195608_83edec60
+        fingerprint: c8b09395e63a2090488591f8d9fa68718d164eb79ba4b83b388af7f4a5b833ec
+        validation:
+          recall@20: 0.037261607902694165
+          ndcg@20: 0.017100169660721327
+      - experiment_id: k_09
+        execution_id: 20261025T201927_244ddd5e
+        fingerprint: 4972e16e447173bf659122084a4594ed74d736bd776806095ccbb086c4157ea9
+        validation:
+          recall@20: 0.036707178104306265
+          ndcg@20: 0.016820221505129556
+      - experiment_id: k_11
+        execution_id: 20261025T204254_89908c06
+        fingerprint: 2ecc368e78c53adbf6021053d2ddb4ddaf9dec11cc93427e05d8a79d76c5ac19
+        validation:
+          recall@20: 0.036831152674780175
+          ndcg@20: 0.016750747407758882
+      - experiment_id: lambda1_0005
+        execution_id: 20261025T210826_58b87ab7
+        fingerprint: a77d7193448274dc55c137158ab055f8ec40e2acd28449fdf7a0756782e1a3d8
+        validation:
+          recall@20: 0.04882368956320974
+          ndcg@20: 0.020340130056638987
+      - experiment_id: lambda1_001
+        execution_id: 20261025T213129_afd7c613
+        fingerprint: a4fa2d8763a3043e1131959b5974cd5684f65803de0f2335538e34a1e5fff96e
+        validation:
+          recall@20: 0.04473030596788004
+          ndcg@20: 0.020553952290041602
+      - experiment_id: lambda1_003
+        execution_id: 20261025T215649_29532ae9
+        fingerprint: 5b0af6d26e54d8efd6cb30f8424976ac5f857e8d00886aed3262fecc0440caca
+        validation:
+          recall@20: 0.03873074869879304
+          ndcg@20: 0.01806335615599221
+      - experiment_id: lambda1_005
+        execution_id: 20261025T222215_fcff5589
+        fingerprint: 4a85dd8e822a5cd3b36430b654d7114ffcf6c80425724a414abd61c6aee6a766
+        validation:
+          recall@20: 0.03623410124777202
+          ndcg@20: 0.01694798833983653
+      - experiment_id: lambda0_0100
+        execution_id: 20261025T224733_8440c873
+        fingerprint: 3d04d3b193cbb5363cd0157242eddb9d796f583d67a54c52309c1ff5c0effac2
+        validation:
+          recall@20: 0.04891799174130858
+          ndcg@20: 0.020517542557439757
+      - experiment_id: lambda0_0500
+        execution_id: 20261025T231036_af734d97
+        fingerprint: f5499828689369ef369f62769c649bfdf599eea3c50ddd118aef6bff1c77a737
+        validation:
+          recall@20: 0.04820510819417503
+          ndcg@20: 0.02010579696803419
+      - experiment_id: lambda0_2000
+        execution_id: 20261025T233555_914d2e74
+        fingerprint: d6ae579ed71f812385e0ba16a771aeb3f3570cda48f9bf7525d8f7d64b46029f
+        validation:
+          recall@20: 0.04742488247974524
+          ndcg@20: 0.020006518977190874
+      - experiment_id: lambda0_10000
+        execution_id: 20261026T000135_f109862e
+        fingerprint: 8e095882206d81b0ac9e81c962f2ee2074e194692c8771667c6453fd4f7cb345
+        validation:
+          recall@20: 0.047970864522195705
+          ndcg@20: 0.020174454642099375
+      - experiment_id: omega_02
+        execution_id: 20261026T002735_038b4c78
+        fingerprint: b1611cd142510d42f5dfc12a9a1efc2322df8df47c4b5a65ced038877c8dacf6
+        validation:
+          recall@20: 0.04803594819049643
+          ndcg@20: 0.020150452942393364
+      - experiment_id: omega_03
+        execution_id: 20261026T005306_c0449fae
+        fingerprint: 967d8fe6c00db5d92c03b5fa642acab427c0a6cedc11aa4f9765e57996395f21
+        validation:
+          recall@20: 0.047936409193508514
+          ndcg@20: 0.020418149252824886
+      - experiment_id: omega_05
+        execution_id: 20261026T011619_94bcb24f
+        fingerprint: 9f9a4711d067dcb2105b10f9b313a119bffab12ad3f81cb07b977d6ddbf71d03
+        validation:
+          recall@20: 0.04719276780815326
+          ndcg@20: 0.020051281305630213
+      - experiment_id: omega_06
+        execution_id: 20261026T013933_ec7115cc
+        fingerprint: cf816a5a0c9b39215fec140f0fdccc63e052be1b6e5f7e34e6a33b5c839198c4
+        validation:
+          recall@20: 0.04068831024306941
+          ndcg@20: 0.018217666531994775
+      - experiment_id: tau_010
+        execution_id: 20261026T020518_25952691
+        fingerprint: f58a07d41eb1219fd759009c99912919fd1688356f3b63bc844c6866f03dd832
+        validation:
+          recall@20: 0.049748889465266094
+          ndcg@20: 0.022262400603132112
+      - experiment_id: tau_015
+        execution_id: 20261026T022937_bdd02910
+        fingerprint: e76018b460aff78e7c5a92c874fcb2306571e5631988f4fedb7d90937051d192
+        validation:
+          recall@20: 0.049823996732775044
+          ndcg@20: 0.0217049190881405
+      - experiment_id: tau_025
+        execution_id: 20261026T025640_c1e00026
+        fingerprint: e8aaca793cc64fe5df18a40fe8705dd8760bde06a3e93ea55621bfafbaa2728f
+        validation:
+          recall@20: 0.04814678746062014
+          ndcg@20: 0.019406743723514
+      - experiment_id: tau_030
+        execution_id: 20261026T032344_2d2d3146
+        fingerprint: cd24922cc3a9dfb7962b7f7c36e82bdf6be2723f92a97fa60c54e8cc06c17bd0
+        validation:
+          recall@20: 0.04801527374285504
+          ndcg@20: 0.019370758243406568
+    blocked_by: []

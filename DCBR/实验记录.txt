@@ -90,3 +90,187 @@ test TOP 40: Recall=0.21544410, NDCG=0.15523595
 test TOP 80: Recall=0.27739549, NDCG=0.17377435
 训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\ReCoBR-TY\\DCBR\\log\\iFashion\\20261024T200344_72e1b0be\\tensorboard"}
 END_EXECUTION: 20261024T200344_72e1b0be
+
+========================================================================
+EXECUTION_ID: 20261026T124309_b3de1d0b
+实验类别: 第一种情况（作者已有数据集配置）
+模型: DCBR
+数据集: Meal-H
+实验备注: DCBR Meal-H under the shared evaluation protocol
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-26T20:43:09+08:00
+结束时间(UTC+08:00): 2026-10-26T20:53:55+08:00
+耗时（秒）: 646.109
+GPU: 0
+运行设备: cuda:0
+代码版本: 3ee58bc9feec003837ac58a9fb12ce472b538f20
+训练源码摘要: efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379
+配置指纹: 86133182066450362eff94f6c89fefa3b9b36e860936860b5682b1520083ee83
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整实际配置:
+data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 1000.0
+num_layers: 2
+upsilon_UB: 0.0
+upsilon_UI: 0.0
+upsilon_BI: 0.3
+xi_UB:
+- 0.6
+- 0.25
+- 0.15
+xi_UI:
+- 0.35
+- 0.6
+- 0.05
+xi_BI:
+- 0.55
+- 0.45
+- 0.0
+omega: 0.1
+gamma_1: 0.3
+gamma_2: 0.05
+tau: 0.2
+lambda_1: 0.02
+lambda_2: 1.0e-05
+epochs: 150
+dataset: Meal-H
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 1575
+num_bundles: 3817
+num_items: 7280
+gpu: '0'
+info: ''
+quiet: false
+num_workers: 0
+best_epoch: 129（从0计数）
+最佳训练轮次: 130
+最佳验证 Recall@20: 0.4981807098
+最佳验证 NDCG@20: 0.3334365157
+val TOP 10: Recall=0.38436115, NDCG=0.30090078
+val TOP 20: Recall=0.49818071, NDCG=0.33343652
+val TOP 40: Recall=0.61960937, NDCG=0.36498411
+val TOP 80: Recall=0.73492097, NDCG=0.39289142
+test TOP 10: Recall=0.40389669, NDCG=0.31170819
+test TOP 20: Recall=0.52451329, NDCG=0.34613114
+test TOP 40: Recall=0.62939979, NDCG=0.37360008
+test TOP 80: Recall=0.74946159, NDCG=0.40276459
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-H\\20261026T124309_b3de1d0b\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-H\\20261026T124309_b3de1d0b\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-H\\20261026T124309_b3de1d0b\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-H\\20261026T124309_b3de1d0b\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-H\\20261026T124309_b3de1d0b\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-H\\20261026T124309_b3de1d0b\\tensorboard"}
+END_EXECUTION: 20261026T124309_b3de1d0b
+
+========================================================================
+EXECUTION_ID: 20261026T125502_cd6dbe5e
+实验类别: 第一种情况（作者已有数据集配置）
+模型: DCBR
+数据集: Meal-L
+实验备注: DCBR Meal-L under the shared evaluation protocol
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-26T20:55:02+08:00
+结束时间(UTC+08:00): 2026-10-26T20:58:22+08:00
+耗时（秒）: 200.484
+GPU: 0
+运行设备: cuda:0
+代码版本: 3ee58bc9feec003837ac58a9fb12ce472b538f20
+训练源码摘要: efc0c8a83909e2ba8aadc6c06fa3a55b5f81cc2244593eef54266ddf83237379
+配置指纹: 06ec247ca0b117102f785542845fa6074cca930269d3773634582169183f5933
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+完整实际配置:
+data_path: C:\Users\admin\PycharmProjects\MultiCBR-Project\datasets
+embedding_size: 64
+batch_size_train: 2048
+batch_size_test: 2048
+topk:
+- 10
+- 20
+- 40
+- 80
+neg_num: 1
+lr: 0.001
+test_interval: 5
+seed: 0
+dims:
+- 1000
+norm: false
+time_emb_dim: 10
+steps: 5
+noise_scale: 1.0
+noise_min: 0.0001
+noise_max: 0.02
+sampling_noise: false
+sampling_steps: 0
+rebuild_k: 1
+lambda_0: 1000.0
+num_layers: 2
+upsilon_UB: 0.05
+upsilon_UI: 0.0
+upsilon_BI: 0.1
+xi_UB:
+- 0.6
+- 0.3
+- 0.1
+xi_UI:
+- 0.4
+- 0.6
+- 0.0
+xi_BI:
+- 0.5
+- 0.4
+- 0.1
+omega: 0.0
+gamma_1: 0.3
+gamma_2: 0.2
+tau: 0.2
+lambda_1: 0.01
+lambda_2: 1.0e-05
+epochs: 150
+dataset: Meal-L
+model: DCBR
+device: cuda:0
+selection_rule: validation Recall@20 and NDCG@20 both strictly improve over the saved
+  checkpoint
+num_users: 1928
+num_bundles: 3578
+num_items: 10589
+gpu: '0'
+info: ''
+quiet: false
+num_workers: 0
+best_epoch: 94（从0计数）
+最佳训练轮次: 95
+最佳验证 Recall@20: 0.3622706208
+最佳验证 NDCG@20: 0.2193961136
+val TOP 10: Recall=0.28632792, NDCG=0.19939446
+val TOP 20: Recall=0.36227062, NDCG=0.21939611
+val TOP 40: Recall=0.44946389, NDCG=0.23882410
+val TOP 80: Recall=0.55567573, NDCG=0.25887121
+test TOP 10: Recall=0.27241767, NDCG=0.18869058
+test TOP 20: Recall=0.36599531, NDCG=0.21368366
+test TOP 40: Recall=0.44800425, NDCG=0.23188931
+test TOP 80: Recall=0.53845918, NDCG=0.24935665
+训练产物: {"log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-L\\20261026T125502_cd6dbe5e\\training.log", "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-L\\20261026T125502_cd6dbe5e\\config.yaml", "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-L\\20261026T125502_cd6dbe5e\\best.pt", "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-L\\20261026T125502_cd6dbe5e\\best_config.json", "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-L\\20261026T125502_cd6dbe5e\\result.json", "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\DCBR\\log\\Meal-L\\20261026T125502_cd6dbe5e\\tensorboard"}
+END_EXECUTION: 20261026T125502_cd6dbe5e

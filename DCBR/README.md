@@ -324,6 +324,8 @@ python -m unittest discover -s DCBR -p "test_*.py" -v
 
 轮次 `youshu_round_04_coverage` 复用这条完整 TXT 作为 `baseline_best`，不重训，不依赖旧 history 或检查点；会核对身份、配置、数据摘要和训练源码，保留引用来源及旧产物未复核的说明。新增 **49 个训练实验**，共 **50 个候选、11 个阶段**：
 
+该引用显式启用 `allow_line_ending_conversion=true`，支持 Windows CRLF 与 Linux LF 迁移：只在当前文件转换为 LF/CRLF 后的 SHA256 与历史摘要精确一致时接受，并记录两端摘要；其他源码或数据内容变化仍拒绝，报错会指出具体文件。历史引用默认仍执行原严格字节校验。
+
 | 阶段 | 新候选 | 新实验数 |
 |---|---|---:|
 | lambda_1 | 0.001、0.005、0.01、0.03、0.05、0.10、0.20、0.40 | 8 |

@@ -6787,6 +6787,7 @@ rounds:
       execution_id: 20261025T115614_4738c53b
       fingerprint: 15153d4cbbca62cd090b51e842a6c39739e7693aa85bf888ecd0ddce045da0b7
       allow_data_path_relocation: true
+      allow_line_ending_conversion: true
       result_file: DCBR/搜参结果.txt
     status: PENDING
     success: false

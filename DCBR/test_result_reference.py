@@ -11,6 +11,34 @@ import run_experiments as runner
 
 
 class ResultReferenceTests(unittest.TestCase):
+    def test_line_endings_only_linux_migration(self):
+        plan = runner.load_plan(runner.MODEL_DIR / '搜参配置.yaml')
+        round_ = next(r for r in plan['rounds'] if r['id'] == 'youshu_round_04_coverage')
+        item = round_['experiments'][0]
+        source_dir = runner.MODEL_DIR
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            data = root / 'data' / 'Youshu'
+            data.mkdir(parents=True)
+            source = root / 'train.py'
+            source.write_bytes((source_dir / 'train.py').read_bytes().replace(b'\r\n', b'\n'))
+            plan['sources']['train.py'] = runner.file_hash(source)
+            original = runner.resolve_path(item['template_config']['data_path']) / 'Youshu'
+            for name in round_['data_files']:
+                target = data / name
+                target.write_bytes((original / name).read_bytes().replace(b'\r\n', b'\n'))
+                round_['data_files'][name] = runner.file_hash(target)
+            item['template_config']['data_path'] = str(data.parent)
+            with patch.object(runner, 'MODEL_DIR', root):
+                result = runner.read_result_reference(item, round_, plan)
+                self.assertEqual(runner.validation_key(result['training_record']),
+                                 (.27404046711304497, .13345297207176463))
+                self.assertEqual(len(result['reference_evidence']['line_ending_conversion']), 7)
+                source.write_bytes(source.read_bytes() + b'\n# actual source change\n')
+                plan['sources']['train.py'] = runner.file_hash(source)
+                with self.assertRaisesRegex(ValueError, 'content mismatch beyond LF/CRLF'):
+                    runner.read_result_reference(item, round_, plan)
+
     @classmethod
     def setUpClass(cls):
         cls.plan = runner.load_plan(runner.MODEL_DIR / '搜参配置.yaml')

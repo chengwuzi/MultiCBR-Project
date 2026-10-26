@@ -15,6 +15,8 @@ class ResultReferenceTests(unittest.TestCase):
         plan = runner.load_plan(runner.MODEL_DIR / '搜参配置.yaml')
         round_ = next(r for r in plan['rounds'] if r['id'] == 'youshu_round_04_coverage')
         item = round_['experiments'][0]
+        # Existing server plans may predate the portability option.
+        item['reference'].pop('allow_line_ending_conversion', None)
         source_dir = runner.MODEL_DIR
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -22,6 +24,8 @@ class ResultReferenceTests(unittest.TestCase):
             data.mkdir(parents=True)
             source = root / 'train.py'
             source.write_bytes((source_dir / 'train.py').read_bytes().replace(b'\r\n', b'\n'))
+            self.assertEqual(runner.file_hash(source),
+                             '61927e1aa0a2552870bb41a5c5b12d27a47640eae5872f0c88b7da4e3fece84d')
             plan['sources']['train.py'] = runner.file_hash(source)
             original = runner.resolve_path(item['template_config']['data_path']) / 'Youshu'
             for name in round_['data_files']:

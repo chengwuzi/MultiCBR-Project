@@ -586,13 +586,13 @@ def read_result_reference(item, round_, plan):
         raise ValueError("Result TXT dataset file list mismatch")
     compatibility = {}
     source_match = reference_hash_match(plan, MODEL_DIR / "train.py", record["sources"]["train.py"],
-                                        plan["sources"]["train.py"], ref.get("allow_line_ending_conversion", False))
+                                        plan["sources"]["train.py"], ref.get("allow_line_ending_conversion", True))
     if source_match:
         compatibility["train.py"] = source_match
     directory = resolve_path(item["template_config"]["data_path"]) / round_["dataset"]
     for name, expected in record["data_files"].items():
         match = reference_hash_match(plan, directory / name, expected, round_["data_files"][name],
-                                     ref.get("allow_line_ending_conversion", False))
+                                     ref.get("allow_line_ending_conversion", True))
         if match:
             compatibility[name] = match
     if compatibility:

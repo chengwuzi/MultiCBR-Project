@@ -1,0 +1,107 @@
+# Meal-H independent plan, execution history and results.
+version: 1
+base_config: ReCoBR_files/config.yaml
+work_dir: ReCoBR_files/Meal-H/log/tuning
+result_file: ReCoBR_files/Meal-H/搜参结果.txt
+defaults:
+  gpu: '0'
+  device: cuda
+  max_attempts: 3
+  retry_delay_seconds: 5
+  console_interval_seconds: 30
+  stream_output: false
+rounds:
+- id: meal_h_initial
+  dataset: Meal-H
+  note: Initial engineering baseline only; full initial configuration frozen here.
+    Diffusion ON; pre-fusion anchor CL OFF; post-fusion CL retained. Fixed seed=2026,
+    epochs=150. No parameter grid has been agreed yet.
+  selection_rule: validation_recall20_then_ndcg20
+  overrides:
+    data_path: ./datasets
+    batch_size_train: 2048
+    batch_size_test: 2048
+    topk:
+    - 10
+    - 20
+    - 40
+    - 80
+    neg_num: 1
+    seed: 2026
+    aug_type: Noise
+    ed_interval: 1
+    embedding_sizes:
+    - 64
+    num_layerss:
+    - 2
+    UB_ratios:
+    - 0.05
+    UI_ratios:
+    - 0.0
+    BI_ratios:
+    - 0.2
+    fusion_weights:
+      modal_weight:
+      - 0.1
+      - 0.3
+      - 0.6
+      UB_layer:
+      - 0.5
+      - 0.5
+      - 0.0
+      UI_layer:
+      - 0.3
+      - 0.4
+      - 0.3
+      BI_layer:
+      - 0.5
+      - 0.5
+      - 0.0
+    lrs:
+    - 0.001
+    l2_regs:
+    - 1.0e-05
+    c_lambdas:
+    - 0.05
+    c_temps:
+    - 0.2
+    epochs: 150
+    test_interval: 5
+    latent_rebuild:
+      enabled: true
+      rebuild_k: 13
+      latent_diffusion_user_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-user-10261919.pt
+      latent_diffusion_bundle_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-bundle-10261919.pt
+      latent_diffusion_hidden_dim: 128
+      latent_diffusion_time_dim: 16
+      latent_diffusion_denoiser_layers: 2
+      latent_diffusion_dropout: 0.1
+      latent_diffusion_num_steps: 12
+      latent_diffusion_beta_start: 0.0001
+      latent_diffusion_beta_end: 0.02
+      latent_diffusion_set_loss_weight: 0.05
+      latent_diffusion_lr: 0.001
+      latent_diffusion_weight_decay: 1.0e-05
+      latent_diffusion_batch_size: 1024
+      latent_diffusion_infer_batch_size: 256
+      latent_diffusion_reset_after_epoch: -1
+      latent_diffusion_reset_optimizer: false
+    anchor_cl:
+      enabled: false
+      anchor_cl_lambda: 0.0
+      temp: 0.2
+      user_cl: true
+      bundle_cl: true
+      ub_ui_user_weight: 1.0
+      ub_bi_user_weight: 1.0
+      ub_ui_bundle_weight: 1.0
+      ub_bi_bundle_weight: 1.0
+    ui_bundle_user_agg_beta: 0.0
+    bi_user_bundle_agg_beta: 0.0
+  experiments:
+  - id: initial
+    note: Initial baseline; use validation for checkpoint and configuration selection,
+      test metrics reported only.
+    overrides: {}
+    status: PENDING
+    success: false

@@ -1,0 +1,140 @@
+# ReCoBR在Meal-H、Meal-L上的初始配置，由本目录train.py及搜参入口读取。
+# 所有相对路径均以项目根目录为准；这些是待验证的工程初值，不是已获得的优胜配置。
+# 当前阶段：开启潜空间扩散重建，关闭融合前UB锚定对比学习；融合后对比学习保持启用。
+# 后续参数搜索保持上述模块状态，anchor_cl中的参数不作为当前搜索项。
+# 其余参数调完后，再单独研究是否启用融合前对比及其权重，不自动切换模块。
+# 根目录训练入口和config.yaml保持原状；本文件由ReCoBR_files/train.py独立加载。
+
+Meal-H:
+  data_path: ./datasets
+  batch_size_train: 2048
+  batch_size_test: 2048
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  seed: 2026
+
+  aug_type: Noise
+  ed_interval: 1
+  embedding_sizes: [64]
+  num_layerss: [2]
+
+  # 图编码以现有iFashion配置为迁移起点，不将其视为Meal-H最优设置。
+  UB_ratios: [0.05]
+  UI_ratios: [0.0]
+  BI_ratios: [0.2]
+  fusion_weights:
+    modal_weight: [0.1, 0.3, 0.6]
+    UB_layer: [0.5, 0.5, 0.0]
+    UI_layer: [0.3, 0.4, 0.3]
+    BI_layer: [0.5, 0.5, 0.0]
+
+  lrs: [1.0e-3]
+  l2_regs: [1.0e-5]
+  c_lambdas: [0.05]
+  c_temps: [0.2]
+  epochs: 150
+  test_interval: 5
+
+  latent_rebuild:
+    enabled: true
+    # 在训练历史内筛选，保留min(K,该用户训练交互数)条边；K=13约保留37.71%的训练边。
+    rebuild_k: 13
+    latent_diffusion_user_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-user-10261919.pt
+    latent_diffusion_bundle_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-bundle-10261919.pt
+    latent_diffusion_hidden_dim: 128
+    latent_diffusion_time_dim: 16
+    latent_diffusion_denoiser_layers: 2
+    latent_diffusion_dropout: 0.1
+    latent_diffusion_num_steps: 12
+    latent_diffusion_beta_start: 1.0e-4
+    latent_diffusion_beta_end: 0.02
+    latent_diffusion_set_loss_weight: 0.05
+    latent_diffusion_lr: 1.0e-3
+    latent_diffusion_weight_decay: 1.0e-5
+    latent_diffusion_batch_size: 1024
+    latent_diffusion_infer_batch_size: 256
+    latent_diffusion_reset_after_epoch: -1
+    latent_diffusion_reset_optimizer: false
+
+  # 用户已决定本阶段关闭：权重置0，其余字段仅保留接口结构，不生效、不参与搜参。
+  # 后续是否启用及采用何种非零权重，待其余参数调完后另行研究。
+  anchor_cl:
+    enabled: false
+    anchor_cl_lambda: 0.0
+    temp: 0.2
+    user_cl: true
+    bundle_cl: true
+    ub_ui_user_weight: 1.0
+    ub_bi_user_weight: 1.0
+    ub_ui_bundle_weight: 1.0
+    ub_bi_bundle_weight: 1.0
+
+  ui_bundle_user_agg_beta: 0.0
+  bi_user_bundle_agg_beta: 0.0
+
+Meal-L:
+  data_path: ./datasets
+  batch_size_train: 2048
+  batch_size_test: 2048
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  seed: 2026
+
+  aug_type: Noise
+  ed_interval: 1
+  embedding_sizes: [64]
+  num_layerss: [2]
+
+  # 融合及UB层系数参考Youshu，UI/BI层系数参考iFashion，采用较小的UB/UI扰动。
+  # 这些是按数据结构提出的迁移初值，不是作者给出的Meal-L配置或已验证优胜值。
+  UB_ratios: [0.05]
+  UI_ratios: [0.0]
+  BI_ratios: [0.1]
+  fusion_weights:
+    modal_weight: [0.35, 0.15, 0.5]
+    UB_layer: [0.7, 0.2, 0.1]
+    UI_layer: [0.3, 0.4, 0.3]
+    BI_layer: [0.5, 0.5, 0.0]
+
+  lrs: [1.0e-3]
+  l2_regs: [1.0e-5]
+  c_lambdas: [0.04]
+  c_temps: [0.2]
+  epochs: 150
+  test_interval: 5
+
+  latent_rebuild:
+    enabled: true
+    # 同样只筛选已有训练边；K=7约保留64.76%的训练边，保护短历史用户。
+    rebuild_k: 7
+    latent_diffusion_user_embedding_path: ./datasets/Meal-L_UB_emb/MealRec+L-user-10261921.pt
+    latent_diffusion_bundle_embedding_path: ./datasets/Meal-L_UB_emb/MealRec+L-bundle-10261921.pt
+    latent_diffusion_hidden_dim: 128
+    latent_diffusion_time_dim: 16
+    latent_diffusion_denoiser_layers: 2
+    latent_diffusion_dropout: 0.1
+    latent_diffusion_num_steps: 12
+    latent_diffusion_beta_start: 1.0e-4
+    latent_diffusion_beta_end: 0.02
+    latent_diffusion_set_loss_weight: 0.05
+    latent_diffusion_lr: 1.0e-3
+    latent_diffusion_weight_decay: 1.0e-5
+    latent_diffusion_batch_size: 1024
+    latent_diffusion_infer_batch_size: 256
+    latent_diffusion_reset_after_epoch: -1
+    latent_diffusion_reset_optimizer: false
+
+  # 与Meal-H保持同一阶段约束，当前不搜索任何融合前对比参数。
+  anchor_cl:
+    enabled: false
+    anchor_cl_lambda: 0.0
+    temp: 0.2
+    user_cl: true
+    bundle_cl: true
+    ub_ui_user_weight: 1.0
+    ub_bi_user_weight: 1.0
+    ub_ui_bundle_weight: 1.0
+    ub_bi_bundle_weight: 1.0
+
+  ui_bundle_user_agg_beta: 0.0
+  bi_user_bundle_agg_beta: 0.0

@@ -1,0 +1,77 @@
+# Paper reconstruction, NOT released author code or verified author-best settings.
+# Each dataset has a complete, independent set of engineering starting settings.
+# No tuning has been run.
+# All paths are relative to the project root, independent of shell cwd.
+Youshu:
+  data_path: ./datasets
+  embedding_size: 64
+  batch_size_train: 2048
+  batch_size_test: 256
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  lr: 0.001
+  adamw_weight_decay: 0.0  # Explicit L2 is already present in Eq. (20).
+  dropout: 0.2
+  gat_negative_slope: 0.2
+  k1: 4
+  diffusion_steps: 10
+  alpha_1: 4.0
+  lambda_1: 0.15
+  lambda_2: 0.0001
+  beta_start: 0.0001  # Positive endpoint; see README, finite first-step convention.
+  beta_end: 0.03
+  epochs: 100
+  test_interval: 5
+  seed: 0
+  num_workers: 0
+  graph_chunk_size: 256
+
+# These combine sensitivity-plot observations into INITIAL configurations;
+# the paper does not establish that they were jointly optimal.
+NetEase:
+  data_path: ./datasets
+  embedding_size: 64
+  batch_size_train: 2048
+  batch_size_test: 256
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  lr: 0.001
+  adamw_weight_decay: 0.0  # Explicit L2 is already present in Eq. (20).
+  dropout: 0.2
+  gat_negative_slope: 0.2
+  k1: 6
+  diffusion_steps: 15
+  alpha_1: 4.0
+  lambda_1: 0.15
+  lambda_2: 0.0001
+  beta_start: 0.0001  # Positive endpoint; see README, finite first-step convention.
+  beta_end: 0.03
+  epochs: 100
+  test_interval: 5
+  seed: 0
+  num_workers: 0
+  graph_chunk_size: 256
+
+iFashion:
+  data_path: ./datasets
+  embedding_size: 64
+  batch_size_train: 2048
+  batch_size_test: 256
+  topk: [10, 20, 40, 80]
+  neg_num: 1
+  lr: 0.001
+  adamw_weight_decay: 0.0  # Explicit L2 is already present in Eq. (20).
+  dropout: 0.2
+  gat_negative_slope: 0.2
+  k1: 8
+  diffusion_steps: 20
+  alpha_1: 8.0
+  lambda_1: 0.25
+  lambda_2: 0.0001
+  beta_start: 0.0001  # Positive endpoint; see README, finite first-step convention.
+  beta_end: 0.03
+  epochs: 100
+  test_interval: 5
+  seed: 0
+  num_workers: 0
+  graph_chunk_size: 256

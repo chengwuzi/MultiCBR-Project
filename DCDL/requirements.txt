@@ -1,0 +1,10 @@
+# PyTorch 2.0 is the paper's version; newer versions can evaluate restricted
+# checkpoints with weights_only=True. Install the appropriate CUDA build separately.
+torch>=2.0
+# Keep NumPy 1.x available for the paper's older PyTorch binaries.
+# Python 3.13+ requires a newer PyTorch/Python-compatible NumPy build instead.
+numpy>=1.24,<2.0; python_version < "3.13"
+numpy>=1.24; python_version >= "3.13"
+scipy>=1.10
+PyYAML>=6.0
+tensorboard>=2.12

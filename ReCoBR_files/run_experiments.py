@@ -493,6 +493,29 @@ def metric_field(rule):
     return "validation" if rule == CROSS_RULE else "test"
 
 
+def reference_hash_match(plan, path, historical, current):
+    """Accept identical text across LF/CRLF checkouts, with exact hash proof."""
+    if historical == current:
+        return None
+    path = Path(path)
+    stat = path.stat()
+    key = (str(path), historical, current, stat.st_size, stat.st_mtime_ns)
+    cache = plan.setdefault("_reference_line_ending_cache", {})
+    if key not in cache:
+        raw = path.read_bytes()
+        if hashlib.sha256(raw).hexdigest() != current:
+            raise ValueError(f"File changed after collecting fingerprints: {path}")
+        lf = raw.replace(b"\r\n", b"\n")
+        matches = [name for name, payload in (("LF", lf), ("CRLF", lf.replace(b"\n", b"\r\n")))
+                   if hashlib.sha256(payload).hexdigest() == historical]
+        if not matches:
+            raise ValueError(f"Result TXT content mismatch beyond LF/CRLF: {path} "
+                             f"(historical={historical}, current={current})")
+        cache[key] = {"historical_sha256": historical, "current_sha256": current,
+                      "historical_line_endings": matches[0]}
+    return copy.deepcopy(cache[key])
+
+
 def read_result_reference(item, round_, plan):
     """Read an explicitly requested historical TXT result, without its old artifacts.
 
@@ -558,17 +581,42 @@ def read_result_reference(item, round_, plan):
                                    "execution_block_sha256": hashlib.sha256(block.encode("utf-8")).hexdigest(),
                                    "artifacts_verified": False,
                                    "metric_precision": "validation @20 full precision; other metrics as printed"}}
-    record = cache[key]
+    record = copy.deepcopy(cache[key])
     actual = record["config"]
     if (any(record[k] != ref[k] for k in ("round_id", "experiment_id", "execution_id", "fingerprint"))
             or record["status"] != "SUCCESS" or record["dataset"] != round_["dataset"]
             or actual.get("dataset") != round_["dataset"] or actual.get("model") != "ReCoBR"
-            or record["selection_rule"] != RULE or actual.get("selection_rule") != RULE
-            or any(record["sources"].get(key) != plan["sources"][key] for key in SCIENTIFIC_SOURCES)
-            or record["data_files"] != round_["data_files"]):
-        raise ValueError("Result TXT identity, source, data or protocol mismatch")
+            or record["selection_rule"] != RULE or actual.get("selection_rule") != RULE):
+        raise ValueError("Result TXT identity or protocol mismatch")
+    conversions = {}
+    for name in sorted(SCIENTIFIC_SOURCES):
+        proof = reference_hash_match(plan, SOURCE_PATHS[name], record["sources"].get(name), plan["sources"][name])
+        if proof:
+            conversions[name] = proof
+    if set(record["data_files"]) != set(round_["data_files"]):
+        raise ValueError("Result TXT data file set mismatch")
+    directory = resolve_path(item["template_config"]["data_path"]) / round_["dataset"]
+    for name, current in round_["data_files"].items():
+        historical = record["data_files"][name]
+        if name in EMBEDDING_KEYS:
+            # Pretrained .pt inputs are binary; no text conversion is allowed.
+            if historical != current:
+                raise ValueError(f"Result TXT pretrained embedding mismatch: {name}")
+        else:
+            proof = reference_hash_match(plan, directory / name, historical, current)
+            if proof:
+                conversions[name] = proof
+    if conversions:
+        record["reference_evidence"]["line_ending_conversion"] = conversions
     for k, value in item["template_config"].items():
         if k == "data_path" and ref.get("allow_data_path_relocation", False):
+            continue
+        if k == "latent_rebuild" and ref.get("allow_data_path_relocation", False):
+            # Dataset and binary embedding hashes above prove input identity.
+            original = {name: v for name, v in actual[k].items() if name not in EMBEDDING_KEYS}
+            expected = {name: v for name, v in value.items() if name not in EMBEDDING_KEYS}
+            if original != expected:
+                raise ValueError("Result TXT configuration mismatch: latent_rebuild")
             continue
         if k not in actual or actual[k] != value:
             raise ValueError(f"Result TXT configuration mismatch: {k}")

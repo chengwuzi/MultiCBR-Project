@@ -4173,3 +4173,1424 @@ rounds:
     - fusion_fine_bi_to_ub
     - fusion_fine_bi_to_ui
   final_candidates: *id001
+
+- id: meal_h_round_02
+  dataset: Meal-H
+  note: 第二轮34个新实验加1个历史对照：l2_reg(4)→扩散噪声上限(4)→低UB融合比例(6)→BI层融合(4)→BI扰动(4)→UI层融合(4)→UI扰动(4)→融合后温度(4)。首先搜索l2_reg；噪声上限安排在融合前，避免UB=0后无效搜扩散。候选依据当前机制及Meal-H实测自主设计，不受旧论文实验或图表网格约束。各阶段保留累计优胜，全部前置成功后完整继承，仅覆盖当前参数。固定150轮、seed=2026、K=13、c_lambda=0.1；扩散开启、融合前对比关闭、SetLoss权重0.05不搜。按未舍入验证Recall@20优先、相同再比验证NDCG@20，完全平局保留较早对照；测试仅报告。
+  selection_rule: validation_recall20_then_ndcg20
+  overrides:
+    data_path: ./datasets
+    batch_size_train: 2048
+    batch_size_test: 2048
+    topk:
+    - 10
+    - 20
+    - 40
+    - 80
+    neg_num: 1
+    seed: 2026
+    aug_type: Noise
+    ed_interval: 1
+    embedding_sizes:
+    - 64
+    num_layerss:
+    - 2
+    UB_ratios:
+    - 0.05
+    UI_ratios:
+    - 0.0
+    BI_ratios:
+    - 0.2
+    fusion_weights:
+      modal_weight:
+      - 0.05
+      - 0.35
+      - 0.6
+      UB_layer:
+      - 0.5
+      - 0.5
+      - 0.0
+      UI_layer:
+      - 0.3
+      - 0.4
+      - 0.3
+      BI_layer:
+      - 0.5
+      - 0.5
+      - 0.0
+    lrs:
+    - 0.001
+    l2_regs:
+    - 1.0e-05
+    c_lambdas:
+    - 0.1
+    c_temps:
+    - 0.2
+    epochs: 150
+    test_interval: 5
+    latent_rebuild:
+      enabled: true
+      rebuild_k: 13
+      latent_diffusion_user_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-user-10261919.pt
+      latent_diffusion_bundle_embedding_path: ./datasets/Meal-H_UB_emb/MealRec+H-bundle-10261919.pt
+      latent_diffusion_hidden_dim: 128
+      latent_diffusion_time_dim: 16
+      latent_diffusion_denoiser_layers: 2
+      latent_diffusion_dropout: 0.1
+      latent_diffusion_num_steps: 12
+      latent_diffusion_beta_start: 0.0001
+      latent_diffusion_beta_end: 0.02
+      latent_diffusion_set_loss_weight: 0.05
+      latent_diffusion_lr: 0.001
+      latent_diffusion_weight_decay: 1.0e-05
+      latent_diffusion_batch_size: 1024
+      latent_diffusion_infer_batch_size: 256
+      latent_diffusion_reset_after_epoch: -1
+      latent_diffusion_reset_optimizer: false
+    anchor_cl:
+      enabled: false
+      anchor_cl_lambda: 0.0
+      temp: 0.2
+      user_cl: true
+      bundle_cl: true
+      ub_ui_user_weight: 1.0
+      ub_bi_user_weight: 1.0
+      ub_ui_bundle_weight: 1.0
+      ub_bi_bundle_weight: 1.0
+    ui_bundle_user_agg_beta: 0.0
+    bi_user_bundle_agg_beta: 0.0
+  experiments:
+  - id: baseline_best
+    note: 复用首轮验证优胜fusion_fine_ub_to_ui，不重复训练。直接核对指定TXT完整执行块、未舍入验证指标、源码、数据及预训练嵌入；旧检查点不在本次复核范围，引用证据如实保留。
+    overrides: {}
+    reference:
+      round_id: meal_h_round_01
+      experiment_id: fusion_fine_ub_to_ui
+      execution_id: 20261026T172912_81c8dcda
+      fingerprint: 150da9d28c9f0c5b58df75dfbb72270f3dbc756cb4ae16770ac0e82c2d516296
+      allow_data_path_relocation: true
+      result_file: ReCoBR_files/Meal-H/搜参结果.txt
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: l2_1e6
+    note: 推荐模型正则先搜：围绕初值1e-5覆盖更弱、更强约束；不改扩散优化器weight_decay。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      l2_regs:
+      - 1.0e-06
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: l2_5e6
+    note: 推荐模型正则先搜：围绕初值1e-5覆盖更弱、更强约束；不改扩散优化器weight_decay。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      l2_regs:
+      - 5.0e-06
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: l2_5e5
+    note: 推荐模型正则先搜：围绕初值1e-5覆盖更弱、更强约束；不改扩散优化器weight_decay。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      l2_regs:
+      - 5.0e-05
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: l2_1e4
+    note: 推荐模型正则先搜：围绕初值1e-5覆盖更弱、更强约束；不改扩散优化器weight_decay。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      l2_regs:
+      - 0.0001
+    inherit_best:
+      candidates:
+      - baseline_best
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: beta_end_0002
+    note: 扩散噪声上限：固定12步和beta_start=1e-4，检查弱、中强扰动；在融合搜索之前执行，保证UB权重仍为0.05，扩散有有效作用路径。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      latent_rebuild:
+        latent_diffusion_beta_end: 0.002
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: beta_end_0008
+    note: 扩散噪声上限：固定12步和beta_start=1e-4，检查弱、中强扰动；在融合搜索之前执行，保证UB权重仍为0.05，扩散有有效作用路径。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      latent_rebuild:
+        latent_diffusion_beta_end: 0.008
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: beta_end_005
+    note: 扩散噪声上限：固定12步和beta_start=1e-4，检查弱、中强扰动；在融合搜索之前执行，保证UB权重仍为0.05，扩散有有效作用路径。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      latent_rebuild:
+        latent_diffusion_beta_end: 0.05
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: beta_end_010
+    note: 扩散噪声上限：固定12步和beta_start=1e-4，检查弱、中强扰动；在融合搜索之前执行，保证UB权重仍为0.05，扩散有有效作用路径。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      latent_rebuild:
+        latent_diffusion_beta_end: 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: fusion_ub0025_ui0375
+    note: 沿首轮降低UB权重的上升方向补6组[UB,UI,BI]比例。UB=0是边界对照：当前融合前对比关闭且额外聚合beta均为0，此时重建UB图不影响最终推荐表示，不能将收益归因于扩散。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        modal_weight:
+        - 0.025
+        - 0.375
+        - 0.6
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: fusion_ub0_ui040
+    note: 沿首轮降低UB权重的上升方向补6组[UB,UI,BI]比例。UB=0是边界对照：当前融合前对比关闭且额外聚合beta均为0，此时重建UB图不影响最终推荐表示，不能将收益归因于扩散。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        modal_weight:
+        - 0.0
+        - 0.4
+        - 0.6
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: fusion_ub0025_ui0325
+    note: 沿首轮降低UB权重的上升方向补6组[UB,UI,BI]比例。UB=0是边界对照：当前融合前对比关闭且额外聚合beta均为0，此时重建UB图不影响最终推荐表示，不能将收益归因于扩散。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        modal_weight:
+        - 0.025
+        - 0.325
+        - 0.65
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: fusion_ub0_ui035
+    note: 沿首轮降低UB权重的上升方向补6组[UB,UI,BI]比例。UB=0是边界对照：当前融合前对比关闭且额外聚合beta均为0，此时重建UB图不影响最终推荐表示，不能将收益归因于扩散。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        modal_weight:
+        - 0.0
+        - 0.35
+        - 0.65
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: fusion_ub0025_ui030
+    note: 沿首轮降低UB权重的上升方向补6组[UB,UI,BI]比例。UB=0是边界对照：当前融合前对比关闭且额外聚合beta均为0，此时重建UB图不影响最终推荐表示，不能将收益归因于扩散。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        modal_weight:
+        - 0.025
+        - 0.3
+        - 0.675
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: fusion_ub0_ui030
+    note: 沿首轮降低UB权重的上升方向补6组[UB,UI,BI]比例。UB=0是边界对照：当前融合前对比关闭且额外聚合beta均为0，此时重建UB图不影响最终推荐表示，不能将收益归因于扩散。
+      本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        modal_weight:
+        - 0.0
+        - 0.3
+        - 0.7
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_layer_initial
+    note: BI层融合：初值[0.5,0.5,0]未纳入二阶输出，分别检查初始层、一阶和二阶偏重；保持传播层数为2。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        BI_layer:
+        - 0.7
+        - 0.3
+        - 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_layer_onehop
+    note: BI层融合：初值[0.5,0.5,0]未纳入二阶输出，分别检查初始层、一阶和二阶偏重；保持传播层数为2。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        BI_layer:
+        - 0.3
+        - 0.7
+        - 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_layer_mixed
+    note: BI层融合：初值[0.5,0.5,0]未纳入二阶输出，分别检查初始层、一阶和二阶偏重；保持传播层数为2。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        BI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_layer_deep
+    note: BI层融合：初值[0.5,0.5,0]未纳入二阶输出，分别检查初始层、一阶和二阶偏重；保持传播层数为2。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        BI_layer:
+        - 0.1
+        - 0.3
+        - 0.6
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_noise_000
+    note: BI表示扰动：初值0.2，覆盖无扰动、较弱及较强幅度；作用于BI传播及UI视图组合物品聚合，Noise模式下不是删边概率。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      BI_ratios:
+      - 0.0
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_noise_010
+    note: BI表示扰动：初值0.2，覆盖无扰动、较弱及较强幅度；作用于BI传播及UI视图组合物品聚合，Noise模式下不是删边概率。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      BI_ratios:
+      - 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_noise_030
+    note: BI表示扰动：初值0.2，覆盖无扰动、较弱及较强幅度；作用于BI传播及UI视图组合物品聚合，Noise模式下不是删边概率。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      BI_ratios:
+      - 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: bi_noise_050
+    note: BI表示扰动：初值0.2，覆盖无扰动、较弱及较强幅度；作用于BI传播及UI视图组合物品聚合，Noise模式下不是删边概率。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      BI_ratios:
+      - 0.5
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_layer_initial
+    note: UI层融合：初值[0.3,0.4,0.3]，检查初始、一阶、二阶偏重及均衡；每组非负、总和为1。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        UI_layer:
+        - 0.6
+        - 0.3
+        - 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_layer_onehop
+    note: UI层融合：初值[0.3,0.4,0.3]，检查初始、一阶、二阶偏重及均衡；每组非负、总和为1。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        UI_layer:
+        - 0.2
+        - 0.6
+        - 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_layer_deep
+    note: UI层融合：初值[0.3,0.4,0.3]，检查初始、一阶、二阶偏重及均衡；每组非负、总和为1。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        UI_layer:
+        - 0.2
+        - 0.3
+        - 0.5
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_layer_equal
+    note: UI层融合：初值[0.3,0.4,0.3]，检查初始、一阶、二阶偏重及均衡；每组非负、总和为1。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      fusion_weights:
+        UI_layer:
+        - 0.3333333333333333
+        - 0.3333333333333333
+        - 0.3333333333333333
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_noise_0025
+    note: UI表示扰动：对照幅度为0，检查从小到中等幅度；作用于UI传播及BI视图用户物品聚合，0仅表示不加扰动。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      UI_ratios:
+      - 0.025
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_noise_005
+    note: UI表示扰动：对照幅度为0，检查从小到中等幅度；作用于UI传播及BI视图用户物品聚合，0仅表示不加扰动。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      UI_ratios:
+      - 0.05
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_noise_010
+    note: UI表示扰动：对照幅度为0，检查从小到中等幅度；作用于UI传播及BI视图用户物品聚合，0仅表示不加扰动。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      UI_ratios:
+      - 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: ui_noise_020
+    note: UI表示扰动：对照幅度为0，检查从小到中等幅度；作用于UI传播及BI视图用户物品聚合，0仅表示不加扰动。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      UI_ratios:
+      - 0.2
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: temp_005
+    note: 融合后对比温度：初值0.2，覆盖更尖锐、更平滑的相似度分布；固定c_lambda=0.1，不调整融合前对比温度。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      c_temps:
+      - 0.05
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      - ui_noise_0025
+      - ui_noise_005
+      - ui_noise_010
+      - ui_noise_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: temp_010
+    note: 融合后对比温度：初值0.2，覆盖更尖锐、更平滑的相似度分布；固定c_lambda=0.1，不调整融合前对比温度。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      c_temps:
+      - 0.1
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      - ui_noise_0025
+      - ui_noise_005
+      - ui_noise_010
+      - ui_noise_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: temp_030
+    note: 融合后对比温度：初值0.2，覆盖更尖锐、更平滑的相似度分布；固定c_lambda=0.1，不调整融合前对比温度。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      c_temps:
+      - 0.3
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      - ui_noise_0025
+      - ui_noise_005
+      - ui_noise_010
+      - ui_noise_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  - id: temp_050
+    note: 融合后对比温度：初值0.2，覆盖更尖锐、更平滑的相似度分布；固定c_lambda=0.1，不调整融合前对比温度。 本网格按当前实现和Meal-H结果设计，非旧论文网格约束；固定150轮、seed=2026。全部前置候选有效成功后继承完整验证优胜，仅覆盖本参数；保留此前优胜，不以测试选参。
+    overrides:
+      c_temps:
+      - 0.5
+    inherit_best:
+      candidates:
+      - baseline_best
+      - l2_1e6
+      - l2_5e6
+      - l2_5e5
+      - l2_1e4
+      - beta_end_0002
+      - beta_end_0008
+      - beta_end_005
+      - beta_end_010
+      - fusion_ub0025_ui0375
+      - fusion_ub0_ui040
+      - fusion_ub0025_ui0325
+      - fusion_ub0_ui035
+      - fusion_ub0025_ui030
+      - fusion_ub0_ui030
+      - bi_layer_initial
+      - bi_layer_onehop
+      - bi_layer_mixed
+      - bi_layer_deep
+      - bi_noise_000
+      - bi_noise_010
+      - bi_noise_030
+      - bi_noise_050
+      - ui_layer_initial
+      - ui_layer_onehop
+      - ui_layer_deep
+      - ui_layer_equal
+      - ui_noise_0025
+      - ui_noise_005
+      - ui_noise_010
+      - ui_noise_020
+      rule: validation_recall20_then_ndcg20
+    status: PENDING
+    success: false
+    fingerprint: null
+    resolved_config: null
+    dependency_selection: null
+    blocked_by: []
+    execution_ids: []
+  stages:
+  - id: l2_reg
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+  - id: diffusion_beta_end
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+  - id: fusion_low_ub
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+    - fusion_ub0025_ui0375
+    - fusion_ub0_ui040
+    - fusion_ub0025_ui0325
+    - fusion_ub0_ui035
+    - fusion_ub0025_ui030
+    - fusion_ub0_ui030
+  - id: bi_layer
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+    - fusion_ub0025_ui0375
+    - fusion_ub0_ui040
+    - fusion_ub0025_ui0325
+    - fusion_ub0_ui035
+    - fusion_ub0025_ui030
+    - fusion_ub0_ui030
+    - bi_layer_initial
+    - bi_layer_onehop
+    - bi_layer_mixed
+    - bi_layer_deep
+  - id: bi_noise
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+    - fusion_ub0025_ui0375
+    - fusion_ub0_ui040
+    - fusion_ub0025_ui0325
+    - fusion_ub0_ui035
+    - fusion_ub0025_ui030
+    - fusion_ub0_ui030
+    - bi_layer_initial
+    - bi_layer_onehop
+    - bi_layer_mixed
+    - bi_layer_deep
+    - bi_noise_000
+    - bi_noise_010
+    - bi_noise_030
+    - bi_noise_050
+  - id: ui_layer
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+    - fusion_ub0025_ui0375
+    - fusion_ub0_ui040
+    - fusion_ub0025_ui0325
+    - fusion_ub0_ui035
+    - fusion_ub0025_ui030
+    - fusion_ub0_ui030
+    - bi_layer_initial
+    - bi_layer_onehop
+    - bi_layer_mixed
+    - bi_layer_deep
+    - bi_noise_000
+    - bi_noise_010
+    - bi_noise_030
+    - bi_noise_050
+    - ui_layer_initial
+    - ui_layer_onehop
+    - ui_layer_deep
+    - ui_layer_equal
+  - id: ui_noise
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+    - fusion_ub0025_ui0375
+    - fusion_ub0_ui040
+    - fusion_ub0025_ui0325
+    - fusion_ub0_ui035
+    - fusion_ub0025_ui030
+    - fusion_ub0_ui030
+    - bi_layer_initial
+    - bi_layer_onehop
+    - bi_layer_mixed
+    - bi_layer_deep
+    - bi_noise_000
+    - bi_noise_010
+    - bi_noise_030
+    - bi_noise_050
+    - ui_layer_initial
+    - ui_layer_onehop
+    - ui_layer_deep
+    - ui_layer_equal
+    - ui_noise_0025
+    - ui_noise_005
+    - ui_noise_010
+    - ui_noise_020
+  - id: temperature
+    candidates:
+    - baseline_best
+    - l2_1e6
+    - l2_5e6
+    - l2_5e5
+    - l2_1e4
+    - beta_end_0002
+    - beta_end_0008
+    - beta_end_005
+    - beta_end_010
+    - fusion_ub0025_ui0375
+    - fusion_ub0_ui040
+    - fusion_ub0025_ui0325
+    - fusion_ub0_ui035
+    - fusion_ub0025_ui030
+    - fusion_ub0_ui030
+    - bi_layer_initial
+    - bi_layer_onehop
+    - bi_layer_mixed
+    - bi_layer_deep
+    - bi_noise_000
+    - bi_noise_010
+    - bi_noise_030
+    - bi_noise_050
+    - ui_layer_initial
+    - ui_layer_onehop
+    - ui_layer_deep
+    - ui_layer_equal
+    - ui_noise_0025
+    - ui_noise_005
+    - ui_noise_010
+    - ui_noise_020
+    - temp_005
+    - temp_010
+    - temp_030
+    - temp_050
+  final_candidates:
+  - baseline_best
+  - l2_1e6
+  - l2_5e6
+  - l2_5e5
+  - l2_1e4
+  - beta_end_0002
+  - beta_end_0008
+  - beta_end_005
+  - beta_end_010
+  - fusion_ub0025_ui0375
+  - fusion_ub0_ui040
+  - fusion_ub0025_ui0325
+  - fusion_ub0_ui035
+  - fusion_ub0025_ui030
+  - fusion_ub0_ui030
+  - bi_layer_initial
+  - bi_layer_onehop
+  - bi_layer_mixed
+  - bi_layer_deep
+  - bi_noise_000
+  - bi_noise_010
+  - bi_noise_030
+  - bi_noise_050
+  - ui_layer_initial
+  - ui_layer_onehop
+  - ui_layer_deep
+  - ui_layer_equal
+  - ui_noise_0025
+  - ui_noise_005
+  - ui_noise_010
+  - ui_noise_020
+  - temp_005
+  - temp_010
+  - temp_030
+  - temp_050

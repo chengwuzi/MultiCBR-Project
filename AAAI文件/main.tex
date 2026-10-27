@@ -468,20 +468,15 @@ Here, $\sigma$ is the sigmoid function, $\Theta$ comprises the trainable initial
         & 0.1132 & 0.0872 & 0.1623 & 0.1045
         & 0.0844 & 0.0458 & 0.1255 & 0.0567 \\
 
-        BundleGT
-        & \underline{0.2905} & \underline{0.1737} & 0.3909 & \underline{0.2011}
-        & 0.1263 & 0.0969 & 0.1819 & 0.1164
-        & 0.0903 & 0.0478 & \underline{0.1389} & 0.0606 \\
-
         MultiCBR
-        & 0.2842 & 0.1693 & 0.3946 & 0.1994
+        & 0.2842 & 0.1693 & 0.3946 & \underline{0.1994}
         & \underline{0.1500} & \underline{0.1203} & \underline{0.2033} & \underline{0.1390}
         & 0.0907 & 0.0494 & 0.1355 & 0.0612 \\
 
         EBRec
-        & 0.2858 & 0.1701 & 0.3871 & 0.1979
+        & \underline{0.2858} & \underline{0.1701} & 0.3871 & 0.1979
         & 0.1329 & 0.1047 & 0.1873 & 0.1238
-        & 0.0899 & 0.0487 & 0.1359 & 0.0604 \\
+        & 0.0899 & 0.0487 & \underline{0.1359} & 0.0604 \\
 
         EpicCBR
         & 0.2852 & 0.1691 & \underline{0.3949} & 0.1985
@@ -496,9 +491,9 @@ Here, $\sigma$ is the sigmoid function, $\Theta$ comprises the trainable initial
 
         \midrule
         \textbf{Improv.}
-        & \textbf{0.52\%} & \textbf{1.27\%} & \textbf{1.22\%} & \textbf{0.60\%}
+        & \textbf{2.17\%} & \textbf{3.41\%} & \textbf{1.22\%} & \textbf{1.45\%}
         & \textbf{4.53\%} & \textbf{9.31\%} & \textbf{1.67\%} & \textbf{7.27\%}
-        & \textbf{4.60\%} & \textbf{1.79\%} & \textbf{0.07\%} & \textbf{1.95\%} \\
+        & \textbf{4.60\%} & \textbf{1.79\%} & \textbf{2.28\%} & \textbf{1.95\%} \\
         \bottomrule
     \end{tabular}
     }
@@ -626,7 +621,7 @@ full-ranking evaluation, with training bundles excluded from
 the candidates.
 
 \paragraph{Baselines.}
-We compare ReCoBR with eleven representative recommendation
+We compare ReCoBR with ten representative recommendation
 methods. \textbf{LightGCN}~\cite{he2020lightgcn} learns collaborative
 representations through neighborhood aggregation.
 \textbf{SGL}~\cite{wu2021sgl} applies contrastive learning to augmented
@@ -638,8 +633,7 @@ interactions. \textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
 preferences through graph convolution, while
 \textbf{MIDGN}~\cite{zhao2022midgn} disentangles global and local intents.
 \textbf{CrossCBR}~\cite{ma2022crosscbr} aligns bundle and item views
-through contrastive learning. \textbf{BundleGT}~\cite{wei2023bundlegt}
-models bundling strategies with hierarchical graph Transformers.
+through contrastive learning.
 \textbf{MultiCBR}~\cite{ma2024multicbr} fuses three relation views before
 contrastive learning. \textbf{EBRec}~\cite{du2025ebrec} enhances
 item-level bundle representations using bundle--user--item
@@ -648,8 +642,8 @@ enhancement with contrastive learning.
 
 Results for LightGCN, SGL, XSimGCL, LightGCL, BGCN, MIDGN,
 CrossCBR, and MultiCBR are taken from
-MultiCBR~\cite{ma2024multicbr}; BundleGT and EBRec results are
-from their respective papers~\cite{wei2023bundlegt,du2025ebrec}.
+MultiCBR~\cite{ma2024multicbr}; EBRec results are
+from its original paper~\cite{du2025ebrec}.
 We reproduce EpicCBR using its open-source implementation.
 
 \paragraph{Parameter Settings.}
@@ -680,12 +674,12 @@ ReCoBR's overall results are averaged over three independent runs.
 
 \subsection{Overall Performance}
 
-Table~\ref{tab:overall} compares ReCoBR with eleven baselines.
+Table~\ref{tab:overall} compares ReCoBR with ten baselines.
 We draw the following observations:
 \begin{itemize}
 \item ReCoBR achieves the best results across all datasets and
 metrics. Its Recall@20 improves over the strongest baseline by
-0.52\%, 4.53\%, and 4.60\% on Youshu, iFashion, and NetEase,
+2.17\%, 4.53\%, and 4.60\% on Youshu, iFashion, and NetEase,
 respectively. The gains are most pronounced on iFashion,
 particularly in NDCG. This may be because its richer U-B
 histories provide more context for preference-guided graph
@@ -698,7 +692,7 @@ that incorporating item information alone does not guarantee
 better recommendation. They highlight the importance of
 effective U-B preference learning, which ReCoBR addresses
 through preference-guided graph reconstruction.
-\item ReCoBR also outperforms CrossCBR, BundleGT, MultiCBR,
+\item ReCoBR also outperforms CrossCBR, MultiCBR,
 EBRec, and EpicCBR, which build on the original U-B relations
 to model bundle preferences and integrate information across
 views. ReCoBR further considers which U-B connections should

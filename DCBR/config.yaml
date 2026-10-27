@@ -39,18 +39,18 @@ iFashion:
   lambda_2: 1.0e-6
   epochs: 50
 
-# Youshu工程配置；初始来源为作者MealRec+L，现按已完成历史的完整精度验证指标修正。
+# Youshu工程配置；初始来源为作者MealRec+L，现更新为第四轮补搜的完整精度验证优胜。
 # 选参：验证Recall@20优先，完全相同再比验证NDCG@20；训练内仍用双指标同时严格提高选epoch。
-# 历史验证优胜：youshu_round_02 / tau_010；不是仅指最近K搜索轮次优胜。
-# EXECUTION_ID: 20261025T115614_4738c53b；best_epoch=69，即第70轮；完整预算90轮、seed=0。
-# lambda_1=0.02、lambda_0=2000、K=1、omega=0.3、tau=0.1、gamma=(0.3,0.2)、lambda_2=1e-5。
-# 验证@20：Recall=0.27404046711304497，NDCG=0.13345297207176463。
-# 测试@10：Recall=0.18752272，NDCG=0.13085166；@20：Recall=0.26680041，NDCG=0.15351393。
-# 测试@40：Recall=0.37340280，NDCG=0.18216333；@80：Recall=0.48317435，NDCG=0.20760588。
-# 最新K轮k_11的验证Recall@20=0.2739693866303016，略低于上述历史配置；不混称全历史验证最优。
+# 当前优胜：youshu_round_04_coverage / xi_ub_deep。
+# EXECUTION_ID: 20261026T200541_a1f11783；best_epoch=79，即第80轮；完整预算90轮、seed=0。
+# lambda_1=0.02、lambda_0=2000、K=1、omega=0.4、tau=0.1、gamma=(0.3,0.2)、lambda_2=1e-6。
+# 验证@20：Recall=0.29031620109431766，NDCG=0.13892012038880322。
+# 测试@10：Recall=0.19314836，NDCG=0.13890391；@20：Recall=0.27407612，NDCG=0.16200406。
+# 测试@40：Recall=0.38557216，NDCG=0.19183618；@80：Recall=0.50144753，NDCG=0.21857306。
+# 本轮复用tau_010历史对照并新增49个实验，逐阶段完整继承优胜；测试指标只报告。
+# noise_scale_03虽有更高测试Recall@20，但未按验证规则获胜，不写为当前优胜。
 # 旧轮曾按测试指标作配置选择，其历史规则保留原样；本次补搜统一使用验证指标，测试只报告。
-# 新增youshu_round_04_coverage：复用该条TXT历史对照，新增49个实验，逐阶段完整继承优胜。
-# 当前值是本轮起点；搜索运行只回写计划状态和结果，不自动覆盖本基础配置。
+# 当前值经用户指令写回；既有轮次overrides和结果保留当时真实设置，不追溯改写。
 Youshu:
   data_path: ./datasets
   embedding_size: 64
@@ -78,27 +78,27 @@ Youshu:
   rebuild_k: 1
   lambda_0: 2000.0
   num_layers: 2
-  upsilon_UB: 0.05
-  upsilon_UI: 0.0
-  upsilon_BI: 0.1
+  upsilon_UB: 0.2
+  upsilon_UI: 0.025
+  upsilon_BI: 0.2
   xi_UB:
-  - 0.6
+  - 0.2
   - 0.3
-  - 0.1
+  - 0.5
   xi_UI:
   - 0.4
   - 0.6
   - 0.0
   xi_BI:
-  - 0.5
-  - 0.4
+  - 0.6
+  - 0.3
   - 0.1
-  omega: 0.3
+  omega: 0.4
   gamma_1: 0.3
   gamma_2: 0.2
   tau: 0.1
   lambda_1: 0.02
-  lambda_2: 1.0e-05
+  lambda_2: 1.0e-06
   epochs: 90
 
 # NetEase 初始配置：本工程综合设置，尚无正式实验结果，不是作者报告的 NetEase 配置。

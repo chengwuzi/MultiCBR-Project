@@ -1,4 +1,3 @@
-# Meal-H 独立搜参计划；配置定义和脚本管理的运行状态集中保存。
 version: 1
 base_config: ReCoBR_files/config.yaml
 work_dir: ReCoBR_files/Meal-H/log/tuning
@@ -100,8 +99,94 @@ rounds:
   - id: initial
     note: 无扩散初始对照；保留当前c_lambda、K字段及原融合比例。K此时不生效，不能复用为开启扩散后的K对照。
     overrides: {}
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.05
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection: null
+    blocked_by: []
+    execution_ids:
+    - 20261026T141535_71d93049
   - id: cl_001
     note: 关闭扩散，c_lambda=0.01；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
     overrides:
@@ -113,8 +198,108 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.01
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261026T141535_71d93049
+      winner_validation:
+        recall@20: 0.35203569784931754
+        ndcg@20: 0.230861296177332
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+    blocked_by: []
+    execution_ids:
+    - 20261026T142335_e5d88a69
   - id: cl_002
     note: 关闭扩散，c_lambda=0.02；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
     overrides:
@@ -126,8 +311,108 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.02
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261026T141535_71d93049
+      winner_validation:
+        recall@20: 0.35203569784931754
+        ndcg@20: 0.230861296177332
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+    blocked_by: []
+    execution_ids:
+    - 20261026T143154_524e3c3b
   - id: cl_004
     note: 关闭扩散，c_lambda=0.04；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
     overrides:
@@ -139,8 +424,108 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.04
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261026T141535_71d93049
+      winner_validation:
+        recall@20: 0.35203569784931754
+        ndcg@20: 0.230861296177332
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+    blocked_by: []
+    execution_ids:
+    - 20261026T144023_eec376f6
   - id: cl_010
     note: 关闭扩散，c_lambda=0.1；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
     overrides:
@@ -152,8 +537,108 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261026T141535_71d93049
+      winner_validation:
+        recall@20: 0.35203569784931754
+        ndcg@20: 0.230861296177332
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+    blocked_by: []
+    execution_ids:
+    - 20261026T144853_b3b115fa
   - id: cl_020
     note: 关闭扩散，c_lambda=0.2；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
     overrides:
@@ -165,8 +650,108 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.2
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261026T141535_71d93049
+      winner_validation:
+        recall@20: 0.35203569784931754
+        ndcg@20: 0.230861296177332
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+    blocked_by: []
+    execution_ids:
+    - 20261026T145713_72e5fdac
   - id: cl_040
     note: 关闭扩散，c_lambda=0.4；相对初值上下各三个候选。非零候选来自论文敏感性分析。固定初始融合比例及其他参数。
     overrides:
@@ -178,8 +763,108 @@ rounds:
       candidates:
       - initial
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.4
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: false
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: initial
+      winner_execution_id: 20261026T141535_71d93049
+      winner_validation:
+        recall@20: 0.35203569784931754
+        ndcg@20: 0.230861296177332
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+    blocked_by: []
+    execution_ids:
+    - 20261026T150607_5d2a0487
   - id: k_01
     note: 开启扩散，K=1；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
     overrides:
@@ -196,8 +881,144 @@ rounds:
       - cl_020
       - cl_040
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 1
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: cl_010
+      winner_execution_id: 20261026T144853_b3b115fa
+      winner_validation:
+        recall@20: 0.35601712200728064
+        ndcg@20: 0.23707765398775973
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+      - experiment_id: cl_001
+        execution_id: 20261026T142335_e5d88a69
+        fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+        validation:
+          recall@20: 0.2547247470953526
+          ndcg@20: 0.1534111636808549
+      - experiment_id: cl_002
+        execution_id: 20261026T143154_524e3c3b
+        fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+        validation:
+          recall@20: 0.30855975163710214
+          ndcg@20: 0.19420799842247596
+      - experiment_id: cl_004
+        execution_id: 20261026T144023_eec376f6
+        fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+        validation:
+          recall@20: 0.34563672026103837
+          ndcg@20: 0.22361289917315982
+      - experiment_id: cl_010
+        execution_id: 20261026T144853_b3b115fa
+        fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+        validation:
+          recall@20: 0.35601712200728064
+          ndcg@20: 0.23707765398775973
+      - experiment_id: cl_020
+        execution_id: 20261026T145713_72e5fdac
+        fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+        validation:
+          recall@20: 0.3477645860532024
+          ndcg@20: 0.22632072037242346
+      - experiment_id: cl_040
+        execution_id: 20261026T150607_5d2a0487
+        fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+        validation:
+          recall@20: 0.2465861866054653
+          ndcg@20: 0.1521145308787163
+    blocked_by: []
+    execution_ids:
+    - 20261026T151512_3237459c
   - id: k_03
     note: 开启扩散，K=3；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
     overrides:
@@ -214,8 +1035,144 @@ rounds:
       - cl_020
       - cl_040
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 3
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: cl_010
+      winner_execution_id: 20261026T144853_b3b115fa
+      winner_validation:
+        recall@20: 0.35601712200728064
+        ndcg@20: 0.23707765398775973
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+      - experiment_id: cl_001
+        execution_id: 20261026T142335_e5d88a69
+        fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+        validation:
+          recall@20: 0.2547247470953526
+          ndcg@20: 0.1534111636808549
+      - experiment_id: cl_002
+        execution_id: 20261026T143154_524e3c3b
+        fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+        validation:
+          recall@20: 0.30855975163710214
+          ndcg@20: 0.19420799842247596
+      - experiment_id: cl_004
+        execution_id: 20261026T144023_eec376f6
+        fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+        validation:
+          recall@20: 0.34563672026103837
+          ndcg@20: 0.22361289917315982
+      - experiment_id: cl_010
+        execution_id: 20261026T144853_b3b115fa
+        fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+        validation:
+          recall@20: 0.35601712200728064
+          ndcg@20: 0.23707765398775973
+      - experiment_id: cl_020
+        execution_id: 20261026T145713_72e5fdac
+        fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+        validation:
+          recall@20: 0.3477645860532024
+          ndcg@20: 0.22632072037242346
+      - experiment_id: cl_040
+        execution_id: 20261026T150607_5d2a0487
+        fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+        validation:
+          recall@20: 0.2465861866054653
+          ndcg@20: 0.1521145308787163
+    blocked_by: []
+    execution_ids:
+    - 20261026T152522_6b9363ef
   - id: k_07
     note: 开启扩散，K=7；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
     overrides:
@@ -232,8 +1189,144 @@ rounds:
       - cl_020
       - cl_040
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 7
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: cl_010
+      winner_execution_id: 20261026T144853_b3b115fa
+      winner_validation:
+        recall@20: 0.35601712200728064
+        ndcg@20: 0.23707765398775973
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+      - experiment_id: cl_001
+        execution_id: 20261026T142335_e5d88a69
+        fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+        validation:
+          recall@20: 0.2547247470953526
+          ndcg@20: 0.1534111636808549
+      - experiment_id: cl_002
+        execution_id: 20261026T143154_524e3c3b
+        fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+        validation:
+          recall@20: 0.30855975163710214
+          ndcg@20: 0.19420799842247596
+      - experiment_id: cl_004
+        execution_id: 20261026T144023_eec376f6
+        fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+        validation:
+          recall@20: 0.34563672026103837
+          ndcg@20: 0.22361289917315982
+      - experiment_id: cl_010
+        execution_id: 20261026T144853_b3b115fa
+        fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+        validation:
+          recall@20: 0.35601712200728064
+          ndcg@20: 0.23707765398775973
+      - experiment_id: cl_020
+        execution_id: 20261026T145713_72e5fdac
+        fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+        validation:
+          recall@20: 0.3477645860532024
+          ndcg@20: 0.22632072037242346
+      - experiment_id: cl_040
+        execution_id: 20261026T150607_5d2a0487
+        fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+        validation:
+          recall@20: 0.2465861866054653
+          ndcg@20: 0.1521145308787163
+    blocked_by: []
+    execution_ids:
+    - 20261026T153529_1ff07dda
   - id: k_13
     note: 开启扩散，K=13；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
     overrides:
@@ -250,8 +1343,144 @@ rounds:
       - cl_020
       - cl_040
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: cl_010
+      winner_execution_id: 20261026T144853_b3b115fa
+      winner_validation:
+        recall@20: 0.35601712200728064
+        ndcg@20: 0.23707765398775973
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+      - experiment_id: cl_001
+        execution_id: 20261026T142335_e5d88a69
+        fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+        validation:
+          recall@20: 0.2547247470953526
+          ndcg@20: 0.1534111636808549
+      - experiment_id: cl_002
+        execution_id: 20261026T143154_524e3c3b
+        fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+        validation:
+          recall@20: 0.30855975163710214
+          ndcg@20: 0.19420799842247596
+      - experiment_id: cl_004
+        execution_id: 20261026T144023_eec376f6
+        fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+        validation:
+          recall@20: 0.34563672026103837
+          ndcg@20: 0.22361289917315982
+      - experiment_id: cl_010
+        execution_id: 20261026T144853_b3b115fa
+        fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+        validation:
+          recall@20: 0.35601712200728064
+          ndcg@20: 0.23707765398775973
+      - experiment_id: cl_020
+        execution_id: 20261026T145713_72e5fdac
+        fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+        validation:
+          recall@20: 0.3477645860532024
+          ndcg@20: 0.22632072037242346
+      - experiment_id: cl_040
+        execution_id: 20261026T150607_5d2a0487
+        fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+        validation:
+          recall@20: 0.2465861866054653
+          ndcg@20: 0.1521145308787163
+    blocked_by: []
+    execution_ids:
+    - 20261026T154611_56c5145d
   - id: k_19
     note: 开启扩散，K=19；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
     overrides:
@@ -268,8 +1497,144 @@ rounds:
       - cl_020
       - cl_040
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 19
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: cl_010
+      winner_execution_id: 20261026T144853_b3b115fa
+      winner_validation:
+        recall@20: 0.35601712200728064
+        ndcg@20: 0.23707765398775973
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+      - experiment_id: cl_001
+        execution_id: 20261026T142335_e5d88a69
+        fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+        validation:
+          recall@20: 0.2547247470953526
+          ndcg@20: 0.1534111636808549
+      - experiment_id: cl_002
+        execution_id: 20261026T143154_524e3c3b
+        fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+        validation:
+          recall@20: 0.30855975163710214
+          ndcg@20: 0.19420799842247596
+      - experiment_id: cl_004
+        execution_id: 20261026T144023_eec376f6
+        fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+        validation:
+          recall@20: 0.34563672026103837
+          ndcg@20: 0.22361289917315982
+      - experiment_id: cl_010
+        execution_id: 20261026T144853_b3b115fa
+        fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+        validation:
+          recall@20: 0.35601712200728064
+          ndcg@20: 0.23707765398775973
+      - experiment_id: cl_020
+        execution_id: 20261026T145713_72e5fdac
+        fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+        validation:
+          recall@20: 0.3477645860532024
+          ndcg@20: 0.22632072037242346
+      - experiment_id: cl_040
+        execution_id: 20261026T150607_5d2a0487
+        fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+        validation:
+          recall@20: 0.2465861866054653
+          ndcg@20: 0.1521145308787163
+    blocked_by: []
+    execution_ids:
+    - 20261026T155614_0ef6f0f6
   - id: k_35
     note: 开启扩散，K=35；完整继承无扩散阶段优胜c_lambda，再仅开启扩散并覆盖K。K=35为基于Meal-H训练历史分布补充的工程点，其余为论文分析范围内的粗搜子集。六个K均重新训练，之后保持扩散开启。
     overrides:
@@ -286,8 +1651,144 @@ rounds:
       - cl_020
       - cl_040
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 35
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: cl_010
+      winner_execution_id: 20261026T144853_b3b115fa
+      winner_validation:
+        recall@20: 0.35601712200728064
+        ndcg@20: 0.23707765398775973
+      candidates:
+      - experiment_id: initial
+        execution_id: 20261026T141535_71d93049
+        fingerprint: 815af3dfdbfc7dd99050899ad3973a67f91e7eca5753671522f08f1c4cff0a12
+        validation:
+          recall@20: 0.35203569784931754
+          ndcg@20: 0.230861296177332
+      - experiment_id: cl_001
+        execution_id: 20261026T142335_e5d88a69
+        fingerprint: 481ca659d2b32b6231f2e8cdf838a3905dd57e3cf4bdc00e639dc80fcdfd358e
+        validation:
+          recall@20: 0.2547247470953526
+          ndcg@20: 0.1534111636808549
+      - experiment_id: cl_002
+        execution_id: 20261026T143154_524e3c3b
+        fingerprint: 40506a0f4867bacb57f61810250302e4f3076e1dec70430df552c6c69c113c21
+        validation:
+          recall@20: 0.30855975163710214
+          ndcg@20: 0.19420799842247596
+      - experiment_id: cl_004
+        execution_id: 20261026T144023_eec376f6
+        fingerprint: 95c475e9c6407e8d333e4384b8704adc815f7e18485243e68849b522731581c0
+        validation:
+          recall@20: 0.34563672026103837
+          ndcg@20: 0.22361289917315982
+      - experiment_id: cl_010
+        execution_id: 20261026T144853_b3b115fa
+        fingerprint: b2f93f33d80fa2ef87645752faf6d2329a5e0e4c828718c70ff773312ec3543f
+        validation:
+          recall@20: 0.35601712200728064
+          ndcg@20: 0.23707765398775973
+      - experiment_id: cl_020
+        execution_id: 20261026T145713_72e5fdac
+        fingerprint: 30a14533b76ca0fcb6ebab5ac5aaa6104410a624467be2e38fc8815de4556e69
+        validation:
+          recall@20: 0.3477645860532024
+          ndcg@20: 0.22632072037242346
+      - experiment_id: cl_040
+        execution_id: 20261026T150607_5d2a0487
+        fingerprint: d213169eaf69e1fe680035a8756259b9afa88802436b44ff34c5a70cdb72d7da
+        validation:
+          recall@20: 0.2465861866054653
+          ndcg@20: 0.1521145308787163
+    blocked_by: []
+    execution_ids:
+    - 20261026T160605_9398e233
   - id: fusion_equal
     note: 融合粗搜：均衡；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -307,8 +1808,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.3333333333333333
+        - 0.3333333333333333
+        - 0.3333333333333333
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T161627_aeb1d036
   - id: fusion_ub
     note: 融合粗搜：偏重UB；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -328,8 +1959,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.6
+        - 0.2
+        - 0.2
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T162703_5f547a21
   - id: fusion_ui
     note: 融合粗搜：偏重UI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -349,8 +2110,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.2
+        - 0.6
+        - 0.2
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T163804_afea9dd4
   - id: fusion_bi
     note: 融合粗搜：偏重BI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -370,8 +2261,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.2
+        - 0.2
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T164707_67d756d5
   - id: fusion_ub_ui
     note: 融合粗搜：偏重UB和UI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -391,8 +2412,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.4
+        - 0.4
+        - 0.2
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T165648_861b67fd
   - id: fusion_ub_bi
     note: 融合粗搜：偏重UB和BI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -412,8 +2563,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.4
+        - 0.2
+        - 0.4
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T170702_b14e6ea7
   - id: fusion_ui_bi
     note: 融合粗搜：偏重UI和BI；权重顺序[UB,UI,BI]。完整继承K阶段优胜c_lambda和K，只修改三视图融合比例。七组为工程设计，K阶段优胜原比例继续参与对照。
     overrides:
@@ -433,8 +2714,138 @@ rounds:
       - k_19
       - k_35
       rule: validation_recall20_then_ndcg20
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.2
+        - 0.4
+        - 0.4
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+    blocked_by: []
+    execution_ids:
+    - 20261026T171806_877f0433
   - id: fusion_fine_ub_to_ui
     note: 融合细搜：从UB向UI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
     overrides:
@@ -460,8 +2871,193 @@ rounds:
       from: UB
       to: UI
       amount: 0.05
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 150da9d28c9f0c5b58df75dfbb72270f3dbc756cb4ae16770ac0e82c2d516296
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.05
+        - 0.35
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+      - experiment_id: fusion_equal
+        execution_id: 20261026T161627_aeb1d036
+        fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+        validation:
+          recall@20: 0.28888220074533044
+          ndcg@20: 0.1799601749652893
+      - experiment_id: fusion_ub
+        execution_id: 20261026T162703_5f547a21
+        fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+        validation:
+          recall@20: 0.24474056119100907
+          ndcg@20: 0.1582110984255844
+      - experiment_id: fusion_ui
+        execution_id: 20261026T163804_afea9dd4
+        fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+        validation:
+          recall@20: 0.33460101356135336
+          ndcg@20: 0.21513950877438384
+      - experiment_id: fusion_bi
+        execution_id: 20261026T164707_67d756d5
+        fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+        validation:
+          recall@20: 0.32394320136356103
+          ndcg@20: 0.20872674296115162
+      - experiment_id: fusion_ub_ui
+        execution_id: 20261026T165648_861b67fd
+        fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+        validation:
+          recall@20: 0.2801405200907659
+          ndcg@20: 0.1776949530887351
+      - experiment_id: fusion_ub_bi
+        execution_id: 20261026T170702_b14e6ea7
+        fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+        validation:
+          recall@20: 0.2702183946901249
+          ndcg@20: 0.17617121931728696
+      - experiment_id: fusion_ui_bi
+        execution_id: 20261026T171806_877f0433
+        fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+        validation:
+          recall@20: 0.33340513463783433
+          ndcg@20: 0.20745604065642959
+      fusion_adjustment:
+        transfer:
+          from: UB
+          to: UI
+          amount: 0.05
+        base_modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        resolved_modal_weight:
+        - 0.05
+        - 0.35
+        - 0.6
+    blocked_by: []
+    execution_ids:
+    - 20261026T172912_81c8dcda
   - id: fusion_fine_ub_to_bi
     note: 融合细搜：从UB向BI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
     overrides:
@@ -487,8 +3083,193 @@ rounds:
       from: UB
       to: BI
       amount: 0.05
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: bca48a1536dbf8189fefe2bad924a81a341fe9b03be490a718e19fea72a6e43d
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.05
+        - 0.3
+        - 0.65
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+      - experiment_id: fusion_equal
+        execution_id: 20261026T161627_aeb1d036
+        fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+        validation:
+          recall@20: 0.28888220074533044
+          ndcg@20: 0.1799601749652893
+      - experiment_id: fusion_ub
+        execution_id: 20261026T162703_5f547a21
+        fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+        validation:
+          recall@20: 0.24474056119100907
+          ndcg@20: 0.1582110984255844
+      - experiment_id: fusion_ui
+        execution_id: 20261026T163804_afea9dd4
+        fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+        validation:
+          recall@20: 0.33460101356135336
+          ndcg@20: 0.21513950877438384
+      - experiment_id: fusion_bi
+        execution_id: 20261026T164707_67d756d5
+        fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+        validation:
+          recall@20: 0.32394320136356103
+          ndcg@20: 0.20872674296115162
+      - experiment_id: fusion_ub_ui
+        execution_id: 20261026T165648_861b67fd
+        fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+        validation:
+          recall@20: 0.2801405200907659
+          ndcg@20: 0.1776949530887351
+      - experiment_id: fusion_ub_bi
+        execution_id: 20261026T170702_b14e6ea7
+        fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+        validation:
+          recall@20: 0.2702183946901249
+          ndcg@20: 0.17617121931728696
+      - experiment_id: fusion_ui_bi
+        execution_id: 20261026T171806_877f0433
+        fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+        validation:
+          recall@20: 0.33340513463783433
+          ndcg@20: 0.20745604065642959
+      fusion_adjustment:
+        transfer:
+          from: UB
+          to: BI
+          amount: 0.05
+        base_modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        resolved_modal_weight:
+        - 0.05
+        - 0.3
+        - 0.65
+    blocked_by: []
+    execution_ids:
+    - 20261026T173946_efab5799
   - id: fusion_fine_ui_to_ub
     note: 融合细搜：从UI向UB转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
     overrides:
@@ -514,8 +3295,193 @@ rounds:
       from: UI
       to: UB
       amount: 0.05
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: 4b356ce2d9cc9302e1eb2b081ee3b38c1cf1bbe91011bdcc13ab71603a4528c9
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.15
+        - 0.25
+        - 0.6
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+      - experiment_id: fusion_equal
+        execution_id: 20261026T161627_aeb1d036
+        fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+        validation:
+          recall@20: 0.28888220074533044
+          ndcg@20: 0.1799601749652893
+      - experiment_id: fusion_ub
+        execution_id: 20261026T162703_5f547a21
+        fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+        validation:
+          recall@20: 0.24474056119100907
+          ndcg@20: 0.1582110984255844
+      - experiment_id: fusion_ui
+        execution_id: 20261026T163804_afea9dd4
+        fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+        validation:
+          recall@20: 0.33460101356135336
+          ndcg@20: 0.21513950877438384
+      - experiment_id: fusion_bi
+        execution_id: 20261026T164707_67d756d5
+        fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+        validation:
+          recall@20: 0.32394320136356103
+          ndcg@20: 0.20872674296115162
+      - experiment_id: fusion_ub_ui
+        execution_id: 20261026T165648_861b67fd
+        fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+        validation:
+          recall@20: 0.2801405200907659
+          ndcg@20: 0.1776949530887351
+      - experiment_id: fusion_ub_bi
+        execution_id: 20261026T170702_b14e6ea7
+        fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+        validation:
+          recall@20: 0.2702183946901249
+          ndcg@20: 0.17617121931728696
+      - experiment_id: fusion_ui_bi
+        execution_id: 20261026T171806_877f0433
+        fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+        validation:
+          recall@20: 0.33340513463783433
+          ndcg@20: 0.20745604065642959
+      fusion_adjustment:
+        transfer:
+          from: UI
+          to: UB
+          amount: 0.05
+        base_modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        resolved_modal_weight:
+        - 0.15
+        - 0.25
+        - 0.6
+    blocked_by: []
+    execution_ids:
+    - 20261026T175050_f34247b0
   - id: fusion_fine_ui_to_bi
     note: 融合细搜：从UI向BI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
     overrides:
@@ -541,8 +3507,193 @@ rounds:
       from: UI
       to: BI
       amount: 0.05
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: ce73bb1e314610151cc9b3ad1d7ec441f79a1ffc2ca8faede472dcbd3ceb9cc6
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.25
+        - 0.65
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+      - experiment_id: fusion_equal
+        execution_id: 20261026T161627_aeb1d036
+        fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+        validation:
+          recall@20: 0.28888220074533044
+          ndcg@20: 0.1799601749652893
+      - experiment_id: fusion_ub
+        execution_id: 20261026T162703_5f547a21
+        fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+        validation:
+          recall@20: 0.24474056119100907
+          ndcg@20: 0.1582110984255844
+      - experiment_id: fusion_ui
+        execution_id: 20261026T163804_afea9dd4
+        fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+        validation:
+          recall@20: 0.33460101356135336
+          ndcg@20: 0.21513950877438384
+      - experiment_id: fusion_bi
+        execution_id: 20261026T164707_67d756d5
+        fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+        validation:
+          recall@20: 0.32394320136356103
+          ndcg@20: 0.20872674296115162
+      - experiment_id: fusion_ub_ui
+        execution_id: 20261026T165648_861b67fd
+        fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+        validation:
+          recall@20: 0.2801405200907659
+          ndcg@20: 0.1776949530887351
+      - experiment_id: fusion_ub_bi
+        execution_id: 20261026T170702_b14e6ea7
+        fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+        validation:
+          recall@20: 0.2702183946901249
+          ndcg@20: 0.17617121931728696
+      - experiment_id: fusion_ui_bi
+        execution_id: 20261026T171806_877f0433
+        fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+        validation:
+          recall@20: 0.33340513463783433
+          ndcg@20: 0.20745604065642959
+      fusion_adjustment:
+        transfer:
+          from: UI
+          to: BI
+          amount: 0.05
+        base_modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        resolved_modal_weight:
+        - 0.1
+        - 0.25
+        - 0.65
+    blocked_by: []
+    execution_ids:
+    - 20261026T180150_9dcbba22
   - id: fusion_fine_bi_to_ub
     note: 融合细搜：从BI向UB转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
     overrides:
@@ -568,8 +3719,193 @@ rounds:
       from: BI
       to: UB
       amount: 0.05
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: e7080207dd78128654bf0410704d7a2c2097776a943bd5697a9d0b1c1200ac66
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.15
+        - 0.3
+        - 0.55
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+      - experiment_id: fusion_equal
+        execution_id: 20261026T161627_aeb1d036
+        fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+        validation:
+          recall@20: 0.28888220074533044
+          ndcg@20: 0.1799601749652893
+      - experiment_id: fusion_ub
+        execution_id: 20261026T162703_5f547a21
+        fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+        validation:
+          recall@20: 0.24474056119100907
+          ndcg@20: 0.1582110984255844
+      - experiment_id: fusion_ui
+        execution_id: 20261026T163804_afea9dd4
+        fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+        validation:
+          recall@20: 0.33460101356135336
+          ndcg@20: 0.21513950877438384
+      - experiment_id: fusion_bi
+        execution_id: 20261026T164707_67d756d5
+        fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+        validation:
+          recall@20: 0.32394320136356103
+          ndcg@20: 0.20872674296115162
+      - experiment_id: fusion_ub_ui
+        execution_id: 20261026T165648_861b67fd
+        fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+        validation:
+          recall@20: 0.2801405200907659
+          ndcg@20: 0.1776949530887351
+      - experiment_id: fusion_ub_bi
+        execution_id: 20261026T170702_b14e6ea7
+        fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+        validation:
+          recall@20: 0.2702183946901249
+          ndcg@20: 0.17617121931728696
+      - experiment_id: fusion_ui_bi
+        execution_id: 20261026T171806_877f0433
+        fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+        validation:
+          recall@20: 0.33340513463783433
+          ndcg@20: 0.20745604065642959
+      fusion_adjustment:
+        transfer:
+          from: BI
+          to: UB
+          amount: 0.05
+        base_modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        resolved_modal_weight:
+        - 0.15
+        - 0.3
+        - 0.55
+    blocked_by: []
+    execution_ids:
+    - 20261026T181225_56871014
   - id: fusion_fine_bi_to_ui
     note: 融合细搜：从BI向UI转移0.05。六个实验围绕同一个粗搜优胜（含原比例对照）生成，不继承前一个细搜实验；c_lambda、K和扩散开启状态固定。
     overrides:
@@ -595,8 +3931,193 @@ rounds:
       from: BI
       to: UI
       amount: 0.05
-    status: PENDING
-    success: false
+    status: SUCCESS
+    success: true
+    fingerprint: caf9f4443441f6537704f48b90ef9e657cf5b741f6543d7de81a390449e9149b
+    resolved_config:
+      data_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets
+      batch_size_train: 2048
+      batch_size_test: 2048
+      topk:
+      - 10
+      - 20
+      - 40
+      - 80
+      neg_num: 1
+      seed: 2026
+      aug_type: Noise
+      ed_interval: 1
+      embedding_sizes:
+      - 64
+      num_layerss:
+      - 2
+      UB_ratios:
+      - 0.05
+      UI_ratios:
+      - 0.0
+      BI_ratios:
+      - 0.2
+      fusion_weights:
+        modal_weight:
+        - 0.1
+        - 0.35
+        - 0.55
+        UB_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+        UI_layer:
+        - 0.3
+        - 0.4
+        - 0.3
+        BI_layer:
+        - 0.5
+        - 0.5
+        - 0.0
+      lrs:
+      - 0.001
+      l2_regs:
+      - 1.0e-05
+      c_lambdas:
+      - 0.1
+      c_temps:
+      - 0.2
+      epochs: 150
+      test_interval: 5
+      latent_rebuild:
+        enabled: true
+        rebuild_k: 13
+        latent_diffusion_user_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-user-10261919.pt
+        latent_diffusion_bundle_embedding_path: C:\Users\admin\PycharmProjects\ReCoBR-TY\datasets\Meal-H_UB_emb\MealRec+H-bundle-10261919.pt
+        latent_diffusion_hidden_dim: 128
+        latent_diffusion_time_dim: 16
+        latent_diffusion_denoiser_layers: 2
+        latent_diffusion_dropout: 0.1
+        latent_diffusion_num_steps: 12
+        latent_diffusion_beta_start: 0.0001
+        latent_diffusion_beta_end: 0.02
+        latent_diffusion_set_loss_weight: 0.05
+        latent_diffusion_lr: 0.001
+        latent_diffusion_weight_decay: 1.0e-05
+        latent_diffusion_batch_size: 1024
+        latent_diffusion_infer_batch_size: 256
+        latent_diffusion_reset_after_epoch: -1
+        latent_diffusion_reset_optimizer: false
+      anchor_cl:
+        enabled: false
+        anchor_cl_lambda: 0.0
+        temp: 0.2
+        user_cl: true
+        bundle_cl: true
+        ub_ui_user_weight: 1.0
+        ub_bi_user_weight: 1.0
+        ub_ui_bundle_weight: 1.0
+        ub_bi_bundle_weight: 1.0
+      ui_bundle_user_agg_beta: 0.0
+      bi_user_bundle_agg_beta: 0.0
+    dependency_selection:
+      rule: validation_recall20_then_ndcg20
+      tie_break: first experiment in declared order
+      winner_experiment_id: k_13
+      winner_execution_id: 20261026T154611_56c5145d
+      winner_validation:
+        recall@20: 0.36257975044554047
+        ndcg@20: 0.2309973435945789
+      candidates:
+      - experiment_id: k_01
+        execution_id: 20261026T151512_3237459c
+        fingerprint: 5de241fcade5de9caffb152054876d92770a52aa2ae5a378e34007f3d028f64f
+        validation:
+          recall@20: 0.3493971550601652
+          ndcg@20: 0.22324952143256796
+      - experiment_id: k_03
+        execution_id: 20261026T152522_6b9363ef
+        fingerprint: 065fac64942c1b3bd13d25bb65b59a0b08decbc12375508e79616efa8310d0c6
+        validation:
+          recall@20: 0.35654061584742486
+          ndcg@20: 0.22414713217872734
+      - experiment_id: k_07
+        execution_id: 20261026T153529_1ff07dda
+        fingerprint: ee15967479e0f9271a104e2094873134e6a2374baf255512f071b4a8beb38cc8
+        validation:
+          recall@20: 0.35781736230555095
+          ndcg@20: 0.232308169364086
+      - experiment_id: k_13
+        execution_id: 20261026T154611_56c5145d
+        fingerprint: 3d85c39c04e2254dff15bc695f6d50ef884b1d6d05b9c0727cc3732c43c44ae3
+        validation:
+          recall@20: 0.36257975044554047
+          ndcg@20: 0.2309973435945789
+      - experiment_id: k_19
+        execution_id: 20261026T155614_0ef6f0f6
+        fingerprint: a924c1b907dcee8146cb37435877e014f64f3da0da5d21e0c8731e0a1bac2b54
+        validation:
+          recall@20: 0.36107583556103556
+          ndcg@20: 0.22640699796398375
+      - experiment_id: k_35
+        execution_id: 20261026T160605_9398e233
+        fingerprint: ce7e36743b945802a256504dc73cdf40b21336b934799d908a376605fcb735dd
+        validation:
+          recall@20: 0.3600003540146994
+          ndcg@20: 0.23256566648879587
+      - experiment_id: fusion_equal
+        execution_id: 20261026T161627_aeb1d036
+        fingerprint: 900db6ff1e9eb5db715e8283f74f841446105ac9b821e75310cce0f9f47d38a0
+        validation:
+          recall@20: 0.28888220074533044
+          ndcg@20: 0.1799601749652893
+      - experiment_id: fusion_ub
+        execution_id: 20261026T162703_5f547a21
+        fingerprint: 0a1781aaef13b8c0ed057837a23e6be874ff881c61f88964f5fb552fd66e2615
+        validation:
+          recall@20: 0.24474056119100907
+          ndcg@20: 0.1582110984255844
+      - experiment_id: fusion_ui
+        execution_id: 20261026T163804_afea9dd4
+        fingerprint: ddcca0fd44fd1d90c383a202ae43c4d89c20c86f83c40ba73693dadf829eea88
+        validation:
+          recall@20: 0.33460101356135336
+          ndcg@20: 0.21513950877438384
+      - experiment_id: fusion_bi
+        execution_id: 20261026T164707_67d756d5
+        fingerprint: 086a3946d7e2c9b7cb1d075c7c1e69e3b119a1514ef31ea5343b8fd1bd0d748e
+        validation:
+          recall@20: 0.32394320136356103
+          ndcg@20: 0.20872674296115162
+      - experiment_id: fusion_ub_ui
+        execution_id: 20261026T165648_861b67fd
+        fingerprint: d460ee97a2792c46683f7e6922ff57c904c93a2b212fd98e65de156317a1921c
+        validation:
+          recall@20: 0.2801405200907659
+          ndcg@20: 0.1776949530887351
+      - experiment_id: fusion_ub_bi
+        execution_id: 20261026T170702_b14e6ea7
+        fingerprint: 05aab8901bda25e2000b36bfa68239cd13d0deadb012e68e40a62690ee9e8eff
+        validation:
+          recall@20: 0.2702183946901249
+          ndcg@20: 0.17617121931728696
+      - experiment_id: fusion_ui_bi
+        execution_id: 20261026T171806_877f0433
+        fingerprint: b37f256b73754f484850bdbaf7c7b7964bd6227176192d4c0642c9f7c73e783a
+        validation:
+          recall@20: 0.33340513463783433
+          ndcg@20: 0.20745604065642959
+      fusion_adjustment:
+        transfer:
+          from: BI
+          to: UI
+          amount: 0.05
+        base_modal_weight:
+        - 0.1
+        - 0.3
+        - 0.6
+        resolved_modal_weight:
+        - 0.1
+        - 0.35
+        - 0.55
+    blocked_by: []
+    execution_ids:
+    - 20261026T182251_a2baee3a
   stages:
   - id: cl_no_diffusion
     candidates:

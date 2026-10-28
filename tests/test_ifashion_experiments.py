@@ -651,6 +651,49 @@ metrics={s:{m:{str(k):(score if s=='val' else 1-score) for k in conf['topk']}
         exported = yaml.safe_load((pipeline / "best_config.yaml").read_text(encoding="utf-8"))
         self.assertEqual(exported["iFashion"], self.base["iFashion"])
 
+    def test_automatic_pipeline_gpu_migration_preserves_success_and_upgrades_old_state(self):
+        command = self.install_automatic_pipeline()
+        script = self.root / "run_ifashion_pipeline.py"
+        current = script.read_bytes()
+        script.write_bytes(current + b"\n# previous pipeline revision\n")
+        # A prior committed pipeline revision models the existing server state.
+        for args in (["git", "init", "-q"], ["git", "add", "run_ifashion_pipeline.py"],
+                     ["git", "-c", "user.name=Test", "-c", "user.email=test@example.invalid",
+                      "commit", "-q", "-m", "prior pipeline"]):
+            result = subprocess.run(args, cwd=self.root, capture_output=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+        self.behavior({"0.3": "fail"})
+        first = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(first.returncode, 1, first.stdout + first.stderr)
+        round7 = self.root / "log/ifashion_tuning/stage1_clambda_recheck_07/state.json"
+        old_records = json.loads(round7.read_text(encoding="utf-8"))["executions"]
+        self.assertEqual([r["status"] for r in old_records], ["SUCCESS", "FAILED", "SUCCESS"])
+        script.write_bytes(current)
+        self.behavior({})
+        migrated = subprocess.run(command[:-1] + ["2", "--allow-gpu-change"], cwd=self.root,
+                                  capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(migrated.returncode, 0, migrated.stdout + migrated.stderr)
+        records = json.loads(round7.read_text(encoding="utf-8"))["executions"]
+        self.assertEqual(records[:3], old_records)
+        self.assertEqual(len(records), 4)
+        self.assertEqual(records[-1]["experiment_id"], "clambda_030")
+        self.assertEqual(records[-1]["gpu"], "2")
+        first_round = self.root / "log/ifashion_tuning/stage3_fusion_local_06/state.json"
+        self.assertEqual(len(json.loads(first_round.read_text(encoding="utf-8"))["executions"]), 3)
+        pipeline = self.root / "log/ifashion_tuning/pipeline_06_10/state.json"
+        state = json.loads(pipeline.read_text(encoding="utf-8"))
+        self.assertEqual(state["status"], "COMPLETE")
+        self.assertEqual(state["gpu_history"], ["1", "2"])
+        self.assertEqual(state["gpu_changes"][0]["from"], "1")
+        resumed = subprocess.run(command[:-1] + ["2"], cwd=self.root, capture_output=True,
+                                 encoding="utf-8", timeout=60)
+        self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
+        (self.root / "models/model.py").write_text("# changed training source\n", encoding="utf-8")
+        rejected = subprocess.run(command[:-1] + ["2", "--allow-gpu-change"], cwd=self.root,
+                                  capture_output=True, encoding="utf-8", timeout=30)
+        self.assertEqual(rejected.returncode, 2)
+        self.assertIn("inputs, code", rejected.stderr)
+
 
 class ResultTests(unittest.TestCase):
     def test_stop_process_tolerates_unix_exit_races(self):

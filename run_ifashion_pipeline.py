@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import re
 import signal
+import subprocess
 import sys
 
 import yaml
@@ -71,7 +72,7 @@ def preview(gpu):
     return first, baseline
 
 
-def signature(first):
+def signature(first, pipeline_source=None):
     digest = hashlib.sha256()
     paths = ["run_ifashion_pipeline.py", "run_ifashion_experiments.py", "experiment_io.py",
              "prepare_ifashion_clambda_recheck.py", "prepare_ifashion_followup.py",
@@ -81,23 +82,34 @@ def signature(first):
     for rel in paths:
         path = PROJECT_ROOT / rel
         digest.update(path.name.encode())
-        digest.update(path.read_bytes())
+        digest.update(pipeline_source if rel == "run_ifashion_pipeline.py" and pipeline_source is not None
+                      else path.read_bytes())
     digest.update(first["gpu"].encode())
     return digest.hexdigest()
 
 
-def select_winner(plan, baseline):
+def compatible_execution(state, plan, experiment, allowed_gpus):
+    return next((r for r in reversed(state["executions"])
+                 if r["experiment_id"] == experiment["id"]
+                 and r["source_hash"] == plan["source_hash"]
+                 and r["config"] == experiment["config"]
+                 and str(r["gpu"]) in allowed_gpus), None)
+
+
+def select_winner(plan, baseline, allowed_gpus=None):
     state_path = PROJECT_ROOT / "log/ifashion_tuning" / plan["round_id"] / "state.json"
     state = runner.load_state(state_path)
     best = copy.deepcopy(baseline)
     choice = "baseline"
     for experiment in plan["experiments"]:
-        record = runner.latest_execution(state, experiment)
+        record = compatible_execution(state, plan, experiment, allowed_gpus or {plan["gpu"]})
         if record is None or record["status"] != "SUCCESS":
             raise RuntimeError(f"Incomplete round: {plan['round_id']}/{experiment['id']}")
         attempt = record["attempts"][-1]
         result_path = Path(attempt["config_snapshot"]).with_name(f"attempt_{attempt['number']}_result.json")
         result = runner.validate_result(result_path, experiment["config"], record["result"]["config"]["info"])
+        if str(result["config"]["gpu"]) != str(record["gpu"]):
+            raise ValueError("The result GPU differs from its original execution record")
         score = validation_score(result["metrics"])
         if score > best["selection_score"]:
             choice = experiment["id"]
@@ -109,9 +121,13 @@ def select_winner(plan, baseline):
     return choice, best
 
 
-def freeze_plan(path, payload):
+def freeze_plan(path, payload, allow_gpu_change=False):
     if path.exists():
-        if yaml.safe_load(path.read_text(encoding="utf-8")) != payload:
+        existing = yaml.safe_load(path.read_text(encoding="utf-8"))
+        comparison = dict(payload)
+        if allow_gpu_change:
+            comparison["gpu"] = existing.get("gpu")
+        if existing != comparison:
             raise RuntimeError(f"An existing pipeline plan has different inputs: {path}")
     else:
         temporary = path.with_name(path.name + ".tmp")
@@ -122,7 +138,25 @@ def freeze_plan(path, payload):
         os.replace(temporary, path)
 
 
-def run(gpu="0", dry_run=False):
+def resume_signature_matches(state, first):
+    original = dict(first, gpu=str(state["gpu"]))
+    if state["signature"] == signature(original):
+        return True
+    # Upgrade old pipeline code without bypassing checks on training or inputs.
+    history = subprocess.run(["git", "log", "-20", "--format=%H", "--", "run_ifashion_pipeline.py"],
+                             cwd=PROJECT_ROOT, capture_output=True, check=False)
+    for commit in history.stdout.decode("ascii", errors="ignore").splitlines():
+        previous = subprocess.run(["git", "show", f"{commit}:run_ifashion_pipeline.py"],
+                                  cwd=PROJECT_ROOT, capture_output=True, check=False)
+        if previous.returncode == 0:
+            lf = previous.stdout.replace(b"\r\n", b"\n")
+            for candidate in (lf, lf.replace(b"\n", b"\r\n")):
+                if state["signature"] == signature(original, candidate):
+                    return True
+    return False
+
+
+def run(gpu="0", dry_run=False, allow_gpu_change=False):
     first, baseline = preview(gpu)
     if dry_run:
         print("DRY RUN：仅预览全部 14 组，不写文件、不启动训练。", flush=True)
@@ -133,12 +167,23 @@ def run(gpu="0", dry_run=False):
         fingerprint = signature(first)
         if state_path.exists():
             state = json.loads(state_path.read_text(encoding="utf-8"))
-            if (state.get("version") != 1 or state.get("signature") != fingerprint
-                    or state.get("initial_baseline") != baseline):
+            if str(state.get("gpu")) != first["gpu"] and not allow_gpu_change:
+                raise RuntimeError("GPU changed; add --allow-gpu-change to reuse completed results on another GPU")
+            if (state.get("version") != 1 or state.get("initial_baseline") != baseline
+                    or not resume_signature_matches(state, first)):
                 raise RuntimeError("Pipeline inputs, code or GPU changed; resume with the original inputs")
+            state.setdefault("gpu_history", [str(state["gpu"])])
+            if str(state["gpu"]) != first["gpu"]:
+                print(f"显式换卡续跑：GPU {state['gpu']} -> {first['gpu']}；保留成功实验的原始记录。", flush=True)
+                state.setdefault("gpu_changes", []).append({"from": str(state["gpu"]), "to": first["gpu"],
+                                                           "at": runner.timestamp()})
+                if first["gpu"] not in state["gpu_history"]:
+                    state["gpu_history"].append(first["gpu"])
+            state.update(signature=fingerprint, gpu=first["gpu"])
         else:
             state = {"version": 1, "signature": fingerprint, "gpu": first["gpu"],
-                     "stages": [], "initial_baseline": baseline}
+                     "gpu_history": [first["gpu"]], "stages": [], "initial_baseline": baseline}
+        allowed_gpus = set(state["gpu_history"])
         state.update(status="RUNNING", updated_at=runner.timestamp())
         state.pop("failed_round", None)
         atomic_write_json(state_path, state)
@@ -156,17 +201,25 @@ def run(gpu="0", dry_run=False):
                 payload["note"] = payload["note"].replace("人工按验证分数选定", "自动按验证综合分数选定").replace(
                     "按验证综合分数人工选定", "按验证综合分数自动选定")
                 source_path = PIPELINE_DIR / f"round_{index + 6}_plan.yaml"
-                freeze_plan(source_path, payload)
+                freeze_plan(source_path, payload, allow_gpu_change=len(allowed_gpus) > 1)
                 plan = runner.load_plan(source_path, gpu=gpu)
                 print(f"\n总进度：第 {index + 1}/5 批，第 {index + 6} 轮；此前已完成 "
                       f"{sum([3, 3, 2, 3, 3][:index])}/14 组", flush=True)
-                code = runner.run(source_path, gpu=gpu)
+                round_state = runner.load_state(PROJECT_ROOT / "log/ifashion_tuning" / plan["round_id"] / "state.json")
+                pending = []
+                for experiment in plan["experiments"]:
+                    previous = compatible_execution(round_state, plan, experiment, allowed_gpus)
+                    if previous is None or previous["status"] != "SUCCESS":
+                        pending.append(experiment["id"])
+                    else:
+                        print(f"复用已成功实验 {experiment['id']}（原 GPU {previous['gpu']}）", flush=True)
+                code = runner.run(source_path, gpu=gpu, mode="selected", only=pending) if pending else 0
                 if code:
                     state.update(status="FAILED", failed_round=plan["round_id"], updated_at=runner.timestamp())
                     atomic_write_json(state_path, state)
                     print("本批仍有失败项，停止后续批次。修复后使用同一命令续跑。", flush=True)
                     return code
-                choice, winner = select_winner(plan, baseline)
+                choice, winner = select_winner(plan, baseline, allowed_gpus)
                 entry = {"round_id": plan["round_id"], "plan": str(source_path),
                          "selected_experiment": choice, "winner": winner}
                 if len(state["stages"]) > index:
@@ -201,12 +254,14 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--gpu", "-g", default="0")
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--allow-gpu-change", action="store_true",
+                        help="explicitly reuse completed records from earlier GPUs; only pending groups use --gpu")
     args = parser.parse_args(argv)
     def interrupted(signum, frame):
         raise KeyboardInterrupt
     signal.signal(signal.SIGTERM, interrupted)
     try:
-        return run(args.gpu, args.dry_run)
+        return run(args.gpu, args.dry_run, args.allow_gpu_change)
     except KeyboardInterrupt:
         print("已停止；使用同一命令续跑，未完成实验从第 0 轮重新训练。", file=sys.stderr)
         return 130

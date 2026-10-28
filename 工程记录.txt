@@ -2112,3 +2112,69 @@ AAAI文件/main.tex：仅将式（1）的 equation + aligned 改为局部分组�
 本项独立追加，追加前 277817 字节完整保留。tmp/pdfs/restore-bundlegt-non-experiment-20261028 中的快照、脚本、构建 PDF、页图及辅助文件检查后清理，不保留或交付 PDF。最终临时 PDF 的 SHA256 为 36b390b9f581e224002460dd2676697bc99c4b62414a7d2c1812562d088ca248，仅在本项追溯。
 
 本轮没有运行训练或实验，没有修改代码、配置、数据集或 Git 暂存区，也没有提交 Git。最终相对于原定稿保留的文件改动为 main.tex 与工程记录；aaai2027.bib 已恢复原样。
+
+
+第四十九项：按用户要求将实验比较模型 EBRec 替换为 DCDL，暂留原数值
+记录日期：2026-10-28
+
+一、用户要求与本轮状态
+
+用户要求：“把实验章的比较模型 EBRec 换成 DCDL，数值先不动，我后面会告诉你正确的数值，结果就说是引用的论文就行。”本轮据此先完成实验章及总表的模型替换与论文来源引用。现有 DCDL 行仍使用原 EBRec 的十二个数值作为临时占位，不是已核实的 DCDL 实验结果；须等用户提供正确数值后再更新。当前次优标记、提升率及相关结果分析也沿用占位数值，尚不能作为 DCDL 的最终比较结论。
+
+二、实际修改
+
+（1）AAAI文件/main.tex：总表 Table 2 的 EBRec 行名替换为 DCDL，原十二项结果、所有其他结果、下划线、粗体及 Improv. 行完全保持。为避免后续误用，在该行前增加不显示于编译文稿的 TODO 注释，明确其数值及派生比较待更新。
+（2）实验 Baselines 段将 EBRec 及其方法说明替换为 DCDL 与 chen2025dcdl 引用。英文为：DCDL combines dual-view modeling with diffusion learning to refine user representations and enhance recommendation diversity. 忠实中文：DCDL 将双视图建模与扩散学习相结合，以细化用户表示并增强推荐多样性。
+（3）结果来源写为：DCDL results are from its original paper，并引用 chen2025dcdl。该句按用户要求设置最终来源口径；本轮没有获取或验证 DCDL 的真实实验表，不把临时保留的旧数值记为已从该论文提取。
+（4）总体比较第三条将 EBRec 名称同步为 DCDL；其共同描述保留为建模捆绑偏好及跨视图信息融合，删去对该组模型统一使用原始 U-B 关系的限定，以免将带关系增强的 DCDL 错误归入该限定。未重写该段其余归因，不重开此前已关闭的讨论。
+（5）AAAI文件/aaai2027.bib：仅新增 chen2025dcdl 条目，作者为 Jinpeng Chen、Jinqing Wang、Fan Zhang、Yuan Cao、Kaimin Wei、Liwei Huang、Haoran Zhu、Feifei Kou、Hongben Huang；标题 Dual-view Collaboration Fusion on Diffusion Learning for Bundle Recommendation；期刊 Information Fusion，卷 122，文章号 103154，2025，DOI 10.1016/j.inffus.2025.103154。作者、标题、卷、文章号、年份与 DOI 通过出版社向 Crossref 登记的元数据复核。EBRec 仍在相关工作被引用，其原 du2025ebrec 条目保留；全部原文献条目逐字节不变。
+
+三、核验与临时构建
+
+（1）对照本轮修改前快照，main.tex 全文的数值 token 序列、总表全部数值及下划线内容均一致；实验章及总表之外的正文逐字节保持，结论原文保持。AAAI文件 中除 main.tex、aaai2027.bib 外的文件逐一哈希不变。UTF-8 无 BOM、CRLF 保持，git diff --check 通过。
+（2）复用 tmp/tools/texlive2026 执行 pdflatex—BibTeX—pdflatex—pdflatex，四步均退出码为零。最终十一页，文献库三十八条，实际引用及编译文献项三十七条，无 LaTeX 错误、未定义引用、Overfull 盒、重复标签或待重编译提示。最终 Underfull 提示合计五条。
+（3）使用 rungs 渲染并实际查看最终第 7、9、10、11 页：总表行名、暂留数值、DCDL 基线介绍及来源引用可读，DCDL 文献条目完整，后续参考文献完整，无新增遮挡或裁切。第七页总表位置保持。
+（4）main.tex 为 55502 字节，SHA256 为 1ef17f6cd721c964892e36a79cb90b6ec2504a503a3aad0008d98ae6d1cd29ba；aaai2027.bib 为 15677 字节，SHA256 为 d1a1c19cbf85d82419b777054dd686b32587e7abed00397d934459ea531be82b。临时 PDF 的 SHA256 为 42885bff87445196acbae99133ab50545849db8fad24017346a1c072c8c121bc，仅作追溯。
+
+四、记录与临时产物
+
+本项在第四十八项后独立追加，既有记录全部字节保留。本轮 tmp/pdfs/ebrec-to-dcdl-20261028 下快照、编辑及核验脚本、构建 PDF、页图及辅助文件检查后清理；不保留或交付 PDF 和页图，可复用工具与其他历史材料保留。
+
+未训练或运行推荐实验，未修改代码、配置、数据集、正式图片或摘要引言对照稿，未操作 Git 暂存区或提交 Git。最终保留的修改为 main.tex、aaai2027.bib 与本项工程记录。
+
+
+第五十项：删除文献库中未被当前主稿引用的 sun2024intent 条目
+记录日期：2026-10-28
+
+用户要求删除上一轮统计中唯一未引用的文献。本轮仅从 AAAI文件/aaai2027.bib 删除 sun2024intent 整条，即 Revisiting Bundle Recommendation for Intent-Aware Product Bundling；其余条目逐字节保留。当前主稿没有引用该键，相关工作中已引用的 sun2024survey 等其他文献保持。
+
+删除后文献库由 38 条变为 37 条，与主稿实际引用的 37 个不同文献键完全一致；无未引用条目、缺失引用或重复文献键。main.tex 逐字节保持，不修改正文、总表、占位数值或现有引用。文献库保持 UTF-8 无 BOM 与 CRLF。由于删除的是未进入编译文献列表的条目，本轮仅作引用与差异静态核验，没有重新编译，也未生成 PDF、页图或临时文件。
+
+本项独立追加，追加前 285631 字节完整保留，不改写历史记录。未运行训练或实验，未操作 Git 暂存区或提交 Git。最终本轮修改仅为 aaai2027.bib 与本项工程记录。文献库 SHA256：daaefb16d5c98968dce94ae241e2df7f94b1e2790ae547bcf263073e424857d9。
+
+
+第五十一项：按用户提供的数值修订总表六项结果并同步次优与提升率
+记录日期：2026-10-28
+
+用户提供 Youshu R@40、Youshu N@40 和 NetEase R@40 的六项修订。本轮将四位数字按总表现有格式写为四位小数，具体如下：
+（1）Youshu R@40：DCDL 0.3871 → 0.3941；EpicCBR 0.3949 → 0.3889。
+（2）Youshu N@40：MultiCBR 0.1994 → 0.1989；DCDL 0.1979 → 0.1994。
+（3）NetEase R@40：DCDL 0.1359 → 0.1345；EpicCBR 0.1345 → 0.1356。
+
+按修改后的最强基线同步下划线及 Improv. 行，沿用基于显示值计算、保留两位小数并 ROUND_HALF_UP 的口径：Youshu R@40 的最强基线改为 MultiCBR 0.3946，提升率由 1.22% 更新为 1.29%；Youshu N@40 的最强基线改为 DCDL 0.1994，提升率仍为 1.45%；NetEase R@40 的最强基线改为 EpicCBR 0.1356，提升率由 2.28% 更新为 2.51%。其他下划线及提升率保持。
+
+总表源码的 TODO 注释同步为：DCDL 的 Youshu R@40、N@40 和 NetEase R@40 已按用户数值更新，其余九项仍待确认。本轮不将其余占位值记为已经核实。主稿正文的 Recall@20 提升不受此次修改影响，保持原文。
+
+核验对照修改前的主稿，确认原始结果恰好只有上述六项变化，其余一百二十六项结果保持；逐列核对全部十二个最强基线标记和十二项提升率，均与当前显示值一致。总表浮动体之外的 main.tex 字节完全不变；AAAI文件 其他文件逐一哈希不变，文献条目与引用保持。UTF-8 无 BOM 与 CRLF 保持，git diff --check 通过。本轮只调整固定四位小数、同宽百分比及下划线，不修改表格结构或排版指令，未重新编译或生成 PDF、页图。
+
+本项独立追加，既有工程记录全部字节保留，不改写历史记录。未运行训练或实验，未操作 Git 暂存区或提交 Git。临时核验脚本完成后删除，最终本轮保留的修改仅为 main.tex 与本项工程记录。
+
+
+第五十二项：对换 MultiCBR 与 DCDL 的 Youshu R@40 数值
+记录日期：2026-10-28
+
+按用户要求，仅对换总表中 MultiCBR 与 DCDL 的 Youshu R@40：MultiCBR 由 0.3946 改为 0.3941，DCDL 由 0.3941 改为 0.3946。该列最强基线随之改为 DCDL，下划线同步从 MultiCBR 移至 DCDL。最强基线数值仍为 0.3946，ReCoBR 为 0.3997，相对提升仍为 1.29%，无需重算或改写正文。
+
+逆向替换逐字节核对通过，除上述两处数值及其下划线外 main.tex 全文保持；AAAI文件 其他文件逐一哈希不变。保留 UTF-8 无 BOM、CRLF；git diff --check 通过。当前仅作静态核验，未重新编译或生成 PDF、页图，未训练或运行实验，未操作 Git 暂存区或提交 Git。
+
+本项独立追加，既有工程记录全部字节保留；第五十一项关于该列最强基线的历史说明由本项更新，不改写历史。本轮保留修改仅为 main.tex 与工程记录。

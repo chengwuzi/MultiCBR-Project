@@ -1,0 +1,1428 @@
+
+========================================================================
+EXECUTION_ID: 20261028T123353_431d2ce6
+实验类别: 第一种情况（作者已有数据集配置）
+模型: MultiCBR
+数据集: Youshu
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-28T20:33:53+08:00
+结束时间(UTC+08:00): 2026-10-28T20:39:50+08:00
+耗时（秒）: 356.640
+实验备注: Repeated batch 20261028T123349_aa0caace run 1/6;
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+best_epoch: 99（从0计数）
+最佳训练轮次: 100
+val TOP 10: Recall=0.20129267, NDCG=0.11830634
+val TOP 20: Recall=0.28804348, NDCG=0.14283393
+val TOP 40: Recall=0.39139122, NDCG=0.16668823
+val TOP 80: Recall=0.50816129, NDCG=0.18936638
+test TOP 10: Recall=0.20317802, NDCG=0.14569974
+test TOP 20: Recall=0.28756725, NDCG=0.16978833
+test TOP 40: Recall=0.38877629, NDCG=0.19729728
+test TOP 80: Recall=0.50882494, NDCG=0.22528015
+完整运行记录(JSON，包含完整实际配置与未舍入指标):
+{
+  "execution_id": "20261028T123353_431d2ce6",
+  "dataset": "Youshu",
+  "model": "MultiCBR",
+  "experiment_case": "first",
+  "implementation": "multicbr-author-port-v1",
+  "status": "SUCCESS",
+  "completed": true,
+  "completed_epochs": 100,
+  "started_at": "2026-10-28T20:33:53+08:00",
+  "note": "Repeated batch 20261028T123349_aa0caace run 1/6; ",
+  "gpu": "0",
+  "device": "cuda:0",
+  "git_commit": "951fa6485f33acf45036564152e148975dc61afc",
+  "config": {
+    "seed": 1285026806,
+    "num_workers": 0,
+    "data_path": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\datasets",
+    "batch_size_train": 2048,
+    "batch_size_test": 2048,
+    "topk": [
+      10,
+      20,
+      40,
+      80
+    ],
+    "neg_num": 1,
+    "aug_type": "Noise",
+    "ed_interval": 1,
+    "embedding_sizes": [
+      64
+    ],
+    "num_layerss": [
+      2
+    ],
+    "UB_ratios": [
+      0.2
+    ],
+    "UI_ratios": [
+      0.1
+    ],
+    "BI_ratios": [
+      0.1
+    ],
+    "fusion_weights": {
+      "modal_weight": [
+        0.35,
+        0.15,
+        0.5
+      ],
+      "UB_layer": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "UI_layer": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "BI_layer": [
+        0.6,
+        0.1,
+        0.3
+      ]
+    },
+    "lrs": [
+      0.001
+    ],
+    "l2_regs": [
+      1e-05
+    ],
+    "c_lambdas": [
+      0.04
+    ],
+    "c_temps": [
+      0.23
+    ],
+    "epochs": 100,
+    "test_interval": 5,
+    "embedding_size": 64,
+    "num_layers": 2,
+    "UB_ratio": 0.2,
+    "UI_ratio": 0.1,
+    "BI_ratio": 0.1,
+    "lr": 0.001,
+    "l2_reg": 1e-05,
+    "c_lambda": 0.04,
+    "c_temp": 0.23,
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "dataset": "Youshu",
+    "model": "MultiCBR",
+    "device": "cuda:0",
+    "gpu": "0",
+    "quiet": true,
+    "info": "",
+    "implementation": "multicbr-author-port-v1",
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+  },
+  "sources": {
+    "model.py": "a338c5ac88b4d9cf3968aaf015d71c1f4b839bebc69b74c3c85fd6d93a18b05a",
+    "data.py": "5eaa8e4a83dd8b475d2ad93802994971140b1b4c4a06ed6a8cb306a9c37b919e",
+    "configuration.py": "f265845bc373cc67806d7b56f7ac8fb79e577e0e5545714c1caaa58d2bc7f4c9",
+    "train.py": "1f68ca2cb50bc0deba9f7873c3c1a45347c98cfaf2ed3fe4c5de990afc81cc09"
+  },
+  "data_files": {
+    "Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f",
+    "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf",
+    "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260",
+    "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c",
+    "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d",
+    "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073"
+  },
+  "input_config_sha256": "92d0aaa6e4a09b3391f3f704563ecacee3821136fff7f938a2102139b996464c",
+  "artifacts": {
+    "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\best.pt",
+    "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\best_config.json",
+    "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\config.yaml",
+    "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\result.json",
+    "log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\training.log",
+    "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\tensorboard",
+    "sources": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_001\\attempt_1\\artifacts\\Youshu\\20261028T123353_431d2ce6\\sources"
+  },
+  "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "pythonhashseed": "1285026806"
+  },
+  "config_hash": "0b0dfb066be57da4731de947b6df62f0170e35a1e811392e7dcef15ad6135530",
+  "data_statistics": {
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "UB_train": {
+      "edges": 34416,
+      "active_rows": 2959
+    },
+    "UB_val": {
+      "edges": 5189,
+      "active_rows": 2959
+    },
+    "UB_test": {
+      "edges": 9746,
+      "active_rows": 2959
+    },
+    "UI": {
+      "edges": 138515,
+      "active_rows": 8006
+    },
+    "BI": {
+      "edges": 176667,
+      "active_rows": 4771
+    }
+  },
+  "last_losses": {
+    "loss": 0.38563877530395985,
+    "bpr": 0.19578035734593868,
+    "contrastive_unweighted": 4.7464606165885925
+  },
+  "result": {
+    "best_epoch": 99,
+    "best_epoch_1based": 100,
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+    "selection_metrics": {
+      "recall@20": 0.2880434769156334,
+      "ndcg@20": 0.14283392758899624
+    },
+    "metrics": {
+      "val": {
+        "recall": {
+          "10": 0.20129266644136531,
+          "20": 0.2880434769156334,
+          "40": 0.39139121913877684,
+          "80": 0.5081612914750285
+        },
+        "ndcg": {
+          "10": 0.11830633949210169,
+          "20": 0.14283392758899624,
+          "40": 0.16668823128739255,
+          "80": 0.18936637834585693
+        }
+      },
+      "test": {
+        "recall": {
+          "10": 0.2031780215847045,
+          "20": 0.2875672469633824,
+          "40": 0.38877628864006,
+          "80": 0.5088249430861091
+        },
+        "ndcg": {
+          "10": 0.14569974114823156,
+          "20": 0.16978833094445706,
+          "40": 0.19729728221732162,
+          "80": 0.22528015322361333
+        }
+      }
+    }
+  },
+  "ended_at": "2026-10-28T20:39:50+08:00",
+  "duration_seconds": 356.64,
+  "artifact_hashes": {
+    "checkpoint_model": "571d15bc2271de3ee74bcf47a071a9c2641e9064d4ad291452be2772897def58",
+    "checkpoint_config": "e2af33d75fb76ba1e7584f84a07610c2a8cd4dd26f961f9f074417024f75e196",
+    "config": "8052fb0838b6af11a1a848831d8d9b0967bab29282ebd9a24ed057d79ae3e8a8"
+  }
+}
+END_EXECUTION: 20261028T123353_431d2ce6
+
+========================================================================
+EXECUTION_ID: 20261028T123956_7428fab0
+实验类别: 第一种情况（作者已有数据集配置）
+模型: MultiCBR
+数据集: Youshu
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-28T20:39:56+08:00
+结束时间(UTC+08:00): 2026-10-28T20:46:08+08:00
+耗时（秒）: 372.204
+实验备注: Repeated batch 20261028T123349_aa0caace run 2/6;
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+best_epoch: 94（从0计数）
+最佳训练轮次: 95
+val TOP 10: Recall=0.20196468, NDCG=0.11804855
+val TOP 20: Recall=0.29216703, NDCG=0.14350232
+val TOP 40: Recall=0.39135125, NDCG=0.16650869
+val TOP 80: Recall=0.50684033, NDCG=0.18877827
+test TOP 10: Recall=0.19878269, NDCG=0.14553057
+test TOP 20: Recall=0.28035844, NDCG=0.16907163
+test TOP 40: Recall=0.39186736, NDCG=0.19905227
+test TOP 80: Recall=0.51299329, NDCG=0.22661941
+完整运行记录(JSON，包含完整实际配置与未舍入指标):
+{
+  "execution_id": "20261028T123956_7428fab0",
+  "dataset": "Youshu",
+  "model": "MultiCBR",
+  "experiment_case": "first",
+  "implementation": "multicbr-author-port-v1",
+  "status": "SUCCESS",
+  "completed": true,
+  "completed_epochs": 100,
+  "started_at": "2026-10-28T20:39:56+08:00",
+  "note": "Repeated batch 20261028T123349_aa0caace run 2/6; ",
+  "gpu": "0",
+  "device": "cuda:0",
+  "git_commit": "951fa6485f33acf45036564152e148975dc61afc",
+  "config": {
+    "seed": 155209778,
+    "num_workers": 0,
+    "data_path": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\datasets",
+    "batch_size_train": 2048,
+    "batch_size_test": 2048,
+    "topk": [
+      10,
+      20,
+      40,
+      80
+    ],
+    "neg_num": 1,
+    "aug_type": "Noise",
+    "ed_interval": 1,
+    "embedding_sizes": [
+      64
+    ],
+    "num_layerss": [
+      2
+    ],
+    "UB_ratios": [
+      0.2
+    ],
+    "UI_ratios": [
+      0.1
+    ],
+    "BI_ratios": [
+      0.1
+    ],
+    "fusion_weights": {
+      "modal_weight": [
+        0.35,
+        0.15,
+        0.5
+      ],
+      "UB_layer": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "UI_layer": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "BI_layer": [
+        0.6,
+        0.1,
+        0.3
+      ]
+    },
+    "lrs": [
+      0.001
+    ],
+    "l2_regs": [
+      1e-05
+    ],
+    "c_lambdas": [
+      0.04
+    ],
+    "c_temps": [
+      0.23
+    ],
+    "epochs": 100,
+    "test_interval": 5,
+    "embedding_size": 64,
+    "num_layers": 2,
+    "UB_ratio": 0.2,
+    "UI_ratio": 0.1,
+    "BI_ratio": 0.1,
+    "lr": 0.001,
+    "l2_reg": 1e-05,
+    "c_lambda": 0.04,
+    "c_temp": 0.23,
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "dataset": "Youshu",
+    "model": "MultiCBR",
+    "device": "cuda:0",
+    "gpu": "0",
+    "quiet": true,
+    "info": "",
+    "implementation": "multicbr-author-port-v1",
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+  },
+  "sources": {
+    "model.py": "a338c5ac88b4d9cf3968aaf015d71c1f4b839bebc69b74c3c85fd6d93a18b05a",
+    "data.py": "5eaa8e4a83dd8b475d2ad93802994971140b1b4c4a06ed6a8cb306a9c37b919e",
+    "configuration.py": "f265845bc373cc67806d7b56f7ac8fb79e577e0e5545714c1caaa58d2bc7f4c9",
+    "train.py": "1f68ca2cb50bc0deba9f7873c3c1a45347c98cfaf2ed3fe4c5de990afc81cc09"
+  },
+  "data_files": {
+    "Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f",
+    "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf",
+    "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260",
+    "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c",
+    "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d",
+    "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073"
+  },
+  "input_config_sha256": "92d0aaa6e4a09b3391f3f704563ecacee3821136fff7f938a2102139b996464c",
+  "artifacts": {
+    "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\best.pt",
+    "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\best_config.json",
+    "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\config.yaml",
+    "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\result.json",
+    "log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\training.log",
+    "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\tensorboard",
+    "sources": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_002\\attempt_1\\artifacts\\Youshu\\20261028T123956_7428fab0\\sources"
+  },
+  "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "pythonhashseed": "155209778"
+  },
+  "config_hash": "19f220edc870b45686573d9de23d5c486d4c110539a8a8b3190b1cf7d8e81594",
+  "data_statistics": {
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "UB_train": {
+      "edges": 34416,
+      "active_rows": 2959
+    },
+    "UB_val": {
+      "edges": 5189,
+      "active_rows": 2959
+    },
+    "UB_test": {
+      "edges": 9746,
+      "active_rows": 2959
+    },
+    "UI": {
+      "edges": 138515,
+      "active_rows": 8006
+    },
+    "BI": {
+      "edges": 176667,
+      "active_rows": 4771
+    }
+  },
+  "last_losses": {
+    "loss": 0.38593011908233166,
+    "bpr": 0.19544565677642822,
+    "contrastive_unweighted": 4.762111663818359
+  },
+  "result": {
+    "best_epoch": 94,
+    "best_epoch_1based": 95,
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+    "selection_metrics": {
+      "recall@20": 0.29216702671702066,
+      "ndcg@20": 0.1435023156643397
+    },
+    "metrics": {
+      "val": {
+        "recall": {
+          "10": 0.20196468228220577,
+          "20": 0.29216702671702066,
+          "40": 0.39135125441581825,
+          "80": 0.5068403310411562
+        },
+        "ndcg": {
+          "10": 0.11804855155880364,
+          "20": 0.1435023156643397,
+          "40": 0.1665086865465397,
+          "80": 0.18877826779627566
+        }
+      },
+      "test": {
+        "recall": {
+          "10": 0.19878269104024532,
+          "20": 0.28035844117654823,
+          "40": 0.3918673614264743,
+          "80": 0.512993289474379
+        },
+        "ndcg": {
+          "10": 0.1455305717651326,
+          "20": 0.16907163454334895,
+          "40": 0.19905226985600077,
+          "80": 0.226619409765493
+        }
+      }
+    }
+  },
+  "ended_at": "2026-10-28T20:46:08+08:00",
+  "duration_seconds": 372.204,
+  "artifact_hashes": {
+    "checkpoint_model": "44cbf262259e5633d432502a46525c60992384b82251b49343eb3a826cb5898b",
+    "checkpoint_config": "3b6c50037f0558540777e32e1e125ec2c0e40ac600d4c9e220f5f4e2758c6619",
+    "config": "045b57dd83a92bd8000251b01f6d4fdf865521d6647e48c4fcea3a55f328496e"
+  }
+}
+END_EXECUTION: 20261028T123956_7428fab0
+
+========================================================================
+EXECUTION_ID: 20261028T124615_309cec50
+实验类别: 第一种情况（作者已有数据集配置）
+模型: MultiCBR
+数据集: Youshu
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-28T20:46:15+08:00
+结束时间(UTC+08:00): 2026-10-28T20:53:00+08:00
+耗时（秒）: 405.110
+实验备注: Repeated batch 20261028T123349_aa0caace run 3/6;
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+best_epoch: 99（从0计数）
+最佳训练轮次: 100
+val TOP 10: Recall=0.20069831, NDCG=0.12001690
+val TOP 20: Recall=0.28997383, NDCG=0.14511443
+val TOP 40: Recall=0.38801438, NDCG=0.16783816
+val TOP 80: Recall=0.50871717, NDCG=0.19106406
+test TOP 10: Recall=0.20256846, NDCG=0.14613695
+test TOP 20: Recall=0.28301456, NDCG=0.16958310
+test TOP 40: Recall=0.39209496, NDCG=0.19892975
+test TOP 80: Recall=0.51235331, NDCG=0.22667631
+完整运行记录(JSON，包含完整实际配置与未舍入指标):
+{
+  "execution_id": "20261028T124615_309cec50",
+  "dataset": "Youshu",
+  "model": "MultiCBR",
+  "experiment_case": "first",
+  "implementation": "multicbr-author-port-v1",
+  "status": "SUCCESS",
+  "completed": true,
+  "completed_epochs": 100,
+  "started_at": "2026-10-28T20:46:15+08:00",
+  "note": "Repeated batch 20261028T123349_aa0caace run 3/6; ",
+  "gpu": "0",
+  "device": "cuda:0",
+  "git_commit": "951fa6485f33acf45036564152e148975dc61afc",
+  "config": {
+    "seed": 3475687584,
+    "num_workers": 0,
+    "data_path": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\datasets",
+    "batch_size_train": 2048,
+    "batch_size_test": 2048,
+    "topk": [
+      10,
+      20,
+      40,
+      80
+    ],
+    "neg_num": 1,
+    "aug_type": "Noise",
+    "ed_interval": 1,
+    "embedding_sizes": [
+      64
+    ],
+    "num_layerss": [
+      2
+    ],
+    "UB_ratios": [
+      0.2
+    ],
+    "UI_ratios": [
+      0.1
+    ],
+    "BI_ratios": [
+      0.1
+    ],
+    "fusion_weights": {
+      "modal_weight": [
+        0.35,
+        0.15,
+        0.5
+      ],
+      "UB_layer": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "UI_layer": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "BI_layer": [
+        0.6,
+        0.1,
+        0.3
+      ]
+    },
+    "lrs": [
+      0.001
+    ],
+    "l2_regs": [
+      1e-05
+    ],
+    "c_lambdas": [
+      0.04
+    ],
+    "c_temps": [
+      0.23
+    ],
+    "epochs": 100,
+    "test_interval": 5,
+    "embedding_size": 64,
+    "num_layers": 2,
+    "UB_ratio": 0.2,
+    "UI_ratio": 0.1,
+    "BI_ratio": 0.1,
+    "lr": 0.001,
+    "l2_reg": 1e-05,
+    "c_lambda": 0.04,
+    "c_temp": 0.23,
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "dataset": "Youshu",
+    "model": "MultiCBR",
+    "device": "cuda:0",
+    "gpu": "0",
+    "quiet": true,
+    "info": "",
+    "implementation": "multicbr-author-port-v1",
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+  },
+  "sources": {
+    "model.py": "a338c5ac88b4d9cf3968aaf015d71c1f4b839bebc69b74c3c85fd6d93a18b05a",
+    "data.py": "5eaa8e4a83dd8b475d2ad93802994971140b1b4c4a06ed6a8cb306a9c37b919e",
+    "configuration.py": "f265845bc373cc67806d7b56f7ac8fb79e577e0e5545714c1caaa58d2bc7f4c9",
+    "train.py": "1f68ca2cb50bc0deba9f7873c3c1a45347c98cfaf2ed3fe4c5de990afc81cc09"
+  },
+  "data_files": {
+    "Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f",
+    "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf",
+    "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260",
+    "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c",
+    "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d",
+    "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073"
+  },
+  "input_config_sha256": "92d0aaa6e4a09b3391f3f704563ecacee3821136fff7f938a2102139b996464c",
+  "artifacts": {
+    "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\best.pt",
+    "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\best_config.json",
+    "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\config.yaml",
+    "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\result.json",
+    "log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\training.log",
+    "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\tensorboard",
+    "sources": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_003\\attempt_1\\artifacts\\Youshu\\20261028T124615_309cec50\\sources"
+  },
+  "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "pythonhashseed": "3475687584"
+  },
+  "config_hash": "b427905d3ab8d078aa6c69832941b9ae6ddf8f1530f8d802f45eea78783ff7a9",
+  "data_statistics": {
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "UB_train": {
+      "edges": 34416,
+      "active_rows": 2959
+    },
+    "UB_val": {
+      "edges": 5189,
+      "active_rows": 2959
+    },
+    "UB_test": {
+      "edges": 9746,
+      "active_rows": 2959
+    },
+    "UI": {
+      "edges": 138515,
+      "active_rows": 8006
+    },
+    "BI": {
+      "edges": 176667,
+      "active_rows": 4771
+    }
+  },
+  "last_losses": {
+    "loss": 0.38609219156205654,
+    "bpr": 0.19641001522541046,
+    "contrastive_unweighted": 4.742054641246796
+  },
+  "result": {
+    "best_epoch": 99,
+    "best_epoch_1based": 100,
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+    "selection_metrics": {
+      "recall@20": 0.28997382975865477,
+      "ndcg@20": 0.1451144307076266
+    },
+    "metrics": {
+      "val": {
+        "recall": {
+          "10": 0.20069830592478718,
+          "20": 0.28997382975865477,
+          "40": 0.3880143805346242,
+          "80": 0.5087171672525822
+        },
+        "ndcg": {
+          "10": 0.1200168966723278,
+          "20": 0.1451144307076266,
+          "40": 0.167838163333956,
+          "80": 0.19106406430692116
+        }
+      },
+      "test": {
+        "recall": {
+          "10": 0.20256846415992522,
+          "20": 0.28301456370197386,
+          "40": 0.3920949592345387,
+          "80": 0.5123533072927667
+        },
+        "ndcg": {
+          "10": 0.14613695006065974,
+          "20": 0.16958310306777258,
+          "40": 0.1989297457505175,
+          "80": 0.2266763092175091
+        }
+      }
+    }
+  },
+  "ended_at": "2026-10-28T20:53:00+08:00",
+  "duration_seconds": 405.11,
+  "artifact_hashes": {
+    "checkpoint_model": "c6f197a31ef94b12592ae28745d69f1b3dd2fcb0f5d24bfbe62d3e78196f9850",
+    "checkpoint_config": "1fddb2220a4640017522312d314b1ed2b9ec11a4d0fa738ca09c3f7f1ba1a0d4",
+    "config": "440d338507bbe906972ddea3ddf38dd26a2b8addc95fd68b4d62c87614c1ff0b"
+  }
+}
+END_EXECUTION: 20261028T124615_309cec50
+
+========================================================================
+EXECUTION_ID: 20261028T125305_4766598d
+实验类别: 第一种情况（作者已有数据集配置）
+模型: MultiCBR
+数据集: Youshu
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-28T20:53:06+08:00
+结束时间(UTC+08:00): 2026-10-28T20:59:54+08:00
+耗时（秒）: 408.796
+实验备注: Repeated batch 20261028T123349_aa0caace run 4/6;
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+best_epoch: 89（从0计数）
+最佳训练轮次: 90
+val TOP 10: Recall=0.20618586, NDCG=0.11926065
+val TOP 20: Recall=0.28856101, NDCG=0.14268409
+val TOP 40: Recall=0.38610643, NDCG=0.16546036
+val TOP 80: Recall=0.50600509, NDCG=0.18856869
+test TOP 10: Recall=0.19809251, NDCG=0.14207953
+test TOP 20: Recall=0.28271497, NDCG=0.16618344
+test TOP 40: Recall=0.38991881, NDCG=0.19524328
+test TOP 80: Recall=0.51115030, NDCG=0.22296978
+完整运行记录(JSON，包含完整实际配置与未舍入指标):
+{
+  "execution_id": "20261028T125305_4766598d",
+  "dataset": "Youshu",
+  "model": "MultiCBR",
+  "experiment_case": "first",
+  "implementation": "multicbr-author-port-v1",
+  "status": "SUCCESS",
+  "completed": true,
+  "completed_epochs": 100,
+  "started_at": "2026-10-28T20:53:06+08:00",
+  "note": "Repeated batch 20261028T123349_aa0caace run 4/6; ",
+  "gpu": "0",
+  "device": "cuda:0",
+  "git_commit": "951fa6485f33acf45036564152e148975dc61afc",
+  "config": {
+    "seed": 3233215529,
+    "num_workers": 0,
+    "data_path": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\datasets",
+    "batch_size_train": 2048,
+    "batch_size_test": 2048,
+    "topk": [
+      10,
+      20,
+      40,
+      80
+    ],
+    "neg_num": 1,
+    "aug_type": "Noise",
+    "ed_interval": 1,
+    "embedding_sizes": [
+      64
+    ],
+    "num_layerss": [
+      2
+    ],
+    "UB_ratios": [
+      0.2
+    ],
+    "UI_ratios": [
+      0.1
+    ],
+    "BI_ratios": [
+      0.1
+    ],
+    "fusion_weights": {
+      "modal_weight": [
+        0.35,
+        0.15,
+        0.5
+      ],
+      "UB_layer": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "UI_layer": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "BI_layer": [
+        0.6,
+        0.1,
+        0.3
+      ]
+    },
+    "lrs": [
+      0.001
+    ],
+    "l2_regs": [
+      1e-05
+    ],
+    "c_lambdas": [
+      0.04
+    ],
+    "c_temps": [
+      0.23
+    ],
+    "epochs": 100,
+    "test_interval": 5,
+    "embedding_size": 64,
+    "num_layers": 2,
+    "UB_ratio": 0.2,
+    "UI_ratio": 0.1,
+    "BI_ratio": 0.1,
+    "lr": 0.001,
+    "l2_reg": 1e-05,
+    "c_lambda": 0.04,
+    "c_temp": 0.23,
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "dataset": "Youshu",
+    "model": "MultiCBR",
+    "device": "cuda:0",
+    "gpu": "0",
+    "quiet": true,
+    "info": "",
+    "implementation": "multicbr-author-port-v1",
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+  },
+  "sources": {
+    "model.py": "a338c5ac88b4d9cf3968aaf015d71c1f4b839bebc69b74c3c85fd6d93a18b05a",
+    "data.py": "5eaa8e4a83dd8b475d2ad93802994971140b1b4c4a06ed6a8cb306a9c37b919e",
+    "configuration.py": "f265845bc373cc67806d7b56f7ac8fb79e577e0e5545714c1caaa58d2bc7f4c9",
+    "train.py": "1f68ca2cb50bc0deba9f7873c3c1a45347c98cfaf2ed3fe4c5de990afc81cc09"
+  },
+  "data_files": {
+    "Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f",
+    "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf",
+    "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260",
+    "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c",
+    "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d",
+    "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073"
+  },
+  "input_config_sha256": "92d0aaa6e4a09b3391f3f704563ecacee3821136fff7f938a2102139b996464c",
+  "artifacts": {
+    "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\best.pt",
+    "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\best_config.json",
+    "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\config.yaml",
+    "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\result.json",
+    "log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\training.log",
+    "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\tensorboard",
+    "sources": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_004\\attempt_1\\artifacts\\Youshu\\20261028T125305_4766598d\\sources"
+  },
+  "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "pythonhashseed": "3233215529"
+  },
+  "config_hash": "da3429090e0bab4e884cb19270b692f85ffb5fcbe67d22e48d4ca2c7798abb0d",
+  "data_statistics": {
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "UB_train": {
+      "edges": 34416,
+      "active_rows": 2959
+    },
+    "UB_val": {
+      "edges": 5189,
+      "active_rows": 2959
+    },
+    "UB_test": {
+      "edges": 9746,
+      "active_rows": 2959
+    },
+    "UI": {
+      "edges": 138515,
+      "active_rows": 8006
+    },
+    "BI": {
+      "edges": 176667,
+      "active_rows": 4771
+    }
+  },
+  "last_losses": {
+    "loss": 0.386568047106266,
+    "bpr": 0.19613960292190313,
+    "contrastive_unweighted": 4.760711252689362
+  },
+  "result": {
+    "best_epoch": 89,
+    "best_epoch_1based": 90,
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+    "selection_metrics": {
+      "recall@20": 0.28856100718610067,
+      "ndcg@20": 0.14268409339670154
+    },
+    "metrics": {
+      "val": {
+        "recall": {
+          "10": 0.2061858646125961,
+          "20": 0.28856100718610067,
+          "40": 0.38610642856341354,
+          "80": 0.5060050941150146
+        },
+        "ndcg": {
+          "10": 0.11926065324407528,
+          "20": 0.14268409339670154,
+          "40": 0.16546035771758302,
+          "80": 0.18856868763234252
+        }
+      },
+      "test": {
+        "recall": {
+          "10": 0.19809251316659715,
+          "20": 0.2827149726684612,
+          "40": 0.3899188052967377,
+          "80": 0.5111503020941144
+        },
+        "ndcg": {
+          "10": 0.1420795328514767,
+          "20": 0.16618343558251839,
+          "40": 0.19524328109983577,
+          "80": 0.22296977969753295
+        }
+      }
+    }
+  },
+  "ended_at": "2026-10-28T20:59:54+08:00",
+  "duration_seconds": 408.796,
+  "artifact_hashes": {
+    "checkpoint_model": "1a90bd41dd238212ae7b701352bd642c1966e9a01679af9dcb5cbe084be855e0",
+    "checkpoint_config": "b0416bf10de756b5131d594171c9a996f4e300c843630befff4284f3426d0091",
+    "config": "a662687828967d0e1cb522031feb404dded1d95d226145f571c01e90dafec918"
+  }
+}
+END_EXECUTION: 20261028T125305_4766598d
+
+========================================================================
+EXECUTION_ID: 20261028T130000_f9c41b67
+实验类别: 第一种情况（作者已有数据集配置）
+模型: MultiCBR
+数据集: Youshu
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-28T21:00:00+08:00
+结束时间(UTC+08:00): 2026-10-28T21:06:54+08:00
+耗时（秒）: 413.875
+实验备注: Repeated batch 20261028T123349_aa0caace run 5/6;
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+best_epoch: 79（从0计数）
+最佳训练轮次: 80
+val TOP 10: Recall=0.19480573, NDCG=0.11636510
+val TOP 20: Recall=0.28510677, NDCG=0.14188651
+val TOP 40: Recall=0.38902435, NDCG=0.16588458
+val TOP 80: Recall=0.50636773, NDCG=0.18837627
+test TOP 10: Recall=0.19909689, NDCG=0.14318956
+test TOP 20: Recall=0.28147896, NDCG=0.16666867
+test TOP 40: Recall=0.38794622, NDCG=0.19522355
+test TOP 80: Recall=0.51072673, NDCG=0.22355803
+完整运行记录(JSON，包含完整实际配置与未舍入指标):
+{
+  "execution_id": "20261028T130000_f9c41b67",
+  "dataset": "Youshu",
+  "model": "MultiCBR",
+  "experiment_case": "first",
+  "implementation": "multicbr-author-port-v1",
+  "status": "SUCCESS",
+  "completed": true,
+  "completed_epochs": 100,
+  "started_at": "2026-10-28T21:00:00+08:00",
+  "note": "Repeated batch 20261028T123349_aa0caace run 5/6; ",
+  "gpu": "0",
+  "device": "cuda:0",
+  "git_commit": "951fa6485f33acf45036564152e148975dc61afc",
+  "config": {
+    "seed": 172597736,
+    "num_workers": 0,
+    "data_path": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\datasets",
+    "batch_size_train": 2048,
+    "batch_size_test": 2048,
+    "topk": [
+      10,
+      20,
+      40,
+      80
+    ],
+    "neg_num": 1,
+    "aug_type": "Noise",
+    "ed_interval": 1,
+    "embedding_sizes": [
+      64
+    ],
+    "num_layerss": [
+      2
+    ],
+    "UB_ratios": [
+      0.2
+    ],
+    "UI_ratios": [
+      0.1
+    ],
+    "BI_ratios": [
+      0.1
+    ],
+    "fusion_weights": {
+      "modal_weight": [
+        0.35,
+        0.15,
+        0.5
+      ],
+      "UB_layer": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "UI_layer": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "BI_layer": [
+        0.6,
+        0.1,
+        0.3
+      ]
+    },
+    "lrs": [
+      0.001
+    ],
+    "l2_regs": [
+      1e-05
+    ],
+    "c_lambdas": [
+      0.04
+    ],
+    "c_temps": [
+      0.23
+    ],
+    "epochs": 100,
+    "test_interval": 5,
+    "embedding_size": 64,
+    "num_layers": 2,
+    "UB_ratio": 0.2,
+    "UI_ratio": 0.1,
+    "BI_ratio": 0.1,
+    "lr": 0.001,
+    "l2_reg": 1e-05,
+    "c_lambda": 0.04,
+    "c_temp": 0.23,
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "dataset": "Youshu",
+    "model": "MultiCBR",
+    "device": "cuda:0",
+    "gpu": "0",
+    "quiet": true,
+    "info": "",
+    "implementation": "multicbr-author-port-v1",
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+  },
+  "sources": {
+    "model.py": "a338c5ac88b4d9cf3968aaf015d71c1f4b839bebc69b74c3c85fd6d93a18b05a",
+    "data.py": "5eaa8e4a83dd8b475d2ad93802994971140b1b4c4a06ed6a8cb306a9c37b919e",
+    "configuration.py": "f265845bc373cc67806d7b56f7ac8fb79e577e0e5545714c1caaa58d2bc7f4c9",
+    "train.py": "1f68ca2cb50bc0deba9f7873c3c1a45347c98cfaf2ed3fe4c5de990afc81cc09"
+  },
+  "data_files": {
+    "Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f",
+    "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf",
+    "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260",
+    "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c",
+    "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d",
+    "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073"
+  },
+  "input_config_sha256": "92d0aaa6e4a09b3391f3f704563ecacee3821136fff7f938a2102139b996464c",
+  "artifacts": {
+    "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\best.pt",
+    "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\best_config.json",
+    "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\config.yaml",
+    "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\result.json",
+    "log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\training.log",
+    "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\tensorboard",
+    "sources": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_005\\attempt_1\\artifacts\\Youshu\\20261028T130000_f9c41b67\\sources"
+  },
+  "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "pythonhashseed": "172597736"
+  },
+  "config_hash": "ebcfc89516671b796d2f0f344ee1d9444dab074875bb4524f2296647fa6d3bf4",
+  "data_statistics": {
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "UB_train": {
+      "edges": 34416,
+      "active_rows": 2959
+    },
+    "UB_val": {
+      "edges": 5189,
+      "active_rows": 2959
+    },
+    "UB_test": {
+      "edges": 9746,
+      "active_rows": 2959
+    },
+    "UI": {
+      "edges": 138515,
+      "active_rows": 8006
+    },
+    "BI": {
+      "edges": 176667,
+      "active_rows": 4771
+    }
+  },
+  "last_losses": {
+    "loss": 0.3845487181097269,
+    "bpr": 0.194362323731184,
+    "contrastive_unweighted": 4.75465989112854
+  },
+  "result": {
+    "best_epoch": 79,
+    "best_epoch_1based": 80,
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+    "selection_metrics": {
+      "recall@20": 0.2851067710946081,
+      "ndcg@20": 0.1418865083963253
+    },
+    "metrics": {
+      "val": {
+        "recall": {
+          "10": 0.19480572668593168,
+          "20": 0.2851067710946081,
+          "40": 0.38902434838627914,
+          "80": 0.5063677262760329
+        },
+        "ndcg": {
+          "10": 0.11636510335258955,
+          "20": 0.1418865083963253,
+          "40": 0.1658845819626035,
+          "80": 0.18837626909395858
+        }
+      },
+      "test": {
+        "recall": {
+          "10": 0.1990968911137763,
+          "20": 0.28147896434375264,
+          "40": 0.3879462187658415,
+          "80": 0.5107267275981381
+        },
+        "ndcg": {
+          "10": 0.14318956463431215,
+          "20": 0.16666867177846587,
+          "40": 0.1952235462618019,
+          "80": 0.22355802947905226
+        }
+      }
+    }
+  },
+  "ended_at": "2026-10-28T21:06:54+08:00",
+  "duration_seconds": 413.875,
+  "artifact_hashes": {
+    "checkpoint_model": "64509a2a92804157ac21b10cb2d8f3f1dd75235231ad9ca8a58160f483bbf84e",
+    "checkpoint_config": "e54a0ec8d2c0bd13d228fbb41ec62c2befb882b2176e8307eeadb605228873cd",
+    "config": "286289d716bb623d6a2cad8e0c9ac2e1596ab5a1a9adbfb49b4121277dc979c2"
+  }
+}
+END_EXECUTION: 20261028T130000_f9c41b67
+
+========================================================================
+EXECUTION_ID: 20261028T130659_e2882e53
+实验类别: 第一种情况（作者已有数据集配置）
+模型: MultiCBR
+数据集: Youshu
+状态: SUCCESS
+开始时间(UTC+08:00): 2026-10-28T21:06:59+08:00
+结束时间(UTC+08:00): 2026-10-28T21:13:47+08:00
+耗时（秒）: 407.375
+实验备注: Repeated batch 20261028T123349_aa0caace run 6/6;
+选模规则: validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint
+best_epoch: 74（从0计数）
+最佳训练轮次: 75
+val TOP 10: Recall=0.20461627, NDCG=0.11990108
+val TOP 20: Recall=0.28797414, NDCG=0.14340366
+val TOP 40: Recall=0.38130698, NDCG=0.16525185
+val TOP 80: Recall=0.50070557, NDCG=0.18821012
+test TOP 10: Recall=0.19983128, NDCG=0.14404280
+test TOP 20: Recall=0.27865505, NDCG=0.16624595
+test TOP 40: Recall=0.38980536, NDCG=0.19633428
+test TOP 80: Recall=0.50731585, NDCG=0.22334304
+完整运行记录(JSON，包含完整实际配置与未舍入指标):
+{
+  "execution_id": "20261028T130659_e2882e53",
+  "dataset": "Youshu",
+  "model": "MultiCBR",
+  "experiment_case": "first",
+  "implementation": "multicbr-author-port-v1",
+  "status": "SUCCESS",
+  "completed": true,
+  "completed_epochs": 100,
+  "started_at": "2026-10-28T21:06:59+08:00",
+  "note": "Repeated batch 20261028T123349_aa0caace run 6/6; ",
+  "gpu": "0",
+  "device": "cuda:0",
+  "git_commit": "951fa6485f33acf45036564152e148975dc61afc",
+  "config": {
+    "seed": 918537015,
+    "num_workers": 0,
+    "data_path": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\datasets",
+    "batch_size_train": 2048,
+    "batch_size_test": 2048,
+    "topk": [
+      10,
+      20,
+      40,
+      80
+    ],
+    "neg_num": 1,
+    "aug_type": "Noise",
+    "ed_interval": 1,
+    "embedding_sizes": [
+      64
+    ],
+    "num_layerss": [
+      2
+    ],
+    "UB_ratios": [
+      0.2
+    ],
+    "UI_ratios": [
+      0.1
+    ],
+    "BI_ratios": [
+      0.1
+    ],
+    "fusion_weights": {
+      "modal_weight": [
+        0.35,
+        0.15,
+        0.5
+      ],
+      "UB_layer": [
+        0.7,
+        0.2,
+        0.1
+      ],
+      "UI_layer": [
+        0.6,
+        0.2,
+        0.2
+      ],
+      "BI_layer": [
+        0.6,
+        0.1,
+        0.3
+      ]
+    },
+    "lrs": [
+      0.001
+    ],
+    "l2_regs": [
+      1e-05
+    ],
+    "c_lambdas": [
+      0.04
+    ],
+    "c_temps": [
+      0.23
+    ],
+    "epochs": 100,
+    "test_interval": 5,
+    "embedding_size": 64,
+    "num_layers": 2,
+    "UB_ratio": 0.2,
+    "UI_ratio": 0.1,
+    "BI_ratio": 0.1,
+    "lr": 0.001,
+    "l2_reg": 1e-05,
+    "c_lambda": 0.04,
+    "c_temp": 0.23,
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "dataset": "Youshu",
+    "model": "MultiCBR",
+    "device": "cuda:0",
+    "gpu": "0",
+    "quiet": true,
+    "info": "",
+    "implementation": "multicbr-author-port-v1",
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint"
+  },
+  "sources": {
+    "model.py": "a338c5ac88b4d9cf3968aaf015d71c1f4b839bebc69b74c3c85fd6d93a18b05a",
+    "data.py": "5eaa8e4a83dd8b475d2ad93802994971140b1b4c4a06ed6a8cb306a9c37b919e",
+    "configuration.py": "f265845bc373cc67806d7b56f7ac8fb79e577e0e5545714c1caaa58d2bc7f4c9",
+    "train.py": "1f68ca2cb50bc0deba9f7873c3c1a45347c98cfaf2ed3fe4c5de990afc81cc09"
+  },
+  "data_files": {
+    "Youshu_data_size.txt": "4f370f871ed707e9505430b8ca12462f2faee526b98f7539fde7e4d4c71ccb8f",
+    "bundle_item.txt": "c94e58170d7d3ea1d8e12469d61a61bb963fd2ee77affffbbbdccba8bf45cadf",
+    "user_item.txt": "b57030126df2355778e809b55105fa1f032b60ddb50ead45a06c2c080b55d260",
+    "user_bundle_train.txt": "18da0562cb426cecb8cf54787e851bf0ccfbaf85bc0462329f58f6ce1e00476c",
+    "user_bundle_tune.txt": "dca9972a5e9df15b8d4fda9d1c7ff4c6e98f7222dacb0f9baed6b8df72ceff3d",
+    "user_bundle_test.txt": "7f923f0a109f59236208c41d35783971d5684ba5eb0ea7387f4bed3044573073"
+  },
+  "input_config_sha256": "92d0aaa6e4a09b3391f3f704563ecacee3821136fff7f938a2102139b996464c",
+  "artifacts": {
+    "checkpoint_model": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\best.pt",
+    "checkpoint_config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\best_config.json",
+    "config": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\config.yaml",
+    "result_json": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\result.json",
+    "log": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\training.log",
+    "tensorboard": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\tensorboard",
+    "sources": "C:\\Users\\admin\\PycharmProjects\\MultiCBR-Project\\MultiCBR\\log\\repeated\\Youshu\\20261028T123349_aa0caace\\run_006\\attempt_1\\artifacts\\Youshu\\20261028T130659_e2882e53\\sources"
+  },
+  "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+  "environment": {
+    "python": "3.12.13 | packaged by conda-forge | (main, Mar  5 2026, 16:36:12) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-10-10.0.19045-SP0",
+    "torch": "2.11.0+cu128",
+    "numpy": "2.4.4",
+    "scipy": "1.18.1",
+    "cuda_runtime": "12.8",
+    "gpu_name": "NVIDIA GeForce RTX 3090",
+    "pythonhashseed": "918537015"
+  },
+  "config_hash": "dc687e31a3df6c6935358440e772dd5f46cb0fdcf015959ba1ea4fbcb3f2e544",
+  "data_statistics": {
+    "num_users": 8039,
+    "num_bundles": 4771,
+    "num_items": 32770,
+    "UB_train": {
+      "edges": 34416,
+      "active_rows": 2959
+    },
+    "UB_val": {
+      "edges": 5189,
+      "active_rows": 2959
+    },
+    "UB_test": {
+      "edges": 9746,
+      "active_rows": 2959
+    },
+    "UI": {
+      "edges": 138515,
+      "active_rows": 8006
+    },
+    "BI": {
+      "edges": 176667,
+      "active_rows": 4771
+    }
+  },
+  "last_losses": {
+    "loss": 0.38710590079426765,
+    "bpr": 0.19703568518161774,
+    "contrastive_unweighted": 4.751755446195602
+  },
+  "result": {
+    "best_epoch": 74,
+    "best_epoch_1based": 75,
+    "selection_rule": "validation Recall@20 and NDCG@20 both strictly improve over the saved checkpoint",
+    "selection_metrics": {
+      "recall@20": 0.28797413941048494,
+      "ndcg@20": 0.1434036621011242
+    },
+    "metrics": {
+      "val": {
+        "recall": {
+          "10": 0.20461626687779866,
+          "20": 0.28797413941048494,
+          "40": 0.38130697989713586,
+          "80": 0.5007055655811719
+        },
+        "ndcg": {
+          "10": 0.11990108406193235,
+          "20": 0.1434036621011242,
+          "40": 0.16525184757687747,
+          "80": 0.18821012413795835
+        }
+      },
+      "test": {
+        "recall": {
+          "10": 0.19983127770612433,
+          "20": 0.27865505186276246,
+          "40": 0.38980535705091984,
+          "80": 0.5073158545202402
+        },
+        "ndcg": {
+          "10": 0.1440428011560005,
+          "20": 0.166245945565964,
+          "40": 0.19633427678269685,
+          "80": 0.223343039896489
+        }
+      }
+    }
+  },
+  "ended_at": "2026-10-28T21:13:47+08:00",
+  "duration_seconds": 407.375,
+  "artifact_hashes": {
+    "checkpoint_model": "260b0bf4010691eb931c6aa0ed296cfd2cb296f799d651fae6f5b3e82c70d5d2",
+    "checkpoint_config": "ff881adf78d73366de47c75fb31096953f697a57310360b0c11b35b3aa61e7d2",
+    "config": "787b0889348f516ef7e81b1b072fb8c9f17dffea960b09883374295b0343c78b"
+  }
+}
+END_EXECUTION: 20261028T130659_e2882e53

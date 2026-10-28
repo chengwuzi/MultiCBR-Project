@@ -5,6 +5,7 @@ import copy
 import io
 import json
 import os
+import re
 from pathlib import Path
 import subprocess
 import sys
@@ -545,6 +546,110 @@ class ControllerTests(unittest.TestCase):
         last = state["executions"]
         self.assertTrue(all(r["config"]["anchor_cl"]["enabled"] for r in last))
         self.assertTrue(all(r["config"]["c_temps"] == [.3] for r in last))
+
+    def install_automatic_pipeline(self):
+        for name in ("run_ifashion_pipeline.py", "run_ifashion_experiments.py", "experiment_io.py",
+                     "prepare_ifashion_clambda_recheck.py", "prepare_ifashion_followup.py"):
+            (self.root / name).write_bytes((ROOT / name).read_bytes())
+        plans = self.root / "tuning_plans"
+        plans.mkdir()
+        for name in ("ifashion_followup_stages_20261028.yaml", "ifashion_fusion_local_06.yaml"):
+            (plans / name).write_bytes((ROOT / "tuning_plans" / name).read_bytes())
+        snapshot = plans / "ifashion_local_baseline_20261028.yaml"
+        snapshot.write_text(yaml.safe_dump(self.base), encoding="utf-8")
+        first_path = plans / "ifashion_fusion_local_06.yaml"
+        first = yaml.safe_load(first_path.read_text(encoding="utf-8"))
+        first["result_file"] = "results/result.txt"
+        first_path.write_text(yaml.safe_dump(first), encoding="utf-8")
+        reference = self.root / "results/result.txt"
+        reference.parent.mkdir()
+        reference.write_text("EXECUTION_ID: 20261025T082203_9dec4c53\n完整实际配置:\n" +
+                             yaml.safe_dump(self.base["iFashion"]) +
+                             "\n尝试 1: SUCCESS\n验证选模分数: 0.4000000000\n", encoding="utf-8")
+        scoring = '''
+score=.1
+score+=.01*(conf['fusion_weights']['modal_weight'][0]==.075)
+score+=.01*(conf['c_lambdas'][0]==.3)
+score+=.01*(conf['c_temps'][0]==.3)
+score+=.01*(conf['anchor_cl']['enabled'] and conf['anchor_cl']['anchor_cl_lambda']==.003)
+score+=.01*(conf['BI_ratios'][0]==.1)
+metrics={s:{m:{str(k):(score if s=='val' else 1-score) for k in conf['topk']}
+            for m in ['recall','ndcg']} for s in ['val','test']}
+'''
+        trainer = FAKE_TRAINER.replace("assert conf['anchor_cl']['enabled'] is False", "")
+        trainer = trainer.replace("model=Path(a.result_json", scoring + "\nmodel=Path(a.result_json")
+        trainer = trainer.replace("'selection_score':.4", "'selection_score':4*score")
+        (self.root / "train.py").write_text(trainer, encoding="utf-8")
+        return [sys.executable, str(self.root / "run_ifashion_pipeline.py"), "--gpu", "1"]
+
+    def test_automatic_pipeline_selects_validation_winners_runs_all_and_resumes(self):
+        command = self.install_automatic_pipeline()
+        result = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        pipeline = self.root / "log/ifashion_tuning/pipeline_06_10"
+        state = json.loads((pipeline / "state.json").read_text(encoding="utf-8"))
+        self.assertEqual(state["status"], "COMPLETE")
+        self.assertEqual([s["selected_experiment"] for s in state["stages"]],
+                         ["ub_0075", "clambda_030", "ctemp_030", "anchor_0003", "bi_noise_010"])
+        self.assertEqual(sum(len(json.loads(p.read_text(encoding="utf-8"))["executions"])
+                             for p in (self.root / "log/ifashion_tuning").glob("*/state.json")
+                             if p.parent != pipeline), 14)
+        best = yaml.safe_load((pipeline / "best_config.yaml").read_text(encoding="utf-8"))["iFashion"]
+        self.assertEqual(best["fusion_weights"]["modal_weight"], [.075, .325, .6])
+        self.assertEqual(best["c_lambdas"], [.3])
+        self.assertEqual(best["c_temps"], [.3])
+        self.assertEqual(best["BI_ratios"], [.1])
+        self.assertEqual(best["anchor_cl"]["anchor_cl_lambda"], .003)
+        counts = {p: p.read_bytes() for p in self.root.glob('counter_*.txt')}
+        resumed = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
+        self.assertEqual({p: p.read_bytes() for p in counts}, counts)
+        changed_gpu = subprocess.run(command[:-1] + ["0"], cwd=self.root, capture_output=True,
+                                     encoding="utf-8", timeout=30)
+        self.assertEqual(changed_gpu.returncode, 2)
+        self.assertIn("GPU changed", changed_gpu.stderr)
+
+    def test_automatic_pipeline_dry_run_lists_all_without_writing(self):
+        command = self.install_automatic_pipeline()
+        result = subprocess.run(command + ["--dry-run"], cwd=self.root, capture_output=True,
+                                encoding="utf-8", timeout=30)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("共 14 组", result.stdout)
+        self.assertIn("bi_noise_030", result.stdout)
+        self.assertFalse((self.root / "log").exists())
+        self.assertFalse(list(self.root.glob('counter_*.txt')))
+
+    def test_automatic_pipeline_stops_on_failure_and_resumes_remaining_groups(self):
+        command = self.install_automatic_pipeline()
+        self.behavior({"0.35": "fail"})
+        failed = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(failed.returncode, 1, failed.stdout + failed.stderr)
+        pipeline = self.root / "log/ifashion_tuning/pipeline_06_10"
+        self.assertEqual(json.loads((pipeline / "state.json").read_text())["status"], "FAILED")
+        self.assertFalse((pipeline / "round_7_plan.yaml").exists())
+        self.behavior({})
+        resumed = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(resumed.returncode, 0, resumed.stdout + resumed.stderr)
+        self.assertEqual(json.loads((pipeline / "state.json").read_text())["status"], "COMPLETE")
+
+    def test_automatic_pipeline_ties_keep_baseline_and_duplicate_launch_is_blocked(self):
+        command = self.install_automatic_pipeline()
+        trainer = self.root / "train.py"
+        trainer.write_text(re.sub(r"^score\+=.*\n", "", trainer.read_text(encoding="utf-8"), flags=re.M),
+                           encoding="utf-8")
+        pipeline = self.root / "log/ifashion_tuning/pipeline_06_10"
+        pipeline.mkdir(parents=True)
+        with runner.round_lock(pipeline / "controller.lock"):
+            blocked = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=30)
+        self.assertEqual(blocked.returncode, 2)
+        self.assertFalse(list(self.root.glob('counter_*.txt')))
+        result = subprocess.run(command, cwd=self.root, capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        state = json.loads((pipeline / "state.json").read_text(encoding="utf-8"))
+        self.assertEqual([s["selected_experiment"] for s in state["stages"]], ["baseline"] * 5)
+        self.assertEqual(state["best"]["execution_id"], "20261025T082203_9dec4c53")
+        exported = yaml.safe_load((pipeline / "best_config.yaml").read_text(encoding="utf-8"))
+        self.assertEqual(exported["iFashion"], self.base["iFashion"])
 
 
 class ResultTests(unittest.TestCase):

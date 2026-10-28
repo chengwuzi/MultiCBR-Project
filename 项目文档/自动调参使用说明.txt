@@ -1,8 +1,9 @@
 iFashion 自动调参使用说明
 
-当前状态（2026-10-25）：用户已决定结束本次 iFashion 调参，并终止第五轮剩余实验。
-最终选定第四轮 ui_to_bi_010，EXECUTION_ID=20261025T082203_9dec4c53，验证综合分数 0.5638427481。
-以下各轮计划与命令作为历史使用说明保留，本次不再执行；详细结论见第十三节及“工作事项.txt”第四项。
+当前状态（2026-10-28）：用户将局部补搜扩展为五批、共 14 组，按融合权重、c_lambda、
+融合后温度、融合前对比权重、BI 噪声的顺序执行；第六、七轮见第十四节，新增三批见第十五节。
+当前已验证基线仍为第四轮 ui_to_bi_010，EXECUTION_ID=20261025T082203_9dec4c53，验证综合分数 0.5638427481。
+第一至第五轮及第十三节保留此前调参收尾历史，第五轮剩余实验仍不恢复。
 
 一、文件分工
 
@@ -268,3 +269,126 @@ epochs=40，seed=2026，anchor_cl.enabled=false，latent_rebuild.enabled=true，
 
 历史计划文件继续保留。运行原第五轮命令仍会按既有 resume 规则选择未成功组，
 结束本次调参后不再启动该命令；不篡改历史进度、执行状态或结果来伪装剩余实验已完成。
+
+
+十四、最初两批局部补搜：先融合权重，再回查 c_lambda（2026-10-28）
+
+最初安排新增 6 组，按两批顺序执行，真实训练在服务器进行；后续扩展为 14 组，见第十五节。
+使用 tuning_plans/ifashion_local_baseline_20261028.yaml 固定第四轮优胜实验的全部输入参数，
+后续修改 config.yaml 不会悄悄改变这两批实验的其他参数。
+共同设置：seed=2026、epochs=40、test_interval=5、c_temp=0.2、anchor_cl.enabled=false、
+latent_rebuild.enabled=true、rebuild_k=3，其余设置与第四轮优胜配置一致。
+config.yaml 继续保留已验证基线，只有新实验完成并选优后再决定是否更新。
+
+第一批：第六轮局部融合权重。
+计划 tuning_plans/ifashion_fusion_local_06.yaml，round_id=stage3_fusion_local_06。
+固定 BI=0.60、c_lambda=0.35，按以下顺序运行：
+ub_005：[UB,UI,BI]=[0.05,0.35,0.60]。
+ub_0075：[UB,UI,BI]=[0.075,0.325,0.60]。
+ub_0125：[UB,UI,BI]=[0.125,0.275,0.60]。
+
+预检查（不训练、不写进度）：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_local_06.yaml --gpu 0 --dry-run
+正式运行：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_fusion_local_06.yaml --gpu 0
+
+进度保存在 log/ifashion_tuning/stage3_fusion_local_06/，结果仍追加到实验结果存档/Ifashion调参.txt。
+中断、失败和续跑规则沿用原控制器；续跑时使用相同命令和相同 GPU。
+本轮不额外重跑历史基线；比较前提是服务器环境、数据和训练源码与基线实验保持一致。
+若环境或训练源码有变化，应先重跑基线确认可比性，再决定新实验是否更好。
+
+三组完整结束后，按验证集 R@20+R@40+N@20+N@40 排名，和第四轮基线 0.5638427481 比较。
+若新三组均未超过基线，继续选 baseline=[0.10,0.30,0.60]。
+同分时保留基线；新组之间同分时按计划顺序选择。不要按测试指标或不同轮次的单项峰值选优。
+单种子微小差异不能证明稳定提升；复验可另行安排，不包含在本次 6 组预算内。
+
+第二批：第七轮 c_lambda 回查。
+第二批需要第一批结果，因此仓库不预置已经选好融合权重的第七轮计划。
+使用 prepare_ifashion_clambda_recheck.py 显式指定选定的融合组，生成计划；工具不会训练或自动选优。
+--fusion-experiment 必填，可选 baseline、ub_005、ub_0075、ub_0125。
+
+例如第一批结束后若 ub_0075 胜出，先预览生成内容：
+python prepare_ifashion_clambda_recheck.py --fusion-experiment ub_0075 --gpu 0 --dry-run
+确认与选定实验一致后生成：
+python prepare_ifashion_clambda_recheck.py --fusion-experiment ub_0075 --gpu 0
+如果保留历史基线，则将 ub_0075 换成 baseline；该示例不是预先认定 ub_0075 最优。
+
+默认生成 tuning_plans/ifashion_clambda_recheck_07.yaml，round_id=stage1_clambda_recheck_07。
+生成器固定选定组的全部配置，只搜索 c_lambdas=[0.25]、[0.30]、[0.40]，依次对应
+clambda_025、clambda_030、clambda_040；对照是同融合配置已有的 c_lambda=0.35 结果。
+工具拒绝覆盖现有文件，避免误改已启动队列的配置；--output 可指定另一个新文件。
+同一 round_id 的生成计划只选定一个融合配置，不同时启动多个控制器。
+
+生成后预检查：
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_recheck_07.yaml --gpu 0 --dry-run
+正式运行：
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_clambda_recheck_07.yaml --gpu 0
+
+第七轮进度保存在 log/ifashion_tuning/stage1_clambda_recheck_07/，结果追加到同一结果档案。
+最后将本轮新三组与同融合配置的 c_lambda=0.35 比较，允许保留 0.35。
+第五轮 k=7/5/1 仍不恢复；温度及融合前对比搜索已获后续授权，按第十五节执行。
+计划生成和执行均不自动修改 config.yaml。
+
+
+十五、增加温度、融合前对比、BI 噪声三批实验（2026-10-28）
+
+用户同意将三个尚未搜索的参数纳入本次工作，新增 8 组，连同第六、七轮共 14 组。
+执行顺序与新候选如下：
+第六轮，3 组：融合权重，见第十四节。
+第七轮，3 组：c_lambda=0.25、0.30、0.40，见第十四节。
+第八轮，2 组：c_temp=0.1、0.3，对照是同配置已有的 0.2。
+第九轮，3 组：开启融合前对比，anchor_cl_lambda=0.001、0.003、0.01，对照是同配置的关闭状态。
+第十轮，3 组：BI_ratios=[0.0]、[0.1]、[0.3]，对照是同配置已有的 0.2。
+
+每批完整结束后，将新组与本批输入基线一起按验证综合分数 S 选优，再生成下一批。
+S 仍为 val Recall@20 + Recall@40 + NDCG@20 + NDCG@40，不使用测试指标挑选参数。
+只有严格超过输入基线才替换基线；同分保留基线，新组之间同分按计划顺序选择。
+这里 baseline 指上一轮计划的 common_overrides 输入配置，包括此前各批选出的全部参数，
+并非始终回退到第四轮原始配置；因此可以保留之前的改进、拒绝当前这一个参数的无效调整。
+各批保持 seed=2026、epochs=40、test_interval=5；新增 8 组不构造参数笛卡尔积。
+各批已有基线结果复用，不重复计入这 14 组；比较仍要求环境、源码、数据一致。
+
+配置定义：tuning_plans/ifashion_followup_stages_20261028.yaml。
+该文件供生成器读取，不是可直接传给 run_ifashion_experiments.py 的实验计划。
+生成器：prepare_ifashion_followup.py，显式输入上一轮有效计划、选定实验 ID 和下一阶段。
+工具校验来源轮次并完整继承配置；支持 --gpu、--dry-run、--output，拒绝覆盖已有文件。
+只生成计划，不启动训练，不读取测试指标，不自动判定结果或更新基础配置。
+
+以下命令中的 SELECTED_ID 必须在上一批完整结束后替换为实际验证优胜 ID；原样执行会报错。
+如果新组均未超过输入基线，用 baseline；使用 baseline 也必须先完成本批结果比较。
+
+第八轮：第七轮完成后生成温度计划。
+SELECTED_ID 可选 baseline、clambda_025、clambda_030、clambda_040。
+先在以下命令末尾加 --dry-run 预览，检查后去掉该参数生成：
+python prepare_ifashion_followup.py --stage ctemp --source-plan tuning_plans/ifashion_clambda_recheck_07.yaml --experiment SELECTED_ID --gpu 0
+生成 tuning_plans/ifashion_ctemp_08.yaml，round_id=stage1_ctemp_08；实验 ID 为 ctemp_010、ctemp_030。
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_ctemp_08.yaml --gpu 0 --dry-run
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_ctemp_08.yaml --gpu 0
+固定第七轮选定的融合权重与 c_lambda，融合前对比仍关闭。
+温度与 c_lambda 存在耦合；本次先单独比较温度，温度变化后的额外权重回查不计入这 14 组。
+
+第九轮：第八轮完成后生成融合前对比计划。
+SELECTED_ID 可选 baseline、ctemp_010、ctemp_030。
+python prepare_ifashion_followup.py --stage anchor_cl --source-plan tuning_plans/ifashion_ctemp_08.yaml --experiment SELECTED_ID --gpu 0
+生成 tuning_plans/ifashion_anchor_cl_09.yaml，round_id=stage2_anchor_09；实验 ID 为
+anchor_0001、anchor_0003、anchor_0010，分别对应 0.001、0.003、0.01。
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_anchor_cl_09.yaml --gpu 0 --dry-run
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_anchor_cl_09.yaml --gpu 0
+三个候选均设置 anchor_cl.enabled=true，用户侧与组合侧均开启，四项内部权重均为 1，
+融合前温度固定 anchor_cl.temp=0.2；融合后 c_temps 继承上一轮选定值，两类温度独立。
+关闭状态原有的 anchor_cl_lambda=0.07 不生效，也不会作为本轮开启后的默认权重。
+
+第十轮：第九轮完成后生成 BI 噪声计划。
+SELECTED_ID 可选 baseline、anchor_0001、anchor_0003、anchor_0010。
+python prepare_ifashion_followup.py --stage bi_noise --source-plan tuning_plans/ifashion_anchor_cl_09.yaml --experiment SELECTED_ID --gpu 0
+生成 tuning_plans/ifashion_bi_noise_10.yaml，round_id=stage_noise_bi_10；实验 ID 为
+bi_noise_000、bi_noise_010、bi_noise_030。
+python run_ifashion_experiments.py --plan tuning_plans/ifashion_bi_noise_10.yaml --gpu 0 --dry-run
+python -u run_ifashion_experiments.py --plan tuning_plans/ifashion_bi_noise_10.yaml --gpu 0
+保持 aug_type=Noise，BI_ratios 是表示扰动幅度，不是删边比例。
+UB/UI 噪声和此前所有选定参数保持不变；若融合前对比没有收益，baseline 会继承关闭状态。
+
+所有正式运行继续使用已有控制器的串行调度、三次尝试、进度恢复、GPU 覆盖及结果追加规则。
+每轮使用独立 round_id；更换输入配置或 GPU 会改变指纹，启动后不要改写计划。
+需要重新生成时可使用 --output 指定新文件；不要并行启动相同 round_id 的控制器。
+本次开发不新增真实结果，尚未选定最终组合；config.yaml 保留第四轮已验证最优配置。

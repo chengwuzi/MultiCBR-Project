@@ -15,6 +15,8 @@ from unittest import mock
 import yaml
 
 import run_ifashion_experiments as runner
+import prepare_ifashion_clambda_recheck as recheck
+import prepare_ifashion_followup as followup
 from experiment_io import atomic_write_json, save_best_result
 
 
@@ -362,6 +364,187 @@ class ControllerTests(unittest.TestCase):
         atomic_write_json(self.root / "log/ifashion_tuning/test_round/state.json", state)
         with self.assertRaisesRegex(RuntimeError, "still alive"):
             self.run_plan()
+
+    def test_recheck_carries_selected_fusion_and_all_other_inputs(self):
+        self.plan["experiments"][0].update(id="ub_0075", overrides={
+            "fusion_weights": {"modal_weight": [.075, .325, .6]}})
+        self.save_plan()
+        expected = runner.load_plan(self.path)["experiments"][0]["config"]
+        with mock.patch.object(recheck, "FUSION_PLAN", self.path):
+            plan = recheck.build_plan("ub_0075", gpu="1")
+        self.assertEqual(plan["common_overrides"], expected)
+        self.assertEqual(plan["gpu"], "1")
+        generated = self.root / "recheck.yaml"
+        generated.write_text(yaml.safe_dump(plan), encoding="utf-8")
+        candidates = runner.load_plan(generated)["experiments"]
+        self.assertEqual([e["config"]["c_lambdas"][0] for e in candidates], [.25, .30, .40])
+        for experiment in candidates:
+            actual = dict(experiment["config"], c_lambdas=expected["c_lambdas"])
+            self.assertEqual(actual, expected)
+
+    def test_recheck_baseline_includes_source_common_overrides(self):
+        self.plan["common_overrides"].update(batch_size_train=1024, epochs=50)
+        self.save_plan()
+        expected = runner.deep_merge(self.base["iFashion"], self.plan["common_overrides"])
+        with mock.patch.object(recheck, "PROJECT_ROOT", self.root), \
+                mock.patch.object(recheck, "FUSION_PLAN", self.path):
+            generated = recheck.build_plan("baseline")
+        self.assertEqual(generated["common_overrides"], expected)
+
+    def test_generators_report_malformed_yaml_without_creating_output(self):
+        self.path.write_text("version: [1\n", encoding="utf-8")
+        destination = self.root / "invalid_output.yaml"
+        with mock.patch.object(recheck, "FUSION_PLAN", self.path), \
+                mock.patch.object(sys, "stderr", io.StringIO()) as errors:
+            self.assertEqual(recheck.main(["--fusion-experiment", "baseline",
+                                           "--output", str(destination)]), 2)
+            self.assertEqual(followup.main(["--stage", "ctemp", "--source-plan", str(self.path),
+                                            "--experiment", "baseline", "--output", str(destination)]), 2)
+            self.assertEqual(errors.getvalue().count("ERROR:"), 2)
+        self.assertFalse(destination.exists())
+
+    def test_recheck_requires_explicit_choice_and_preserves_existing_plan(self):
+        destination = self.root / "generated.yaml"
+        with mock.patch.object(recheck, "PROJECT_ROOT", self.root), \
+                mock.patch.object(recheck, "FUSION_PLAN", self.path), \
+                mock.patch.object(subprocess, "Popen") as launch, \
+                redirect_stdout(io.StringIO()), mock.patch.object(sys, "stderr", io.StringIO()):
+            with self.assertRaises(ValueError):
+                recheck.build_plan("unknown")
+            with self.assertRaises(SystemExit) as missing_choice:
+                recheck.main(["--output", str(destination)])
+            self.assertEqual(missing_choice.exception.code, 2)
+            args = ["--fusion-experiment", "baseline", "--output", str(destination)]
+            self.assertEqual(recheck.main(args + ["--dry-run"]), 0)
+            self.assertFalse(destination.exists())
+            self.assertEqual(recheck.main(args), 0)
+            original = destination.read_bytes()
+            generated = runner.load_plan(destination)
+            self.assertEqual(generated["experiments"][0]["config"]["fusion_weights"],
+                             self.base["iFashion"]["fusion_weights"])
+            self.assertEqual(recheck.main(args), 2)
+            self.assertEqual(destination.read_bytes(), original)
+            launch.assert_not_called()
+
+    def test_followup_chain_preserves_selected_inputs_and_baseline_fallback(self):
+        self.plan["round_id"] = "stage1_clambda_recheck_07"
+        self.plan["common_overrides"]["fusion_weights"] = {"modal_weight": [.075, .325, .6]}
+        self.save_plan()
+        with mock.patch.object(followup, "PROJECT_ROOT", self.root):
+            temperature, _ = followup.build_plan("ctemp", self.path, "b", gpu="1")
+            self.assertEqual(temperature["gpu"], "1")
+            source = self.root / "temperature.yaml"
+            source.write_text(yaml.safe_dump(temperature), encoding="utf-8")
+            loaded = runner.load_plan(source)
+            self.assertEqual([e["config"]["c_temps"][0] for e in loaded["experiments"]], [.1, .3])
+            for e in loaded["experiments"]:
+                self.assertEqual(e["config"]["c_lambdas"], [.1])
+                self.assertEqual(e["config"]["fusion_weights"]["modal_weight"], [.075, .325, .6])
+            anchor, _ = followup.build_plan("anchor_cl", source, "ctemp_030")
+            source = self.root / "anchor.yaml"
+            source.write_text(yaml.safe_dump(anchor), encoding="utf-8")
+            loaded = runner.load_plan(source)
+            self.assertEqual([e["config"]["anchor_cl"]["anchor_cl_lambda"]
+                              for e in loaded["experiments"]], [.001, .003, .01])
+            for e in loaded["experiments"]:
+                self.assertTrue(e["config"]["anchor_cl"]["enabled"])
+                self.assertEqual(e["config"]["anchor_cl"]["temp"], .2)
+                self.assertEqual(e["config"]["c_temps"], [.3])
+            noise, _ = followup.build_plan("bi_noise", source, "anchor_0003")
+            fallback, _ = followup.build_plan("bi_noise", source, "baseline")
+            self.assertTrue(noise["common_overrides"]["anchor_cl"]["enabled"])
+            self.assertEqual(noise["common_overrides"]["anchor_cl"]["anchor_cl_lambda"], .003)
+            self.assertFalse(fallback["common_overrides"]["anchor_cl"]["enabled"])
+            for plan in (noise, fallback):
+                self.assertEqual(plan["common_overrides"]["c_temps"], [.3])
+                self.assertEqual(plan["common_overrides"]["c_lambdas"], [.1])
+                path = self.root / "noise.yaml"
+                path.write_text(yaml.safe_dump(plan), encoding="utf-8")
+                self.assertEqual([e["config"]["BI_ratios"][0]
+                                  for e in runner.load_plan(path)["experiments"]], [0., .1, .3])
+
+    def test_followup_rejects_wrong_round_unknown_group_and_inert_noise(self):
+        with mock.patch.object(followup, "PROJECT_ROOT", self.root):
+            with self.assertRaisesRegex(ValueError, "requires source round"):
+                followup.build_plan("ctemp", self.path, "baseline")
+            self.plan["round_id"] = "stage1_clambda_recheck_07"
+            self.save_plan()
+            with self.assertRaisesRegex(ValueError, "Unknown source experiment"):
+                followup.build_plan("ctemp", self.path, "unknown")
+            self.plan["round_id"] = "stage2_anchor_09"
+            self.plan["common_overrides"]["aug_type"] = "ED"
+            self.save_plan()
+            with self.assertRaisesRegex(ValueError, "aug_type=Noise"):
+                followup.build_plan("bi_noise", self.path, "baseline")
+
+    def test_followup_cli_preview_generation_and_no_overwrite(self):
+        self.plan["round_id"] = "stage1_clambda_recheck_07"
+        self.save_plan()
+        destination = self.root / "generated_temperature.yaml"
+        args = ["--stage", "ctemp", "--source-plan", str(self.path),
+                "--experiment", "baseline", "--output", str(destination), "--gpu", "1"]
+        with mock.patch.object(followup, "PROJECT_ROOT", self.root), \
+                mock.patch.object(subprocess, "Popen") as launch, \
+                redirect_stdout(io.StringIO()), mock.patch.object(sys, "stderr", io.StringIO()):
+            self.assertEqual(followup.main(args + ["--dry-run"]), 0)
+            self.assertFalse(destination.exists())
+            self.assertEqual(followup.main(args), 0)
+            original = destination.read_bytes()
+            self.assertEqual(runner.load_plan(destination)["gpu"], "1")
+            self.assertEqual(followup.main(args), 2)
+            self.assertEqual(destination.read_bytes(), original)
+            launch.assert_not_called()
+
+    def test_all_five_rounds_execute_with_fake_workers_and_resume(self):
+        # Test orchestration with all 14 candidates; this never imports a model.
+        (self.root / "train.py").write_text(
+            FAKE_TRAINER.replace("assert conf['anchor_cl']['enabled'] is False", ""), encoding="utf-8")
+        for name in ("run_ifashion_experiments.py", "experiment_io.py"):
+            (self.root / name).write_bytes((ROOT / name).read_bytes())
+        self.plan.update(round_id="stage3_fusion_local_06", common_overrides={})
+        self.plan["experiments"] = [
+            {"id": eid, "note": eid, "overrides": {"fusion_weights": {"modal_weight": weights}}}
+            for eid, weights in (("ub_005", [.05, .35, .6]), ("ub_0075", [.075, .325, .6]),
+                                 ("ub_0125", [.125, .275, .6]))
+        ]
+        self.save_plan()
+        source = self.path
+        total = 0
+        with mock.patch.object(recheck, "PROJECT_ROOT", self.root), \
+                mock.patch.object(recheck, "FUSION_PLAN", self.path), \
+                mock.patch.object(followup, "PROJECT_ROOT", self.root):
+            for index in range(5):
+                if index == 1:
+                    plan = recheck.build_plan("ub_0075", gpu="1")
+                elif index >= 2:
+                    stage, selected = (("ctemp", "clambda_030"), ("anchor_cl", "ctemp_030"),
+                                       ("bi_noise", "anchor_0003"))[index - 2]
+                    plan, _ = followup.build_plan(stage, source, selected, gpu="1")
+                if index:
+                    source = self.root / f"round_{index + 6}.yaml"
+                    source.write_text(yaml.safe_dump(plan), encoding="utf-8")
+                parsed = runner.load_plan(source, gpu="1")
+                command = [sys.executable, str(self.root / "run_ifashion_experiments.py"),
+                           "--plan", str(source), "--gpu", "1"]
+                completed = subprocess.run(command, cwd=self.root, capture_output=True,
+                                           encoding="utf-8", timeout=30)
+                self.assertEqual(completed.returncode, 0, completed.stdout + completed.stderr)
+                state_path = self.root / "log/ifashion_tuning" / parsed["round_id"] / "state.json"
+                state = json.loads(state_path.read_text(encoding="utf-8"))
+                self.assertEqual(len(state["executions"]), len(parsed["experiments"]))
+                for record, experiment in zip(state["executions"], parsed["experiments"]):
+                    self.assertEqual(record["status"], "SUCCESS")
+                    self.assertEqual(record["config"], experiment["config"])
+                before_resume = state_path.read_bytes()
+                resumed = subprocess.run(command, cwd=self.root, capture_output=True,
+                                         encoding="utf-8", timeout=30)
+                self.assertEqual(resumed.returncode, 0, resumed.stderr)
+                self.assertEqual(state_path.read_bytes(), before_resume)
+                total += len(parsed["experiments"])
+        self.assertEqual(total, 14)
+        last = state["executions"]
+        self.assertTrue(all(r["config"]["anchor_cl"]["enabled"] for r in last))
+        self.assertTrue(all(r["config"]["c_temps"] == [.3] for r in last))
 
 
 class ResultTests(unittest.TestCase):

@@ -1,0 +1,27 @@
+version: 1
+round_id: stage3_fusion_local_06
+note: "第六轮局部补搜：固定 BI=0.60，搜索 UB=0.05/0.075/0.125；以第四轮 [0.10,0.30,0.60]、验证分数 0.5638427481 为对照。固定 c_lambda=0.35、温度=0.2、40 轮、seed=2026，关闭融合前对比。"
+base_config: tuning_plans/ifashion_local_baseline_20261028.yaml
+seed: 2026
+gpu: "0"
+max_attempts: 3
+result_file: "实验结果存档/Ifashion调参.txt"
+
+common_overrides: {}
+
+experiments:
+  - id: ub_005
+    note: "固定 BI=0.60；[UB,UI,BI]=[0.05,0.35,0.60]，检查较低 UB 占比。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.05, 0.35, 0.60]
+  - id: ub_0075
+    note: "固定 BI=0.60；[UB,UI,BI]=[0.075,0.325,0.60]，补查 UB=0.05 与 0.10 之间。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.075, 0.325, 0.60]
+  - id: ub_0125
+    note: "固定 BI=0.60；[UB,UI,BI]=[0.125,0.275,0.60]，补查略高于 UB=0.10 的位置。"
+    overrides:
+      fusion_weights:
+        modal_weight: [0.125, 0.275, 0.60]

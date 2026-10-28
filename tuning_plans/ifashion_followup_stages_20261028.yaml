@@ -1,0 +1,59 @@
+# Stage definitions for prepare_ifashion_followup.py; not a controller plan.
+version: 1
+stages:
+  ctemp:
+    source_round: stage1_clambda_recheck_07
+    round_id: stage1_ctemp_08
+    output: tuning_plans/ifashion_ctemp_08.yaml
+    note: "第八轮融合后温度：固定第七轮选定配置，比较 c_temp=0.1/0.3，与已有温度 0.2 对照；融合前对比保持关闭。"
+    experiments:
+      - id: ctemp_010
+        note: "融合后温度 c_temp=0.1，其余继承上一轮选定配置。"
+        overrides:
+          c_temps: [0.1]
+      - id: ctemp_030
+        note: "融合后温度 c_temp=0.3，其余继承上一轮选定配置。"
+        overrides:
+          c_temps: [0.3]
+  anchor_cl:
+    source_round: stage1_ctemp_08
+    round_id: stage2_anchor_09
+    output: tuning_plans/ifashion_anchor_cl_09.yaml
+    note: "第九轮融合前对比：固定第八轮选定配置，开启 UB 锚定对比，搜索总权重 0.001/0.003/0.01；融合前温度固定 0.2，用户侧、组合侧均开启，四项内部权重为 1；与关闭状态对照。"
+    experiments:
+      - id: anchor_0001
+        note: "启用融合前对比，anchor_cl_lambda=0.001，融合前温度固定 0.2。"
+        overrides:
+          anchor_cl:
+            enabled: true
+            anchor_cl_lambda: 0.001
+      - id: anchor_0003
+        note: "启用融合前对比，anchor_cl_lambda=0.003，融合前温度固定 0.2。"
+        overrides:
+          anchor_cl:
+            enabled: true
+            anchor_cl_lambda: 0.003
+      - id: anchor_0010
+        note: "启用融合前对比，anchor_cl_lambda=0.01，融合前温度固定 0.2。"
+        overrides:
+          anchor_cl:
+            enabled: true
+            anchor_cl_lambda: 0.01
+  bi_noise:
+    source_round: stage2_anchor_09
+    round_id: stage_noise_bi_10
+    output: tuning_plans/ifashion_bi_noise_10.yaml
+    note: "第十轮 BI 噪声：固定第九轮选定配置，保持 aug_type=Noise，搜索 BI_ratio=0/0.1/0.3，与已有 0.2 对照；该参数是表示扰动幅度。"
+    experiments:
+      - id: bi_noise_000
+        note: "BI 噪声幅度为 0；UB/UI 噪声、融合权重及对比设置均继承上一轮选定配置。"
+        overrides:
+          BI_ratios: [0.0]
+      - id: bi_noise_010
+        note: "BI 噪声幅度为 0.1，其余继承上一轮选定配置。"
+        overrides:
+          BI_ratios: [0.1]
+      - id: bi_noise_030
+        note: "BI 噪声幅度为 0.3，其余继承上一轮选定配置。"
+        overrides:
+          BI_ratios: [0.3]

@@ -68,17 +68,18 @@ NetEase:
 
 
 iFashion:
-  # 本次调参已于 2026-10-25 结束；以下为已完成实验中按验证综合分数选定的配置。
-  # 轮次: stage3_fusion_04；实验 ID: ui_to_bi_010。
-  # EXECUTION_ID: 20261025T082203_9dec4c53。
-  # 验证选模分数: 0.5638427481（val Recall@20 + Recall@40 + NDCG@20 + NDCG@40）。
-  # val@20: Recall=0.15337706, NDCG=0.09792502；val@40: Recall=0.20153946, NDCG=0.11100121。
-  # 最佳轮次: 第 30 轮（best_epoch=29，从 0 计数）；完整训练预算保持 40 轮。
-  # test@10: Recall=0.11244437, NDCG=0.11269867。
-  # test@20: Recall=0.15333284, NDCG=0.12911472。
-  # test@40: Recall=0.20203943, NDCG=0.14622128。
-  # test@80: Recall=0.25767797, NDCG=0.16277068。
-  # 配置与结果详情见 项目文档/工作事项.txt 的收尾记录及 实验结果存档/Ifashion调参.txt。
+  # 截至 2026-10-29，第六至十轮共 14 组已完成；以下按验证综合分数选定。
+  # 轮次: stage1_clambda_recheck_07；实验 ID: clambda_030。
+  # EXECUTION_ID: 20261028T135628_a6584711。
+  # 验证选模分数: 0.5676286080（val Recall@20 + Recall@40 + NDCG@20 + NDCG@40）。
+  # val@20: Recall=0.15418641, NDCG=0.09891195；val@40: Recall=0.20254033, NDCG=0.11198991。
+  # 最佳轮次: 第 40 轮（best_epoch=39，从 0 计数）；默认训练预算保持 40 轮。
+  # 单独延长训练可用 train.py --epochs 60，60 轮结果尚未获得。
+  # test@10: Recall=0.11343226, NDCG=0.11459451。
+  # test@20: Recall=0.15406646, NDCG=0.13089307。
+  # test@40: Recall=0.20319149, NDCG=0.14812316。
+  # test@80: Recall=0.25987125, NDCG=0.16497335。
+  # 详情见 项目文档/工作事项.txt 第十项及 实验结果存档/Ifashion调参.txt。
   data_path: './datasets'
   batch_size_train: 2048
   batch_size_test: 2048
@@ -98,14 +99,14 @@ iFashion:
   BI_ratios: [0.2]
 
   fusion_weights:
-    modal_weight: [0.1, 0.3, 0.6]
+    modal_weight: [0.05, 0.35, 0.6]
     UB_layer: [0.5, 0.5, 0.0]
     UI_layer: [0.3, 0.4, 0.3]
     BI_layer: [0.5, 0.5, 0.0]
 
   lrs: [1.0e-3]
   l2_regs: [1.0e-5]
-  c_lambdas: [0.35]
+  c_lambdas: [0.30]
   c_temps: [0.2]
 
   epochs: 40

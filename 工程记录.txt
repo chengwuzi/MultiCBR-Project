@@ -2319,3 +2319,38 @@ main.tex 为 55511 字节，SHA256 为 e60674aa592b29af6ac0d24b899264b5ddbcab216
 去除本次唯一添加的 textbf 包装后，main.tex 与修改前逐字节一致。AAAI文件 其他二十八个文件逐一 SHA256 不变，UTF-8 无 BOM 与 CRLF 保持，git diff --check 通过。本次为单处局部字体格式修改，只做源码范围与差异核验，未重新编译或生成 PDF、页图。
 
 本项独立追加，追加前 305561 字节完整保留，不回改历史。未训练或运行实验，未修改代码、配置、数据、图片或文献库，未操作 Git 暂存区或提交 Git。本轮最终修改仅为 main.tex 和本项工程记录。main.tex SHA256：e475d031ada73d3b50fcba9f8e31edc779849516b6978ba3d8889a68e225495a。
+
+
+第六十一项：整合用户重写的相关工作并核对配置文献引用
+记录日期：2026-11-01
+
+一、用户要求与实际范围
+
+用户提供 Bundle Recommendation、Denoising and Diffusion for Recommendation、Contrastive Learning for Recommendation 三节新稿，要求整合并研究处理引用。本轮用新稿完整替换 AAAI文件/main.tex 的 Related Work 正文，采用现有 subsection 自动编号，不自行润色、增删或扩写用户的英文论述；仅增加支持相应陈述的文献引用，以及将 bundle–user–item 中的排版连接号转换为 LaTeX 的双连字符。
+
+原先位于 2.1 与 2.2 之间的框架图浮动体原位、完整字节保留，包括图片引用、图注、尺寸、标签和浮动参数。摘要、引言及其 ReCoBR 加粗、第一条贡献、方法章、实验数据与文字、其他图表、结论均逐字节保持。
+
+二、引用对应与核实来源
+
+（1）2.1：范围概述引用 sun2024survey；早期分解与注意力学习引用 cao2017efm、chen2019dam；图传播对应 chang2020bgcn；MIDGN、BundleGT、DGMAE、EBRec、EpicCBR 分别对应 zhao2022midgn、wei2023bundlegt、ren2023dgmae、du2025ebrec、li2026epiccbr。
+（2）2.2：早期截断和降权引用 wang2021adt；DeCA、CAFU 分别对应 wang2022deca、jiang2026cafu；扩散一般机制引用 ho2020ddpm；DiffRec、DiffuRec、DDRM 分别对应 wang2023diffrec、li2023diffurec、zhao2024ddrm；DCBR、DCDL、RDiffBR 分别对应 li2025dcbr、chen2025dcdl、zhang2026rdiffbr。ReCoBR 自身方法介绍不额外自引。
+（3）2.3：一般对比学习描述引用 chen2020simclr；SGL、AdaGCL、BIGCF 分别对应 wu2021sgl、jiang2023adagcl、zhang2024bigcf；捆绑推荐中的 CrossCBR、MultiCBR 分别对应 ma2022crosscbr、ma2024multicbr。
+（4）所有所需条目已在文献库内，本轮未新增或修改 aaai2027.bib。新正文共插入二十四处 cite 命令，早期分解与注意力学习处为两个引用键，合计涉及二十五篇不同文献。没有为了保留旧引用而将新稿未讨论的方法强行附入，也没有自动加入新阅读的 MixRec。
+（5）针对新增或更具体的描述，核对作者原文、作者公开版本或出版社摘要：EFM 的分解及列表—物品建模、DeCA 的跨模型一致性、DDRM 的多步表示去噪、EBRec 的 B-U-I 高阶相关性与 U-I 增强、EpicCBR 的物品关系与新捆绑、DCDL 的用户表示扩散和融合用户特征条件，均能对应用户稿。沿用既有正式发表条目的作者、年份及引用键，不把预印本上传年份替换为正式发表年份。
+核实入口包括：https://liqiangnie.github.io/paper/p585-cao.pdf 、https://hexiangnan.github.io/papers/www22-robust-rec.pdf 、https://arxiv.org/abs/2401.06982 、https://arxiv.org/abs/2311.16892 、https://ink.library.smu.edu.sg/sis_research/10870/ 、https://arxiv.org/abs/2602.11680 、https://www.sciencedirect.com/science/article/pii/S1566253525002271 。其余已研读文献结合项目已有原文及当前条目核对；RDiffBR 标有“假结果”的本地材料仅用于方法描述核对，不采用实验数值。
+
+三、引用数量与内容验证
+
+DDRM 的 zhao2024ddrm 恢复正文引用；新稿删除了旧相关工作中唯一出现的 ren2023dccf、yang2022kgcl、zou2022mcclk，因此实际引用由三十六篇变为三十四篇，文献库仍为三十七条。以上三条未引用条目保留，未擅自清理文献库。没有缺失引用键或重复条目。
+
+去除新加的引用和 LaTeX 标题格式并还原排版连接号后，新正文与用户提供的三节稿逐字一致。Related Work 之前和之后的完整字节分别与修改前相同，框架图原始字节在新节中完整保留。AAAI文件 其他二十八个文件及三个历史摘要引言对照稿均逐一哈希不变。main.tex 为 54145 字节，SHA256 为 a28ce2eee9d11aeeb223efdb1b03a88fe372c054aa2dff4a49b84796ef896547；UTF-8 无 BOM 与 CRLF 保持。
+
+四、构建与版面检查
+
+复用 tmp/tools/texlive2026 完成 pdflatex—BibTeX—pdflatex—pdflatex；因标签变化，再执行一轮 pdflatex，共五步均退出码为零。最终 10 页，编译文献项 34 条；无 LaTeX 错误、未定义引用、Overfull 盒、重复标签或待重编译提示；Underfull hbox 2 条、vbox 1 条。使用 rungs 渲染并实际查看第 2—4 页，新相关工作的三个小节及引用完整，框架图仍在第三页，方法章与公式衔接完整，没有新增重叠或裁切。总表与消融表仍在第七页，深入分析和抗噪图仍在第八页，超参数图仍在第九页，全文仍为十页。git diff --check 通过。临时 PDF SHA256 为 62674893b33d6b120b85fdf3d561d6fdba1b3baaeb2881aee0f14734595c24fc，仅供追溯。
+
+五、记录与临时产物
+
+本项独立追加，既有工程记录全部字节保留，不回改历史。tmp/pdfs/replace-related-work-20261101 中的用户稿、修改前快照、脚本、引用及构建检查信息、PDF、页图和辅助文件完成自检后清理，不保留或交付 PDF、页图；可复用工具、原始图片及历史材料保留。
+
+未运行训练或推荐实验，未修改代码、配置、数据集或文献库，未操作 Git 暂存区、提交 Git 或切换分支。本轮最终修改仅为 main.tex 和本项工程记录。

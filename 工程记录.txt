@@ -2266,3 +2266,56 @@ main.tex 为 55511 字节，SHA256 为 e60674aa592b29af6ac0d24b899264b5ddbcab216
 本项独立追加，既有工程记录全部字节保留，不回改历史。tmp/pdfs/replace-abstract-20261101 内的用户文本快照、修改前快照、编辑构建脚本、构建日志、PDF、页图及辅助文件仅供自检，检查完成后清理，不保留或交付 PDF 或页图；可复用工具、原始图片和历史材料保留。
 
 没有运行训练或推荐实验，没有修改代码、配置、数据集或参考文献，没有操作 Git 暂存区、提交 Git 或切换分支。本轮最终修改仅为 main.tex 和本项工程记录。
+
+
+第五十八项：用用户重新撰写并补全首段的引言替换当前引言
+记录日期：2026-11-01
+
+一、用户材料及开头补全
+
+用户提供附件 C:/Users/86188/.codex/attachments/a5dcfc3d-6bdb-43fe-8798-1fa2642af46b/已粘贴的文本.txt，要求将重新撰写的引言替换进去。读取后发现附件直接以“users discover suitable collections...”起句，缺少首句前半部分。询问缺失文字后，用户补充完整第一段，以“Bundle recommendation (BR) aims to match users with collections of related items, such as music playlists and fashion outfits...”起句。本轮以用户补充的完整首段替代附件首段，其余十个文本块按附件采用，没有自行补写缺失内容或润色原文。
+
+二、实际替换与 LaTeX 适配
+
+（1）仅替换 AAAI文件/main.tex 的 Introduction 正文，保留章节命令及章节外全部字节。新内容涵盖 BR 三类关系、DAM/BGCN、CrossCBR/MultiCBR/DGMAE、U-B 噪声和稀疏性、两个重新表述的挑战、ReCoBR 流程及三项贡献。
+（2）按原有样式将两个 Challenge 标题设为粗体；用户提供的三条编号贡献转换为 enumerate 环境。仅转换展示格式，不改英文词句、大小写、标点、段落顺序或编号含义。
+（3）作者年份标注转换为现有 BibTeX 键：Chen et al. 2019a→chen2019dam，Ma et al. 2022→ma2022crosscbr，Ma et al. 2024→ma2024multicbr，Chang et al. 2020→chang2020bgcn，Ren et al. 2023b→ren2023dgmae；合并年份和分号列举转换为同一 cite 中的相应多键。所有键均已存在，未新增、删除或修改文献库条目。
+（4）逆向移除仅为 LaTeX 展示加入的格式，并将引用还原为作者年份、贡献列表还原为用户编号后，新引言与“补齐首段＋附件其余内容”逐字一致。引言正文之外的 main.tex 前后字节逐一核对保持，上一轮新摘要完整保留，实验数值、结果表述、相关工作、方法、结论和正式图表均未修改。
+（5）main.tex 为 54530 字节，SHA256 为 1879544d11273cdf4299e22cd1bca94b115d61bf4327c7061a1775c4c848c1f8。UTF-8 无 BOM 与 CRLF 保持。AAAI文件 其他二十八个文件及三个历史摘要引言对照稿均逐一哈希不变。
+
+三、引用与构建核验
+
+新引言未保留原引言中的 zhao2024ddrm 引用，该条在其他章节没有被引用，因此实际引用由三十七篇变为三十六篇，文献库仍为三十七条；该未引用条目本轮未额外清理。其余引用无缺失。
+
+复用 tmp/tools/texlive2026 完成 pdflatex—BibTeX—pdflatex—pdflatex；因第四步提示标签变化，再执行一轮 pdflatex，五步均退出码为零。最终 10 页，编译文献项 36 条，无 LaTeX 错误、未定义引用、Overfull 盒、重复标签或待重编译提示；Underfull hbox 4 条、vbox 0 条。通过 rungs 渲染并实际查看第 1—4 页：补全首段、两个挑战、方法总述、三条编号贡献及引用均完整，摘要和相关工作衔接正常；第三页式（1）完整排入同栏，后续公式顺序正常，没有新增遮挡、裁切或异常空白。框架图仍在第三页，总表与消融表仍在第七页，深入分析和抗噪图仍在第八页，超参数图仍在第九页；页数自然由十一页变为十页，未修改模板、字号、页边距或行距。git diff --check 通过。临时 PDF SHA256 为 cd8f283675ff056584e1096912c2c9c013ab1ab0811ca9f91a574a8d8ceb59aa，仅供追溯。
+
+四、工程记录与临时产物
+
+本项独立追加，既有工程记录全部字节保持，不回改历史。tmp/pdfs/replace-introduction-20261101 中的用户文本快照、补全首段、修改前快照、编辑和构建脚本、日志、检查 PDF、页图及辅助文件仅用于本轮自检，完成后清理，不保留或交付 PDF、页图；原附件、可复用工具、原始图片及历史材料保留。
+
+没有运行训练或推荐实验，没有修改代码、配置、数据集或参考文献，没有操作 Git 暂存区、提交 Git 或切换分支。本轮最终修改仅为 main.tex 和本项工程记录。
+
+
+第五十九项：按用户指定原句修改第一条贡献
+记录日期：2026-11-01
+
+用户要求将三条贡献中的第一条改为：We propose ReCoBR, a bundle recommendation framework that uses diffusion-driven U-B graph reconstruction to reduce the impact of noisy interactions.
+忠实中文：我们提出 ReCoBR，一个利用扩散驱动的 U-B 图重构来减轻噪声交互影响的捆绑推荐框架。
+
+本轮仅替换 AAAI文件/main.tex 中第一条贡献原句，删除句末的 during graph propagation，保留句号、item 命令及编号环境。第二、第三条贡献和其他论文内容均保持。逆向恢复该唯一替换后，完整 main.tex 与修改前逐字节一致；AAAI文件 其他二十八个文件逐一 SHA256 不变，UTF-8 无 BOM 与 CRLF 保持；git diff --check 通过。
+
+本次为用户指定的单句删词，执行文本与差异静态核验，没有重新编译，没有生成 PDF、页图，没有运行训练或推荐实验，没有修改其他正文、表格、数据、图片、参考文献、代码或配置。
+
+本项独立追加，追加前 304226 字节完整保留，不回改历史；未操作 Git 暂存区或提交 Git。本轮修改仅为 main.tex 与本项记录。main.tex SHA256：273dcf9aa1f46434c99a15ef265e22bf989845fa29f9d9e2be3d411a1cd79fe0。
+
+
+第六十项：仅加粗引言正式提出 ReCoBR 处的模型名及括号全称
+记录日期：2026-11-01
+
+用户确认采用参照 CAFU 的格式建议：在引言正式提出模型处，加粗 ReCoBR 及括号中的 Reconstruction and Contrastive Learning for Bundle Recommendation，后续普通提及保持正常字体。
+
+本轮仅在 AAAI文件/main.tex 的 Introduction 方法介绍段，为现有 ReCoBR (Reconstruction and Contrastive Learning for Bundle Recommendation) 外包一层 textbf；括号属于加粗范围，其后的逗号及正文保持原样。没有改动任何英文词句、空格或标点，摘要中的 ReCoBR、贡献列表及其他位置的模型名均保持；没有实施之前仅供讨论的 LightGCN 引用、缩写或列表样式建议。
+
+去除本次唯一添加的 textbf 包装后，main.tex 与修改前逐字节一致。AAAI文件 其他二十八个文件逐一 SHA256 不变，UTF-8 无 BOM 与 CRLF 保持，git diff --check 通过。本次为单处局部字体格式修改，只做源码范围与差异核验，未重新编译或生成 PDF、页图。
+
+本项独立追加，追加前 305561 字节完整保留，不回改历史。未训练或运行实验，未修改代码、配置、数据、图片或文献库，未操作 Git 暂存区或提交 Git。本轮最终修改仅为 main.tex 和本项工程记录。main.tex SHA256：e475d031ada73d3b50fcba9f8e31edc779849516b6978ba3d8889a68e225495a。

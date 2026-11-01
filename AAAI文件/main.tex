@@ -648,15 +648,9 @@ representations and enhance recommendation diversity.
 \textbf{EpicCBR}~\cite{li2026epiccbr} combines item-relation
 enhancement with contrastive learning.
 
-Results for LightGCN, SGL, XSimGCL, LightGCL, BGCN, MIDGN,
-CrossCBR, and MultiCBR are taken from
-MultiCBR~\cite{ma2024multicbr}; DCDL results are
-from its original paper~\cite{chen2025dcdl}.
-We reproduce EpicCBR using its open-source implementation.
-
 \paragraph{Parameter Settings.}
-We implement ReCoBR in PyTorch on a GeForce RTX 3090 GPU.
-We use 64-dimensional embeddings with
+All experiments are implemented on a GeForce RTX 3090 GPU.
+For ReCoBR, we use 64-dimensional embeddings with
 Xavier~\cite{glorot2010xavier} initialization and two propagation
 layers. Recommendation training uses
 Adam~\cite{kingma2015adam} with learning rate $10^{-3}$,
@@ -675,7 +669,8 @@ $\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak 0.005,\allowbreak 0.007,\al
 $\lambda_{\mathrm{set}}$ in
 $\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$, and $\lambda_c$ in
 $\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
-ReCoBR's overall results are averaged over three independent runs.
+For the baselines, we tune hyperparameters within the ranges
+specified in their original papers.
 
 
 
@@ -798,7 +793,7 @@ auxiliary information for bundle recommendation.
     (e) Post-fusion contrastive weight $\lambda_c$.
     Broken $y$-axes use different scales for the datasets;
     candidate values are displayed at equally spaced horizontal
-    positions. Panels (d) and (e) report one run per setting.}
+    positions.}
     \label{fig:hyperparameter}
 \end{figure*}
 

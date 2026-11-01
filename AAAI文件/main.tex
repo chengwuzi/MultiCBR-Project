@@ -117,13 +117,13 @@ In bundle recommendation, CrossCBR aligns representations of the same users and 
 
 Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
 
-Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we then use the reconstructed U-B view as a common anchor for cross-view contrastive learning before representation fusion. The fused user and bundle representations produce the final recommendation scores.
+Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion. The fused user and bundle representations produce the final recommendation scores.
 
 We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
 
 \subsection{Diffusion-Driven U-B Graph Denoising and Reconstruction}\label{sec:graph-reconstruction}
 
-The purpose of this module is to evaluate an observed interaction in the context of the user's historical bundle preferences. We construct this context in a pretrained representation space, refine it through conditional denoising, and translate the resulting preference vector into a selection of graph connections.
+This module evaluates observed U-B interactions based on users' historical bundle preferences. We construct a preference representation from each user's history, refine it through conditional denoising, and use it to select connections for graph propagation.
 
 \subsubsection{Pretraining and Historical Preference Construction}
 
@@ -202,7 +202,7 @@ This objective learns a shared recovery function from perturbed historical prefe
 
 Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:framework} illustrates how SetLoss complements the reconstruction objective in denoiser training.
 
-Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages average directional agreement between the recovered preference and the user's historical bundle representations:
+Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages high average cosine similarity between the recovered preference and the user's historical bundle embeddings:
 \begin{equation}
 \mathcal L_{\mathrm{set}}
 =\mathbb E_{u,t,\boldsymbol\epsilon}
@@ -262,7 +262,7 @@ Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundl
 
 \subsection{Pre-Fusion Cross-View Contrastive Learning}
 
-With the U-B graph reconstructed, we next learn representations from this graph together with user-item behavior and bundle composition. The auxiliary relations provide complementary evidence when a user's bundle feedback is limited. We first construct user and bundle representations in each view, and then connect them through U-B-anchored contrastive learning before fusion.
+With the U-B graph reconstructed, we next learn representations from this graph together with user-item behavior and bundle composition. When U-B feedback is sparse, U-I interactions and B-I affiliations provide additional information for preference learning. We learn user and bundle representations from each view and use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion.
 
 \subsubsection{View-Specific Representations}
 
@@ -289,9 +289,9 @@ where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\math
 
 This step yields three representations for each user, $\{\mathbf e_u^{\mathrm{UB}},\mathbf e_u^{\mathrm{UI}},\mathbf e_u^{\mathrm{BI}}\}$, and each bundle, $\{\mathbf e_b^{\mathrm{UB}},\mathbf e_b^{\mathrm{UI}},\mathbf e_b^{\mathrm{BI}}\}$, all in $\mathbb R^d$. These unfused representations are used to construct the cross-view objective below and are later fused for prediction.
 
-\subsubsection{Cross-View Objectives Anchored in U-B}
+\subsubsection{Cross-View Contrastive Objectives}
 
-Using these view-specific representations, we pair each user's U-B representation with its U-I and B-I counterparts, and do the same for each bundle. The reconstructed U-B view thus serves as the common reference. Each same-entity pair is a positive pair, while other entities of the same type provide in-batch negatives. For every recommendation minibatch, we remove duplicate user IDs and duplicate positive-bundle IDs to form the entity sets $\mathcal S_U$ and $\mathcal S_B$, ensuring that an entity is not repeated as its own in-batch negative.
+For each user, we pair its representation from the reconstructed U-B view with its representations from the U-I and B-I views. We construct the same pairs for bundles. The reconstructed U-B view thus serves as the common reference. Each same-entity pair is a positive pair, while other entities of the same type provide in-batch negatives. For every recommendation minibatch, we remove duplicate user IDs and duplicate positive-bundle IDs to form the entity sets $\mathcal S_U$ and $\mathcal S_B$, ensuring that an entity is not repeated as its own in-batch negative.
 
 For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n}$ and $\mathbf G=(\mathbf g_j)_{j=1}^{n}$, we define the directional InfoNCE objective \cite{oord2018cpc} as
 \begin{equation}
@@ -311,7 +311,7 @@ The temperature $\tau>0$ controls sensitivity to similarity differences. For eac
 \mathcal I_\tau\!\left(\mathbf E_r^{\mathrm{UB}},\mathbf E_r^v\right).
 \tag{14}
 \end{equation}
-Equation (14) encourages agreement for the same user or bundle across U-B--U-I and U-B--B-I pairs while preserving discrimination between entities. A user-side or bundle-side term is omitted when the corresponding entity set contains fewer than two members and therefore provides no in-batch negatives. The U-B view is the common anchor in constructing the objective, and gradients update both representations in each pair. These constraints inject behavioral and compositional evidence into bundle-level preference learning when U-B histories are sparse.
+Equation (14) encourages agreement for the same user or bundle across U-B--U-I and U-B--B-I pairs while preserving discrimination between entities. A user-side or bundle-side term is omitted when the corresponding entity set contains fewer than two members and therefore provides no in-batch negatives. The U-B view is the common anchor in constructing the objective, and gradients update both representations in each pair. This alignment allows information from the U-I and B-I views to support bundle preference learning when U-B feedback is sparse.
 
 \subsection{Prediction and Model Optimization}
 
@@ -685,18 +685,13 @@ We draw the following observations:
 \item ReCoBR achieves the best results across all datasets and
 metrics. Its Recall@20 improves over the strongest baseline by
 2.17\%, 2.94\%, and 4.60\% on Youshu, iFashion, and NetEase,
-respectively. The gains are most pronounced on iFashion,
-particularly in NDCG. This may be because its richer U-B
-histories provide more context for preference-guided graph
-reconstruction and neighbor selection, helping distill clearer
-and more discriminative user preference signals.
+respectively. The largest relative NDCG gains occur on iFashion. One possible explanation is that iFashion has more U-B interactions
+per user, which may help ReCoBR select useful connections for graph
+propagation.
 \item SGL, XSimGCL, and LightGCL outperform LightGCN across all
 datasets and metrics. On iFashion, they also exceed BGCN and
-MIDGN despite using only U-B interactions. These results show
-that incorporating item information alone does not guarantee
-better recommendation. They highlight the importance of
-effective U-B preference learning, which ReCoBR addresses
-through preference-guided graph reconstruction.
+MIDGN despite using only U-B interactions. These results suggest that effective U-B preference learning remains
+important even when auxiliary item-level information is available.
 \item ReCoBR also outperforms CrossCBR, MultiCBR,
 DCDL, and EpicCBR, which model bundle preferences and
 integrate information across views. ReCoBR further considers
@@ -768,13 +763,11 @@ performs best. Random-K can improve over Original UB but
 remains inferior to ReCoBR, indicating that selecting
 appropriate connections matters beyond reducing their number.
 Popularity-K's weak NDCG suggests that global popularity is
-insufficient for personalized ranking. Pretrain-Sim even
-underperforms Random-K, suggesting that pretrained user-bundle
-similarity does not necessarily reflect a connection's value
-for subsequent propagation. These results suggest that ReCoBR's preference-guided
-selection helps retain interactions that better reflect users'
-bundle preferences, providing more informative signals for
-graph propagation.
+insufficient for personalized ranking. Pretrain-Sim performs worse than Random-K, suggesting that
+pretrained user-bundle similarity alone may not identify the most
+useful connections for graph propagation. Together, these results suggest that preference-guided selection is
+more effective than random, popularity-based, or
+pretrained-similarity-based selection.
 
 
 
@@ -902,17 +895,16 @@ regularization with the ranking objective.
 
 \section{Conclusion}
 
-In this paper, we proposed ReCoBR to address noisy and sparse
-U-B feedback in bundle recommendation. ReCoBR refined
-historical bundle preferences through user-conditioned
-diffusion with a bundle-set consistency constraint and used
-the refined preferences to reconstruct the U-B propagation
-graph. The reconstructed U-B view then anchored pre-fusion
-contrastive learning, enabling auxiliary behavioral and
-compositional information to support bundle preference
-modeling. Experiments on three public datasets demonstrated
-ReCoBR's advantages over state-of-the-art baselines and the
-effectiveness of its key designs.
+In this paper, we proposed ReCoBR to address noisy and sparse U-B
+feedback in bundle recommendation. ReCoBR refined users' historical
+bundle preferences through user-conditioned diffusion with a
+bundle-set consistency loss. The refined preferences guided the
+selection of observed U-B connections to reconstruct the graph for
+propagation. Cross-view contrastive learning aligned user and bundle
+representations from the reconstructed U-B view with those from the
+U-I and B-I views. Experiments on three public datasets showed that
+ReCoBR outperformed the compared baselines, and ablation results
+supported the effectiveness of its main components.
 
 \bibliography{aaai2027}
 

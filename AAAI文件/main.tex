@@ -493,13 +493,13 @@ Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings
         \midrule
         \textbf{ReCoBR}
         & \textbf{0.2920} & \textbf{0.1759} & \textbf{0.3997} & \textbf{0.2023}
-        & \textbf{0.1568} & \textbf{0.1315} & \textbf{0.2067} & \textbf{0.1491}
+        & \textbf{0.1541} & \textbf{0.1310} & \textbf{0.2041} & \textbf{0.1481}
         & \textbf{0.0955} & \textbf{0.0511} & \textbf{0.1390} & \textbf{0.0627} \\
 
         \midrule
         \textbf{Improv.}
         & \textbf{2.17\%} & \textbf{3.41\%} & \textbf{1.29\%} & \textbf{1.45\%}
-        & \textbf{4.74\%} & \textbf{9.31\%} & \textbf{2.68\%} & \textbf{7.58\%}
+        & \textbf{2.94\%} & \textbf{8.89\%} & \textbf{1.39\%} & \textbf{6.85\%}
         & \textbf{4.60\%} & \textbf{1.79\%} & \textbf{2.51\%} & \textbf{1.95\%} \\
         \bottomrule
     \end{tabular}
@@ -534,23 +534,15 @@ Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings
         & R@20 & N@20 \\
         \midrule
 
-        \textbf{ReCoBR}
-        & \textbf{0.2920}
-        & \textbf{0.1759}
-        & \textbf{0.0955}
-        & \textbf{0.0511}
-        & \textbf{0.1568}
-        & \textbf{0.1315} \\
-
         \shortstack[l]{w/o Graph\\Recon.}
-        & 0.2919 & 0.1734
+        & 0.2904 & 0.1734
         & 0.0948 & 0.0509
         & 0.1500 & 0.1245 \\
 
         w/o SetLoss
         & 0.2913 & 0.1749
         & 0.0951 & 0.0506
-        & 0.1559 & 0.1301 \\
+        & 0.1527 & 0.1301 \\
 
         w/o All CL
         & 0.2326 & 0.1307
@@ -560,12 +552,22 @@ Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings
         \shortstack[l]{w/o Pre-fusion\\CL}
         & 0.2901 & 0.1692
         & 0.0906 & 0.0487
-        & 0.1558 & 0.1304 \\
+        & 0.1532 & 0.1304 \\
 
         \shortstack[l]{w/o Post-fusion\\CL}
         & 0.2595 & 0.1502
         & 0.0682 & 0.0350
         & 0.0461 & 0.0350 \\
+        \midrule
+
+        \textbf{ReCoBR}
+        & \textbf{0.2920}
+        & \textbf{0.1759}
+        & \textbf{0.0955}
+        & \textbf{0.0511}
+        & \textbf{0.1541}
+        & \textbf{0.1310} \\
+
         \bottomrule
     \end{tabular}
     }
@@ -682,7 +684,7 @@ We draw the following observations:
 \begin{itemize}
 \item ReCoBR achieves the best results across all datasets and
 metrics. Its Recall@20 improves over the strongest baseline by
-2.17\%, 4.74\%, and 4.60\% on Youshu, iFashion, and NetEase,
+2.17\%, 2.94\%, and 4.60\% on Youshu, iFashion, and NetEase,
 respectively. The gains are most pronounced on iFashion,
 particularly in NDCG. This may be because its richer U-B
 histories provide more context for preference-guided graph

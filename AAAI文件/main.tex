@@ -731,32 +731,94 @@ jointly refining U-B preference signals and integrating
 auxiliary information for bundle recommendation.
 
 
-\begin{figure}[!b]
+
+
+
+
+\begin{figure}[!t]
     \centering
     \begin{tabular}{@{}cc@{}}
         \includegraphics[width=0.46\columnwidth]
         {Figures/m1recall20.png} &
         \includegraphics[width=0.46\columnwidth]
         {Figures/m1ndcg20.png} \\
-        (a) & (b) \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{Interaction selection on iFashion using Recall@20
+    and NDCG@20 ($K=\kappa$).}
+    \label{fig:interaction-selection}
+\end{figure}
+
+\subsection{In-depth Analysis}
+
+
+
+
+\paragraph{Interaction Selection Strategies.}
+On iFashion, we compare ReCoBR with the original graph
+(\textbf{Original UB}) and three filtering strategies: random
+selection (\textbf{Random-K}), bundle popularity
+(\textbf{Popularity-K}), and pretrained user-bundle similarity
+(\textbf{Pretrain-Sim}). All filtering strategies select from
+users' training histories under the same per-user retention
+limit $\kappa$. As shown in
+Figure~\ref{fig:interaction-selection}, ReCoBR consistently
+performs best. Random-K can improve over Original UB but
+remains inferior to ReCoBR, indicating that selecting
+appropriate connections matters beyond reducing their number.
+Popularity-K's weak NDCG suggests that global popularity is
+insufficient for personalized ranking. Pretrain-Sim even
+underperforms Random-K, suggesting that pretrained user-bundle
+similarity does not necessarily reflect a connection's value
+for subsequent propagation. These results suggest that ReCoBR's preference-guided
+selection helps retain interactions that better reflect users'
+bundle preferences, providing more informative signals for
+graph propagation.
+
+
+
+
+
+
+
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}cc@{}}
         \includegraphics[width=0.46\columnwidth]
         {Figures/m2recall20.png} &
         \includegraphics[width=0.46\columnwidth]
         {Figures/m2ndcg20.png} \\
-        (c) & (d)
+        (a) & (b)
     \end{tabular}
 
-    \caption{In-depth analysis of ReCoBR using Recall@20 and
-    NDCG@20. (a)--(b) Interaction selection on iFashion
-    ($K=\kappa$). (c)--(d) ReCoBR versus w/o Pre-fusion CL on
-    NetEase, both retaining graph reconstruction. Users are
-    sorted by increasing training U-B interaction counts and
-    divided into four equally sized groups (G1--G4). Lines show
-    relative improvements over w/o Pre-fusion CL.}
-    \label{fig:in-depth-analysis}
+    \caption{ReCoBR versus w/o Pre-fusion CL on NetEase using
+    Recall@20 and NDCG@20, both retaining graph reconstruction.
+    Users are sorted by increasing training U-B interaction counts
+    and divided into four equally sized groups (G1--G4). Lines
+    show relative improvements over w/o Pre-fusion CL.}
+    \label{fig:sparse-users}
 \end{figure}
 
-\begin{figure}[!b]
+\paragraph{Performance on Sparse Users.}
+NetEase users are sorted by increasing training U-B
+interaction counts and divided into four equally sized groups
+(G1--G4). We compare ReCoBR with \textbf{w/o Pre-fusion CL},
+retaining graph reconstruction in both.
+Figure~\ref{fig:sparse-users} shows improvements
+across all four groups, with the largest relative gains in
+the sparsest group G1: 12.64\% in Recall@20 and 9.32\% in
+NDCG@20. These results suggest that explicit cross-view
+learning is particularly useful when direct bundle feedback
+is limited, allowing U-I behavior and B-I composition to
+provide additional learning signals for bundle preference
+modeling.
+
+
+
+
+
+\begin{figure}[!t]
     \centering
     \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
         \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
@@ -775,6 +837,21 @@ auxiliary information for bundle recommendation.
     training interactions, retaining all original edges.}
     \label{fig:noise-robustness}
 \end{figure}
+
+\paragraph{Robustness to Noisy U-B Interactions.}
+We compare ReCoBR with CrossCBR and MultiCBR using the same
+perturbed U-B input graph for each dataset and noise ratio.
+Ranking supervision, U-I and B-I relations, and evaluation data
+remain unchanged. We rerun ReCoBR's full training pipeline,
+including U-B pretraining. Figure~\ref{fig:noise-robustness} shows
+that ReCoBR maintains the highest Recall@20 and NDCG@20 across
+all datasets and tested noise ratios, showing that it retains
+its recommendation advantage when additional random connections
+interfere with U-B graph propagation.
+
+
+
+
 
 \begin{figure*}[t]
     \centering
@@ -798,71 +875,6 @@ auxiliary information for bundle recommendation.
     positions.}
     \label{fig:hyperparameter}
 \end{figure*}
-
-\subsection{In-depth Analysis}
-
-
-
-
-\paragraph{Interaction Selection Strategies.}
-On iFashion, we compare ReCoBR with the original graph
-(\textbf{Original UB}) and three filtering strategies: random
-selection (\textbf{Random-K}), bundle popularity
-(\textbf{Popularity-K}), and pretrained user-bundle similarity
-(\textbf{Pretrain-Sim}). All filtering strategies select from
-users' training histories under the same per-user retention
-limit $\kappa$. As shown in
-Figure~\ref{fig:in-depth-analysis}(a)--(b), ReCoBR consistently
-performs best. Random-K can improve over Original UB but
-remains inferior to ReCoBR, indicating that selecting
-appropriate connections matters beyond reducing their number.
-Popularity-K's weak NDCG suggests that global popularity is
-insufficient for personalized ranking. Pretrain-Sim even
-underperforms Random-K, suggesting that pretrained user-bundle
-similarity does not necessarily reflect a connection's value
-for subsequent propagation. These results suggest that ReCoBR's preference-guided
-selection helps retain interactions that better reflect users'
-bundle preferences, providing more informative signals for
-graph propagation.
-
-
-
-
-
-
-
-\paragraph{Performance on Sparse Users.}
-NetEase users are sorted by increasing training U-B
-interaction counts and divided into four equally sized groups
-(G1--G4). We compare ReCoBR with \textbf{w/o Pre-fusion CL},
-retaining graph reconstruction in both.
-Figure~\ref{fig:in-depth-analysis}(c)--(d) shows improvements
-across all four groups, with the largest relative gains in
-the sparsest group G1: 12.64\% in Recall@20 and 9.32\% in
-NDCG@20. These results suggest that explicit cross-view
-learning is particularly useful when direct bundle feedback
-is limited, allowing U-I behavior and B-I composition to
-provide additional learning signals for bundle preference
-modeling.
-
-
-
-
-
-\paragraph{Robustness to Noisy U-B Interactions.}
-We compare ReCoBR with CrossCBR and MultiCBR using the same
-perturbed U-B input graph for each dataset and noise ratio.
-Ranking supervision, U-I and B-I relations, and evaluation data
-remain unchanged. We rerun ReCoBR's full training pipeline,
-including U-B pretraining. Figure~\ref{fig:noise-robustness} shows
-that ReCoBR maintains the highest Recall@20 and NDCG@20 across
-all datasets and tested noise ratios, showing that it retains
-its recommendation advantage when additional random connections
-interfere with U-B graph propagation.
-
-
-
-
 
 \subsection{Hyperparameter Sensitivity}
 

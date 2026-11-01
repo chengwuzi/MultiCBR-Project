@@ -2658,3 +2658,70 @@ main.tex 为 53858 字节，SHA256 为 661c83f5f1dd3701e3cf1bbcfb58e3078418d3522
 main.tex 由 53858 字节变为 53878 字节，SHA256 为 eeff2f70448967573dea4a445160c6a9b202b7e0a95858805f9cf9c6a53a37a4。临时编译 PDF 的 SHA256 为 3c62fcd6a2c39bf038261b05322a25a81f41da4d560ddce37fa2236dc5e3a467，仅供追溯。
 
 本项在第六十九项后独立追加，追加前 347369 字节完整保留，不回改历史。tmp/pdfs/ablation-row-layout-20261102 内快照、核验报告、构建日志、PDF、页图和辅助文件完成检查后清理，不保留或交付 PDF、页图，可复用工具及原有材料保留。未运行训练或推荐实验，未修改代码、配置、数据集、正式图片或参考文献，未操作 Git 暂存区、提交 Git 或切换分支。本轮最终修改仅为 main.tex 和本项工程记录。
+
+第七十一项：将原 Figure 2 按两个实验拆为独立图并同步引用
+记录日期：2026-11-02
+
+用户确认原 Figure 2 的 (a)(b) 属于交互选择策略实验、(c)(d) 属于稀疏用户实验，要求分别成图，并基本沿用原图注拆分。本轮按上一轮研究方案实施，仅修改 AAAI文件/main.tex 中原 Figure 2 图块及两处正文引用。
+
+一、图组、图注和编号
+
+（1）原 (a)(b) 的 m1recall20.png 与 m1ndcg20.png 保留为新 Figure 2，两幅单栏并排，子图编号为 (a)(b)，标签改为 fig:interaction-selection。图注为：
+Interaction selection on iFashion using Recall@20 and NDCG@20 ($K=\kappa$).
+
+（2）原 (c)(d) 的 m2recall20.png 与 m2ndcg20.png 拆为新 Figure 3，两幅单栏并排，子图编号重新从 (a)(b) 开始，标签为 fig:sparse-users。图注为：
+ReCoBR versus w/o Pre-fusion CL on NetEase using Recall@20 and NDCG@20, both retaining graph reconstruction. Users are sorted by increasing training U-B interaction counts and divided into four equally sized groups (G1--G4). Lines show relative improvements over w/o Pre-fusion CL.
+
+两条图注均来自原图注的对应内容，仅为独立成图分别保留指标说明、移除旧子图范围和通用总起句。两组均沿用原有 0.46 columnwidth 图宽和 figure[!b] 方式；四个原 PNG 文件及图内曲线、柱线、图例、坐标、数字均未修改。
+
+（3）Interaction Selection Strategies 段原 Figure 2(a)--(b) 引用改为整张新 Figure 2，Performance on Sparse Users 段原 Figure 2(c)--(d) 引用改为整张新 Figure 3。两段分析、12.64%/9.32% 等结果和小节结构保持。原 fig:in-depth-analysis 标签与引用已清除。
+
+（4）抗噪图和超参数图的源码、图注、标签及原有引用命令保持；通过 LaTeX 自动编号由原 Figure 3、Figure 4 顺延为 Figure 4、Figure 5，没有手写替换图号。框架图仍为 Figure 1。
+
+二、范围核验
+
+本轮共三个局部片段替换：原合并图块一处、正文引用两处。逆向恢复这三个片段后，完整 main.tex 与修改前逐字节一致。全部图片引用路径、引用顺序和 includegraphics 尺寸指令逐项保持；文献引用命令及二十一个公式编号序列不变，表格、实验数值、其他正文及公式不改。AAAI文件 其他二十八个文件及三个历史摘要引言对照稿逐一 SHA256 不变，正式文件集合不变。UTF-8 无 BOM、CRLF 保持，git diff --check 通过。
+
+三、编译与视觉检查
+
+复用 tmp/tools/texlive2026 执行 pdflatex—BibTeX—pdflatex—pdflatex，在标签变化后补充一次 pdflatex，共五步退出码均为零。最终十页、文献项三十四条，无 LaTeX 错误、未定义引用、Overfull 盒、重复标签或待重编译提示；Underfull hbox 两条、vbox 一条。
+
+辅助文件和 PDF 文本共同确认 Figure 1 在第三页，新 Figure 2、Figure 3 以及顺延的 Figure 4 均在第八页，Figure 5 在第九页；正文所引编号与各自图注一致。渲染并实际查看第七至九页，核对总表和消融表、两张独立新图及图注、抗噪图、超参数图和相邻正文。两组子图各自为 (a)(b)，图注完整，未发现新增遮挡、裁切或编号错位。拆图后总页数仍为十页。
+
+main.tex 由 53878 字节变为 53987 字节，SHA256 为 644ab80c4102c3ae97d1f62b8ba18dd6825ac7413a0c0a09e630ea2f2d4ab5f6。临时编译 PDF 的 SHA256 为 433d358d9905a9b9e1bf933f1473cd6e2e49416450a2299efe56e6cf6386a39e，仅供追溯。
+
+四、记录与临时产物
+
+本项在第七十项后独立追加，追加前 350018 字节完整保留，不回改历史。tmp/pdfs/split-in-depth-figures-20261102 内快照、核验报告、构建日志、PDF、页图和辅助文件完成检查后清理，不保留或交付 PDF、页图，可复用工具及原有材料保留。未运行训练或推荐实验，未修改代码、配置、数据集、正式图片或参考文献，未操作 Git 暂存区、提交 Git 或切换分支。本轮最终修改仅为 main.tex 和本项工程记录。
+
+第七十二项：将 Figure 2—4 左右分布试排方案落实到正式 main.tex
+记录日期：2026-11-02
+
+用户反馈 Overleaf 编译后 Figure 2、3、4 仍集中在同一栏，并附截图。前一轮按“研究”要求仅在临时副本比较了两版，没有改正式 main.tex；本轮将先前选定的 b_sparse-at-bottom 方案实际写入正式源文件。未直接操作或同步 Overleaf 云端工程，需用更新后的本地 main.tex 覆盖云端对应文件再编译。
+
+一、实际排版调整
+
+（1）Figure 2 的源码位于 In-depth Analysis 小节之前，浮动参数由 [!b] 改为 [!t]，使其出现在第八页左栏顶部，下方衔接 4.4 标题和交互选择策略分析。
+（2）Figure 3 移至 Performance on Sparse Users 段落之前，保留 [!b]。编译后位于第八页左栏底部，上方为交互选择与稀疏用户的分析文字，Figure 2 与 Figure 3 之间不再连续堆放图片。
+（3）Figure 4 移至 Robustness to Noisy U-B Interactions 段落之前，浮动参数由 [!b] 改为 [!t]，编译后位于第八页右栏顶部，下方接抗噪分析。
+（4）Figure 5 的源码移至 Hyperparameter Sensitivity 小节之前，保留原 figure* 和 [t]，以保持四组实验图在源码中的 2、3、4、5 编号顺序。编译后仍在第九页跨栏顶部。
+
+只移动图块、调整 Figure 2 和 Figure 4 两处浮动选项，另有随图块移动产生的空行变化。没有设置强制分页、负间距或修改模板浮动参数，没有添加宏包。所有图片文件、图宽、图组内部结构、子图编号、图注、标签、正文引用及分析文字均保持。图表数据和其他论文内容不改。
+
+二、范围核验
+
+正式 main.tex 与上一轮已成功编译、实际查看的所选临时版本逐字节一致，SHA256 相同。核对各图块内容，仅 Figure 2 与 Figure 4 的 [!b] 各改为 [!t]；去除图块后的剩余文字按空白归一化完全一致，并通过逐个移除新增位置的图块、还原原始图块位置验证其他源码字节保持。全部图片引用路径、尺寸和顺序不变，文献引用、正文引用、标签及二十一个公式编号分别核对序列保持。
+
+AAAI文件 其他二十八个文件与三个历史摘要引言对照稿逐一 SHA256 不变，正式文件集合不变；UTF-8 无 BOM 与 CRLF 保持，git diff --check 通过。未修改或替换用户截图中的图内数据，也未根据截图推测和同步 Overleaf 其他素材。
+
+三、编译与实际页面检查
+
+复用 tmp/tools/texlive2026 执行 pdflatex—BibTeX—pdflatex—pdflatex，并在标签变化后补充一次 pdflatex，共五步退出码均为零。最终十页、文献项三十四条；无 LaTeX 错误、未定义引用、Overfull 盒、重复标签或待重编译提示，Underfull hbox 两条、vbox 一条。
+
+辅助文件确认图号仍为 Figure 1—5，框架图在第三页，Figure 2、3、4 均在第八页，Figure 5 在第九页。PDF 图注坐标进一步确认 Figure 2 的 x=54.0、y=637.6，Figure 3 的 x=54.0、y=148.1，Figure 4 的 x=319.5、y=458.5（点），即前两图左上/左下、抗噪图右上。渲染并实际查看第七至九页，核对表格、左右图文分布、图注、后续跨栏超参数图和相邻正文，没有新增遮挡、裁切或引用错位。全文仍为十页。
+
+main.tex 由 53987 字节变为 53995 字节，SHA256 为 81391d93bc8691f8bbbef68cf1e32d9e6e543396be54c859660aa9fc6977038a。临时编译 PDF 的 SHA256 为 8a36a2356e669731234c74a58c80bd9320c2b56029aada635fcb8dd0eadf8e7b，仅供追溯。
+
+四、记录与临时产物
+
+本项在第七十一项后独立追加，追加前 354155 字节完整保留，不回改历史。tmp/pdfs/apply-figure-placement-20261102 内快照、核验报告、构建日志、PDF、页图和辅助文件检查后清理，不保留或交付 PDF、页图，可复用工具及原有材料保留。没有运行训练或推荐实验，没有修改代码、配置、数据集、正式图片或参考文献，未操作 Git 暂存区、提交 Git 或切换分支。本轮最终修改仅为 main.tex 和本项工程记录。

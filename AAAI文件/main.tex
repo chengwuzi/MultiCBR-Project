@@ -87,8 +87,8 @@ Later studies examine different aspects of bundle preference learning. MIDGN mod
 
 \begin{figure*}[!t]
     \centering
-    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
-    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction with user-conditioned denoising and bundle-set consistency, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework-raw.png}
+    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
     \label{fig:framework}
 \end{figure*}
 
@@ -117,7 +117,7 @@ In bundle recommendation, CrossCBR aligns representations of the same users and 
 
 Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
 
-Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery. To address sparse U-B feedback, we use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion. The fused user and bundle representations produce the final recommendation scores.
+Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery (Figure~\ref{fig:denoising}). To address sparse U-B feedback, we use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion. The fused user and bundle representations produce the final recommendation scores.
 
 We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
 
@@ -158,6 +158,15 @@ For each active user $u$, we summarize the representations of the historically i
 \tag{3}
 \end{equation}
 The vector $\mathbf p_{u,0}$ represents the user's observed bundle-preference context. Mean pooling accommodates histories of different lengths while keeping the denoising input $d$-dimensional. We construct this vector for users in $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. The subscript $0$ denotes the state before artificial noise is added; it does not assume that the observed history is free of interaction noise.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.98\columnwidth]{Figures/setloss.png}
+    \caption{User-conditioned denoising with reconstruction and
+    bundle-set consistency losses. The trained denoiser is applied
+    iteratively to refine historical preferences.}
+    \label{fig:denoising}
+\end{figure}
 
 \subsubsection{User-Conditioned Diffusion Denoising}
 
@@ -200,7 +209,7 @@ This objective learns a shared recovery function from perturbed historical prefe
 
 \subsubsection{Bundle-Set Consistency in Denoising}
 
-Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:framework} illustrates how SetLoss complements the reconstruction objective in denoiser training.
+Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:denoising} illustrates how SetLoss complements the reconstruction objective in denoiser training.
 
 Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages high average cosine similarity between the recovered preference and the user's historical bundle embeddings:
 \begin{equation}
@@ -745,6 +754,24 @@ auxiliary information for bundle recommendation.
     \label{fig:interaction-selection}
 \end{figure}
 
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2ndcg20.png} \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{ReCoBR versus w/o Pre-fusion CL on NetEase using
+    Recall@20 and NDCG@20, both retaining graph reconstruction.
+    Users are sorted by increasing training U-B interaction counts
+    and divided into four equally sized groups (G1--G4). Lines
+    show relative improvements over w/o Pre-fusion CL.}
+    \label{fig:sparse-users}
+\end{figure}
+
 \subsection{In-depth Analysis}
 
 
@@ -775,40 +802,6 @@ pretrained-similarity-based selection.
 
 
 
-\begin{figure}[!b]
-    \centering
-    \begin{tabular}{@{}cc@{}}
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2ndcg20.png} \\
-        (a) & (b)
-    \end{tabular}
-
-    \caption{ReCoBR versus w/o Pre-fusion CL on NetEase using
-    Recall@20 and NDCG@20, both retaining graph reconstruction.
-    Users are sorted by increasing training U-B interaction counts
-    and divided into four equally sized groups (G1--G4). Lines
-    show relative improvements over w/o Pre-fusion CL.}
-    \label{fig:sparse-users}
-\end{figure}
-
-\paragraph{Performance on Sparse Users.}
-NetEase users are sorted by increasing training U-B
-interaction counts and divided into four equally sized groups
-(G1--G4). We compare ReCoBR with \textbf{w/o Pre-fusion CL},
-retaining graph reconstruction in both.
-Figure~\ref{fig:sparse-users} shows improvements
-across all four groups, with the largest relative gains in
-the sparsest group G1: 12.64\% in Recall@20 and 9.32\% in
-NDCG@20. These results suggest that explicit cross-view
-learning is particularly useful when direct bundle feedback
-is limited, allowing U-I behavior and B-I composition to
-provide additional learning signals for bundle preference
-modeling.
-
-
-
 
 
 \begin{figure}[!t]
@@ -830,21 +823,6 @@ modeling.
     training interactions, retaining all original edges.}
     \label{fig:noise-robustness}
 \end{figure}
-
-\paragraph{Robustness to Noisy U-B Interactions.}
-We compare ReCoBR with CrossCBR and MultiCBR using the same
-perturbed U-B input graph for each dataset and noise ratio.
-Ranking supervision, U-I and B-I relations, and evaluation data
-remain unchanged. We rerun ReCoBR's full training pipeline,
-including U-B pretraining. Figure~\ref{fig:noise-robustness} shows
-that ReCoBR maintains the highest Recall@20 and NDCG@20 across
-all datasets and tested noise ratios, showing that it retains
-its recommendation advantage when additional random connections
-interfere with U-B graph propagation.
-
-
-
-
 
 \begin{figure*}[t]
     \centering
@@ -868,6 +846,43 @@ interfere with U-B graph propagation.
     positions.}
     \label{fig:hyperparameter}
 \end{figure*}
+
+\paragraph{Performance on Sparse Users.}
+NetEase users are sorted by increasing training U-B
+interaction counts and divided into four equally sized groups
+(G1--G4). We compare ReCoBR with \textbf{w/o Pre-fusion CL},
+retaining graph reconstruction in both.
+Figure~\ref{fig:sparse-users} shows improvements
+across all four groups, with the largest relative gains in
+the sparsest group G1: 12.64\% in Recall@20 and 9.32\% in
+NDCG@20. These results suggest that explicit cross-view
+learning is particularly useful when direct bundle feedback
+is limited, allowing U-I behavior and B-I composition to
+provide additional learning signals for bundle preference
+modeling.
+
+
+
+
+
+
+
+\paragraph{Robustness to Noisy U-B Interactions.}
+We compare ReCoBR with CrossCBR and MultiCBR using the same
+perturbed U-B input graph for each dataset and noise ratio.
+Ranking supervision, U-I and B-I relations, and evaluation data
+remain unchanged. We rerun ReCoBR's full training pipeline,
+including U-B pretraining. Figure~\ref{fig:noise-robustness} shows
+that ReCoBR maintains the highest Recall@20 and NDCG@20 across
+all datasets and tested noise ratios, showing that it retains
+its recommendation advantage when additional random connections
+interfere with U-B graph propagation.
+
+
+
+
+
+
 
 \subsection{Hyperparameter Sensitivity}
 

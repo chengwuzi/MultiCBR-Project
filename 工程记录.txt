@@ -2762,3 +2762,54 @@ main.tex 由 53987 字节变为 53995 字节，SHA256 为 81391d93bc8691f8bbbef6
 main.tex 由 53995 字节变为 53864 字节，SHA256 为 471ba36f7b1dede2a8e6284108317775016f3a429722e5afa6b9a62adb4e6fe7。临时编译 PDF 的 SHA256 为 8e5a9bebc434bbc582ad8b34d4fc09d2d0858d2ef5169458d7fc9e818f0ea61e，仅供追溯。
 
 本项在第七十二项后独立追加，追加前 358342 字节完整保留，不回改历史。tmp/pdfs/exact-chapters-3-5-20261102 内快照、核验报告、构建日志、PDF、页图和辅助文件完成检查后清理，不保留或交付 PDF、页图，可复用工具和原有材料保持。除源文件外，按工程维护规则追加本项工程记录，并保留用户要求的 diff；未运行训练或推荐实验，未修改代码、配置、数据集、正式图像或参考文献，未操作 Git 暂存区、提交 Git 或切换分支。
+
+第七十四项：正式拆分框架总图与去噪细节图，并最小化同步图注和正文引用
+记录日期：2026-11-02
+
+用户先提出原整张框架图拥挤，计划拆为总图与细节图；前轮已在临时副本比较排版，确定跨栏总图与单栏细节图方案。用户随后确认，在 3.1 总览段 SetLoss 那句末尾补新 Figure 2 引用，其余文字保持，再明确要求开发。本轮将选定方案及该补充实际写入 AAAI文件/main.tex。
+
+一、图片接入与图注
+
+（1）Figure 1 保留 fig:framework、figure*[!t] 和 0.98 textwidth，将引用图片从 Figures/digo_framework.png 改为用户新加入的 Figures/digo_framework-raw.png。完整三阶段主线保留在总图；图注去除移入细节图的具体内容后为：
+Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.
+
+（2）在 3.2 的 User-Conditioned Diffusion Denoising 小标题之前插入 Figure 2，使用 figure[!t]、0.98 columnwidth 和 Figures/setloss.png，标签为 fig:denoising，图注为：
+User-conditioned denoising with reconstruction and bundle-set consistency losses. The trained denoiser is applied iteratively to refine historical preferences.
+
+两张新 PNG 均直接使用用户提供的文件，没有生成、裁切、重绘或修改图片，也没有删除原 digo_framework.png。digo_framework-raw.png 和 setloss.png 在本轮开始前已由用户暂存于 Git，暂存的文件模式、对象和路径核对保持。
+
+二、正文的最小改动
+
+（1）3.1 中 Figure 1 outlines ReCoBR. 及其余总览文字保留，仅将指定 SetLoss 句末补为：
+The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery (Figure 2).
+源码使用 Figure~\ref{fig:denoising} 自动引用，没有硬编码图号。
+
+（2）3.2 SetLoss 段落的现有句子仍为：
+Figure 2 illustrates how SetLoss complements the reconstruction objective in denoiser training.
+只将原 fig:framework 改为 fig:denoising，句中其他单词不改。新图在总览及 SetLoss 段各引用一次，图注没有添加额外数学公式或新方法声明。
+
+三、图号与浮动安排
+
+新增 Figure 2 后，原四张实验图依次由 Figure 2—5 顺延为 Figure 3—6，继续使用原标签和自动引用，不改实验分析文字。图内数据、全部实验图注、各图宽度、内部排布和原有浮动选项逐项保持。
+
+为采用此前实际验证的十页布局，调整三处实验图块的源码位置：稀疏用户图（新 Figure 4）移到 In-depth Analysis 小节之前、交互选择图之后；抗噪图和超参数图（新 Figure 5、6）依次前移到 Performance on Sparse Users 段落之前。这样使图块及时进入浮动排版，保持编号顺序并避免超参数图延后造成额外一页。未改变正文段落顺序，未添加强制分页、负间距或额外宏包。
+
+四、范围核验
+
+以此前十页试排版本为底稿，仅再补用户确认的总览 Figure 2 引用。除图环境及空行位置外，去除两处本轮引用变化后，完整正文与修改前逐字节保持；对应段落的所有文字不再改写。所有二十一个 equation 环境、数学片段、公式编号、三张表格及其数据、全部文献引用序列不变。四个实验图块内容与选项分别逐字保持，仅位置改变；新增图的标签和引用关系核对正确。
+
+AAAI文件 其他三十个文件以及三个历史摘要引言稿逐一 SHA256 不变，正式文件集合不变；UTF-8 无 BOM、CRLF 保持，git diff --check 通过。除两处明确的图引用及两条图注外，没有修改论文其他文字，没有修改摘要、引言、相关工作正文、方法公式、结果或结论。
+
+五、编译与实际页面检查
+
+复用 tmp/tools/texlive2026 执行 pdflatex—BibTeX—pdflatex—pdflatex，并在标签变化后补充一次 pdflatex，共五步退出码均为零。最终十页、文献项三十四条，无 LaTeX 错误、未定义引用、Overfull 盒、重复标签或待重编译提示；Underfull hbox 两条、vbox 两条。
+
+总图 Figure 1 在第三页，细节图 Figure 2 在第四页，新 Figure 3、4、5 均在第八页，Figure 6 在第九页。图注坐标确认交互选择图在第八页左上、稀疏用户图在左下、抗噪图在右上。渲染并实际查看第三至第九页，核对总图、细节图内文字与图注、总览句末 (Figure 2)、SetLoss 现有句的引用、后续公式及表格、实验图分布、超参数图和结论，未发现新增遮挡或裁切。没有为缩页删减或改写实验正文。
+
+main.tex 由 53864 字节变为 54181 字节，SHA256 为 5c45d075a87cf95df77ef8954aa637ccfeb1faaa1a236d0809d71a1f11929a17。临时编译 PDF 的 SHA256 为 891c67b3a473b4780bd0574bae2367c6a737cbe5d5ea4ae51d20aeb727cf8b25，仅供追溯。
+
+六、记录、产物与同步
+
+本项在第七十三项后独立追加，追加前 363547 字节完整保留，不回改历史。tmp/pdfs/apply-framework-split-20261102 内快照、差异、核验报告、构建日志、PDF、页图和辅助文件完成检查后清理，不保留或交付 PDF、页图，可复用工具和原有材料保留。
+
+本轮实际修改为 main.tex 及追加本项工程记录；两个新图文件维持用户原始内容和已有暂存状态。没有运行训练或推荐实验，没有修改模型代码、配置、数据集或参考文献，未操作 Git 暂存区、提交 Git 或切换分支。没有直接操作 Overleaf；同步时需上传更新后的 main.tex，以及 Figures/digo_framework-raw.png、Figures/setloss.png，并保留相应目录结构。

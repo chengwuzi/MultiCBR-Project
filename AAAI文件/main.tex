@@ -1,0 +1,926 @@
+\documentclass[letterpaper]{article}
+
+% AAAI 2027 anonymous submission style
+\usepackage[submission]{aaai2027}
+
+% Required packages
+\usepackage[hyphens]{url}
+\usepackage{graphicx}
+\urlstyle{rm}
+\def\UrlFont{\rm}
+\usepackage{natbib}
+\usepackage{caption}
+\frenchspacing
+
+% Mathematical formulas
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+% Professional tables
+\usepackage{booktabs}
+\usepackage{multirow}
+
+% Required PDF metadata
+\pdfinfo{
+/TemplateVersion (2027.1)
+}
+
+% Number sections and subsections.
+% Subsubsections remain unnumbered.
+\setcounter{secnumdepth}{2}
+
+% Paper title
+\title{Diffusion-Driven Graph Reconstruction and Cross-View Contrastive Learning for Bundle Recommendation}
+
+% Anonymous author information
+\author{
+Anonymous Submission
+}
+
+\affiliations{
+}
+
+\begin{document}
+
+\maketitle
+
+
+\begin{abstract}
+Bundle recommendation (BR) aims to match users with collections of items that suit their preferences. Recent studies have achieved promising results by leveraging user-bundle (U-B) interactions alongside auxiliary user-item (U-I) interactions and bundle-item (B-I) affiliations. Despite this progress, two challenges remain: (1) noise in the observed U-B graph can introduce misleading preference signals during graph propagation; (2) sparse U-B feedback hinders accurate modeling of users' bundle preferences. To address these challenges, we propose ReCoBR, a framework that combines diffusion-driven graph reconstruction with cross-view contrastive learning.
+Specifically, we first construct a preference representation from each user's historical bundle interactions and then use a user-conditioned diffusion model to refine it. During denoising, we incorporate a bundle-set consistency loss to retain information from previously interacted bundles. The refined preferences guide the selection of observed connections to reconstruct the U-B graph, reducing the influence of noisy interactions during propagation.
+Next, we use cross-view contrastive learning to improve preference learning under sparse U-B feedback. This approach aligns user and bundle representations from the reconstructed U-B graph with those from the U-I and B-I views. The aligned representations are then combined for recommendation.
+Experiments on three public datasets show that ReCoBR outperforms the compared baselines.
+\end{abstract}
+
+
+\section{Introduction}
+
+Bundle recommendation (BR) aims to match users with collections of related items, such as music playlists and fashion outfits~\cite{chen2019dam,ma2022crosscbr}. It helps users discover suitable collections while creating additional sales opportunities for platforms~\cite{ma2022crosscbr,ma2024multicbr}. BR methods commonly draw on three types of relations: user-bundle (U-B) interactions reflect users' choices of bundles; user-item (U-I) interactions provide information about their interests in individual items; and bundle-item (B-I) affiliations describe which items belong to each bundle. Together, these relations offer complementary information for learning users' bundle preferences.
+
+Early BR methods combined direct U-B feedback with item-level information. DAM jointly models U-B and U-I interactions and uses attention to build bundle representations from their constituent items~\cite{chen2019dam}. Graph-based methods further exploit the relations among users, bundles, and items. BGCN uses graph propagation to learn representations in both the bundle and item views, with B-I affiliations connecting bundles to their constituent items~\cite{chang2020bgcn}.
+
+More recent studies have explored how to combine information learned from different views. CrossCBR uses cross-view contrastive learning to align representations of the same user or bundle across the bundle and item views~\cite{ma2022crosscbr}. MultiCBR separately encodes U-B, U-I, and B-I relations into three views, combines their representations for recommendation, and applies contrastive learning after fusion~\cite{ma2024multicbr}. DGMAE uses knowledge distillation to transfer information from direct and higher-order U-B relations to the item view~\cite{ren2023dgmae}.
+
+Despite these advances, learning users' bundle preferences still relies heavily on observed U-B interactions. However, the observed U-B graph has limitations that can hinder accurate preference learning. First, the observed U-B graph may contain noisy interactions, such as accidental clicks. Second, many users have interacted with only a few bundles. Although U-I interactions and B-I affiliations provide useful additional information, they cannot fully overcome these limitations of U-B feedback. Based on the above analysis, we identify the following two challenges.
+
+\textbf{Challenge 1: Denoising U-B Feedback While Preserving Preference Information.} The observed U-B graph does not indicate which connections are noisy, making it difficult to decide which ones to retain for graph propagation. Retaining unreliable connections may allow misleading preference signals to spread through neighborhood aggregation. However, removing too many connections can also discard valuable information about users' historical bundle choices. The challenge is to reduce the influence of noisy interactions without losing useful preference information.
+
+\textbf{Challenge 2: Cross-View Collaboration under Sparse U-B Feedback.} Unlike U-B interactions, U-I interactions and B-I affiliations do not directly reveal users' preferences for complete bundles. A user may like an individual item without liking a bundle that contains it. The challenge is to coordinate information across the U-B, U-I, and B-I views so that auxiliary information can support bundle preference learning when U-B feedback is sparse.
+
+To address these challenges, we propose \textbf{ReCoBR (Reconstruction and Contrastive Learning for Bundle Recommendation)}, which combines diffusion-driven U-B graph reconstruction with cross-view contrastive learning. We first pretrain user and bundle embeddings on the observed U-B graph using LightGCN. For each user, we average the embeddings of bundles they have interacted with to construct a preference representation. We add Gaussian noise to each preference representation and train a diffusion model to recover it. The model is conditioned on the user's pretrained embedding. During denoising, we introduce a bundle-set consistency loss to encourage agreement between the recovered preference and the user's historical bundle embeddings. The trained denoiser iteratively refines each user's preference representation. Using these refined preferences, we score each user's observed U-B connections and retain the highest-scoring ones to reconstruct the U-B graph for propagation. Next, we encode the U-I, B-I, and reconstructed U-B views through graph propagation to obtain user and bundle representations. Before fusion, we use cross-view contrastive learning to align user and bundle representations from the reconstructed U-B view with those from the U-I and B-I views. The aligned representations are then combined to predict users' preferences for bundles.
+
+Our main contributions are summarized as follows:
+
+\begin{enumerate}
+\item We propose ReCoBR, a bundle recommendation framework that uses diffusion-driven U-B graph reconstruction to reduce the impact of noisy interactions.
+\item We design cross-view contrastive learning based on the reconstructed U-B view to improve bundle preference learning under sparse U-B feedback.
+\item Experiments on three public datasets show that ReCoBR outperforms baseline methods and demonstrate the effectiveness of its main components.
+\end{enumerate}
+
+\section{Related Work}
+
+\subsection{Bundle Recommendation}
+
+Bundle recommendation includes both ranking predefined bundles and constructing new item collections~\cite{sun2024survey}. For bundle ranking, early methods combine U-B feedback with item-level information through factorization and attention-based learning~\cite{cao2017efm,chen2019dam}. DAM uses attention to aggregate item representations within a bundle, while BGCN learns from the bundle and item views through graph propagation~\cite{chang2020bgcn}.
+
+Later studies examine different aspects of bundle preference learning. MIDGN models user intents in global and local views~\cite{zhao2022midgn}, while BundleGT uses hierarchical graph Transformers to capture bundling strategies~\cite{wei2023bundlegt}. Other methods focus on making better use of item-level information. DGMAE transfers information from direct and higher-order U-B relations to the item view through knowledge distillation~\cite{ren2023dgmae}. EBRec enhances item-level bundle representations by modeling bundle--user--item correlations and augmenting U-I interactions~\cite{du2025ebrec}. EpicCBR explores item relations to improve recommendation for newly introduced bundles~\cite{li2026epiccbr}.
+
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework-raw.png}
+    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \label{fig:framework}
+\end{figure*}
+
+\subsection{Denoising and Diffusion for Recommendation}
+
+Implicit feedback can include interactions that do not reflect users' actual preferences. Early denoising methods reduce the influence of such interactions by removing selected training examples or assigning them lower weights~\cite{wang2021adt}. DeCA uses agreement between models to guide denoising~\cite{wang2022deca}. CAFU reduces noise through filtered uniformity and improves learning from sparse interactions through constrained alignment~\cite{jiang2026cafu}.
+
+Diffusion models learn to recover data or representations from controlled perturbations~\cite{ho2020ddpm}. DiffRec models users' interaction vectors through diffusion~\cite{wang2023diffrec}, while DiffuRec uses diffusion to recover target-item embeddings in sequential recommendation~\cite{li2023diffurec}. DDRM applies multi-step denoising to make learned representations more robust to noisy feedback~\cite{zhao2024ddrm}.
+
+Diffusion-based methods have also been applied to bundle recommendation. DCBR uses conditional diffusion to denoise U-B interactions~\cite{li2025dcbr}. DCDL combines dual-view modeling with diffusion on user representations, using fused user features to guide denoising and improve recommendation diversity~\cite{chen2025dcdl}. RDiffBR uses residual diffusion to adapt bundle representations when their item composition changes~\cite{zhang2026rdiffbr}. ReCoBR uses diffusion to refine preference representations built from users' historical bundle interactions. It then uses these representations to select observed U-B connections for graph propagation.
+
+\subsection{Contrastive Learning for Recommendation}
+
+Contrastive learning adds supervision by encouraging related representations to be similar~\cite{chen2020simclr}. In graph-based recommendation, SGL constructs different views through random changes to the interaction graph~\cite{wu2021sgl}. AdaGCL learns augmented views using graph generation and denoising models~\cite{jiang2023adagcl}, while BIGCF applies contrastive regularization to interaction and intent representations~\cite{zhang2024bigcf}.
+
+In bundle recommendation, CrossCBR aligns representations of the same users and bundles across the bundle and item views before fusion~\cite{ma2022crosscbr}. MultiCBR models the U-B, U-I, and B-I views and applies contrastive learning after combining their representations~\cite{ma2024multicbr}. ReCoBR uses the reconstructed U-B view to align user and bundle representations with those from the U-I and B-I views before fusion.
+
+
+
+
+
+
+\section{Methodology}\label{sec:methodology}
+
+\subsection{Task Definition and Framework Overview}
+
+Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
+
+Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery (Figure~\ref{fig:denoising}). To address sparse U-B feedback, we use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion. The fused user and bundle representations produce the final recommendation scores.
+
+We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
+
+\subsection{Diffusion-Driven U-B Graph Denoising and Reconstruction}\label{sec:graph-reconstruction}
+
+This module evaluates observed U-B interactions based on users' historical bundle preferences. We construct a preference representation from each user's history, refine it through conditional denoising, and use it to select connections for graph propagation.
+
+\subsubsection{Pretraining and Historical Preference Construction}
+
+We pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ be its trainable initial embeddings, and let $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$ denote the observed neighbors of user $u$ and bundle $b$. LightGCN propagation is given by
+\begin{equation}
+\begin{aligned}
+\mathbf h_u^{(\ell+1)}
+&=\sum_{b\in\mathcal N_u}
+\frac{\mathbf h_b^{(\ell)}}
+{\sqrt{|\mathcal N_u||\mathcal N_b|}},\\
+\mathbf h_b^{(\ell+1)}
+&=\sum_{u\in\mathcal N_b}
+\frac{\mathbf h_u^{(\ell)}}
+{\sqrt{|\mathcal N_b||\mathcal N_u|}}.
+\end{aligned}
+\tag{1}
+\end{equation}
+Here, $L_p$ is the number of pretraining propagation layers, and the fixed aggregation coefficients satisfy $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$. We aggregate the initial and propagated embeddings as
+\begin{equation}
+\mathbf e_u^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_u^{(\ell)},
+\qquad
+\mathbf e_b^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_b^{(\ell)}.
+\tag{2}
+\end{equation}
+The resulting embeddings $\mathbf e_u^0$ and $\mathbf e_b^0$ remain fixed during graph reconstruction. They are subsequently used to construct historical preferences, condition the denoiser, and score observed interactions.
+
+For each active user $u$, we summarize the representations of the historically interacted bundles by mean pooling:
+\begin{equation}
+\mathbf p_{u,0}
+=\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}\mathbf e_b^0.
+\tag{3}
+\end{equation}
+The vector $\mathbf p_{u,0}$ represents the user's observed bundle-preference context. Mean pooling accommodates histories of different lengths while keeping the denoising input $d$-dimensional. We construct this vector for users in $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. The subscript $0$ denotes the state before artificial noise is added; it does not assume that the observed history is free of interaction noise.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.98\columnwidth]{Figures/setloss.png}
+    \caption{User-conditioned denoising with reconstruction and
+    bundle-set consistency losses. The trained denoiser is applied
+    iteratively to refine historical preferences.}
+    \label{fig:denoising}
+\end{figure}
+
+\subsubsection{User-Conditioned Diffusion Denoising}
+
+We train the denoiser to recover historical preference representations under different levels of perturbation. Following the Gaussian diffusion formulation \cite{ho2020ddpm,wang2023diffrec}, let $T$ be the number of diffusion steps and $\beta_t\in(0,1)$ the noise variance at step $t$. We use a linear variance schedule and define $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\prod_{s=1}^{t}\alpha_s$. A perturbed preference vector can be sampled directly as
+\begin{equation}
+\mathbf p_{u,t}
+=\sqrt{\bar\alpha_t}\,\mathbf p_{u,0}
++\sqrt{1-\bar\alpha_t}\,\boldsymbol\epsilon,
+\qquad
+\boldsymbol\epsilon\sim\mathcal N(\mathbf 0,\mathbf I_d).
+\tag{4}
+\end{equation}
+Here, $\boldsymbol\epsilon\in\mathbb R^d$ is standard Gaussian noise, $\mathbf I_d$ is the $d$-dimensional identity matrix, and $\bar\alpha_t$ controls how much historical information remains at noise level $t$.
+
+To make recovery personalized, we condition the denoiser on the pretrained user representation $\mathbf e_u^0$. We implement the denoiser $f_\theta$ as a multilayer perceptron (MLP), with parameters $\theta$, that predicts the unperturbed preference vector:
+\begin{equation}
+\begin{aligned}
+\widehat{\mathbf p}_{u,0}
+&=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t),\\
+f_\theta(\mathbf p,\mathbf c,t)
+&=\operatorname{MLP}_\theta
+\bigl([\mathbf p;\mathbf c;\mathbf p\odot\mathbf c;
+|\mathbf p-\mathbf c|;\boldsymbol\psi(t)]\bigr).
+\end{aligned}
+\tag{5}
+\end{equation}
+In Eq. (5), $[\cdot;\cdot]$ denotes concatenation, $\odot$ denotes element-wise multiplication, and $|\mathbf p-\mathbf c|$ is the element-wise absolute deviation. The vectors $\mathbf p$ and $\mathbf c$ preserve the current preference estimate and the user condition, while $\mathbf p\odot\mathbf c$ and $|\mathbf p-\mathbf c|$ expose their coordinate-wise agreement and discrepancy. The sinusoidal embedding $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ specifies the perturbation level. Together with the timestep embedding, these features allow the MLP to adapt preference recovery to both the user and the perturbation level. Consequently, the MLP receives a $(4d+d_t)$-dimensional input and predicts a $d$-dimensional preference vector.
+
+During training, we uniformly sample $u\in\mathcal U_+$ and $t\in\{1,\ldots,T\}$ and draw Gaussian noise as in Eq. (4). The reconstruction objective is
+\begin{equation}
+\mathcal L_{\mathrm{rec}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{d}
+\left\|\widehat{\mathbf p}_{u,0}-\mathbf p_{u,0}\right\|_2^2
+\right].
+\tag{6}
+\end{equation}
+This objective learns a shared recovery function from perturbed historical preferences. The original representation supplies the reconstruction target, while the pretrained user embedding provides personalized context.
+
+\subsubsection{Bundle-Set Consistency in Denoising}
+
+Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:denoising} illustrates how SetLoss complements the reconstruction objective in denoiser training.
+
+Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages high average cosine similarity between the recovered preference and the user's historical bundle embeddings:
+\begin{equation}
+\mathcal L_{\mathrm{set}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}
+\left(1-\operatorname{sim}
+\left(\widehat{\mathbf p}_{u,0},\mathbf e_b^0\right)\right)
+\right].
+\tag{7}
+\end{equation}
+Equation (6) reconstructs the pooled preference vector, whereas Eq. (7) aligns the recovered preference with its constituent historical bundles under the cosine-similarity geometry later used for interaction scoring. Averaging over the history prevents users with more interactions from dominating the objective.
+
+We optimize the denoiser with
+\begin{equation}
+\mathcal L_{\mathrm D}
+=\mathcal L_{\mathrm{rec}}
++\lambda_{\mathrm{set}}\mathcal L_{\mathrm{set}},
+\tag{8}
+\end{equation}
+where $\lambda_{\mathrm{set}}\geq 0$ controls the contribution of SetLoss.
+
+\subsubsection{Preference Refinement and Graph Reconstruction}
+
+After learning the denoiser, we use it to refine the historical preference vector for interaction scoring. This stage employs a deterministic refinement procedure initialized with $\mathbf p_{u,0}$. Specifically,
+\begin{equation}
+\begin{aligned}
+\mathbf r_{u,T}&=\mathbf p_{u,0},\\
+\mathbf r_{u,t-1}
+&=f_\theta(\mathbf r_{u,t},\mathbf e_u^0,t),
+\qquad t=T,T-1,\ldots,1,\\
+\mathbf p_u^\star&=\mathbf r_{u,0}.
+\end{aligned}
+\tag{9}
+\end{equation}
+The states $\mathbf r_{u,t}$ are refinement iterates, distinct from the forward-corrupted training states $\mathbf p_{u,t}$. Each iteration feeds the current estimate back into the denoiser with the next timestep condition. Thus, graph reconstruction applies the learned recovery network to an observed preference context, without sampling a Gaussian starting state.
+
+We measure how closely each observed bundle matches the refined preference:
+\begin{equation}
+s_{ub}
+=\operatorname{sim}(\mathbf p_u^\star,\mathbf e_b^0),
+\qquad b\in\mathcal N_u.
+\tag{10}
+\end{equation}
+For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles, where the positive integer $\kappa$ controls the maximum retained degree:
+\begin{equation}
+\begin{aligned}
+\widetilde{\mathcal N}_u
+&=\underset{b\in\mathcal N_u}{\operatorname{TopK}}
+\left(s_{ub},\kappa_u\right),\\
+\widetilde x_{ub}
+&=\mathbf 1\!\left[b\in\widetilde{\mathcal N}_u\right].
+\end{aligned}
+\tag{11}
+\end{equation}
+Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain their full histories; users outside $\mathcal U_+$ have no retained U-B edges. Selection is restricted to observed interactions, so graph reconstruction neither creates new edges nor changes the ranking labels defined by $\mathbf X$. The resulting binary matrix $\widetilde{\mathbf X}$ is the reconstructed U-B graph used for downstream propagation.
+
+\subsection{Pre-Fusion Cross-View Contrastive Learning}
+
+With the U-B graph reconstructed, we next learn representations from this graph together with user-item behavior and bundle composition. When U-B feedback is sparse, U-I interactions and B-I affiliations provide additional information for preference learning. We learn user and bundle representations from each view and use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion.
+
+\subsubsection{View-Specific Representations}
+
+Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Fixed view-specific coefficients combine the initial embeddings with the $\ell_2$-normalized layer outputs. During training, the inherited backbone adds small representation perturbations to the propagation outputs and auxiliary item pooling; these perturbations are disabled during evaluation. The encoders share trainable initial embeddings for the same entity, which are separate from the fixed pretrained embeddings in Section~\ref{sec:graph-reconstruction}.
+
+\textbf{U-B view.} Propagation on the reconstructed U-B graph directly produces user representations $\mathbf e_u^{\mathrm{UB}}$ and bundle representations $\mathbf e_b^{\mathrm{UB}}$, capturing collaborative information through the retained interactions.
+
+\textbf{U-I view.} Propagation on the U-I graph produces user representations $\mathbf e_u^{\mathrm{UI}}$ and item representations $\mathbf e_i^{\mathrm{UI}}$. To obtain a bundle representation $\mathbf e_b^{\mathrm{UI}}$ in this view, we average the representations of its constituent items according to $\mathbf Z$.
+
+\textbf{B-I view.} Propagation on the B-I graph produces bundle representations $\mathbf e_b^{\mathrm{BI}}$ and item representations $\mathbf e_i^{\mathrm{BI}}$. To obtain a user representation $\mathbf e_u^{\mathrm{BI}}$ in this view, we average the representations of the items that the user has interacted with according to $\mathbf Y$.
+
+The two item-pooling operations are
+\begin{equation}
+\mathbf e_b^{\mathrm{UI}}
+=\frac{1}{|\mathcal I_b|}
+\sum_{i\in\mathcal I_b}\mathbf e_i^{\mathrm{UI}},
+\qquad
+\mathbf e_u^{\mathrm{BI}}
+=\frac{1}{|\mathcal I_u|}
+\sum_{i\in\mathcal I_u}\mathbf e_i^{\mathrm{BI}},
+\tag{12}
+\end{equation}
+where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\mathcal I_u=\{i:y_{ui}=1\}$ contains the items interacted with by user $u$. An empty neighborhood contributes a zero vector.
+
+This step yields three representations for each user, $\{\mathbf e_u^{\mathrm{UB}},\mathbf e_u^{\mathrm{UI}},\mathbf e_u^{\mathrm{BI}}\}$, and each bundle, $\{\mathbf e_b^{\mathrm{UB}},\mathbf e_b^{\mathrm{UI}},\mathbf e_b^{\mathrm{BI}}\}$, all in $\mathbb R^d$. These unfused representations are used to construct the cross-view objective below and are later fused for prediction.
+
+\subsubsection{Cross-View Contrastive Objectives}
+
+For each user, we pair its representation from the reconstructed U-B view with its representations from the U-I and B-I views. We construct the same pairs for bundles. The reconstructed U-B view thus serves as the common reference. Each same-entity pair is a positive pair, while other entities of the same type provide in-batch negatives. For every recommendation minibatch, we remove duplicate user IDs and duplicate positive-bundle IDs to form the entity sets $\mathcal S_U$ and $\mathcal S_B$, ensuring that an entity is not repeated as its own in-batch negative.
+
+For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n}$ and $\mathbf G=(\mathbf g_j)_{j=1}^{n}$, we define the directional InfoNCE objective \cite{oord2018cpc} as
+\begin{equation}
+\mathcal I_\tau(\mathbf H,\mathbf G)
+=-\frac{1}{n}\sum_{j=1}^{n}
+\log
+\frac{\exp\!\left(\operatorname{sim}(\mathbf h_j,\mathbf g_j)/\tau\right)}
+{\sum_{k=1}^{n}
+\exp\!\left(\operatorname{sim}(\mathbf h_j,\mathbf g_k)/\tau\right)}.
+\tag{13}
+\end{equation}
+The temperature $\tau>0$ controls sensitivity to similarity differences. For each anchor $\mathbf h_j$, its counterpart $\mathbf g_j$ is the positive candidate, and all representations in $\mathbf G$, including the positive, form the denominator. Let $\mathbf E_r^v=(\mathbf e_q^v)_{q\in\mathcal S_r}$ for $r\in\{U,B\}$, with the same entity ordering across views. The pre-fusion objective is
+\begin{equation}
+\mathcal L_{\mathrm A}
+=\sum_{r\in\{U,B\}}
+\sum_{v\in\{\mathrm{UI},\mathrm{BI}\}}
+\mathcal I_\tau\!\left(\mathbf E_r^{\mathrm{UB}},\mathbf E_r^v\right).
+\tag{14}
+\end{equation}
+Equation (14) encourages agreement for the same user or bundle across U-B--U-I and U-B--B-I pairs while preserving discrimination between entities. A user-side or bundle-side term is omitted when the corresponding entity set contains fewer than two members and therefore provides no in-batch negatives. The U-B view is the common anchor in constructing the objective, and gradients update both representations in each pair. This alignment allows information from the U-I and B-I views to support bundle preference learning when U-B feedback is sparse.
+
+\subsection{Prediction and Model Optimization}
+
+\textbf{View fusion and prediction.} Following MultiCBR \cite{ma2024multicbr}, we adopt its fixed view coefficients to combine the three view-specific representations into a single user representation and a single bundle representation:
+\begin{equation}
+\begin{aligned}
+\mathbf e_u
+&=\omega_1\mathbf e_u^{\mathrm{UB}}
++\omega_2\mathbf e_u^{\mathrm{UI}}
++\omega_3\mathbf e_u^{\mathrm{BI}},\\
+\mathbf e_b
+&=\omega_1\mathbf e_b^{\mathrm{UB}}
++\omega_2\mathbf e_b^{\mathrm{UI}}
++\omega_3\mathbf e_b^{\mathrm{BI}}.
+\end{aligned}
+\tag{15}
+\end{equation}
+Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B, U-I, and B-I views, respectively. The same coefficients are used for users and bundles; they are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$. The inner product of the fused representations gives the preference score:
+\begin{equation}
+\hat y_{ub}=\mathbf e_u^\top\mathbf e_b.
+\tag{16}
+\end{equation}
+
+\textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Let $\mathbf E_U=(\mathbf e_{u_j})_{j=1}^{m}$ and $\mathbf E_B=(\mathbf e_{b_j^+})_{j=1}^{m}$ denote their fused representation sequences. Following MultiCBR \cite{ma2024multicbr}, the fused-space self-contrastive regularizer is
+\begin{equation}
+\mathcal L_{\mathrm C}
+=\frac{1}{2}\left[
+\mathcal I_\tau(\mathbf E_U,\mathbf E_U)
++\mathcal I_\tau(\mathbf E_B,\mathbf E_B)
+\right].
+\tag{17}
+\end{equation}
+For each occurrence in the minibatch, the numerator pairs its fused representation with itself, while all minibatch occurrences of the same entity type appear in the denominator. This inherited objective regularizes separation in the fused representation space, whereas $\mathcal L_{\mathrm A}$ explicitly connects different relation views before fusion. The BPR loss \cite{rendle2009bpr} is
+\begin{equation}
+\mathcal L_{\mathrm{BPR}}
+=-\frac{1}{m}
+\sum_{j=1}^{m}
+\log\sigma\!\left(\hat y_{u_jb_j^+}-\hat y_{u_jb_j^-}\right).
+\tag{18}
+\end{equation}
+Here, $\sigma$ is the sigmoid function. We optimize BPR together with the two regularization objectives:
+\begin{equation}
+\mathcal L_{\mathrm R}
+=\mathcal L_{\mathrm{BPR}}
++\lambda_a\mathcal L_{\mathrm A}
++\lambda_c\mathcal L_{\mathrm C}
++\lambda_r\|\Theta\|_2^2.
+\tag{19}
+\end{equation}
+Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings of the recommendation backbone, and $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. Ranking examples continue to come from $\mathbf X$, even when their edges are not selected for $\widetilde{\mathbf X}$. Graph reconstruction therefore filters propagation connections while preserving the observed feedback used for ranking.
+
+\textbf{Training.} After offline U-B pretraining, each training epoch contains three stages. First, we update the denoiser $f_\theta$ for one pass over $\mathcal U_+$ using $\mathcal L_{\mathrm D}$. Second, the updated denoiser refines every active user's historical preference, scores the observed U-B interactions, and refreshes $\widetilde{\mathbf X}$ through the Top-K selection in Eq. (11). Third, we hold $\widetilde{\mathbf X}$ fixed and update the recommendation parameters $\Theta$ on ranking minibatches using $\mathcal L_{\mathrm R}$. The denoiser and recommendation backbone use separate optimizers. Because Top-K edge selection is discrete, gradients from $\mathcal L_{\mathrm R}$ do not propagate through $\widetilde{\mathbf X}$ to $f_\theta$.
+
+\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (16) after excluding bundles observed in the training data. Graph reconstruction is performed before scoring; the denoiser is not run separately for each candidate bundle.
+
+% =========================================================
+% Table 1: Dataset statistics, single-column table
+% =========================================================
+% Declare experiment tables early so they can appear on the intended pages.
+\begin{table}[!b]
+    \centering
+    {\small
+    \setlength{\tabcolsep}{2pt}
+    \begin{tabular}{@{}lrrrrrr@{}}
+        \toprule
+        Dataset
+        & \#Users
+        & \#Items
+        & \#Bundles
+        & \#U--I
+        & \#U--B
+        & \shortstack{\#Avg.\\I/B} \\
+        \midrule
+        Youshu
+        & 8,039
+        & 32,770
+        & 4,771
+        & 138,515
+        & 51,377
+        & 37.03 \\
+        NetEase
+        & 18,528
+        & 123,628
+        & 22,864
+        & 1,128,065
+        & 302,303
+        & 77.80 \\
+        iFashion
+        & 53,897
+        & 42,563
+        & 27,694
+        & 2,290,645
+        & 1,679,708
+        & 3.86 \\
+        \bottomrule
+    \end{tabular}
+    }
+
+    \caption{Dataset statistics. U--I and U--B count user--item
+    and user--bundle interactions; Avg. I/B is the average
+    number of items per bundle.}
+    \label{tab:datasets}
+\end{table}
+
+
+% =========================================================
+% Table 2: Overall results, double-column table
+% =========================================================
+\begin{table*}[!t]
+    \centering
+    {\small
+    \setlength{\tabcolsep}{1mm}
+    \begin{tabular}{@{}lrrrrrrrrrrrr@{}}
+        \toprule
+        \multirow{2}{*}{Method}
+        & \multicolumn{4}{c}{Youshu}
+        & \multicolumn{4}{c}{iFashion}
+        & \multicolumn{4}{c}{NetEase} \\
+        \cmidrule(lr){2-5}
+        \cmidrule(lr){6-9}
+        \cmidrule(lr){10-13}
+        & R@20 & N@20 & R@40 & N@40
+        & R@20 & N@20 & R@40 & N@40
+        & R@20 & N@20 & R@40 & N@40 \\
+        \midrule
+
+        LightGCN
+        & 0.2278 & 0.1341 & 0.3176 & 0.1589
+        & 0.0836 & 0.0609 & 0.1280 & 0.0767
+        & 0.0495 & 0.0253 & 0.0791 & 0.0333 \\
+
+        SGL
+        & 0.2616 & 0.1544 & 0.3611 & 0.1816
+        & 0.0998 & 0.0736 & 0.1492 & 0.0910
+        & 0.0714 & 0.0385 & 0.1097 & 0.0487 \\
+
+        XSimGCL
+        & 0.2635 & 0.1558 & 0.3565 & 0.1808
+        & 0.0999 & 0.0741 & 0.1493 & 0.0916
+        & 0.0709 & 0.0375 & 0.1073 & 0.0474 \\
+
+        LightGCL
+        & 0.2706 & 0.1547 & 0.3674 & 0.1821
+        & 0.0893 & 0.0650 & 0.1360 & 0.0814
+        & 0.0704 & 0.0370 & 0.1117 & 0.0479 \\
+        \midrule
+
+        BGCN
+        & 0.2427 & 0.1324 & 0.3370 & 0.1586
+        & 0.0799 & 0.0581 & 0.1233 & 0.0734
+        & 0.0623 & 0.0327 & 0.0986 & 0.0422 \\
+
+        MIDGN
+        & 0.2679 & 0.1521 & 0.3694 & 0.1802
+        & 0.0852 & 0.0471 & 0.1296 & 0.0592
+        & 0.0676 & 0.0341 & 0.1079 & 0.0449 \\
+
+        CrossCBR
+        & 0.2813 & 0.1662 & 0.3768 & 0.1929
+        & 0.1131 & 0.0867 & 0.1614 & 0.1043
+        & 0.0840 & 0.0457 & 0.1253 & 0.0566 \\
+
+        MultiCBR
+        & 0.2823 & 0.1679 & 0.3901 & 0.1970
+        & \underline{0.1497} & \underline{0.1203} & \underline{0.2013} & \underline{0.1386}
+        & 0.0905 & 0.0493 & 0.1353 & 0.0611 \\
+
+        % TODO: DCDL Youshu R@40/N@40 and NetEase R@40 updated per user; the remaining nine values await confirmation.
+        DCDL
+        & \underline{0.2858} & \underline{0.1701} & \underline{0.3946} & \underline{0.1994}
+        & 0.1459 & 0.1157 & 0.1979 & 0.1336
+        & 0.0897 & 0.0489 & 0.1340 & 0.0605 \\
+
+        EpicCBR
+        & 0.2852 & 0.1691 & 0.3889 & 0.1985
+        & 0.1474 & 0.1189 & 0.2000 & 0.1374
+        & \underline{0.0913} & \underline{0.0502} & \underline{0.1356} & \underline{0.0615} \\
+
+        \midrule
+        \textbf{ReCoBR}
+        & \textbf{0.2920} & \textbf{0.1759} & \textbf{0.3997} & \textbf{0.2023}
+        & \textbf{0.1541} & \textbf{0.1310} & \textbf{0.2041} & \textbf{0.1481}
+        & \textbf{0.0955} & \textbf{0.0511} & \textbf{0.1390} & \textbf{0.0627} \\
+
+        \midrule
+        \textbf{Improv.}
+        & \textbf{2.17\%} & \textbf{3.41\%} & \textbf{1.29\%} & \textbf{1.45\%}
+        & \textbf{2.94\%} & \textbf{8.89\%} & \textbf{1.39\%} & \textbf{6.85\%}
+        & \textbf{4.60\%} & \textbf{1.79\%} & \textbf{2.51\%} & \textbf{1.95\%} \\
+        \bottomrule
+    \end{tabular}
+    }
+
+    \caption{Overall performance at Top-20 and Top-40 on three
+    datasets. R and N denote Recall and NDCG. Bold and underlined
+    entries mark the best and second-best results, respectively.
+    Improv. is ReCoBR's relative improvement over the strongest
+    baseline for each metric.}
+    \label{tab:overall}
+\end{table*}
+
+
+% Table 3: Ablation study, single-column table
+% =========================================================
+\begin{table}[!t]
+    \centering
+    {\small
+    \setlength{\tabcolsep}{2pt}
+    \begin{tabular}{@{}lrrrrrr@{}}
+        \toprule
+        \multirow{2}{*}{Variant}
+        & \multicolumn{2}{c}{Youshu}
+        & \multicolumn{2}{c}{NetEase}
+        & \multicolumn{2}{c}{iFashion} \\
+        \cmidrule(lr){2-3}
+        \cmidrule(lr){4-5}
+        \cmidrule(lr){6-7}
+        & R@20 & N@20
+        & R@20 & N@20
+        & R@20 & N@20 \\
+        \midrule
+
+        \shortstack[l]{w/o Graph\\Recon.}
+        & 0.2904 & 0.1734
+        & 0.0948 & 0.0509
+        & 0.1500 & 0.1245 \\
+
+        w/o SetLoss
+        & 0.2913 & 0.1749
+        & 0.0951 & 0.0506
+        & 0.1527 & 0.1301 \\
+
+        w/o All CL
+        & 0.2326 & 0.1307
+        & 0.0512 & 0.0260
+        & 0.0400 & 0.0281 \\
+
+        \shortstack[l]{w/o Pre-fusion\\CL}
+        & 0.2901 & 0.1692
+        & 0.0906 & 0.0487
+        & 0.1532 & 0.1304 \\
+
+        \shortstack[l]{w/o Post-fusion\\CL}
+        & 0.2595 & 0.1502
+        & 0.0682 & 0.0350
+        & 0.0461 & 0.0350 \\
+        \midrule
+
+        \textbf{ReCoBR}
+        & \textbf{0.2920}
+        & \textbf{0.1759}
+        & \textbf{0.0955}
+        & \textbf{0.0511}
+        & \textbf{0.1541}
+        & \textbf{0.1310} \\
+
+        \bottomrule
+    \end{tabular}
+    }
+
+    \caption{Component ablations on three datasets, evaluated by
+    Recall@20 (R@20) and NDCG@20 (N@20). Bold entries identify
+    the complete ReCoBR model. CL denotes contrastive learning.}
+    \label{tab:ablation}
+\end{table}
+
+
+\subsection{Computational Complexity}
+
+Let $n_+=|\mathcal U_+|$ and $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$. Let $M=|\mathcal E_{\mathrm{UB}}|$ be the number of observed U-B edges, and let $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ be the total number of edges used for graph propagation. We use $Q$ and $m$ to denote the number and size of recommendation minibatches, respectively. With a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
+
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(T+1)n_+C_f\\
+&+n_+h_{\max}\!\left[d+\log(1+\kappa)\right]\\
+&+Q\bigl(LEd+m^2d\bigr)
+\end{aligned}
+\right).
+\tag{20}
+\end{equation}
+The three terms correspond to denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Since $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$, reconstruction does not densify the U-B graph.
+
+For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$, let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the denoiser parameter count. The peak training space is
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(L+1)Vd+P_\theta+(|\mathcal U|+|\mathcal B|)d\\
+&+E+M+m^2+b_dh_{\max}d
+\end{aligned}
+\right).
+\tag{21}
+\end{equation}
+At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and scoring all candidate bundles for one user costs $O(|\mathcal B|d)$.
+
+
+\section{Experiments}
+
+In this section, we evaluate ReCoBR against state-of-the-art bundle
+recommendation methods on three public datasets.
+
+\subsection{Experimental Settings}
+
+
+\paragraph{Datasets.}
+To evaluate ReCoBR, we conduct experiments on three public
+datasets: \textbf{Youshu}~\cite{chen2019dam},
+\textbf{iFashion}~\cite{chen2019pog}, and
+\textbf{NetEase}~\cite{cao2017efm}.
+Table~\ref{tab:datasets} summarizes their statistics.
+For a fair comparison, we use the same data splits and
+full-ranking evaluation protocol as MultiCBR~\cite{ma2024multicbr}.
+Performance is measured using Recall@$K$ and
+NDCG@$K$~\cite{wang2019ngcf} for $K\in\{20,40\}$ under
+full-ranking evaluation, with training bundles excluded from
+the candidates.
+
+\paragraph{Baselines.}
+We compare ReCoBR with ten representative recommendation
+methods. \textbf{LightGCN}~\cite{he2020lightgcn} learns collaborative
+representations through neighborhood aggregation.
+\textbf{SGL}~\cite{wu2021sgl} applies contrastive learning to augmented
+graphs. \textbf{XSimGCL}~\cite{yu2024xsimgcl} uses noise-based embedding
+augmentation, while \textbf{LightGCL}~\cite{cai2023lightgcl} constructs
+contrastive views using singular value decomposition.
+These four methods treat bundles as items and use only U-B
+interactions. \textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
+preferences through graph convolution, while
+\textbf{MIDGN}~\cite{zhao2022midgn} disentangles global and local intents.
+\textbf{CrossCBR}~\cite{ma2022crosscbr} aligns bundle and item views
+through contrastive learning.
+\textbf{MultiCBR}~\cite{ma2024multicbr} fuses three relation views before
+contrastive learning. \textbf{DCDL}~\cite{chen2025dcdl} combines
+dual-view modeling with diffusion learning to refine user
+representations and enhance recommendation diversity.
+\textbf{EpicCBR}~\cite{li2026epiccbr} combines item-relation
+enhancement with contrastive learning.
+
+\paragraph{Parameter Settings.}
+All experiments are implemented on a GeForce RTX 3090 GPU.
+For ReCoBR, we use 64-dimensional embeddings with
+Xavier~\cite{glorot2010xavier} initialization and two propagation
+layers. Recommendation training uses
+Adam~\cite{kingma2015adam} with learning rate $10^{-3}$,
+batch size 2048, and one negative bundle per positive
+interaction; $\tau=0.20$ and $\lambda_r=10^{-5}$.
+The denoiser is a two-layer MLP with hidden size 128,
+timestep embedding size 16, and dropout 0.1, trained with
+batch size 1024, learning rate $10^{-3}$, and weight decay
+$10^{-5}$.
+The minimum noise variance is fixed at $\beta_1=10^{-4}$.
+
+For sensitivity analysis, we vary $\beta_T$ in
+$\{0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.06,\allowbreak 0.08\}$, $\kappa$ in
+$\{1,\allowbreak 3,\allowbreak 5,\allowbreak 7,\allowbreak 9,\allowbreak 11,\allowbreak 13,\allowbreak 15,\allowbreak 17,\allowbreak 19\}$, $\lambda_a$ in
+$\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak 0.005,\allowbreak 0.007,\allowbreak 0.009\}$,
+$\lambda_{\mathrm{set}}$ in
+$\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$, and $\lambda_c$ in
+$\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
+For the baselines, we tune hyperparameters within the ranges
+specified in their original papers.
+
+
+
+
+\subsection{Overall Performance}
+
+Table~\ref{tab:overall} compares ReCoBR with ten baselines.
+We draw the following observations:
+\begin{itemize}
+\item ReCoBR achieves the best results across all datasets and
+metrics. Its Recall@20 improves over the strongest baseline by
+2.17\%, 2.94\%, and 4.60\% on Youshu, iFashion, and NetEase,
+respectively. The largest relative NDCG gains occur on iFashion. One possible explanation is that iFashion has more U-B interactions
+per user, which may help ReCoBR select useful connections for graph
+propagation.
+\item SGL, XSimGCL, and LightGCL outperform LightGCN across all
+datasets and metrics. On iFashion, they also exceed BGCN and
+MIDGN despite using only U-B interactions. These results suggest that effective U-B preference learning remains
+important even when auxiliary item-level information is available.
+\item ReCoBR also outperforms CrossCBR, MultiCBR,
+DCDL, and EpicCBR, which model bundle preferences and
+integrate information across views. ReCoBR further considers
+which U-B connections should guide learning across views, bringing interaction refinement
+and auxiliary-information integration into one framework.
+ReCoBR's consistent gains across all three datasets support
+the value of diffusion-driven graph reconstruction in
+uncovering informative U-B preference signals for cross-view
+learning.
+\end{itemize}
+
+
+\subsection{Ablation Study}
+
+Table~\ref{tab:ablation} compares ReCoBR with five variants:
+\textbf{w/o Graph Recon.} restores the original U-B graph;
+\textbf{w/o SetLoss} removes the bundle-set consistency loss;
+\textbf{w/o Pre-fusion CL} and \textbf{w/o Post-fusion CL}
+remove their respective contrastive objectives; and
+\textbf{w/o All CL} removes both. Graph reconstruction
+improves ranking performance, particularly on iFashion,
+supporting preference-guided selection of propagation
+connections. SetLoss yields further gains, reinforcing the
+value of consistency with historical bundle preferences.
+Removing pre-fusion learning also degrades performance,
+highlighting the value of connecting U-B preferences with
+auxiliary views before fusion. The larger losses without
+post-fusion or all contrastive learning emphasize the
+importance of representation regularization. Overall, ReCoBR
+outperforms all variants, demonstrating the effectiveness of
+jointly refining U-B preference signals and integrating
+auxiliary information for bundle recommendation.
+
+
+
+
+
+
+\begin{figure}[!t]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1ndcg20.png} \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{Interaction selection on iFashion using Recall@20
+    and NDCG@20 ($K=\kappa$).}
+    \label{fig:interaction-selection}
+\end{figure}
+
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2ndcg20.png} \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{ReCoBR versus w/o Pre-fusion CL on NetEase using
+    Recall@20 and NDCG@20, both retaining graph reconstruction.
+    Users are sorted by increasing training U-B interaction counts
+    and divided into four equally sized groups (G1--G4). Lines
+    show relative improvements over w/o Pre-fusion CL.}
+    \label{fig:sparse-users}
+\end{figure}
+
+\subsection{In-depth Analysis}
+
+
+
+
+\paragraph{Interaction Selection Strategies.}
+On iFashion, we compare ReCoBR with the original graph
+(\textbf{Original UB}) and three filtering strategies: random
+selection (\textbf{Random-K}), bundle popularity
+(\textbf{Popularity-K}), and pretrained user-bundle similarity
+(\textbf{Pretrain-Sim}). All filtering strategies select from
+users' training histories under the same per-user retention
+limit $\kappa$. As shown in
+Figure~\ref{fig:interaction-selection}, ReCoBR consistently
+performs best. Random-K can improve over Original UB but
+remains inferior to ReCoBR, indicating that selecting
+appropriate connections matters beyond reducing their number.
+Popularity-K's weak NDCG suggests that global popularity is
+insufficient for personalized ranking. Pretrain-Sim performs worse than Random-K, suggesting that
+pretrained user-bundle similarity alone may not identify the most
+useful connections for graph propagation. Together, these results suggest that preference-guided selection is
+more effective than random, popularity-based, or
+pretrained-similarity-based selection.
+
+
+
+
+
+
+
+
+
+\begin{figure}[!t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
+        \multicolumn{2}{c}{(a) Youshu} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
+        \multicolumn{2}{c}{(b) iFashion} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
+        \multicolumn{2}{c}{(c) NetEase}
+    \end{tabular}
+    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
+    Youshu, iFashion, and NetEase. We add random edges at ratios from
+    0\% to 25\% in 5\% increments relative to each user's original
+    training interactions, retaining all original edges.}
+    \label{fig:noise-robustness}
+\end{figure}
+
+\begin{figure*}[t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
+        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
+        (a) & (b) & (c) & (d) & (e)
+    \end{tabular}
+
+    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
+    iFashion, and NetEase. (a) Diffusion noise variance endpoint
+    $\beta_T$. (b) U-B retention limit $\kappa$.
+    (c) Pre-fusion contrastive weight $\lambda_a$.
+    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (e) Post-fusion contrastive weight $\lambda_c$.
+    Broken $y$-axes use different scales for the datasets;
+    candidate values are displayed at equally spaced horizontal
+    positions.}
+    \label{fig:hyperparameter}
+\end{figure*}
+
+\paragraph{Performance on Sparse Users.}
+NetEase users are sorted by increasing training U-B
+interaction counts and divided into four equally sized groups
+(G1--G4). We compare ReCoBR with \textbf{w/o Pre-fusion CL},
+retaining graph reconstruction in both.
+Figure~\ref{fig:sparse-users} shows improvements
+across all four groups, with the largest relative gains in
+the sparsest group G1: 12.64\% in Recall@20 and 9.32\% in
+NDCG@20. These results suggest that explicit cross-view
+learning is particularly useful when direct bundle feedback
+is limited, allowing U-I behavior and B-I composition to
+provide additional learning signals for bundle preference
+modeling.
+
+
+
+
+
+
+
+\paragraph{Robustness to Noisy U-B Interactions.}
+We compare ReCoBR with CrossCBR and MultiCBR using the same
+perturbed U-B input graph for each dataset and noise ratio.
+Ranking supervision, U-I and B-I relations, and evaluation data
+remain unchanged. We rerun ReCoBR's full training pipeline,
+including U-B pretraining. Figure~\ref{fig:noise-robustness} shows
+that ReCoBR maintains the highest Recall@20 and NDCG@20 across
+all datasets and tested noise ratios, showing that it retains
+its recommendation advantage when additional random connections
+interfere with U-B graph propagation.
+
+
+
+
+
+
+
+\subsection{Hyperparameter Sensitivity}
+
+Figure~\ref{fig:hyperparameter} reports ReCoBR's sensitivity
+to five key hyperparameters. We vary one parameter at a time
+while keeping the others fixed. For $\beta_T$, intermediate
+noise levels yield better performance than the extremes,
+suggesting that preference recovery benefits from moderate
+perturbation without excessively disrupting historical
+information. For $\kappa$, iFashion favors smaller retained
+neighborhoods, whereas NetEase benefits from retaining more
+connections. This difference highlights the need to balance
+neighborhood coverage with preference relevance when selecting
+propagation connections. Nonzero $\lambda_{\mathrm{set}}$
+weights improve performance on Youshu, while iFashion and
+NetEase show only small, nonmonotonic changes. Increasing
+this weight does not consistently yield further gains.
+Moderate nonzero values of $\lambda_a$ and $\lambda_c$ improve
+performance, while larger weights can reduce it. The decline
+is especially pronounced for $\lambda_c$ on Youshu and
+NetEase, suggesting the need to balance contrastive
+regularization with the ranking objective.
+
+
+
+\section{Conclusion}
+
+In this paper, we proposed ReCoBR to address noisy and sparse U-B
+feedback in bundle recommendation. ReCoBR refined users' historical
+bundle preferences through user-conditioned diffusion with a
+bundle-set consistency loss. The refined preferences guided the
+selection of observed U-B connections to reconstruct the graph for
+propagation. Cross-view contrastive learning aligned user and bundle
+representations from the reconstructed U-B view with those from the
+U-I and B-I views. Experiments on three public datasets showed that
+ReCoBR outperformed the compared baselines, and ablation results
+supported the effectiveness of its main components.
+
+\bibliography{aaai2027}
+
+\end{document}

@@ -357,3 +357,51 @@ Bundle recommendation (BR) aims to match users with collections of related items
 后续进入现有方法背景部分的讨论，结合用户对师兄批注的解释，研究方法介绍的组织顺序、句间衔接及术语表达。用户选定的本段保持稳定，后续如有新决定再据此更新。
 
 本次仅按用户明确授权追加“工程记录.txt”。本段及此前定稿摘要尚未写入“AAAI文件/main.tex”；未修改论文源码、参考文献、图片、代码、配置或数据，未执行编译或训练。
+
+第十项：引言背景段定稿、三部分七模型的组织方式及正文更新
+
+记录日期：2026-11-13（北京时间）
+
+一、本次定稿范围与结构
+
+用户确认本项保存的背景段定稿，并明确要求“记一项，然后改下AAAI文件”。本段承接已定稿的引言第一段，将初稿中分别以“Early BR methods ...”和“More recent studies ...”开头的两段合并为一个自然段，作为整体推进精修。
+
+段落内部采用三个部分、七个模型：第一部分为 DAM、BGCN，介绍交互与物品信息的利用及图建模；第二部分为 CrossCBR、DGMAE、MultiCBR，介绍跨视图信息交流、蒸馏及融合后的对比学习；第三部分为 DCDL、RDiffBR，介绍扩散模型在用户与捆绑表示学习中的应用。DGMAE 排在 MultiCBR 前面。讨论过补充 EFM 等模型，用户最终决定不增加模型，保留上述七个模型。
+
+二、用户确认的英文定稿
+
+Early BR methods explored how to incorporate item-level information into bundle preference learning. For example, DAM jointly models U-B and U-I interactions, using attention to construct bundle representations from item embeddings (Chen et al., 2019a). To capture higher-order relations among users, bundles, and items, BGCN introduces graph propagation in the bundle and item views. BGCN also uses B-I affiliations to aggregate item information into bundle representations (Chang et al., 2020). Building on multi-view representation learning, subsequent studies have focused on strengthening information exchange and integration across views. For instance, CrossCBR applies contrastive learning to align representations of the same user (bundle) across the bundle and item views (Ma et al., 2022). Meanwhile, DGMAE uses knowledge distillation to transfer information from first- and higher-order U-B relations to the item view (Ren et al., 2023). More recently, MultiCBR separately learns representations from the U-B, U-I, and B-I views, fuses these representations for recommendation, and applies contrastive learning after fusion (Ma et al., 2024). Recent studies have also investigated diffusion models to improve user and bundle representations for recommendation. Specifically, DCDL applies diffusion learning to user representations within a dual-view framework to improve recommendation diversity (Chen et al., 2025). In addition, RDiffBR uses residual diffusion to adapt bundle representations to changes in bundle composition (Zhang et al., 2026).
+
+三、对应中文翻译
+
+早期的捆绑推荐方法探索了如何将物品层面的信息引入捆绑偏好学习。例如，DAM 联合建模 U-B 和 U-I 交互，利用注意力机制从物品嵌入构建捆绑表示（Chen et al., 2019a）。为捕捉用户、捆绑和物品之间的高阶关系，BGCN 在捆绑视图和物品视图中引入图传播。BGCN 还利用 B-I 关系，将物品信息聚合到捆绑表示中（Chang et al., 2020）。在多视图表示学习的基础上，后续研究着重加强视图之间的信息交流与整合。例如，CrossCBR 通过对比学习，对齐同一用户（捆绑）在捆绑视图和物品视图中的表示（Ma et al., 2022）。与此同时，DGMAE 利用知识蒸馏，将一阶和高阶 U-B 关系中的信息传递到物品视图（Ren et al., 2023）。更近期的 MultiCBR 分别从 U-B、U-I 和 B-I 三个视图学习表示，将这些表示融合用于推荐，并在融合后开展对比学习（Ma et al., 2024）。近期研究还探讨了利用扩散模型改善用于推荐的用户和捆绑表示。具体而言，DCDL 在双视图框架中对用户表示进行扩散学习，以改善推荐多样性（Chen et al., 2025）。此外，RDiffBR 利用残差扩散，使捆绑表示适应捆绑组成的变化（Zhang et al., 2026）。
+
+四、本轮确定的表达与写作取舍
+
+（1）借鉴 CAFU 引言中各部分之间有内容依据的衔接方式，为三部分保留必要的引导句与连接词。连接句需要说明研究关注点如何转移，不能仅把模型介绍拼接在一起。第一部分从物品信息利用写到图传播，第二部分着重视图间的信息交流与整合，第三部分转向扩散模型对用户和捆绑表示的改善。
+
+（2）第一处保留“Early BR methods explored ...”；第二部分采用“subsequent studies have focused on strengthening information exchange and integration across views”；扩散部分最终采用“Recent studies have also investigated diffusion models to improve user and bundle representations for recommendation.”，避免三个部分的引导句都重复使用 explored，并明确扩散部分的介绍重点。
+
+（3）DAM 采用“jointly models U-B and U-I interactions, using attention to construct ...”，用 using 减少相邻的 and。保留用户确认的“construct bundle representations from item embeddings”，未采用复审中提出的可选 aggregate 改写。
+
+（4）BGCN 先交代捕捉高阶关系及在捆绑、物品视图中的图传播，再以第二句明确 B-I 关系用于将物品信息聚合到捆绑表示。CrossCBR 采用“the same user (bundle)”，明确同一用户或同一捆绑在不同视图中的对应关系。DGMAE 使用“first- and higher-order U-B relations”，保留“transfer information”，未采用可选的 transfer knowledge。
+
+（5）MultiCBR 的最终句子在同一个明确主语下，依次写出“分别学习表示 → 融合这些表示用于推荐 → 融合后开展对比学习”。采用“fuses these representations for recommendation, and applies contrastive learning after fusion”，使 for recommendation 紧跟融合动作，after fusion 明确对比学习的位置。此前把对比学习拆成独立被动句，或将用途嵌入“after fusing these representations for recommendation”的版本均由本项取代。
+
+（6）DCDL 最终采用“applies diffusion learning to user representations within a dual-view framework to improve recommendation diversity”，以明确的动词搭配说明扩散学习对象、双视图框架及推荐多样性的目的。RDiffBR 保留“uses residual diffusion to adapt bundle representations to changes in bundle composition”。
+
+（7）本轮进一步明确：控制句长应服务于完整、清楚的理解，不能为缩短句子机械拆开紧密相连的方法步骤；并列层次和修饰关系应清楚。必要时重复模型名称或准确的专业名词，优先保证指代稳定，不为避免重复而随意更换术语。后续修改只落实用户选定的方案，未被采纳的候选不自动带入完整稿。
+
+五、本次正文更新、验证与当前落盘状态
+
+（1）已将上述定稿写入“AAAI文件/main.tex”，替换初稿中的两段背景介绍并合并为一个自然段。原文中的作者年份引用转为现有 LaTeX 引用键：chen2019dam、chang2020bgcn、ma2022crosscbr、ren2023dgmae、ma2024multicbr、chen2025dcdl、zhang2026rdiffbr。这七个键均已存在于 aaai2027.bib，无需新增或修改参考文献条目。
+
+（2）已核对本次写入的英文与用户确认的版本一致，除将作者年份转换为引用命令外未改写定稿；已检查单段结构、七个引用键及新增内容的括号配对，并确认背景段之外的正文内容保持原样。正文改动已通过 git diff --check。本次未执行本地编译，Overleaf 排版效果由用户复制后编译查看。
+
+（3）第七项的完整摘要与第九项的引言第一段，已在此前用户明确要求“目前已定稿的部分，写进main.tex”时写入本地正文。本次在此基础上继续更新背景段。因此，当前 main.tex 已包含完整摘要、引言第一段及本项背景段三个已定稿部分；前面记录中的“尚未写入”属于当时状态，历史记录保留。
+
+（4）本次实际修改范围为“AAAI文件/main.tex”和“工程记录.txt”。未修改参考文献、图片、代码、配置及数据。用户可复制更新后的 main.tex 到现有 Overleaf 工程查看效果。
+
+六、后续承接
+
+后续进入过渡段的研讨。背景段最后介绍 RDiffBR 对捆绑组成变化的适应，下一段需先将话题收回捆绑偏好学习及 U-B 交互的作用，再自然引出噪声与稀疏带来的影响，随后展开两个挑战。过渡段、挑战说明、本文工作介绍和贡献表述本次均未改写，仍按用户后续明确选择及授权逐项推进。

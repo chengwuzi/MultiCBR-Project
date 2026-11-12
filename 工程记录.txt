@@ -171,3 +171,71 @@ Module 2：基于重构 U-B 视图的融合前跨视图对比学习，对应 Cha
 （1）后续在摘要、引言、方法及其他相关位置，根据段落需要合理引入完整名称与缩写，并统一使用 DGR、CCL 指代对应模块。介绍框架时先交代两个模块及各自目的，再展开关键设计，清楚说明 DGR 形成的重构 U-B 图如何用于 CCL 中的表示学习与跨视图约束。
 
 （2）本项确定的是模块命名与叙述组织方式，两个模块的具体设计和逻辑关系继续承接既有记录。用户本次授权为“记一项”，实际仅追加“工程记录.txt”，尚未将新名称写入论文源码或修改图片、参考文献、代码、配置及数据，未执行编译或训练。
+
+第六项：摘要开头至两个挑战的表述定稿
+
+记录日期：2026-11-12（北京时间）
+
+一、本次定稿范围与叙述逻辑
+
+用户确认摘要开头四句定稿，范围包括捆绑推荐任务定义、现有基于图的方法如何使用三类关系、U-B 交互的重要性，以及噪声与稀疏性两个挑战。叙述顺序为：任务目标 → 现有方法的信息来源 → U-B 直接反映捆绑整体偏好、发挥核心作用 → 从 U-B 交互中学习所面临的两个挑战。
+
+第二句采用“Existing graph-based methods”，提前交代图建模背景，与后文的 U-B 图及图传播衔接。第三句采用“in these methods”，明确指向前句的现有方法，不再使用指代含糊的“in this process”。两个挑战的引入采用“However, learning from these interactions faces two challenges:”，保留两个挑战的具体内容。
+
+二、用户确认的英文定稿
+
+Bundle recommendation (BR) aims to match users with collections of items that suit their preferences. Existing graph-based methods learn users’ bundle preferences from user-bundle (U-B) interactions and use user-item (U-I) interactions and bundle-item (B-I) affiliations as auxiliary information. U-B interactions play a central role in these methods, as they provide direct signals of users’ preferences for bundles as a whole. However, learning from these interactions faces two challenges: (1) noise in the observed U-B graph can introduce misleading preference signals during graph propagation; (2) sparse U-B feedback hinders accurate modeling of users’ bundle preferences.
+
+三、对应中文翻译
+
+捆绑推荐（BR）旨在为用户匹配符合其偏好的物品集合。现有的基于图的方法从用户—捆绑（U-B）交互中学习用户的捆绑偏好，并将用户—物品（U-I）交互和捆绑—物品（B-I）隶属关系作为辅助信息。U-B 交互在这些方法中发挥着核心作用，因为它们提供了用户对捆绑整体偏好的直接信号。然而，基于这些交互进行学习面临两个挑战：（1）观测到的 U-B 图中的噪声可能在图传播过程中引入误导性的偏好信号；（2）稀疏的 U-B 反馈阻碍对用户捆绑偏好的准确建模。
+
+四、后续承接与本次修改范围
+
+（1）后续进入摘要的方法介绍部分，研究如何承接两个挑战，引出 ReCoBR 及已确定名称的 DGR、CCL 两个模块，再分别阐述关键设计与作用。该部分尚未定稿。
+
+（2）继续遵循用户已明确的协作方式：供评估选择的英文版本均附准确、忠于原文的中文翻译。
+
+（3）本项根据用户本次“这部分定稿；记一项”的明确要求追加。本次仅更新“工程记录.txt”；上述定稿尚未写入“AAAI文件/main.tex”。未修改其他项目文件，未执行编译或训练。后续修改论文文件仍以用户明确授权为准。
+
+第七项：完整摘要定稿、PDGR 命名与后续引言精修安排
+
+记录日期：2026-11-12（北京时间）
+
+一、本次定稿及与既有记录的关系
+
+用户明确确认“摘要定为这稿”，并要求记录，后续转入引言精修。本项保存完整英文摘要及对应中文翻译，作为后续工作的最新摘要基准。第六项保存的开头属于此前阶段版本，其具体表述由本项取代；第五项中的第一个模块名称 DGR 更新为本项确定的 PDGR。历史记录保留，两个挑战、两个模块的研究逻辑继续承接既有共识。
+
+二、用户确认的完整英文摘要
+
+Bundle recommendation (BR) aims to match users with collections of items that suit their preferences. Existing graph-based methods learn bundle preferences primarily from user-bundle (U-B) interactions, while incorporating user-item (U-I) interactions and bundle-item (B-I) affiliations as auxiliary information. Despite their effectiveness, limitations in the observed U-B interactions still pose two challenges: (1) noise in the observed U-B graph can introduce misleading preference signals during graph propagation; (2) sparse U-B feedback hinders accurate modeling of users’ bundle preferences. To address these challenges, we propose ReCoBR. ReCoBR reduces the impact of noisy interactions through Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR) and improves preference learning under sparse feedback through Cross-View Contrastive Learning (CCL). In PDGR, we first pretrain user and bundle embeddings on the observed U-B graph. We construct users’ historical preference representations from the bundle embeddings and denoise the preference representations with a user-conditioned diffusion model. We then use the denoised representations to filter observed U-B interactions and reconstruct the U-B graph. Next, CCL applies contrastive learning between the reconstructed U-B view and each auxiliary view before representation fusion, enabling auxiliary information to better support bundle preference learning for sparse users. Experiments on three public datasets show that ReCoBR outperforms the baseline methods.
+
+三、对应中文翻译
+
+捆绑推荐（BR）旨在为用户匹配符合其偏好的物品集合。现有的基于图的方法主要从用户—捆绑（U-B）交互中学习捆绑偏好，同时引入用户—物品（U-I）交互和捆绑—物品（B-I）隶属关系作为辅助信息。尽管这些方法有效，观测到的 U-B 交互存在的局限仍然带来两个挑战：（1）观测到的 U-B 图中的噪声可能在图传播过程中引入误导性的偏好信号；（2）稀疏的 U-B 反馈阻碍对用户捆绑偏好的准确建模。为应对这些挑战，我们提出 ReCoBR。ReCoBR 通过基于预训练的扩散驱动 U-B 图重构（PDGR）减少噪声交互的影响，并通过跨视图对比学习（CCL）改善稀疏反馈下的偏好学习。在 PDGR 中，我们首先在观测到的 U-B 图上预训练用户和捆绑嵌入。我们利用这些捆绑嵌入构建用户的历史偏好表示，并使用以用户为条件的扩散模型对这些偏好表示进行去噪。随后，我们利用去噪后的表示过滤已观测的 U-B 交互，重构 U-B 图。接着，CCL 在表示融合前开展重构 U-B 视图与各辅助视图之间的对比学习，使辅助信息能够更有效地支持稀疏用户的捆绑偏好学习。在三个公共数据集上的实验表明，ReCoBR 优于基线方法。
+
+四、本轮确定的写作取舍与用词
+
+（1）摘要开头将 U-B 的主要地位融入现有方法的介绍，采用“learn bundle preferences primarily from user-bundle (U-B) interactions”，并以 U-I、B-I 作为辅助信息。随后采用“Despite their effectiveness, limitations in the observed U-B interactions still pose two challenges:”引出噪声与稀疏性两个挑战，不再单列“U-B interactions play a central role ...”一句。
+
+（2）模块 1 的全称确定为 Pretraining-Based Diffusion-Driven U-B Graph Reconstruction（PDGR），中文为“基于预训练的扩散驱动 U-B 图重构”。P 对应 Pretraining-Based。后续讨论及获得授权的稿件修改统一使用 PDGR。模块 2 继续采用 Cross-View Contrastive Learning（CCL）。
+
+（3）摘要中间部分借鉴 CAFU 的组织方式，先介绍两个模块与各自作用，再说明关键设计，遵循从精从简、突出主线的原则。PDGR 按“在观测 U-B 图上预训练用户和捆绑嵌入 → 利用捆绑嵌入构建历史偏好表示并进行用户条件扩散去噪 → 过滤已观测 U-B 交互、重构 U-B 图”的顺序展开。先明确预训练的来源，避免直接出现缺少背景交代的“pretrained bundle embeddings”；以重构图收束 PDGR 的叙述，衔接后面的 CCL。
+
+（4）用户决定摘要中不再介绍一致性约束或 Bundle-Set Consistency Loss（SetLoss）。该设计仍是 PDGR 的组成部分，后续在引言中作为创新设计展开其动机、作用及保留历史偏好信息的逻辑。本次仅调整摘要的信息取舍，不表示删除方法设计。
+
+（5）CCL 的摘要表述明确使用重构 U-B 视图，在表示融合前与各辅助视图开展对比学习，并将作用落到支持稀疏用户的捆绑偏好学习。采用“each auxiliary view”避免连续列举造成多个 and 嵌套；采用“before representation fusion”明确融合对象；结尾采用“for sparse users”呼应稀疏交互挑战。
+
+（6）保留“the preference representations”明确去噪对象，避免 them 在历史偏好表示与捆绑嵌入两个复数对象之间产生指代疑问。保留“filter observed U-B interactions”。最终实验结论采用“the baseline methods”。第二句仍采用“while incorporating”，未采用复审中提出的可选替换“while using”。
+
+五、篇幅与投稿背景补充
+
+（1）最终完整英文摘要按空格分词统计为 201 词，包含最后的实验结论句，连字符词计为一个词。该统计用于本轮篇幅比较，不作为投稿要求。
+
+（2）用户明确说明，AAAI 仅是目前采用的排版模板，不代表投稿目标。后续考虑投稿期刊，TCSS 是候选之一，具体目标尚未确定。摘要篇幅优先服务于清楚、顺畅的表达，正式投稿要求待目标期刊确定后核对，不按 AAAI 投稿要求约束当前精修。
+
+六、后续工作及本次修改范围
+
+（1）后续转入引言精修，以本项确认的摘要和既有研究逻辑为基准，继续结合初稿、师兄批注、CAFU 及其他参照论文开展讨论。引言需展开摘要中省略的一致性约束设计，并说明 PDGR、CCL 的动机、关键作用与衔接关系。英文候选稿继续附准确、忠于原文的中文翻译。
+
+（2）本项按用户本次明确要求追加，仅更新“工程记录.txt”。完整摘要及 PDGR 名称尚未写入“AAAI文件/main.tex”；未修改其他项目文件，未执行编译或训练。后续修改论文文件及追加工程记录，继续按用户明确授权的具体范围执行。

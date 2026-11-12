@@ -323,3 +323,37 @@ CAFU 是高优先级参考，尤其值得学习其介绍现有方法、衔接挑
 接下来在初稿引言基础上进行中等幅度精修，结合师兄批注，重点展开问题动机、两个模块的对应关系，以及摘要中省略的一致性约束设计。用户将先准备引言批注的分析，后续根据其提供的具体内容继续研讨。
 
 本次实际操作仅为追加本项工程记录，未修改论文源码、参考文献、图片、代码、配置或数据，未执行编译或训练。
+
+第九项：引言第一段定稿及措辞、引用安排
+
+记录日期：2026-11-12（北京时间）
+
+一、本次定稿范围
+
+用户确认引言第一段采用本项保存的版本，并明确要求“记一项”。本段按“捆绑推荐的任务定义与例子 → 对用户和平台的价值 → 三类关系及各自提供的信息 → 总结三类关系对偏好学习的作用”组织。后续引言精修以本段为最新基准；第七项的完整摘要定稿及既有研究逻辑继续有效。
+
+二、用户确认的英文定稿
+
+Bundle recommendation (BR) aims to match users with collections of related items, such as music playlists and fashion outfits (Chen et al., 2019a; Ma et al., 2022). BR helps users discover suitable collections while creating additional sales opportunities for platforms (Ma et al., 2022, 2024). BR methods commonly use three types of relations (Ma et al., 2022, 2024): user-bundle (U-B) interactions reflect users’ choices of bundles; user-item (U-I) interactions provide information about their interests in individual items; and bundle-item (B-I) affiliations describe which items belong to each bundle. Together, these relations provide information for learning users’ bundle preferences.
+
+三、对应中文翻译
+
+捆绑推荐（BR）旨在为用户匹配由相关物品组成的集合，例如音乐播放列表和服装搭配（Chen et al., 2019a；Ma et al., 2022）。BR 帮助用户发现适合自己的物品集合，同时为平台创造更多销售机会（Ma et al., 2022, 2024）。捆绑推荐方法通常利用三类关系（Ma et al., 2022, 2024）：用户—捆绑（U-B）交互反映用户对捆绑的选择；用户—物品（U-I）交互提供用户对单个物品的兴趣信息；捆绑—物品（B-I）关系描述每个捆绑包含哪些物品。这些关系共同为学习用户的捆绑偏好提供信息。
+
+四、本轮确定的修改与引用安排
+
+（1）保留第一句的任务定义及音乐播放列表、服装搭配两个例子。第二句以已定义的 BR 替换 It，使主语明确，回应师兄关于指代和表达的批注。
+
+（2）三类关系的总领表述采用“BR methods commonly use three types of relations”，并补入“(Ma et al., 2022, 2024)”作为相关文献依据。随后以并列分句具体说明 U-B、U-I、B-I 分别提供的信息，帮助熟悉主流推荐系统但不熟悉捆绑推荐的读者理解。
+
+（3）保留最后一句，采用“Together, these relations provide information for learning users’ bundle preferences.”，不再使用 complementary。讨论中提出的删除末句、改用“BR methods combine information ...”，以及以 useful 或 different types of information 替换的候选均未被采用。
+
+（4）最后一句是对前一句已介绍内容的收束，没有提出新的独立结论，因此不在该句末尾重复添加相同引用。上述判断针对本段的内容与引用衔接；全文其他位置仍根据具体主张及其依据安排引用。
+
+（5）本段先交代任务、用途与信息来源。U-B 的关键作用及观测交互的噪声、稀疏问题，留在后续过渡段集中展开。
+
+五、后续承接与本次实际修改范围
+
+后续进入现有方法背景部分的讨论，结合用户对师兄批注的解释，研究方法介绍的组织顺序、句间衔接及术语表达。用户选定的本段保持稳定，后续如有新决定再据此更新。
+
+本次仅按用户明确授权追加“工程记录.txt”。本段及此前定稿摘要尚未写入“AAAI文件/main.tex”；未修改论文源码、参考文献、图片、代码、配置或数据，未执行编译或训练。

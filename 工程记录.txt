@@ -405,3 +405,55 @@ Early BR methods explored how to incorporate item-level information into bundle 
 六、后续承接
 
 后续进入过渡段的研讨。背景段最后介绍 RDiffBR 对捆绑组成变化的适应，下一段需先将话题收回捆绑偏好学习及 U-B 交互的作用，再自然引出噪声与稀疏带来的影响，随后展开两个挑战。过渡段、挑战说明、本文工作介绍和贡献表述本次均未改写，仍按用户后续明确选择及授权逐项推进。
+
+第十一项：引言过渡段阶段定稿、三层复审及后续回看安排
+
+记录日期：2026-11-13（北京时间）
+
+一、本次授权、定稿范围与阶段定位
+
+用户要求从逻辑、语句、词汇三个层面通读审阅当前过渡段，确认无明显问题后记录并修改 AAAI 文件，同时明确要求：后面两个挑战修改完成后，还需要回头复审本段。
+
+本次以用户最新选定的过渡段为基准，完成上下文连读及三层复审。整体逻辑、句子结构和主要术语没有发现需要重新讨论的实质问题；仅对相邻两句重复出现 difficult 做一处局部润色。以下版本作为当前阶段定稿写入正文，不视为免于后续联合复审的最终固定版本。
+
+二、本阶段英文定稿
+
+Although these methods differ in their modeling strategies, they learn users’ bundle preferences primarily from observed U-B interactions. However, noise and sparsity in the observed U-B interactions remain significant obstacles to accurately modeling users’ bundle preferences. For example, accidental clicks may be recorded as positive interactions even when they do not reflect users’ actual preferences. During graph propagation, misleading preference signals from noisy U-B interactions can spread through neighborhood aggregation. Meanwhile, many users have interacted with only a few bundles, leaving limited historical information for learning their preferences. For these users, item interests and bundle composition can provide additional information, but using this information effectively remains difficult. Based on the above analysis, we identify the following two challenges.
+
+三、对应中文翻译
+
+尽管这些方法采用不同的建模策略，它们主要从观测到的 U-B 交互中学习用户的捆绑偏好。然而，观测到的 U-B 交互中的噪声与稀疏性，仍对用户捆绑偏好的准确建模构成显著障碍。例如，误点击可能被记录为正交互，即使这些交互并不反映用户的真实偏好。在图传播过程中，来自噪声 U-B 交互的误导性偏好信号可能通过邻居聚合传播。与此同时，许多用户仅与少量捆绑发生过交互，可用于学习其偏好的历史信息有限。对于这些用户，物品兴趣和捆绑组成能够提供额外信息，但有效利用这些信息仍有困难。基于上述分析，我们提出以下两个挑战。
+
+四、本轮确定的叙述与用词
+
+（1）开头以“不同的建模策略—共同的 U-B 偏好信息来源”承接已定稿背景段，强调主要从观测 U-B 交互中学习捆绑偏好。原文中“still relies heavily”与“cannot fully overcome”的叙述不再沿用。
+
+（2）第二句明确噪声和稀疏性对偏好学习的影响。用户最终选择“remain significant obstacles to accurately modeling users’ bundle preferences”，未采用 major 或 notable，也未保留此前仅描述信息可能不可靠或不充分的版本。
+
+（3）噪声部分先以误点击说明观测正交互未必反映真实偏好，再说明误导性偏好信号在图传播中通过邻居聚合传播。采用“noisy U-B interactions”，明确指向噪声交互，避免使用范围不清楚的 these interactions。术语核对表明 unreliable interactions 有实际文献用例，但当前讨论噪声问题，noisy interactions 更贴合语境，也与摘要表述一致。
+
+（4）稀疏部分先说明用户仅有少量捆绑交互、可用于偏好学习的历史信息有限，再说明物品兴趣和捆绑组成能够提供补充。最后补上“but using this information effectively remains difficult”，使本段落到有效利用辅助信息的困难，避免只说明辅助信息有用便直接收束。
+
+（5）上述末句保留用户选定的 difficult，避免与下一句 challenges 的词根重复。具体为何有效利用辅助信息仍有困难、为何需要进一步加强视图协同，将在 Challenge 2 中展开；不在过渡段提前引入融合前对比、预训练或 SetLoss 等具体方法设计。
+
+（6）结尾按用户要求保留“Based on the above analysis, we identify the following two challenges.”，不采用此前的“These issues motivate ...”。
+
+（7）本次复审发现第五句“making it difficult to learn their preferences from the limited history”与第六句“remains difficult”相邻重复。已在本次授权范围内将第五句局部改为“leaving limited historical information for learning their preferences”，保留第六句已选定的表达，其余已讨论内容不变。对应中文同步调整为“可用于学习其偏好的历史信息有限”。
+
+五、三层复审结论与两个挑战完成后的联合复审
+
+（1）逻辑：当前段落按“U-B 的作用 → 噪声与稀疏的影响 → 误点击及噪声传播 → 稀疏历史与辅助信息利用困难 → 引出两个挑战”展开，能够承接背景段，并为后续挑战提供问题背景。Challenge 1 需继续解释交互筛选与历史偏好保留之间的取舍；Challenge 2 需具体展开稀疏条件下有效利用辅助信息的困难及视图协同的动机。
+
+（2）语句：句子主干与修饰关系清楚，噪声传播句以误导性偏好信号为主语；these users 指向前一句交互较少的用户，this information 指向同句由物品兴趣和捆绑组成提供的额外信息。相邻 difficult 重复已处理。
+
+（3）词汇：保留用户选定的 significant obstacles、positive interactions、noisy U-B interactions、neighborhood aggregation 和 remains difficult 等表达。专业术语的一致性优先于机械替换同义词；本段已明确的问题名称与摘要保持衔接。
+
+（4）用户明确要求的后续回看：两个挑战完成后，必须将“背景段—过渡段—Challenge 1—Challenge 2”连续复审。重点检查过渡段是否为挑战充分铺垫，噪声传播与稀疏历史的说明是否出现不必要的重复，以及“有效利用辅助信息仍有困难”是否在 Challenge 2 中得到具体解释。必要时同步调整过渡段的详略、措辞和引用位置。当前阶段定稿不替代这一步复审。
+
+六、本次实际落盘与验证
+
+（1）已在“AAAI文件/main.tex”中替换原有过渡段，正文保持一个自然段。除将英文弯引号转为 LaTeX 源文件使用的普通撇号外，写入内容与本项保存的阶段定稿一致。
+
+（2）已核对正文仅有该过渡段发生变动。已定稿摘要、引言第一段、背景段，以及两个挑战、本文工作与贡献等其余正文均保持原样。新段落格式及文本一致性检查通过，正文改动已通过 git diff --check。
+
+（3）本次实际修改“AAAI文件/main.tex”与“工程记录.txt”，未修改参考文献、图片、代码、配置或数据，未执行本地编译或训练。用户可将 main.tex 复制到现有 Overleaf 工程查看排版效果。

@@ -680,6 +680,82 @@ specified in their original papers.
 
 
 
+\begin{figure}[!t]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m1ndcg20.png} \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{Interaction selection on iFashion using Recall@20
+    and NDCG@20 ($K=\kappa$).}
+    \label{fig:interaction-selection}
+\end{figure}
+
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2ndcg20.png} \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{ReCoBR versus w/o Pre-fusion CL on NetEase using
+    Recall@20 and NDCG@20, both retaining graph reconstruction.
+    Users are sorted by increasing training U-B interaction counts
+    and divided into four equally sized groups (G1--G4). Lines
+    show relative improvements over w/o Pre-fusion CL.}
+    \label{fig:sparse-users}
+\end{figure}
+
+\begin{figure}[!t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
+        \multicolumn{2}{c}{(a) Youshu} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
+        \multicolumn{2}{c}{(b) iFashion} \\
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
+        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
+        \multicolumn{2}{c}{(c) NetEase}
+    \end{tabular}
+    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
+    Youshu, iFashion, and NetEase. We add random edges at ratios from
+    0\% to 25\% in 5\% increments relative to each user's original
+    training interactions, retaining all original edges.}
+    \label{fig:noise-robustness}
+\end{figure}
+
+\begin{figure*}[t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
+        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
+        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
+        (a) & (b) & (c) & (d) & (e)
+    \end{tabular}
+
+    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
+    iFashion, and NetEase. (a) Diffusion noise variance endpoint
+    $\beta_T$. (b) U-B retention limit $\kappa$.
+    (c) Pre-fusion contrastive weight $\lambda_a$.
+    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (e) Post-fusion contrastive weight $\lambda_c$.
+    Broken $y$-axes use different scales for the datasets;
+    candidate values are displayed at equally spaced horizontal
+    positions.}
+    \label{fig:hyperparameter}
+\end{figure*}
+
 \subsection{Overall Performance}
 
 Table~\ref{tab:overall} compares ReCoBR with ten baselines.
@@ -733,38 +809,9 @@ auxiliary information for bundle recommendation.
 
 
 
-\begin{figure}[!t]
-    \centering
-    \begin{tabular}{@{}cc@{}}
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m1recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m1ndcg20.png} \\
-        (a) & (b)
-    \end{tabular}
 
-    \caption{Interaction selection on iFashion using Recall@20
-    and NDCG@20 ($K=\kappa$).}
-    \label{fig:interaction-selection}
-\end{figure}
 
-\begin{figure}[!b]
-    \centering
-    \begin{tabular}{@{}cc@{}}
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2ndcg20.png} \\
-        (a) & (b)
-    \end{tabular}
 
-    \caption{ReCoBR versus w/o Pre-fusion CL on NetEase using
-    Recall@20 and NDCG@20, both retaining graph reconstruction.
-    Users are sorted by increasing training U-B interaction counts
-    and divided into four equally sized groups (G1--G4). Lines
-    show relative improvements over w/o Pre-fusion CL.}
-    \label{fig:sparse-users}
-\end{figure}
 
 \subsection{In-depth Analysis}
 
@@ -798,48 +845,9 @@ pretrained-similarity-based selection.
 
 
 
-\begin{figure}[!t]
-    \centering
-    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
-        \multicolumn{2}{c}{(a) Youshu} \\
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
-        \multicolumn{2}{c}{(b) iFashion} \\
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
-        \multicolumn{2}{c}{(c) NetEase}
-    \end{tabular}
-    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
-    Youshu, iFashion, and NetEase. We add random edges at ratios from
-    0\% to 25\% in 5\% increments relative to each user's original
-    training interactions, retaining all original edges.}
-    \label{fig:noise-robustness}
-\end{figure}
 
-\begin{figure*}[t]
-    \centering
-    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
-        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
-        (a) & (b) & (c) & (d) & (e)
-    \end{tabular}
 
-    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
-    iFashion, and NetEase. (a) Diffusion noise variance endpoint
-    $\beta_T$. (b) U-B retention limit $\kappa$.
-    (c) Pre-fusion contrastive weight $\lambda_a$.
-    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
-    (e) Post-fusion contrastive weight $\lambda_c$.
-    Broken $y$-axes use different scales for the datasets;
-    candidate values are displayed at equally spaced horizontal
-    positions.}
-    \label{fig:hyperparameter}
-\end{figure*}
+
 
 \paragraph{Performance on Sparse Users.}
 NetEase users are sorted by increasing training U-B

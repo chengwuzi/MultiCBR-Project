@@ -791,3 +791,17 @@ Our main contributions are summarized as follows:
 （3）工程记录继续以 UTF-8 无 BOM、CRLF 追加，保留全部既有内容。本次未执行本地 LaTeX 编译或模型训练，未同步网页 Overleaf。用户可复制更新后的 main.tex 查看编译排版。
 
 （4）至此，本轮精修的摘要和引言各部分均已有定稿并写入 main.tex，包括三项贡献。后续工作范围由用户继续确定，文件修改与工程记录仍按用户明确授权执行。
+
+第十七项：过渡段辅助信息句调整定稿
+
+记录日期：2026-11-14（北京时间）
+
+用户确认过渡段的新版本。本次仅更新第六句，明确补充信息来自 U-I 交互和 B-I 关系，并将利用目标落到捆绑偏好学习；本项替代第十一项中的对应句子。
+
+英文定稿：
+For these users, U-I interactions and B-I affiliations can provide additional information, but effectively using this information for bundle preference learning remains difficult.
+
+中文翻译：
+对于这些用户，U-I 交互和 B-I 关系能够提供补充信息，但有效利用这些信息来学习捆绑偏好仍然存在困难。
+
+已替换 AAAI文件/main.tex 中的对应句子，保留过渡段其余内容、已有引用和其他定稿内容。已核对本次正文差异仅为这一句，引用与文件差异检查通过；未执行编译。

@@ -737,3 +737,57 @@ PDGR 提供一种扩散驱动的机制，用于评估观测到的 U-B 交互的�
 （3）本次仅修改 main.tex 与工程记录.txt，未执行本地 LaTeX 编译或模型训练，也未同步网页 Overleaf。用户可复制更新后的 main.tex 到既有 Overleaf 工程查看排版。
 
 （4）至本轮，摘要、引言背景与方法发展介绍、过渡段、两个挑战及本文模型介绍均已有定稿并写入 main.tex。下一步处理三项贡献；后续修改仍须遵守用户明确授权再改文件、明确要求再记工程记录的协作约定。
+
+第十六项：引言三项贡献定稿、师兄批注落实与正文更新
+
+记录日期：2026-11-13（北京时间）
+
+一、本轮授权与定稿范围
+
+用户经过逐条修改确认三项贡献的完整版本，并明确要求“定稿吧，记一项，改下AAAI文件”。本次将下述英文定稿写入 AAAI文件/main.tex 的贡献列表，并按师兄对引导句“不用换段”的批注，将“Our main contributions are summarized as follows:”接在前面的模型介绍后，保持同一自然段。
+
+二、英文定稿
+
+Our main contributions are summarized as follows:
+
+1. We propose a bundle recommendation framework, ReCoBR, which uses diffusion-driven U-B graph reconstruction based on pretrained embeddings to reduce the impact of noisy interactions.
+
+2. We design cross-view contrastive learning based on the reconstructed U-B view, enabling more effective use of auxiliary information to improve bundle preference learning for sparse users.
+
+3. Experiments on three public datasets demonstrate the effectiveness of ReCoBR.
+
+三、对应中文翻译
+
+1. 我们提出捆绑推荐框架 ReCoBR，通过基于预训练嵌入的扩散驱动 U-B 图重构，减少噪声交互的影响。
+
+2. 我们设计基于重构 U-B 视图的跨视图对比学习，使辅助信息得到更有效的利用，从而改善交互稀疏用户的捆绑偏好学习。
+
+3. 三个公开数据集上的实验验证了 ReCoBR 的有效性。
+
+四、师兄批注与本轮确定的写法
+
+（1）本阶段已核对 11-2 初稿贡献部分的原始批注，并查看 10-20 对应位置及 CAFU 的贡献段。11-2 的相关意见包括：贡献引导句不用换段；第一条将框架说明放在 ReCoBR 前，再用 which 展开；扩散图重构需要体现自身特色；稀疏作为第二个挑战需要在论述中得到充分体现；第三条的 main components 表达不合适。后续进入新部分时，应先核对该部分原始批注，再提出修改意见。
+
+（2）用户明确要求：贡献每条只写一句话，突出“我们做了什么、解决了什么问题”；本处不使用 PDGR、CCL 模块简称，不展开操作流程。此前每条多句、用模块简称解释设计的候选已被否定，后续不得恢复。
+
+（3）第一条按用户要求突出基于预训练的设计，以“diffusion-driven U-B graph reconstruction based on pretrained embeddings”表达，并将作用落到减少噪声交互的影响。句式为“We propose a bundle recommendation framework, ReCoBR, which ...”，落实框架说明与名称的顺序及 which 衔接。
+
+（4）第二条保留重构 U-B 视图作为跨视图对比学习的基础。用户明确要求从本条贡献中去掉 pre-fusion，并将 under sparse U-B feedback 改为 for sparse users。该调整是贡献句的表达取舍，模型介绍中的融合前对比设计继续采用既有定稿。
+
+（5）第二条在 view 后用逗号分开设计与作用，再以 enabling 引出更有效地利用辅助信息、改善交互稀疏用户捆绑偏好学习的作用。使用 more effective use 表达信息利用效果；不重新采用“在……偏好学习中更有效地利用……”这一用户认为别扭的中文组织方式。
+
+（6）第三条依用户要求采用最简常规表述，仅说明三个公开数据集上的实验验证 ReCoBR 的有效性，不再保留 main components，也不增加具体提升数字或其他实验主张。
+
+五、段落格式与记录承接
+
+第十五项保存的是模型介绍及总结句的英文内容，当时正文写为四个自然段；用户随后明确要求不分段，已将该部分合并为一个自然段，措辞保持不变。本轮保留这一合并结果，并删除模型介绍与贡献引导句之间的空行。LaTeX 源码中引导句仍可单独占一行，但没有空行分隔，因此与前文属于同一自然段；三项贡献继续采用原有 enumerate 环境呈现。
+
+六、实际落盘与验证
+
+（1）本次仅修改 AAAI文件/main.tex 的三条贡献及贡献引导句前的段落分隔，并追加本项工程记录。摘要、引言此前定稿的全部措辞、相关工作、方法、实验及参考文献保持原样。
+
+（2）已核对正文三条贡献与本项英文定稿逐字一致；通过还原本次替换和空行调整后比较文件哈希，确认正文其他内容未变化。核对 LaTeX 花括号与段落连接，git diff --check 通过；参考文献文件哈希保持不变。
+
+（3）工程记录继续以 UTF-8 无 BOM、CRLF 追加，保留全部既有内容。本次未执行本地 LaTeX 编译或模型训练，未同步网页 Overleaf。用户可复制更新后的 main.tex 查看编译排版。
+
+（4）至此，本轮精修的摘要和引言各部分均已有定稿并写入 main.tex，包括三项贡献。后续工作范围由用户继续确定，文件修改与工程记录仍按用户明确授权执行。

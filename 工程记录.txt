@@ -457,3 +457,45 @@ Although these methods differ in their modeling strategies, they learn users’ 
 （2）已核对正文仅有该过渡段发生变动。已定稿摘要、引言第一段、背景段，以及两个挑战、本文工作与贡献等其余正文均保持原样。新段落格式及文本一致性检查通过，正文改动已通过 git diff --check。
 
 （3）本次实际修改“AAAI文件/main.tex”与“工程记录.txt”，未修改参考文献、图片、代码、配置或数据，未执行本地编译或训练。用户可将 main.tex 复制到现有 Overleaf 工程查看排版效果。
+
+第十二项：挑战一定稿、交互可靠性评估机制与 PDGR 的对应
+
+记录日期：2026-11-13（北京时间）
+
+一、本次定稿与修改范围
+
+用户确认挑战一当前版本定稿，并明确要求“记一项，改下AAAI文件”。本次保留原有小标题及前三句，仅替换最后一句。师兄认为该段整体基本可以，主要问题是原结尾“without losing useful preference information”缺乏不丢失有效信息的验证，构成过强承诺。
+
+二、英文定稿
+
+Challenge 1: Denoising U-B Feedback While Preserving Preference Information. The observed U-B graph does not indicate which connections are noisy, making it difficult to decide which ones to retain for graph propagation. Retaining unreliable connections may allow misleading preference signals to spread through neighborhood aggregation. However, removing too many connections can also discard valuable information about users’ historical bundle choices. The challenge is to develop an effective mechanism for assessing the reliability of observed U-B interactions to guide graph denoising.
+
+三、对应中文翻译
+
+挑战一：在保留偏好信息的同时对 U-B 反馈去噪。观测到的 U-B 图并未标明哪些连接包含噪声，因此难以确定图传播中应保留哪些连接。保留不可靠的连接可能使误导性的偏好信号通过邻居聚合传播。然而，删除过多连接也可能丢失用户历史捆绑选择中有价值的信息。挑战在于构建一种有效机制，用于评估观测到的 U-B 交互的可靠性，从而指导图去噪。
+
+四、本轮确定的逻辑与措辞
+
+（1）用户未采用仅将原句调整为“尽可能保留有用偏好信息”的修改方向，而是提出围绕“有效机制”展开：评估交互可靠性，为交互筛选和图去噪提供依据。
+
+（2）最终逻辑链条为：观测图不标明噪声连接 → 保留不可靠连接可能传播误导性信号 → 过度删除也可能丢失有用历史信息 → 需要有效的交互可靠性评估机制来指导图去噪。保留偏好信息的动机已在标题和前文说明，结尾不再作零信息损失的保证。
+
+（3）结尾采用“to guide graph denoising”，替代此前“determining which connections to retain for graph propagation”的写法，使落点简洁明确。用户专门讨论了 develop 的适用性，最终保留“develop an effective mechanism”，表达构建有效机制。
+
+（4）本段已按逻辑、语句、词汇三个层面复审。前三句继续保持原文，包括指向 connections 的 which ones，以及描述连接可靠性的 unreliable connections；不因其他段落的局部措辞意见而机械替换。
+
+五、后续 PDGR 工作介绍的衔接
+
+（1）PDGR 需要明确回应本挑战：基于预训练嵌入构建历史偏好表示，经用户条件扩散模型去噪后，利用偏好与捆绑的匹配得分评估已观测交互的相对可靠性，再保留高分连接，得到用于图传播的重构 U-B 图。后续介绍应凸显这一机制的作用，而非只罗列预训练和扩散的操作步骤。
+
+（2）当前实现使用去噪后的历史偏好表示与冻结的预训练捆绑嵌入之间的余弦相似度，对用户已观测的连接评分。该得分可作为交互筛选依据，不应直接写成经过校准的噪声概率或已经验证的噪声真值判别结果。
+
+（3）用户提及的不同场景，可结合不同用户的历史偏好背景理解，并通过用户条件体现。SetLoss 则需说明如何使去噪后的偏好表示与历史捆绑信息保持联系，从而帮助保留有用偏好信息。具体英文将在 PDGR 段落精修时研究，本次不提前改写该段。
+
+六、本次落盘与后续安排
+
+（1）已在“AAAI文件/main.tex”中仅替换 Challenge 1 的最后一句，保留标题、前三句及其余正文。源文件使用普通英文撇号，含义与本项定稿一致。
+
+（2）已核对正文与修改前版本相比只有上述一句发生变化，并通过正文 git diff --check。工程记录以追加方式保存本项，既有记录保持原样。本次不涉及参考文献、代码、配置或图片，也未执行本地编译。
+
+（3）后续进入 Challenge 2 的重构及本文工作介绍的精修。两个挑战完成后，按第十一项的约定，必须回头连续复审“背景段—过渡段—Challenge 1—Challenge 2”，检查铺垫、重复、逻辑衔接及两个模块的对应关系。

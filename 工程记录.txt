@@ -671,3 +671,69 @@ Challenge 2: Cross-View Collaboration under Sparse U-B Feedback. Sparse U-B inte
 十一、本次记录范围
 
 本次仅追加“工程记录.txt”的第十四项，保存经验总结与后续准备，不修改论文正文或其他项目文件。保留上一轮尚未提交的挑战二改动及全部既有记录；核对正文、参考文献和正文既有差异保持不变，并检查记录追加及文件差异格式。未执行编译或训练。
+
+第十五项：模型介绍定稿及过渡段—两个挑战—方法介绍的联合复审
+
+记录日期：2026-11-13（北京时间）
+
+一、本轮授权、定稿与修改范围
+
+用户完成模型介绍的逐句研讨，确认新增的总结句并审阅完整版后，要求“回溯审阅检查下过渡段和两个挑战，没啥问题就定稿吧，记一项，AAAI文件改下”。本轮将过渡段、两个挑战与最新模型介绍连读，检查逻辑、语句、词汇及前后呼应。复审未发现必须改动过渡段和两个挑战的实质问题，保留第十一至十三项对应原文；将下述模型介绍及总结句定稿并替换 main.tex 中尚未更新的旧版工作介绍。
+
+二、回溯复审结论
+
+（1）过渡段从已有方法收回 U-B 交互的重要作用，再说明噪声传播、稀疏历史与辅助信息利用困难，最后引出两个挑战。概述与挑战之间有适当的展开关系，没有出现新的论证断层。
+
+（2）挑战一说明观测图不标明噪声连接，保留不可靠连接与删除过多连接各有代价，最终提出评估交互可靠性、指导图去噪的有效机制。PDGR 开头直接回应这一机制需求，中间交代偏好构建、用户条件去噪及 SetLoss，结尾通过偏好评分、保留高分连接落实到重构图。标题和正文中保留有用信息的动机也得到 SetLoss 的作用说明，不恢复原稿“不丢失任何有效信息”的保证。
+
+（3）挑战二从稀疏 U-B 交互造成的学习困难，转到辅助信息利用需求，介绍现有三视图方法的传播与加权融合，再指出可提供额外监督的直接跨视图约束这一补强位置，最后回到更有效利用 U-I、B-I 信息的目标。CCL 开头明确点出稀疏反馈下的额外监督，随后说明同一用户（捆绑）的融合前对比与辅助信息支持作用，与挑战对应。现有方法差异沿用第十三项已核对的范围，不扩大为所有方法都没有跨视图协同。
+
+（4）PDGR 以重构传播图结束，CCL 以“Building on the reconstructed U-B graph”承接，两个模块的输入输出关系清楚。CCL 保留融合后的对比目标，最后用 Overall 总结框架处理噪声与稀疏问题的整体作用，再接后续贡献列表。
+
+（5）语句主干、指代、修饰关系及术语连读检查通过。挑战二中稀疏相关用词仍较密集，但分别承担标题限定、问题说明、辅助信息引入、监督作用及挑战收束的任务；本次保留用户已确认的强调方式，不因单纯计数而改写已定稿句子。此结论是在已有联合复审基础上，加入新模型介绍后的再次核对。
+
+三、模型介绍英文定稿
+
+To address these challenges, we propose Reconstruction and Contrastive Learning for Bundle Recommendation (ReCoBR), which comprises Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR) and Cross-View Contrastive Learning (CCL).
+
+PDGR provides a diffusion-driven mechanism to assess the reliability of observed U-B interactions and guide graph denoising. Specifically, we first pretrain user and bundle embeddings on the observed U-B graph using LightGCN. We then construct each user's preference representation by averaging the pretrained embeddings of their historically interacted bundles. The resulting preference representations are denoised by a diffusion model conditioned on the pretrained user embeddings. During denoising, we introduce a bundle-set consistency loss (SetLoss) to preserve useful preference information by aligning the denoised preferences with users' historical bundle embeddings. Finally, we score the observed U-B interactions using the denoised preferences and retain high-scoring connections to reconstruct the graph for propagation.
+
+Building on the reconstructed U-B graph, CCL offers additional supervision for preference learning under sparse U-B feedback. Specifically, we apply contrastive learning before fusion to align representations of the same user (bundle) between the reconstructed U-B view and each auxiliary view. These cross-view constraints allow auxiliary information to directly support the learning of bundle preferences. We then fuse the representations for recommendation while retaining the post-fusion contrastive objective.
+
+Overall, ReCoBR establishes a unified framework that integrates diffusion and cross-view contrastive learning to effectively address noise and sparsity in U-B interactions.
+
+四、对应中文翻译
+
+为应对上述挑战，我们提出用于捆绑推荐的重构与对比学习框架（ReCoBR），包括基于预训练的扩散驱动 U-B 图重构（PDGR）和跨视图对比学习（CCL）。
+
+PDGR 提供一种扩散驱动的机制，用于评估观测到的 U-B 交互的可靠性，并指导图去噪。具体而言，我们首先使用 LightGCN 在观测 U-B 图上预训练用户和捆绑嵌入。随后，我们通过对每位用户历史交互过的捆绑的预训练嵌入取平均，构建该用户的偏好表示。得到的偏好表示由以预训练用户嵌入为条件的扩散模型进行去噪。在去噪过程中，我们引入捆绑集合一致性损失（SetLoss），通过对齐去噪后的偏好与用户历史交互捆绑的嵌入，保留有用的偏好信息。最后，我们利用去噪后的偏好对观测到的 U-B 交互进行评分，保留高分连接，重构用于图传播的 U-B 图。
+
+基于重构后的 U-B 图，CCL 为稀疏 U-B 反馈下的偏好学习提供额外监督。具体而言，我们在融合前开展对比学习，对齐同一用户（捆绑）在重构 U-B 视图与各辅助视图中的表示。这些跨视图约束使辅助信息能够直接支持捆绑偏好的学习。随后，我们融合各视图表示进行推荐，同时保留融合后的对比目标。
+
+总体而言，ReCoBR 构建了一个统一框架，将扩散与跨视图对比学习相结合，以有效应对 U-B 交互中的噪声与稀疏问题。
+
+五、本阶段逐句精修中确定的表达与组织方式
+
+（1）模型全称放在缩写前，明确两个模块名称。PDGR 的完整名称为 Pretraining-Based Diffusion-Driven U-B Graph Reconstruction；CCL 为 Cross-View Contrastive Learning。
+
+（2）PDGR 首句从一般的“依据偏好评估可靠性”改为“提供扩散驱动的机制，评估可靠性并指导图去噪”，直接回应挑战一最后一句。后续通过 first、then、The resulting preference representations、During denoising、Finally 说明步骤间的关系，使读者从预训练顺着读到最终重构图。
+
+（3）历史偏好句采用对历史交互捆绑的预训练嵌入取平均的简洁结构。SetLoss 句改为“引入什么损失—通过什么约束—保留什么信息”，并用 During denoising 明确其所在过程。SetLoss 在引言解释，摘要继续保持此前不展开该细节的定稿。
+
+（4）CCL 开头保留用户选定的句式，仅将 provides 换为 offers，避免与 PDGR 首句重复；不采用改写整句为 enhances ... through ... 的候选。额外监督、融合前同实体对比及保留融合后目标依次交代，不将继承的融合后目标额外包装为第三个模块。
+
+（5）总结句以 Overall 明确标识总结。用户未采用 By coupling ... goes beyond representation fusion ... 的较抽象表述，也未采用较长的可靠性与辅助信息双重展开；最终采用 establishes a unified framework，简洁强调扩散与跨视图对比学习的结合及其应对噪声、稀疏的作用。该句总结整体设计，不添加首创、完全消除问题或端到端联合优化等新的技术主张。
+
+六、相关词频核对与统计口径
+
+按本轮写入的全文统计，包含两个挑战的小标题及尚未精修的三条贡献，忽略大小写，按完整单词匹配：摘要 sparse 为 3 次、sparsity 为 0 次、noise 为 1 次、noisy 为 1 次；引言 sparse 为 6 次、sparsity 为 3 次、noise 为 2 次、noisy 为 3 次。denoise、denoised、denoising 另计，摘要合计 2 次，引言合计 7 次。挑战二包含标题时，sparse 与 sparsity 合计 5 次。此前聊天中的统计已将新版模型介绍计入，本轮实际落盘后计数一致。
+
+七、实际落盘、验证与后续进度
+
+（1）仅将 AAAI文件/main.tex 中原有工作介绍替换为“框架引入—PDGR—CCL—总结”四个自然段；保留框架全称与缩写的原有加粗格式，并使用源文件统一的普通英文撇号。正文文字与上述定稿一致。过渡段、两个挑战、摘要、背景段、三项贡献及其他正文保持原样，参考文献文件未修改。
+
+（2）已核对新正文与选定稿一致，并通过将新段落还原为旧段落后的文件哈希比较，确认模型介绍以外的正文未发生变化；核对花括号、摘要环境及既有 MultiCBR 引用键，检查 git diff --check。工程记录以 UTF-8 无 BOM、CRLF 追加本项，保留此前全部字节内容。
+
+（3）本次仅修改 main.tex 与工程记录.txt，未执行本地 LaTeX 编译或模型训练，也未同步网页 Overleaf。用户可复制更新后的 main.tex 到既有 Overleaf 工程查看排版。
+
+（4）至本轮，摘要、引言背景与方法发展介绍、过渡段、两个挑战及本文模型介绍均已有定稿并写入 main.tex。下一步处理三项贡献；后续修改仍须遵守用户明确授权再改文件、明确要求再记工程记录的协作约定。

@@ -111,17 +111,17 @@ In bundle recommendation, CrossCBR aligns representations of the same user (bund
 
 Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
 
-Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery (Figure~\ref{fig:denoising}). To address sparse U-B feedback, we use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion. The fused user and bundle representations produce the final recommendation scores.
+ReCoBR consists of two modules: PDGR and CCL. To reduce the influence of noisy interactions, PDGR uses a user-conditioned diffusion model to refine historical preference representations constructed from pretrained bundle embeddings. These refined preferences guide U-B interaction filtering and graph reconstruction. Building on the reconstructed graph, CCL introduces cross-view constraints before representation fusion, allowing auxiliary information to support bundle preference learning for sparse users. The fused user and bundle representations are then used for recommendation.
 
 We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
 
-\subsection{Diffusion-Driven U-B Graph Denoising and Reconstruction}\label{sec:graph-reconstruction}
+\subsection{Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR)}\label{sec:graph-reconstruction}
 
-This module evaluates observed U-B interactions based on users' historical bundle preferences. We construct a preference representation from each user's history, refine it through conditional denoising, and use it to select connections for graph propagation.
+PDGR assesses the reliability of observed U-B interactions through preference-based scoring. We construct historical preference representations from pretrained embeddings and train a user-conditioned denoiser with a bundle-set consistency constraint. The refined preferences are then used to score observed interactions and retain high-scoring connections for graph propagation.
 
 \subsubsection{Pretraining and Historical Preference Construction}
 
-We pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ be its trainable initial embeddings, and let $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$ denote the observed neighbors of user $u$ and bundle $b$. LightGCN propagation is given by
+To capture collaborative information from U-B interactions, we pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ denote the trainable initial embeddings. The observed neighbors of user $u$ and bundle $b$ are $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$, respectively. LightGCN propagates information between users and bundles as follows:
 \begin{equation}
 \begin{aligned}
 \mathbf h_u^{(\ell+1)}
@@ -135,23 +135,24 @@ We pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayes
 \end{aligned}
 \tag{1}
 \end{equation}
-Here, $L_p$ is the number of pretraining propagation layers, and the fixed aggregation coefficients satisfy $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$. We aggregate the initial and propagated embeddings as
+After $L_p$ propagation layers, we combine the initial and propagated embeddings to obtain the pretrained user and bundle embeddings:
 \begin{equation}
 \mathbf e_u^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_u^{(\ell)},
 \qquad
 \mathbf e_b^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_b^{(\ell)}.
 \tag{2}
 \end{equation}
-The resulting embeddings $\mathbf e_u^0$ and $\mathbf e_b^0$ remain fixed during graph reconstruction. They are subsequently used to construct historical preferences, condition the denoiser, and score observed interactions.
+Here, $\eta_\ell$ is the fixed weight assigned to layer $\ell$, with $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$.
+The pretrained embeddings remain fixed throughout denoiser and recommendation training. We use $\mathbf e_b^0$ to construct historical preference representations and score observed interactions, while $\mathbf e_u^0$ provides the user condition for denoising.
 
-For each active user $u$, we summarize the representations of the historically interacted bundles by mean pooling:
+We construct historical preference representations for users with observed U-B interactions, denoted by $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. For each $u\in\mathcal U_+$, we average the pretrained embeddings of their historically interacted bundles:
 \begin{equation}
 \mathbf p_{u,0}
 =\frac{1}{|\mathcal N_u|}
 \sum_{b\in\mathcal N_u}\mathbf e_b^0.
 \tag{3}
 \end{equation}
-The vector $\mathbf p_{u,0}$ represents the user's observed bundle-preference context. Mean pooling accommodates histories of different lengths while keeping the denoising input $d$-dimensional. We construct this vector for users in $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. The subscript $0$ denotes the state before artificial noise is added; it does not assume that the observed history is free of interaction noise.
+The resulting vector $\mathbf p_{u,0}$ summarizes the user's historical bundle preferences. Mean pooling maps histories of different lengths to a $d$-dimensional representation. The subscript $0$ denotes the preference representation before Gaussian noise is added.
 
 \begin{figure}[!t]
     \centering
@@ -164,7 +165,7 @@ The vector $\mathbf p_{u,0}$ represents the user's observed bundle-preference co
 
 \subsubsection{User-Conditioned Diffusion Denoising}
 
-We train the denoiser to recover historical preference representations under different levels of perturbation. Following the Gaussian diffusion formulation \cite{ho2020ddpm,wang2023diffrec}, let $T$ be the number of diffusion steps and $\beta_t\in(0,1)$ the noise variance at step $t$. We use a linear variance schedule and define $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\prod_{s=1}^{t}\alpha_s$. A perturbed preference vector can be sampled directly as
+We train the denoiser to recover historical preference representations from inputs with different noise levels. Following the Gaussian diffusion formulation \cite{ho2020ddpm,wang2023diffrec}, let $T$ be the number of diffusion steps and $\beta_t\in(0,1)$ the noise variance at step $t$. We use a linear variance schedule, with $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\prod_{s=1}^{t}\alpha_s$. At step $t$, the noisy preference representation is
 \begin{equation}
 \mathbf p_{u,t}
 =\sqrt{\bar\alpha_t}\,\mathbf p_{u,0}
@@ -173,25 +174,24 @@ We train the denoiser to recover historical preference representations under dif
 \boldsymbol\epsilon\sim\mathcal N(\mathbf 0,\mathbf I_d).
 \tag{4}
 \end{equation}
-Here, $\boldsymbol\epsilon\in\mathbb R^d$ is standard Gaussian noise, $\mathbf I_d$ is the $d$-dimensional identity matrix, and $\bar\alpha_t$ controls how much historical information remains at noise level $t$.
+Here, $\boldsymbol\epsilon\in\mathbb R^d$ is standard Gaussian noise, and $\mathbf I_d$ is the $d$-dimensional identity matrix. The coefficient $\bar\alpha_t$ controls the contribution of the historical preference representation at step $t$.
 
-To make recovery personalized, we condition the denoiser on the pretrained user representation $\mathbf e_u^0$. We implement the denoiser $f_\theta$ as a multilayer perceptron (MLP), with parameters $\theta$, that predicts the unperturbed preference vector:
+To personalize denoising, we condition the model on the pretrained user embedding $\mathbf e_u^0$. Following DiffRec \cite{wang2023diffrec}, we use a multilayer perceptron (MLP) as the denoising network. Our denoiser $f_\theta$, parameterized by $\theta$, predicts the historical preference representation from the noisy input:
 \begin{equation}
 \begin{aligned}
 \widehat{\mathbf p}_{u,0}
-&=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t),\\
-f_\theta(\mathbf p,\mathbf c,t)
-&=\operatorname{MLP}_\theta
-\bigl([\mathbf p;\mathbf c;\mathbf p\odot\mathbf c;
-|\mathbf p-\mathbf c|;\boldsymbol\psi(t)]\bigr).
+&=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t)\\
+&=\operatorname{MLP}_\theta\bigl([\mathbf p_{u,t};\mathbf e_u^0;
+\mathbf p_{u,t}\odot\mathbf e_u^0;\\
+&\hspace{20mm}|\mathbf p_{u,t}-\mathbf e_u^0|;\boldsymbol\psi(t)]\bigr).
 \end{aligned}
 \tag{5}
 \end{equation}
-In Eq. (5), $[\cdot;\cdot]$ denotes concatenation, $\odot$ denotes element-wise multiplication, and $|\mathbf p-\mathbf c|$ is the element-wise absolute deviation. The vectors $\mathbf p$ and $\mathbf c$ preserve the current preference estimate and the user condition, while $\mathbf p\odot\mathbf c$ and $|\mathbf p-\mathbf c|$ expose their coordinate-wise agreement and discrepancy. The sinusoidal embedding $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ specifies the perturbation level. Together with the timestep embedding, these features allow the MLP to adapt preference recovery to both the user and the perturbation level. Consequently, the MLP receives a $(4d+d_t)$-dimensional input and predicts a $d$-dimensional preference vector.
+Here, $[\cdot;\cdot]$ denotes concatenation and $\odot$ denotes element-wise multiplication. The input includes the noisy preference, the pretrained user embedding, their element-wise product, and their absolute difference. These features allow the network to model the relationship between the noisy preference and the user condition. We further include a sinusoidal timestep embedding $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ to indicate the noise level. The MLP maps the resulting $(4d+d_t)$-dimensional input to a $d$-dimensional preference representation.
 
-During training, we uniformly sample $u\in\mathcal U_+$ and $t\in\{1,\ldots,T\}$ and draw Gaussian noise as in Eq. (4). The reconstruction objective is
+During training, we uniformly sample a user $u\in\mathcal U_+$ and a timestep $t\in\{1,\ldots,T\}$. We then sample Gaussian noise to construct $\mathbf p_{u,t}$ as in Eq. (4). The mean squared error (MSE) reconstruction loss is
 \begin{equation}
-\mathcal L_{\mathrm{rec}}
+\mathcal L_{\mathrm{mse}}
 =\mathbb E_{u,t,\boldsymbol\epsilon}
 \left[
 \frac{1}{d}
@@ -199,30 +199,28 @@ During training, we uniformly sample $u\in\mathcal U_+$ and $t\in\{1,\ldots,T\}$
 \right].
 \tag{6}
 \end{equation}
-This objective learns a shared recovery function from perturbed historical preferences. The original representation supplies the reconstruction target, while the pretrained user embedding provides personalized context.
+Minimizing this loss trains the denoiser to recover $\mathbf p_{u,0}$ from $\mathbf p_{u,t}$, with $\mathbf e_u^0$ providing user-specific information.
 
 \subsubsection{Bundle-Set Consistency in Denoising}
 
-Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:denoising} illustrates how SetLoss complements the reconstruction objective in denoiser training.
+The reconstruction loss in Eq. (6) supervises recovery of the pooled historical preference vector. Graph reconstruction, however, requires scoring each historical bundle against the denoised preference. We therefore introduce a bundle-set consistency loss (SetLoss) to preserve useful preference information from the user's historical bundles.
 
-Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages high average cosine similarity between the recovered preference and the user's historical bundle embeddings:
+Let $\cos(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages consistency between the denoised preference and the user's historical bundle embeddings:
 \begin{equation}
 \mathcal L_{\mathrm{set}}
 =\mathbb E_{u,t,\boldsymbol\epsilon}
 \left[
 \frac{1}{|\mathcal N_u|}
 \sum_{b\in\mathcal N_u}
-\left(1-\operatorname{sim}
+\left(1-\cos
 \left(\widehat{\mathbf p}_{u,0},\mathbf e_b^0\right)\right)
 \right].
 \tag{7}
 \end{equation}
-Equation (6) reconstructs the pooled preference vector, whereas Eq. (7) aligns the recovered preference with its constituent historical bundles under the cosine-similarity geometry later used for interaction scoring. Averaging over the history prevents users with more interactions from dominating the objective.
-
-We optimize the denoiser with
+SetLoss supplements the pooled-vector reconstruction with consistency constraints between the denoised preference and individual historical bundle embeddings. Using the same cosine similarity for SetLoss and subsequent interaction scoring connects preference denoising with graph reconstruction. Averaging over the history normalizes each user's loss by their number of observed bundles. We jointly optimize the two losses:
 \begin{equation}
 \mathcal L_{\mathrm D}
-=\mathcal L_{\mathrm{rec}}
+=\mathcal L_{\mathrm{mse}}
 +\lambda_{\mathrm{set}}\mathcal L_{\mathrm{set}},
 \tag{8}
 \end{equation}
@@ -230,7 +228,7 @@ where $\lambda_{\mathrm{set}}\geq 0$ controls the contribution of SetLoss.
 
 \subsubsection{Preference Refinement and Graph Reconstruction}
 
-After learning the denoiser, we use it to refine the historical preference vector for interaction scoring. This stage employs a deterministic refinement procedure initialized with $\mathbf p_{u,0}$. Specifically,
+To reconstruct the U-B graph, we apply the current denoiser to each user's historical preference representation. Starting from $\mathbf p_{u,0}$, we repeatedly update the representation over timesteps $T,T-1,\ldots,1$:
 \begin{equation}
 \begin{aligned}
 \mathbf r_{u,T}&=\mathbf p_{u,0},\\
@@ -241,16 +239,16 @@ After learning the denoiser, we use it to refine the historical preference vecto
 \end{aligned}
 \tag{9}
 \end{equation}
-The states $\mathbf r_{u,t}$ are refinement iterates, distinct from the forward-corrupted training states $\mathbf p_{u,t}$. Each iteration feeds the current estimate back into the denoiser with the next timestep condition. Thus, graph reconstruction applies the learned recovery network to an observed preference context, without sampling a Gaussian starting state.
+Here, $\mathbf r_{u,t}$ is the intermediate representation during refinement, and $\mathbf p_u^\star$ is the final refined preference. Each step passes the current representation, the pretrained user embedding, and the timestep to the denoiser.
 
-We measure how closely each observed bundle matches the refined preference:
+We then score each observed U-B interaction by the cosine similarity between the refined preference and the corresponding pretrained bundle embedding:
 \begin{equation}
 s_{ub}
-=\operatorname{sim}(\mathbf p_u^\star,\mathbf e_b^0),
+=\cos(\mathbf p_u^\star,\mathbf e_b^0),
 \qquad b\in\mathcal N_u.
 \tag{10}
 \end{equation}
-For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles, where the positive integer $\kappa$ controls the maximum retained degree:
+Higher scores indicate a closer match to the user's refined preference. For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles. The positive integer $\kappa$ specifies the maximum number of retained interactions per user:
 \begin{equation}
 \begin{aligned}
 \widetilde{\mathcal N}_u
@@ -261,15 +259,17 @@ For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u
 \end{aligned}
 \tag{11}
 \end{equation}
-Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain their full histories; users outside $\mathcal U_+$ have no retained U-B edges. Selection is restricted to observed interactions, so graph reconstruction neither creates new edges nor changes the ranking labels defined by $\mathbf X$. The resulting binary matrix $\widetilde{\mathbf X}$ is the reconstructed U-B graph used for downstream propagation.
+Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain all their connections. The selected interactions form $\widetilde{\mathbf X}$, which defines the reconstructed U-B graph for propagation.
 
-\subsection{Pre-Fusion Cross-View Contrastive Learning}
+\subsection{Cross-View Contrastive Learning (CCL)}
 
-With the U-B graph reconstructed, we next learn representations from this graph together with user-item behavior and bundle composition. When U-B feedback is sparse, U-I interactions and B-I affiliations provide additional information for preference learning. We learn user and bundle representations from each view and use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion.
+Building on the reconstructed U-B graph, CCL uses the U-I and B-I views to provide additional supervision for bundle preference learning. We encode the three relation views, then align representations of the same user (bundle) between the reconstructed U-B view and each auxiliary view before fusion. These direct cross-view constraints help auxiliary information support preference learning for sparse users.
 
 \subsubsection{View-Specific Representations}
 
-Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Fixed view-specific coefficients combine the initial embeddings with the $\ell_2$-normalized layer outputs. During training, the inherited backbone adds small representation perturbations to the propagation outputs and auxiliary item pooling; these perturbations are disabled during evaluation. The encoders share trainable initial embeddings for the same entity, which are separate from the fixed pretrained embeddings in Section~\ref{sec:graph-reconstruction}.
+Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. The encoders share trainable initial embeddings for the same entity. These embeddings are learned during recommendation training, separately from the fixed pretrained embeddings used by PDGR.
+
+Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Within each view, fixed layer weights combine the initial embeddings and the $\ell_2$-normalized propagation outputs. During training, we add small representation perturbations to the propagation outputs and auxiliary item pooling. These perturbations are disabled during evaluation.
 
 \textbf{U-B view.} Propagation on the reconstructed U-B graph directly produces user representations $\mathbf e_u^{\mathrm{UB}}$ and bundle representations $\mathbf e_b^{\mathrm{UB}}$, capturing collaborative information through the retained interactions.
 
@@ -290,23 +290,23 @@ The two item-pooling operations are
 \end{equation}
 where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\mathcal I_u=\{i:y_{ui}=1\}$ contains the items interacted with by user $u$. An empty neighborhood contributes a zero vector.
 
-This step yields three representations for each user, $\{\mathbf e_u^{\mathrm{UB}},\mathbf e_u^{\mathrm{UI}},\mathbf e_u^{\mathrm{BI}}\}$, and each bundle, $\{\mathbf e_b^{\mathrm{UB}},\mathbf e_b^{\mathrm{UI}},\mathbf e_b^{\mathrm{BI}}\}$, all in $\mathbb R^d$. These unfused representations are used to construct the cross-view objective below and are later fused for prediction.
+After graph propagation and item pooling, each user (bundle) has a representation in all three views. We use these $d$-dimensional representations for cross-view contrastive learning before fusing them for recommendation.
 
 \subsubsection{Cross-View Contrastive Objectives}
 
-For each user, we pair its representation from the reconstructed U-B view with its representations from the U-I and B-I views. We construct the same pairs for bundles. The reconstructed U-B view thus serves as the common reference. Each same-entity pair is a positive pair, while other entities of the same type provide in-batch negatives. For every recommendation minibatch, we remove duplicate user IDs and duplicate positive-bundle IDs to form the entity sets $\mathcal S_U$ and $\mathcal S_B$, ensuring that an entity is not repeated as its own in-batch negative.
+For each recommendation minibatch, we collect unique users and unique positive bundles into $\mathcal S_U$ and $\mathcal S_B$, respectively. For each user (bundle), we pair the representation from the reconstructed U-B view with its counterpart in each auxiliary view. Representations of the same entity form a positive pair, while those of other entities of the same type provide in-batch negatives. Using unique entities avoids treating repeated IDs as negative samples. We omit the user-side or bundle-side terms if the corresponding set contains fewer than two entities.
 
 For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n}$ and $\mathbf G=(\mathbf g_j)_{j=1}^{n}$, we define the directional InfoNCE objective \cite{oord2018cpc} as
 \begin{equation}
 \mathcal I_\tau(\mathbf H,\mathbf G)
 =-\frac{1}{n}\sum_{j=1}^{n}
 \log
-\frac{\exp\!\left(\operatorname{sim}(\mathbf h_j,\mathbf g_j)/\tau\right)}
+\frac{\exp\!\left(\cos(\mathbf h_j,\mathbf g_j)/\tau\right)}
 {\sum_{k=1}^{n}
-\exp\!\left(\operatorname{sim}(\mathbf h_j,\mathbf g_k)/\tau\right)}.
+\exp\!\left(\cos(\mathbf h_j,\mathbf g_k)/\tau\right)}.
 \tag{13}
 \end{equation}
-The temperature $\tau>0$ controls sensitivity to similarity differences. For each anchor $\mathbf h_j$, its counterpart $\mathbf g_j$ is the positive candidate, and all representations in $\mathbf G$, including the positive, form the denominator. Let $\mathbf E_r^v=(\mathbf e_q^v)_{q\in\mathcal S_r}$ for $r\in\{U,B\}$, with the same entity ordering across views. The pre-fusion objective is
+Here, $\tau>0$ is the contrastive temperature. For anchor $\mathbf h_j$, $\mathbf g_j$ is the positive sample, while $\mathbf g_k$ with $k\neq j$ provides a negative sample. Let $\mathbf E_r^v=(\mathbf e_q^v)_{q\in\mathcal S_r}$ for $r\in\{U,B\}$, with the same entity ordering across views. The pre-fusion objective combines U-B--U-I and U-B--B-I pairs for both users and bundles:
 \begin{equation}
 \mathcal L_{\mathrm A}
 =\sum_{r\in\{U,B\}}
@@ -314,11 +314,11 @@ The temperature $\tau>0$ controls sensitivity to similarity differences. For eac
 \mathcal I_\tau\!\left(\mathbf E_r^{\mathrm{UB}},\mathbf E_r^v\right).
 \tag{14}
 \end{equation}
-Equation (14) encourages agreement for the same user or bundle across U-B--U-I and U-B--B-I pairs while preserving discrimination between entities. A user-side or bundle-side term is omitted when the corresponding entity set contains fewer than two members and therefore provides no in-batch negatives. The U-B view is the common anchor in constructing the objective, and gradients update both representations in each pair. This alignment allows information from the U-I and B-I views to support bundle preference learning when U-B feedback is sparse.
+Minimizing $\mathcal L_{\mathrm A}$ brings representations of the same entity closer across views and separates different entities. The reconstructed U-B view serves as the common anchor, with gradients updating both representations in each pair. Through these constraints, auxiliary information contributes to preference learning before fusion, providing additional supervision for sparse users.
 
 \subsection{Prediction and Model Optimization}
 
-\textbf{View fusion and prediction.} Following MultiCBR \cite{ma2024multicbr}, we adopt its fixed view coefficients to combine the three view-specific representations into a single user representation and a single bundle representation:
+\textbf{View fusion and prediction.} Following the weighted fusion strategy of MultiCBR \cite{ma2024multicbr}, we combine the three view-specific representations using fixed coefficients:
 \begin{equation}
 \begin{aligned}
 \mathbf e_u
@@ -338,7 +338,7 @@ Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B,
 \tag{16}
 \end{equation}
 
-\textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Let $\mathbf E_U=(\mathbf e_{u_j})_{j=1}^{m}$ and $\mathbf E_B=(\mathbf e_{b_j^+})_{j=1}^{m}$ denote their fused representation sequences. Following MultiCBR \cite{ma2024multicbr}, the fused-space self-contrastive regularizer is
+\textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Let $\mathbf E_U=(\mathbf e_{u_j})_{j=1}^{m}$ and $\mathbf E_B=(\mathbf e_{b_j^+})_{j=1}^{m}$ denote their fused representation sequences. We also retain contrastive learning after fusion, following the strategy of MultiCBR \cite{ma2024multicbr}. Our post-fusion contrastive objective is
 \begin{equation}
 \mathcal L_{\mathrm C}
 =\frac{1}{2}\left[
@@ -347,7 +347,9 @@ Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B,
 \right].
 \tag{17}
 \end{equation}
-For each occurrence in the minibatch, the numerator pairs its fused representation with itself, while all minibatch occurrences of the same entity type appear in the denominator. This inherited objective regularizes separation in the fused representation space, whereas $\mathcal L_{\mathrm A}$ explicitly connects different relation views before fusion. The BPR loss \cite{rendle2009bpr} is
+In Eq. (17), each fused representation is paired with itself, with all representations of the same entity type in the minibatch used for comparison. Repeated users or bundles retain their separate positions in these sequences. This objective encourages separation between different entities in the fused representation space. Together, $\mathcal L_{\mathrm A}$ and $\mathcal L_{\mathrm C}$ constrain view-specific and fused representations, respectively.
+
+For recommendation, the BPR loss \cite{rendle2009bpr} encourages higher scores for observed bundles than for unobserved bundles:
 \begin{equation}
 \mathcal L_{\mathrm{BPR}}
 =-\frac{1}{m}
@@ -355,7 +357,7 @@ For each occurrence in the minibatch, the numerator pairs its fused representati
 \log\sigma\!\left(\hat y_{u_jb_j^+}-\hat y_{u_jb_j^-}\right).
 \tag{18}
 \end{equation}
-Here, $\sigma$ is the sigmoid function. We optimize BPR together with the two regularization objectives:
+Here, $\sigma$ is the sigmoid function. The overall recommendation objective combines BPR, the two contrastive losses, and embedding regularization:
 \begin{equation}
 \mathcal L_{\mathrm R}
 =\mathcal L_{\mathrm{BPR}}
@@ -364,11 +366,11 @@ Here, $\sigma$ is the sigmoid function. We optimize BPR together with the two re
 +\lambda_r\|\Theta\|_2^2.
 \tag{19}
 \end{equation}
-Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings of the recommendation backbone, and $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. Ranking examples continue to come from $\mathbf X$, even when their edges are not selected for $\widetilde{\mathbf X}$. Graph reconstruction therefore filters propagation connections while preserving the observed feedback used for ranking.
+The parameter set $\Theta$ contains the trainable initial user, bundle, and item embeddings of the recommendation backbone. The coefficients $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. We sample ranking triplets using the original interactions in $\mathbf X$.
 
-\textbf{Training.} After offline U-B pretraining, each training epoch contains three stages. First, we update the denoiser $f_\theta$ for one pass over $\mathcal U_+$ using $\mathcal L_{\mathrm D}$. Second, the updated denoiser refines every active user's historical preference, scores the observed U-B interactions, and refreshes $\widetilde{\mathbf X}$ through the Top-K selection in Eq. (11). Third, we hold $\widetilde{\mathbf X}$ fixed and update the recommendation parameters $\Theta$ on ranking minibatches using $\mathcal L_{\mathrm R}$. The denoiser and recommendation backbone use separate optimizers. Because Top-K edge selection is discrete, gradients from $\mathcal L_{\mathrm R}$ do not propagate through $\widetilde{\mathbf X}$ to $f_\theta$.
+\textbf{Training.} After offline U-B pretraining, each training epoch proceeds in three stages. First, we update the denoiser $f_\theta$ for one pass over $\mathcal U_+$ using $\mathcal L_{\mathrm D}$. Second, we use the updated denoiser to refine historical preferences and score observed U-B interactions for all users in $\mathcal U_+$. The Top-K selection in Eq. (11) then refreshes $\widetilde{\mathbf X}$. Third, we hold $\widetilde{\mathbf X}$ fixed and update the recommendation parameters $\Theta$ on ranking minibatches using $\mathcal L_{\mathrm R}$. The denoiser and recommendation backbone use separate optimizers. Top-K selection is discrete, so recommendation gradients do not propagate through the reconstructed graph to the denoiser.
 
-\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (16) after excluding bundles observed in the training data. Graph reconstruction is performed before scoring; the denoiser is not run separately for each candidate bundle.
+\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (16) after excluding bundles observed in the training data. The denoiser is used only during graph reconstruction, before candidate scoring.
 
 % =========================================================
 % Table 1: Dataset statistics, single-column table
@@ -584,7 +586,7 @@ Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings
 
 \subsection{Computational Complexity}
 
-Let $n_+=|\mathcal U_+|$ and $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$. Let $M=|\mathcal E_{\mathrm{UB}}|$ be the number of observed U-B edges, and let $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ be the total number of edges used for graph propagation. We use $Q$ and $m$ to denote the number and size of recommendation minibatches, respectively. With a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
+Each training epoch includes denoiser training, graph reconstruction, and recommendation learning. Let $n_+=|\mathcal U_+|$ be the number of users with observed U-B interactions, and let $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$ be the maximum history length. The observed U-B graph has $M=|\mathcal E_{\mathrm{UB}}|$ edges. The three propagation graphs contain $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ edges in total. We denote the number and size of recommendation minibatches by $Q$ and $m$, respectively. For a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
 
 \begin{equation}
 O\!\left(
@@ -596,9 +598,9 @@ O\!\left(
 \right).
 \tag{20}
 \end{equation}
-The three terms correspond to denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Since $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$, reconstruction does not densify the U-B graph.
+The three terms account for denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Graph reconstruction retains a subset of the observed interactions, so $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$.
 
-For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$, let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the denoiser parameter count. The peak training space is
+For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$ denote the total number of entities. Let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the number of denoiser parameters. The peak training space is
 \begin{equation}
 O\!\left(
 \begin{aligned}

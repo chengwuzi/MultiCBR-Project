@@ -1015,3 +1015,615 @@ In bundle recommendation, diffusion has been explored to improve diversity and r
 四、本次实际操作与验证
 
 已替换 main.tex 中相关工作的七段正文，逐段核对与最终确认稿一致（仅作 LaTeX 引用、撇号及连接号转换）。相关工作保留三个小节，24 处引用对应 24 个不同文献条目，未发现缺失引用键；检查了本节花括号配对及文件差异。相关工作之外的正文、框架图代码、参考文献数据库及样式文件保持不变；保留此前图表排版调整。工程记录仅追加本项，维持 UTF-8 无 BOM、CRLF 格式。本次未编译，用户可复制更新后的 main.tex 到 Overleaf 查看效果。
+
+第二十二项：方法章整体精修、符号统一及逐处修改记录
+
+记录日期：2026-11-15（北京时间）
+
+一、用户授权与本轮范围
+
+用户认可上一轮方法章审阅意见，授权一次完成方法章精修并写入 AAAI文件/main.tex，同时要求对每处修改作记录。本次还要求研究参照论文对各层系数 eta_l 的处理方式，并删除正文中介绍目前两张框架图的文字。用户可能后续合并两图，图的重绘、合并及图注适配由后续专项工作处理；当前保留两张图的文件、插图代码、图注和位置。本项更新此前计划修改图注的安排，当前仅删除方法正文中的引图说明。
+
+师兄明确批到的公式与符号调整本次一并落实：条件变量直接写 e_u^0，sim 统一为 cos，MSE 重构损失 L_rec 改称 L_mse。计算内容、网络结构、损失构成及全部公式编号保持不变。摘要、引言、相关工作、实验和结论正文，以及表格、参考文献数据库、样式、模型代码、配置和实验结果均未修改。
+
+二、层聚合权重的研究与处理
+
+（1）核对本地参照论文“推荐系统/3.LightGCN Simplifying and Powering Graph Convoluti.pdf”第 4 页：其层聚合段先定义 alpha_k 为第 k 层嵌入对最终表示的贡献权重，再说明该权重可以作为手动设置的超参数或可学习参数；该论文实际采用 1/(K+1) 的均匀权重。可借鉴的是先解释作用，再交代本文具体采用的固定或学习方式。
+
+（2）核对“师兄论文-CAFU(重要).pdf”第 3 页：层聚合公式后解释层权重，并说明通常采用均匀设置。该处公式使用 omega_k，说明文字中出现 alpha_k；本项目不复制这一符号不一致。核对“捆绑推荐/23-CrossCBR.pdf”第 3 页：其层聚合直接用各层表示求和。参照论文并不只有一种聚合写法，关键在于定义与实际设置一致。
+
+（3）本项目沿用现有的非负且和为 1 的固定 eta_l 定义，补清 ell 是传播层索引、L_p 是预训练传播层数、eta_l 控制各层嵌入对最终表示的贡献，且不在训练中更新。保持式（1）（2）不变。独立预训练的原始脚本、日志和权重数值在当前工程中没有可核实材料，这一状态此前已记录，因此没有借用其他论文的均匀权重或用下游三视图配置反推预训练参数。具体数值仍留待原始预训练材料补证。
+
+三、精修执行原则与内容组织
+
+面向熟悉 LightGCN、XSimGCL、DirectAU、CAFU 但未必熟悉捆绑推荐的中文推荐系统读者，按逻辑、语句、词汇三层检查。重点采用清楚的主干、明确的对象和指代、自然的步骤承接，降低英语阅读负担；保留必要技术定义与训练/推理区别。方法组织借鉴 CAFU 的“设计目的或现有目标的不足—操作与公式—作用及下一步用途”。
+
+PDGR 重点解释预训练嵌入的不同用途、用户条件去噪、SetLoss 与历史捆绑一致性及后续评分的联系，再以交互评分和重构图收束。CCL 承接重构 U-B 图，说明额外监督的来源、跨视图正负样本和约束作用，最后区分融合前与融合后目标。复杂度仅重排解释，不更改分析表达式。
+
+四、逐处修改清单
+
+以下按 26 个定位单元保存修改说明与完整前后原文；每个单元覆盖同一处连续叙述及关联公式，说明中分别列出内部调整。行号对应本次快照，后续编辑可能改变行号，应结合原文和小节定位。M10 与 M11 之间还删除了空段，使联合损失的引导与公式衔接；这是师兄“不换行”批注的处理。未列出的正文保持原样。
+
+【M01】原稿第 114 行起；本次修改后第 114 行起
+修改说明：框架概述按两个模块的目的、产出和衔接重写，明确历史偏好来自预训练捆绑嵌入；删除框架图引导句及 SetLoss 图括号引用。
+修改前（LaTeX 原文）：
+Figure~\ref{fig:framework} outlines ReCoBR. To address noise in U-B interactions, we first pretrain user and bundle representations, learn a user-conditioned denoiser over historical bundle representations, and use the refined preferences to reconstruct the U-B graph. The denoising objective incorporates a bundle-set consistency loss (SetLoss) to retain bundle-preference information during recovery (Figure~\ref{fig:denoising}). To address sparse U-B feedback, we use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion. The fused user and bundle representations produce the final recommendation scores.
+修改后（LaTeX 原文）：
+ReCoBR consists of two modules: PDGR and CCL. To reduce the influence of noisy interactions, PDGR uses a user-conditioned diffusion model to refine historical preference representations constructed from pretrained bundle embeddings. These refined preferences guide U-B interaction filtering and graph reconstruction. Building on the reconstructed graph, CCL introduces cross-view constraints before representation fusion, allowing auxiliary information to support bundle preference learning for sparse users. The fused user and bundle representations are then used for recommendation.
+
+【M02】原稿第 118 行起；本次修改后第 118 行起
+修改说明：模块一标题与摘要、引言中已定稿的全称和简称统一，保留交叉引用标签。
+修改前（LaTeX 原文）：
+\subsection{Diffusion-Driven U-B Graph Denoising and Reconstruction}\label{sec:graph-reconstruction}
+修改后（LaTeX 原文）：
+\subsection{Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR)}\label{sec:graph-reconstruction}
+
+【M03】原稿第 120 行起；本次修改后第 120 行起
+修改说明：模块一开头直接回应挑战一中的可靠性评估机制，并按偏好构建、条件去噪、评分筛选组织流程。
+修改前（LaTeX 原文）：
+This module evaluates observed U-B interactions based on users' historical bundle preferences. We construct a preference representation from each user's history, refine it through conditional denoising, and use it to select connections for graph propagation.
+修改后（LaTeX 原文）：
+PDGR assesses the reliability of observed U-B interactions through preference-based scoring. We construct historical preference representations from pretrained embeddings and train a user-conditioned denoiser with a bundle-set consistency constraint. The refined preferences are then used to score observed interactions and retain high-scoring connections for graph propagation.
+
+【M04】原稿第 124 行起；本次修改后第 124 行起
+修改说明：预训练段补充获取 U-B 协同信息的目的；拆开初始嵌入和邻居定义；明确层索引、层数、固定层权重的含义及不参与梯度更新；保留式（1）（2）的计算内容，不虚构具体权重；分别说明固定用户嵌入和捆绑嵌入的用途。
+修改前（LaTeX 原文）：
+We pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ be its trainable initial embeddings, and let $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$ denote the observed neighbors of user $u$ and bundle $b$. LightGCN propagation is given by
+\begin{equation}
+\begin{aligned}
+\mathbf h_u^{(\ell+1)}
+&=\sum_{b\in\mathcal N_u}
+\frac{\mathbf h_b^{(\ell)}}
+{\sqrt{|\mathcal N_u||\mathcal N_b|}},\\
+\mathbf h_b^{(\ell+1)}
+&=\sum_{u\in\mathcal N_b}
+\frac{\mathbf h_u^{(\ell)}}
+{\sqrt{|\mathcal N_b||\mathcal N_u|}}.
+\end{aligned}
+\tag{1}
+\end{equation}
+Here, $L_p$ is the number of pretraining propagation layers, and the fixed aggregation coefficients satisfy $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$. We aggregate the initial and propagated embeddings as
+\begin{equation}
+\mathbf e_u^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_u^{(\ell)},
+\qquad
+\mathbf e_b^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_b^{(\ell)}.
+\tag{2}
+\end{equation}
+The resulting embeddings $\mathbf e_u^0$ and $\mathbf e_b^0$ remain fixed during graph reconstruction. They are subsequently used to construct historical preferences, condition the denoiser, and score observed interactions.
+修改后（LaTeX 原文）：
+To capture collaborative information from U-B interactions, we pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ denote the trainable initial embeddings. The observed neighbors of user $u$ and bundle $b$ are $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$, respectively. LightGCN propagates information between users and bundles as follows:
+\begin{equation}
+\begin{aligned}
+\mathbf h_u^{(\ell+1)}
+&=\sum_{b\in\mathcal N_u}
+\frac{\mathbf h_b^{(\ell)}}
+{\sqrt{|\mathcal N_u||\mathcal N_b|}},\\
+\mathbf h_b^{(\ell+1)}
+&=\sum_{u\in\mathcal N_b}
+\frac{\mathbf h_u^{(\ell)}}
+{\sqrt{|\mathcal N_b||\mathcal N_u|}}.
+\end{aligned}
+\tag{1}
+\end{equation}
+Here, $\ell$ indexes the propagation layer, and $L_p$ is the number of pretraining layers. We combine the initial and propagated embeddings using fixed layer weights $\eta_\ell$. Each weight controls the contribution of layer $\ell$ to the final embedding and is not updated during training. The weights satisfy $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$:
+\begin{equation}
+\mathbf e_u^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_u^{(\ell)},
+\qquad
+\mathbf e_b^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_b^{(\ell)}.
+\tag{2}
+\end{equation}
+The pretrained embeddings remain fixed throughout denoiser and recommendation training. We use $\mathbf e_b^0$ to construct historical preference representations and score observed interactions, while $\mathbf e_u^0$ provides the user condition for denoising.
+
+【M05】原稿第 147 行起；本次修改后第 147 行起
+修改说明：历史偏好段先定义有 U-B 历史的用户集合，去除 active user 的高活跃歧义；统一历史偏好表示称呼，保留均值池化和下标含义，删除关于历史并非无噪声的防守式补充；式（3）不变。
+修改前（LaTeX 原文）：
+For each active user $u$, we summarize the representations of the historically interacted bundles by mean pooling:
+\begin{equation}
+\mathbf p_{u,0}
+=\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}\mathbf e_b^0.
+\tag{3}
+\end{equation}
+The vector $\mathbf p_{u,0}$ represents the user's observed bundle-preference context. Mean pooling accommodates histories of different lengths while keeping the denoising input $d$-dimensional. We construct this vector for users in $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. The subscript $0$ denotes the state before artificial noise is added; it does not assume that the observed history is free of interaction noise.
+修改后（LaTeX 原文）：
+We construct historical preference representations for users with observed U-B interactions, denoted by $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. For each $u\in\mathcal U_+$, we average the pretrained embeddings of their historically interacted bundles:
+\begin{equation}
+\mathbf p_{u,0}
+=\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}\mathbf e_b^0.
+\tag{3}
+\end{equation}
+The resulting vector $\mathbf p_{u,0}$ summarizes the user's historical bundle preferences. Mean pooling maps histories of different lengths to a $d$-dimensional representation. The subscript $0$ denotes the preference representation before Gaussian noise is added.
+
+【M06】原稿第 167 行起；本次修改后第 167 行起
+修改说明：加噪段按训练目的、噪声设置、表示构造解释；统一 noisy preference representation，拆开高斯噪声和系数的定义；式（4）不变。
+修改前（LaTeX 原文）：
+We train the denoiser to recover historical preference representations under different levels of perturbation. Following the Gaussian diffusion formulation \cite{ho2020ddpm,wang2023diffrec}, let $T$ be the number of diffusion steps and $\beta_t\in(0,1)$ the noise variance at step $t$. We use a linear variance schedule and define $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\prod_{s=1}^{t}\alpha_s$. A perturbed preference vector can be sampled directly as
+\begin{equation}
+\mathbf p_{u,t}
+=\sqrt{\bar\alpha_t}\,\mathbf p_{u,0}
++\sqrt{1-\bar\alpha_t}\,\boldsymbol\epsilon,
+\qquad
+\boldsymbol\epsilon\sim\mathcal N(\mathbf 0,\mathbf I_d).
+\tag{4}
+\end{equation}
+Here, $\boldsymbol\epsilon\in\mathbb R^d$ is standard Gaussian noise, $\mathbf I_d$ is the $d$-dimensional identity matrix, and $\bar\alpha_t$ controls how much historical information remains at noise level $t$.
+修改后（LaTeX 原文）：
+We train the denoiser to recover historical preference representations from inputs with different noise levels. Following the Gaussian diffusion formulation \cite{ho2020ddpm,wang2023diffrec}, let $T$ be the number of diffusion steps and $\beta_t\in(0,1)$ the noise variance at step $t$. We use a linear variance schedule, with $\alpha_t=1-\beta_t$ and $\bar\alpha_t=\prod_{s=1}^{t}\alpha_s$. At step $t$, the noisy preference representation is
+\begin{equation}
+\mathbf p_{u,t}
+=\sqrt{\bar\alpha_t}\,\mathbf p_{u,0}
++\sqrt{1-\bar\alpha_t}\,\boldsymbol\epsilon,
+\qquad
+\boldsymbol\epsilon\sim\mathcal N(\mathbf 0,\mathbf I_d).
+\tag{4}
+\end{equation}
+Here, $\boldsymbol\epsilon\in\mathbb R^d$ is standard Gaussian noise, and $\mathbf I_d$ is the $d$-dimensional identity matrix. The coefficient $\bar\alpha_t$ controls the contribution of the historical preference representation at step $t$.
+
+【M07】原稿第 178 行起；本次修改后第 178 行起
+修改说明：条件去噪段补 DiffRec 引用，引用仅支持 MLP 去噪器选择；式（5）将泛指 p、c 分别明确为 p_{u,t}、e_u^0，并重排等式换行，不改网络输入组成；改写 preserve/expose/coordinate-wise agreement 等抽象措辞，合并时间步作用的重复解释。
+修改前（LaTeX 原文）：
+To make recovery personalized, we condition the denoiser on the pretrained user representation $\mathbf e_u^0$. We implement the denoiser $f_\theta$ as a multilayer perceptron (MLP), with parameters $\theta$, that predicts the unperturbed preference vector:
+\begin{equation}
+\begin{aligned}
+\widehat{\mathbf p}_{u,0}
+&=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t),\\
+f_\theta(\mathbf p,\mathbf c,t)
+&=\operatorname{MLP}_\theta
+\bigl([\mathbf p;\mathbf c;\mathbf p\odot\mathbf c;
+|\mathbf p-\mathbf c|;\boldsymbol\psi(t)]\bigr).
+\end{aligned}
+\tag{5}
+\end{equation}
+In Eq. (5), $[\cdot;\cdot]$ denotes concatenation, $\odot$ denotes element-wise multiplication, and $|\mathbf p-\mathbf c|$ is the element-wise absolute deviation. The vectors $\mathbf p$ and $\mathbf c$ preserve the current preference estimate and the user condition, while $\mathbf p\odot\mathbf c$ and $|\mathbf p-\mathbf c|$ expose their coordinate-wise agreement and discrepancy. The sinusoidal embedding $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ specifies the perturbation level. Together with the timestep embedding, these features allow the MLP to adapt preference recovery to both the user and the perturbation level. Consequently, the MLP receives a $(4d+d_t)$-dimensional input and predicts a $d$-dimensional preference vector.
+修改后（LaTeX 原文）：
+To personalize denoising, we condition the model on the pretrained user embedding $\mathbf e_u^0$. Following DiffRec \cite{wang2023diffrec}, we use a multilayer perceptron (MLP) as the denoising network. Our denoiser $f_\theta$, parameterized by $\theta$, predicts the historical preference representation from the noisy input:
+\begin{equation}
+\begin{aligned}
+\widehat{\mathbf p}_{u,0}
+&=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t)\\
+&=\operatorname{MLP}_\theta\bigl([\mathbf p_{u,t};\mathbf e_u^0;
+\mathbf p_{u,t}\odot\mathbf e_u^0;\\
+&\hspace{20mm}|\mathbf p_{u,t}-\mathbf e_u^0|;\boldsymbol\psi(t)]\bigr).
+\end{aligned}
+\tag{5}
+\end{equation}
+Here, $[\cdot;\cdot]$ denotes concatenation and $\odot$ denotes element-wise multiplication. The input includes the noisy preference, the pretrained user embedding, their element-wise product, and their absolute difference. These features allow the network to model the relationship between the noisy preference and the user condition. We further include a sinusoidal timestep embedding $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ to indicate the noise level. The MLP maps the resulting $(4d+d_t)$-dimensional input to a $d$-dimensional preference representation.
+
+【M08】原稿第 192 行起；本次修改后第 191 行起
+修改说明：训练采样拆句，将 draw 改为 sample；重构损失命名为 MSE，式（6）仅将 L_rec 改为 L_mse；用明确的输入、目标与用户条件解释损失，删除 shared recovery function 等抽象表述。
+修改前（LaTeX 原文）：
+During training, we uniformly sample $u\in\mathcal U_+$ and $t\in\{1,\ldots,T\}$ and draw Gaussian noise as in Eq. (4). The reconstruction objective is
+\begin{equation}
+\mathcal L_{\mathrm{rec}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{d}
+\left\|\widehat{\mathbf p}_{u,0}-\mathbf p_{u,0}\right\|_2^2
+\right].
+\tag{6}
+\end{equation}
+This objective learns a shared recovery function from perturbed historical preferences. The original representation supplies the reconstruction target, while the pretrained user embedding provides personalized context.
+修改后（LaTeX 原文）：
+During training, we uniformly sample a user $u\in\mathcal U_+$ and a timestep $t\in\{1,\ldots,T\}$. We then sample Gaussian noise to construct $\mathbf p_{u,t}$ as in Eq. (4). The mean squared error (MSE) reconstruction loss is
+\begin{equation}
+\mathcal L_{\mathrm{mse}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{d}
+\left\|\widehat{\mathbf p}_{u,0}-\mathbf p_{u,0}\right\|_2^2
+\right].
+\tag{6}
+\end{equation}
+Minimizing this loss trains the denoiser to recover $\mathbf p_{u,0}$ from $\mathbf p_{u,t}$, with $\mathbf e_u^0$ providing user-specific information.
+
+【M09】原稿第 206 行起；本次修改后第 205 行起
+修改说明：SetLoss 引入段按聚合向量重构、逐捆绑评分需求、额外一致性约束展开；删除去噪图介绍句，突出设计理由。
+修改前（LaTeX 原文）：
+Reconstructing the pooled vector provides a basic denoising objective, but subsequent interaction selection depends on the recovered vector's compatibility with individual historical bundles. We therefore introduce SetLoss to connect preference recovery with the bundle representations that will be used for graph reconstruction. Figure~\ref{fig:denoising} illustrates how SetLoss complements the reconstruction objective in denoiser training.
+修改后（LaTeX 原文）：
+The reconstruction loss in Eq. (6) supervises recovery of the pooled historical preference vector. Graph reconstruction, however, requires scoring each historical bundle against the denoised preference. We therefore introduce a bundle-set consistency loss (SetLoss) to preserve useful preference information from the user's historical bundles.
+
+【M10】原稿第 208 行起；本次修改后第 207 行起
+修改说明：余弦相似度定义和式（7）统一用 cos；公式后直接解释 SetLoss 与向量重构的区别、与交互评分的联系及按历史数量归一化的作用，删除几何式抽象表述；将联合优化引导接在同一段，回应不另起段的批注。
+修改前（LaTeX 原文）：
+Let $\operatorname{sim}(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages high average cosine similarity between the recovered preference and the user's historical bundle embeddings:
+\begin{equation}
+\mathcal L_{\mathrm{set}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}
+\left(1-\operatorname{sim}
+\left(\widehat{\mathbf p}_{u,0},\mathbf e_b^0\right)\right)
+\right].
+\tag{7}
+\end{equation}
+Equation (6) reconstructs the pooled preference vector, whereas Eq. (7) aligns the recovered preference with its constituent historical bundles under the cosine-similarity geometry later used for interaction scoring. Averaging over the history prevents users with more interactions from dominating the objective.
+修改后（LaTeX 原文）：
+Let $\cos(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages consistency between the denoised preference and the user's historical bundle embeddings:
+\begin{equation}
+\mathcal L_{\mathrm{set}}
+=\mathbb E_{u,t,\boldsymbol\epsilon}
+\left[
+\frac{1}{|\mathcal N_u|}
+\sum_{b\in\mathcal N_u}
+\left(1-\cos
+\left(\widehat{\mathbf p}_{u,0},\mathbf e_b^0\right)\right)
+\right].
+\tag{7}
+\end{equation}
+SetLoss supplements the pooled-vector reconstruction with consistency constraints between the denoised preference and individual historical bundle embeddings. Using the same cosine similarity for SetLoss and subsequent interaction scoring connects preference denoising with graph reconstruction. Averaging over the history normalizes each user's loss by their number of observed bundles. We jointly optimize the two losses:
+
+【M11】原稿第 222 行起；本次修改后第 220 行起
+修改说明：删除已经并入前段的重复联合优化引导句；式（8）同步 L_mse 命名，损失结构和权重定义保持不变。
+修改前（LaTeX 原文）：
+We optimize the denoiser with
+\begin{equation}
+\mathcal L_{\mathrm D}
+=\mathcal L_{\mathrm{rec}}
++\lambda_{\mathrm{set}}\mathcal L_{\mathrm{set}},
+\tag{8}
+\end{equation}
+where $\lambda_{\mathrm{set}}\geq 0$ controls the contribution of SetLoss.
+修改后（LaTeX 原文）：
+\begin{equation}
+\mathcal L_{\mathrm D}
+=\mathcal L_{\mathrm{mse}}
++\lambda_{\mathrm{set}}\mathcal L_{\mathrm{set}},
+\tag{8}
+\end{equation}
+where $\lambda_{\mathrm{set}}\geq 0$ controls the contribution of SetLoss.
+
+【M12】原稿第 233 行起；本次修改后第 230 行起
+修改说明：图重构使用当前去噪器，与逐轮训练流程一致；正面说明历史偏好初始化和逆序重复更新，保留必要迭代信息；用中间表示、最终偏好解释状态，删除 refinement iterates 等难读词组及重复的非高斯起点否定句；式（9）不变。
+修改前（LaTeX 原文）：
+After learning the denoiser, we use it to refine the historical preference vector for interaction scoring. This stage employs a deterministic refinement procedure initialized with $\mathbf p_{u,0}$. Specifically,
+\begin{equation}
+\begin{aligned}
+\mathbf r_{u,T}&=\mathbf p_{u,0},\\
+\mathbf r_{u,t-1}
+&=f_\theta(\mathbf r_{u,t},\mathbf e_u^0,t),
+\qquad t=T,T-1,\ldots,1,\\
+\mathbf p_u^\star&=\mathbf r_{u,0}.
+\end{aligned}
+\tag{9}
+\end{equation}
+The states $\mathbf r_{u,t}$ are refinement iterates, distinct from the forward-corrupted training states $\mathbf p_{u,t}$. Each iteration feeds the current estimate back into the denoiser with the next timestep condition. Thus, graph reconstruction applies the learned recovery network to an observed preference context, without sampling a Gaussian starting state.
+修改后（LaTeX 原文）：
+To reconstruct the U-B graph, we apply the current denoiser to each user's historical preference representation. Starting from $\mathbf p_{u,0}$, we repeatedly update the representation over timesteps $T,T-1,\ldots,1$:
+\begin{equation}
+\begin{aligned}
+\mathbf r_{u,T}&=\mathbf p_{u,0},\\
+\mathbf r_{u,t-1}
+&=f_\theta(\mathbf r_{u,t},\mathbf e_u^0,t),
+\qquad t=T,T-1,\ldots,1,\\
+\mathbf p_u^\star&=\mathbf r_{u,0}.
+\end{aligned}
+\tag{9}
+\end{equation}
+Here, $\mathbf r_{u,t}$ is the intermediate representation during refinement, and $\mathbf p_u^\star$ is the final refined preference. Each step passes the current representation, the pretrained user embedding, and the timestep to the denoiser.
+
+【M13】原稿第 246 行起；本次修改后第 243 行起
+修改说明：交互评分段明确评分对象及分数含义，式（10）同步 cos；将 maximum retained degree 改为每位用户最多保留的交互数；保留 Top-K 返回集合、历史较短时全保留及重构图产出，删减无交互用户及原始标签的不必要重复解释；式（11）不变。
+修改前（LaTeX 原文）：
+We measure how closely each observed bundle matches the refined preference:
+\begin{equation}
+s_{ub}
+=\operatorname{sim}(\mathbf p_u^\star,\mathbf e_b^0),
+\qquad b\in\mathcal N_u.
+\tag{10}
+\end{equation}
+For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles, where the positive integer $\kappa$ controls the maximum retained degree:
+\begin{equation}
+\begin{aligned}
+\widetilde{\mathcal N}_u
+&=\underset{b\in\mathcal N_u}{\operatorname{TopK}}
+\left(s_{ub},\kappa_u\right),\\
+\widetilde x_{ub}
+&=\mathbf 1\!\left[b\in\widetilde{\mathcal N}_u\right].
+\end{aligned}
+\tag{11}
+\end{equation}
+Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain their full histories; users outside $\mathcal U_+$ have no retained U-B edges. Selection is restricted to observed interactions, so graph reconstruction neither creates new edges nor changes the ranking labels defined by $\mathbf X$. The resulting binary matrix $\widetilde{\mathbf X}$ is the reconstructed U-B graph used for downstream propagation.
+修改后（LaTeX 原文）：
+We then score each observed U-B interaction by the cosine similarity between the refined preference and the corresponding pretrained bundle embedding:
+\begin{equation}
+s_{ub}
+=\cos(\mathbf p_u^\star,\mathbf e_b^0),
+\qquad b\in\mathcal N_u.
+\tag{10}
+\end{equation}
+Higher scores indicate a closer match to the user's refined preference. For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles. The positive integer $\kappa$ specifies the maximum number of retained interactions per user:
+\begin{equation}
+\begin{aligned}
+\widetilde{\mathcal N}_u
+&=\underset{b\in\mathcal N_u}{\operatorname{TopK}}
+\left(s_{ub},\kappa_u\right),\\
+\widetilde x_{ub}
+&=\mathbf 1\!\left[b\in\widetilde{\mathcal N}_u\right].
+\end{aligned}
+\tag{11}
+\end{equation}
+Here, $\operatorname{TopK}(s_{ub},\kappa_u)$ returns the set of $\kappa_u$ bundles in $\mathcal N_u$ with the largest scores, and $\mathbf 1[\cdot]$ is the indicator function. Users with at most $\kappa$ observed bundles retain all their connections. The selected interactions form $\widetilde{\mathbf X}$, which defines the reconstructed U-B graph for propagation.
+
+【M14】原稿第 266 行起；本次修改后第 263 行起
+修改说明：模块二小节标题与摘要、引言定稿名称统一；融合前的位置在正文和目标定义中明确。
+修改前（LaTeX 原文）：
+\subsection{Pre-Fusion Cross-View Contrastive Learning}
+修改后（LaTeX 原文）：
+\subsection{Cross-View Contrastive Learning (CCL)}
+
+【M15】原稿第 268 行起；本次修改后第 265 行起
+修改说明：CCL 开头承接 PDGR 产出的重构图，说明跨视图约束如何提供额外监督，回应交互稀疏用户的学习需求。
+修改前（LaTeX 原文）：
+With the U-B graph reconstructed, we next learn representations from this graph together with user-item behavior and bundle composition. When U-B feedback is sparse, U-I interactions and B-I affiliations provide additional information for preference learning. We learn user and bundle representations from each view and use cross-view contrastive learning to align representations from the reconstructed U-B view with those from the U-I and B-I views before fusion.
+修改后（LaTeX 原文）：
+Building on the reconstructed U-B graph, CCL uses the U-I and B-I views to provide additional supervision for bundle preference learning. We encode the three relation views, then align representations of the same user (bundle) between the reconstructed U-B view and each auxiliary view before fusion. These direct cross-view constraints help auxiliary information support preference learning for sparse users.
+
+【M16】原稿第 272 行起；本次修改后第 269 行起
+修改说明：编码总述拆成图与参数来源、传播与训练扰动两段；前移共享嵌入与固定预训练嵌入的区别；去除 inherited backbone 的开发说明口吻，保留固定层权重、归一化和训练/评估扰动差别。
+修改前（LaTeX 原文）：
+Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Fixed view-specific coefficients combine the initial embeddings with the $\ell_2$-normalized layer outputs. During training, the inherited backbone adds small representation perturbations to the propagation outputs and auxiliary item pooling; these perturbations are disabled during evaluation. The encoders share trainable initial embeddings for the same entity, which are separate from the fixed pretrained embeddings in Section~\ref{sec:graph-reconstruction}.
+修改后（LaTeX 原文）：
+Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. The encoders share trainable initial embeddings for the same entity. These embeddings are learned during recommendation training, separately from the fixed pretrained embeddings used by PDGR.
+
+Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Within each view, fixed layer weights combine the initial embeddings and the $\ell_2$-normalized propagation outputs. During training, we add small representation perturbations to the propagation outputs and auxiliary item pooling. These perturbations are disabled during evaluation.
+
+【M17】原稿第 293 行起；本次修改后第 292 行起
+修改说明：三视图编码收束句改为过程产出及用途，省去已经逐一定义过的两组三视图符号列表，减少重复。
+修改前（LaTeX 原文）：
+This step yields three representations for each user, $\{\mathbf e_u^{\mathrm{UB}},\mathbf e_u^{\mathrm{UI}},\mathbf e_u^{\mathrm{BI}}\}$, and each bundle, $\{\mathbf e_b^{\mathrm{UB}},\mathbf e_b^{\mathrm{UI}},\mathbf e_b^{\mathrm{BI}}\}$, all in $\mathbb R^d$. These unfused representations are used to construct the cross-view objective below and are later fused for prediction.
+修改后（LaTeX 原文）：
+After graph propagation and item pooling, each user (bundle) has a representation in all three views. We use these $d$-dimensional representations for cross-view contrastive learning before fusing them for recommendation.
+
+【M18】原稿第 297 行起；本次修改后第 296 行起
+修改说明：按实体集合、正样本、负样本、有效批次条件组织样本构造；将少于两个实体的条件前移，避免打断公式后的作用解释；维持用户和正捆绑去重规则。
+修改前（LaTeX 原文）：
+For each user, we pair its representation from the reconstructed U-B view with its representations from the U-I and B-I views. We construct the same pairs for bundles. The reconstructed U-B view thus serves as the common reference. Each same-entity pair is a positive pair, while other entities of the same type provide in-batch negatives. For every recommendation minibatch, we remove duplicate user IDs and duplicate positive-bundle IDs to form the entity sets $\mathcal S_U$ and $\mathcal S_B$, ensuring that an entity is not repeated as its own in-batch negative.
+修改后（LaTeX 原文）：
+For each recommendation minibatch, we collect unique users and unique positive bundles into $\mathcal S_U$ and $\mathcal S_B$, respectively. For each user (bundle), we pair the representation from the reconstructed U-B view with its counterpart in each auxiliary view. Representations of the same entity form a positive pair, while those of other entities of the same type provide in-batch negatives. Using unique entities avoids treating repeated IDs as negative samples. We omit the user-side or bundle-side terms if the corresponding set contains fewer than two entities.
+
+【M19】原稿第 299 行起；本次修改后第 298 行起
+修改说明：式（13）统一 cos，保留方向性 InfoNCE；直接解释温度和正负样本，式（14）前点明用户/捆绑各两组跨视图配对；公式后集中说明同实体对齐、不同实体区分、双侧更新及稀疏用户额外监督；式（14）不变。
+修改前（LaTeX 原文）：
+For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n}$ and $\mathbf G=(\mathbf g_j)_{j=1}^{n}$, we define the directional InfoNCE objective \cite{oord2018cpc} as
+\begin{equation}
+\mathcal I_\tau(\mathbf H,\mathbf G)
+=-\frac{1}{n}\sum_{j=1}^{n}
+\log
+\frac{\exp\!\left(\operatorname{sim}(\mathbf h_j,\mathbf g_j)/\tau\right)}
+{\sum_{k=1}^{n}
+\exp\!\left(\operatorname{sim}(\mathbf h_j,\mathbf g_k)/\tau\right)}.
+\tag{13}
+\end{equation}
+The temperature $\tau>0$ controls sensitivity to similarity differences. For each anchor $\mathbf h_j$, its counterpart $\mathbf g_j$ is the positive candidate, and all representations in $\mathbf G$, including the positive, form the denominator. Let $\mathbf E_r^v=(\mathbf e_q^v)_{q\in\mathcal S_r}$ for $r\in\{U,B\}$, with the same entity ordering across views. The pre-fusion objective is
+\begin{equation}
+\mathcal L_{\mathrm A}
+=\sum_{r\in\{U,B\}}
+\sum_{v\in\{\mathrm{UI},\mathrm{BI}\}}
+\mathcal I_\tau\!\left(\mathbf E_r^{\mathrm{UB}},\mathbf E_r^v\right).
+\tag{14}
+\end{equation}
+Equation (14) encourages agreement for the same user or bundle across U-B--U-I and U-B--B-I pairs while preserving discrimination between entities. A user-side or bundle-side term is omitted when the corresponding entity set contains fewer than two members and therefore provides no in-batch negatives. The U-B view is the common anchor in constructing the objective, and gradients update both representations in each pair. This alignment allows information from the U-I and B-I views to support bundle preference learning when U-B feedback is sparse.
+修改后（LaTeX 原文）：
+For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n}$ and $\mathbf G=(\mathbf g_j)_{j=1}^{n}$, we define the directional InfoNCE objective \cite{oord2018cpc} as
+\begin{equation}
+\mathcal I_\tau(\mathbf H,\mathbf G)
+=-\frac{1}{n}\sum_{j=1}^{n}
+\log
+\frac{\exp\!\left(\cos(\mathbf h_j,\mathbf g_j)/\tau\right)}
+{\sum_{k=1}^{n}
+\exp\!\left(\cos(\mathbf h_j,\mathbf g_k)/\tau\right)}.
+\tag{13}
+\end{equation}
+Here, $\tau>0$ is the contrastive temperature. For anchor $\mathbf h_j$, $\mathbf g_j$ is the positive sample, while $\mathbf g_k$ with $k\neq j$ provides a negative sample. Let $\mathbf E_r^v=(\mathbf e_q^v)_{q\in\mathcal S_r}$ for $r\in\{U,B\}$, with the same entity ordering across views. The pre-fusion objective combines U-B--U-I and U-B--B-I pairs for both users and bundles:
+\begin{equation}
+\mathcal L_{\mathrm A}
+=\sum_{r\in\{U,B\}}
+\sum_{v\in\{\mathrm{UI},\mathrm{BI}\}}
+\mathcal I_\tau\!\left(\mathbf E_r^{\mathrm{UB}},\mathbf E_r^v\right).
+\tag{14}
+\end{equation}
+Minimizing $\mathcal L_{\mathrm A}$ brings representations of the same entity closer across views and separates different entities. The reconstructed U-B view serves as the common anchor, with gradients updating both representations in each pair. Through these constraints, auxiliary information contributes to preference learning before fusion, providing additional supervision for sparse users.
+
+【M20】原稿第 321 行起；本次修改后第 320 行起
+修改说明：将直接采用其系数改为沿用固定权重融合策略，避免暗示完全照搬 MultiCBR 的具体数值；式（15）（16）及系数约束不变。
+修改前（LaTeX 原文）：
+\textbf{View fusion and prediction.} Following MultiCBR \cite{ma2024multicbr}, we adopt its fixed view coefficients to combine the three view-specific representations into a single user representation and a single bundle representation:
+\begin{equation}
+\begin{aligned}
+\mathbf e_u
+&=\omega_1\mathbf e_u^{\mathrm{UB}}
++\omega_2\mathbf e_u^{\mathrm{UI}}
++\omega_3\mathbf e_u^{\mathrm{BI}},\\
+\mathbf e_b
+&=\omega_1\mathbf e_b^{\mathrm{UB}}
++\omega_2\mathbf e_b^{\mathrm{UI}}
++\omega_3\mathbf e_b^{\mathrm{BI}}.
+\end{aligned}
+\tag{15}
+\end{equation}
+Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B, U-I, and B-I views, respectively. The same coefficients are used for users and bundles; they are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$. The inner product of the fused representations gives the preference score:
+\begin{equation}
+\hat y_{ub}=\mathbf e_u^\top\mathbf e_b.
+\tag{16}
+\end{equation}
+修改后（LaTeX 原文）：
+\textbf{View fusion and prediction.} Following the weighted fusion strategy of MultiCBR \cite{ma2024multicbr}, we combine the three view-specific representations using fixed coefficients:
+\begin{equation}
+\begin{aligned}
+\mathbf e_u
+&=\omega_1\mathbf e_u^{\mathrm{UB}}
++\omega_2\mathbf e_u^{\mathrm{UI}}
++\omega_3\mathbf e_u^{\mathrm{BI}},\\
+\mathbf e_b
+&=\omega_1\mathbf e_b^{\mathrm{UB}}
++\omega_2\mathbf e_b^{\mathrm{UI}}
++\omega_3\mathbf e_b^{\mathrm{BI}}.
+\end{aligned}
+\tag{15}
+\end{equation}
+Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B, U-I, and B-I views, respectively. The same coefficients are used for users and bundles; they are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$. The inner product of the fused representations gives the preference score:
+\begin{equation}
+\hat y_{ub}=\mathbf e_u^\top\mathbf e_b.
+\tag{16}
+\end{equation}
+
+【M21】原稿第 341 行起；本次修改后第 340 行起
+修改说明：融合后目标统一命名，明确引用 MultiCBR 的融合后策略而不声称正样本形式完全相同；简化 occurrence/分子分母叙述，同时保留自身配对、重复 ID 按序列位置保留的既定定义；解释融合前后目标分工及 BPR 作用；将两个正则目标改为两个对比损失与嵌入正则，精简原始交互采样说明；式（17）—（19）不变。
+修改前（LaTeX 原文）：
+\textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Let $\mathbf E_U=(\mathbf e_{u_j})_{j=1}^{m}$ and $\mathbf E_B=(\mathbf e_{b_j^+})_{j=1}^{m}$ denote their fused representation sequences. Following MultiCBR \cite{ma2024multicbr}, the fused-space self-contrastive regularizer is
+\begin{equation}
+\mathcal L_{\mathrm C}
+=\frac{1}{2}\left[
+\mathcal I_\tau(\mathbf E_U,\mathbf E_U)
++\mathcal I_\tau(\mathbf E_B,\mathbf E_B)
+\right].
+\tag{17}
+\end{equation}
+For each occurrence in the minibatch, the numerator pairs its fused representation with itself, while all minibatch occurrences of the same entity type appear in the denominator. This inherited objective regularizes separation in the fused representation space, whereas $\mathcal L_{\mathrm A}$ explicitly connects different relation views before fusion. The BPR loss \cite{rendle2009bpr} is
+\begin{equation}
+\mathcal L_{\mathrm{BPR}}
+=-\frac{1}{m}
+\sum_{j=1}^{m}
+\log\sigma\!\left(\hat y_{u_jb_j^+}-\hat y_{u_jb_j^-}\right).
+\tag{18}
+\end{equation}
+Here, $\sigma$ is the sigmoid function. We optimize BPR together with the two regularization objectives:
+\begin{equation}
+\mathcal L_{\mathrm R}
+=\mathcal L_{\mathrm{BPR}}
++\lambda_a\mathcal L_{\mathrm A}
++\lambda_c\mathcal L_{\mathrm C}
++\lambda_r\|\Theta\|_2^2.
+\tag{19}
+\end{equation}
+Here, $\Theta$ comprises the trainable initial user, bundle, and item embeddings of the recommendation backbone, and $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. Ranking examples continue to come from $\mathbf X$, even when their edges are not selected for $\widetilde{\mathbf X}$. Graph reconstruction therefore filters propagation connections while preserving the observed feedback used for ranking.
+修改后（LaTeX 原文）：
+\textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Let $\mathbf E_U=(\mathbf e_{u_j})_{j=1}^{m}$ and $\mathbf E_B=(\mathbf e_{b_j^+})_{j=1}^{m}$ denote their fused representation sequences. We also retain contrastive learning after fusion, following the strategy of MultiCBR \cite{ma2024multicbr}. Our post-fusion contrastive objective is
+\begin{equation}
+\mathcal L_{\mathrm C}
+=\frac{1}{2}\left[
+\mathcal I_\tau(\mathbf E_U,\mathbf E_U)
++\mathcal I_\tau(\mathbf E_B,\mathbf E_B)
+\right].
+\tag{17}
+\end{equation}
+In Eq. (17), each fused representation is paired with itself, with all representations of the same entity type in the minibatch used for comparison. Repeated users or bundles retain their separate positions in these sequences. This objective encourages separation between different entities in the fused representation space. Together, $\mathcal L_{\mathrm A}$ and $\mathcal L_{\mathrm C}$ constrain view-specific and fused representations, respectively.
+
+For recommendation, the BPR loss \cite{rendle2009bpr} encourages higher scores for observed bundles than for unobserved bundles:
+\begin{equation}
+\mathcal L_{\mathrm{BPR}}
+=-\frac{1}{m}
+\sum_{j=1}^{m}
+\log\sigma\!\left(\hat y_{u_jb_j^+}-\hat y_{u_jb_j^-}\right).
+\tag{18}
+\end{equation}
+Here, $\sigma$ is the sigmoid function. The overall recommendation objective combines BPR, the two contrastive losses, and embedding regularization:
+\begin{equation}
+\mathcal L_{\mathrm R}
+=\mathcal L_{\mathrm{BPR}}
++\lambda_a\mathcal L_{\mathrm A}
++\lambda_c\mathcal L_{\mathrm C}
++\lambda_r\|\Theta\|_2^2.
+\tag{19}
+\end{equation}
+The parameter set $\Theta$ contains the trainable initial user, bundle, and item embeddings of the recommendation backbone. The coefficients $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. We sample ranking triplets using the original interactions in $\mathbf X$.
+
+【M22】原稿第 369 行起；本次修改后第 370 行起
+修改说明：训练段保留每轮三阶段、单轮遍历、两个优化器与离散 Top-K 梯度边界；将图刷新的长句拆开，统一有历史用户为 U_+。
+修改前（LaTeX 原文）：
+\textbf{Training.} After offline U-B pretraining, each training epoch contains three stages. First, we update the denoiser $f_\theta$ for one pass over $\mathcal U_+$ using $\mathcal L_{\mathrm D}$. Second, the updated denoiser refines every active user's historical preference, scores the observed U-B interactions, and refreshes $\widetilde{\mathbf X}$ through the Top-K selection in Eq. (11). Third, we hold $\widetilde{\mathbf X}$ fixed and update the recommendation parameters $\Theta$ on ranking minibatches using $\mathcal L_{\mathrm R}$. The denoiser and recommendation backbone use separate optimizers. Because Top-K edge selection is discrete, gradients from $\mathcal L_{\mathrm R}$ do not propagate through $\widetilde{\mathbf X}$ to $f_\theta$.
+修改后（LaTeX 原文）：
+\textbf{Training.} After offline U-B pretraining, each training epoch proceeds in three stages. First, we update the denoiser $f_\theta$ for one pass over $\mathcal U_+$ using $\mathcal L_{\mathrm D}$. Second, we use the updated denoiser to refine historical preferences and score observed U-B interactions for all users in $\mathcal U_+$. The Top-K selection in Eq. (11) then refreshes $\widetilde{\mathbf X}$. Third, we hold $\widetilde{\mathbf X}$ fixed and update the recommendation parameters $\Theta$ on ranking minibatches using $\mathcal L_{\mathrm R}$. The denoiser and recommendation backbone use separate optimizers. Top-K selection is discrete, so recommendation gradients do not propagate through the reconstructed graph to the denoiser.
+
+【M23】原稿第 371 行起；本次修改后第 372 行起
+修改说明：推理段保留所选模型对应的图、表示缓存和候选排除规则；将末尾两个重复说明压缩为去噪器仅用于评分前图重构的直接表达。
+修改前（LaTeX 原文）：
+\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (16) after excluding bundles observed in the training data. Graph reconstruction is performed before scoring; the denoiser is not run separately for each candidate bundle.
+修改后（LaTeX 原文）：
+\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (16) after excluding bundles observed in the training data. The denoiser is used only during graph reconstruction, before candidate scoring.
+
+【M24】原稿第 587 行起；本次修改后第 588 行起
+修改说明：复杂度先交代三个阶段，再按含义定义用户数、历史长度、原图和传播图边数、批次数与大小及去噪器成本；降低连续符号定义的阅读负担，不改假设或复杂度表达式。
+修改前（LaTeX 原文）：
+Let $n_+=|\mathcal U_+|$ and $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$. Let $M=|\mathcal E_{\mathrm{UB}}|$ be the number of observed U-B edges, and let $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ be the total number of edges used for graph propagation. We use $Q$ and $m$ to denote the number and size of recommendation minibatches, respectively. With a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
+修改后（LaTeX 原文）：
+Each training epoch includes denoiser training, graph reconstruction, and recommendation learning. Let $n_+=|\mathcal U_+|$ be the number of users with observed U-B interactions, and let $h_{\max}=\max_{u\in\mathcal U_+}|\mathcal N_u|$ be the maximum history length. The observed U-B graph has $M=|\mathcal E_{\mathrm{UB}}|$ edges. The three propagation graphs contain $E=|\widetilde{\mathcal E}_{\mathrm{UB}}|+|\mathcal E_{\mathrm{UI}}|+|\mathcal E_{\mathrm{BI}}|$ edges in total. We denote the number and size of recommendation minibatches by $Q$ and $m$, respectively. For a fixed-depth denoiser whose hidden widths scale with $d$, one evaluation costs $C_f=O(d^2)$. The time complexity of one training epoch is
+
+【M25】原稿第 589 行起；本次修改后第 590 行起
+修改说明：时间复杂度后的说明与三阶段对应，原图边数关系改为正面说明；保留既定有界堆分析及离线单次传播成本，式（20）不变。
+修改前（LaTeX 原文）：
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(T+1)n_+C_f\\
+&+n_+h_{\max}\!\left[d+\log(1+\kappa)\right]\\
+&+Q\bigl(LEd+m^2d\bigr)
+\end{aligned}
+\right).
+\tag{20}
+\end{equation}
+The three terms correspond to denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Since $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$, reconstruction does not densify the U-B graph.
+修改后（LaTeX 原文）：
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(T+1)n_+C_f\\
+&+n_+h_{\max}\!\left[d+\log(1+\kappa)\right]\\
+&+Q\bigl(LEd+m^2d\bigr)
+\end{aligned}
+\right).
+\tag{20}
+\end{equation}
+The three terms account for denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Graph reconstruction retains a subset of the observed interactions, so $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$.
+
+【M26】原稿第 601 行起；本次修改后第 602 行起
+修改说明：空间复杂度的变量定义拆句并补实体总数含义；保持峰值空间、缓存构建与推断评分复杂度不变，式（21）不变。
+修改前（LaTeX 原文）：
+For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$, let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the denoiser parameter count. The peak training space is
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(L+1)Vd+P_\theta+(|\mathcal U|+|\mathcal B|)d\\
+&+E+M+m^2+b_dh_{\max}d
+\end{aligned}
+\right).
+\tag{21}
+\end{equation}
+At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and scoring all candidate bundles for one user costs $O(|\mathcal B|d)$.
+修改后（LaTeX 原文）：
+For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$ denote the total number of entities. Let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the number of denoiser parameters. The peak training space is
+\begin{equation}
+O\!\left(
+\begin{aligned}
+&(L+1)Vd+P_\theta+(|\mathcal U|+|\mathcal B|)d\\
+&+E+M+m^2+b_dh_{\max}d
+\end{aligned}
+\right).
+\tag{21}
+\end{equation}
+At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and scoring all candidate bundles for one user costs $O(|\mathcal B|d)$.
+
+五、符号调整与图文适配承接
+
+（1）式（5）直接用 p_{u,t} 和 e_u^0 表示输入，在同一组等式中展开四类向量特征与时间嵌入；仅作明确变量和必要换行，不增加新的条件、参数或网络层。
+
+（2）式（6）（8）的 L_rec 改为 L_mse。重命名符合师兄避免 rec 歧义的批注；XSimGCL 等推荐论文常以 L_rec 表示推荐损失，而本处明确是 MSE 重构损失。当前 setloss.png 内仍使用 L_rec，按用户“图后面专门适配”的安排暂不改图；后续合图或重绘时需同步为 L_mse，并核对联合损失中的对应记号。
+
+（3）余弦相似度定义及式（7）（10）（13）统一使用 cos，与当前图中已有记号一致。其余 15 个编号公式的 LaTeX 内容逐字保持不变；式（5）的输入组成与维度、其他改名公式的计算内容也均保持不变。全部公式仍编号（1）至（21）。
+
+（4）删除了方法概述中的框架图介绍、括号中的去噪图引用，以及 SetLoss 引入段的去噪图说明，共三处正文引图表达。两张图的代码和图注未变。后续按最终方法稿和 PDGR/CCL 命名处理图，图完成后再评估是否需要恢复必要的正文引图说明。
+
+六、本次验证与文件状态
+
+（1）核对实际差异：方法章之外正文完全一致；全部 9 个图表浮动环境（含图注、表格数字、路径和位置）逐字未变；AAAI 模板、参考文献、代码、配置和实验结果未修改。
+
+（2）公式检查：共 21 个编号公式，变更仅出现在（5）（6）（7）（8）（10）（13）；其中（6）（8）仅改损失名称，（7）（10）（13）仅改余弦函数记号，（5）仅明确输入变量及调整换行。方法正文不再残留条件变量 c、sim 或 L_rec，也不再有针对两张框架图的正文引图句。
+
+（3）引用检查：MLP 处新增一次现有 DiffRec 文献的引用，未新增或修改参考文献条目。全稿 33 个不同引用键均能在 aaai2027.bib 中解析。
+
+（4）使用本地 TeX Live 完成 pdfLaTeX—BibTeX—重复 pdfLaTeX 的临时编译，直至交叉引用稳定；临时文件位于 tmp/method-review-20261115。最终 PDF 为 11 页，无未定义引用或交叉引用，无 Overfull 内容越界警告。对方法所在第 3—7 页逐页渲染检查，确认模块标题、公式（5）的换行及其他方法公式正常显示。编译日志保留两项 Underfull 提示，分别涉及页高分配及实验段落，不影响方法章内容显示；本轮未为这些提示改动其他章节或浮动布局。
+
+（5）main.tex 保持 UTF-8 无 BOM、CRLF。修改后 SHA-256：65179881f1570e5f09523bc376142bd94d45fb5a5726db7106847b8d6bb0ff46。工程记录仅在此前 125421 字节之后追加本项，保留既有记录，使用 UTF-8 无 BOM、CRLF。完成差异检查及既有记录前缀核对；未运行模型训练、未同步 Overleaf、未提交 Git。

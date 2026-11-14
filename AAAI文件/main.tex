@@ -792,8 +792,9 @@ PDGR improves performance on all three datasets. On iFashion,
 NDCG@20 increases from 0.1245 to 0.1310 with PDGR, showing
 the benefit of using preference-based scores to select connections for
 graph propagation. Removing SetLoss also reduces performance
-across the three datasets. These additional gains support using
-historical bundle embeddings to constrain preference denoising.
+across the three datasets. This suggests that constraining denoising
+with historical bundle embeddings helps retain useful preference
+information.
 
 CCL also improves recommendation performance. On NetEase,
 removing CCL reduces Recall@20 from 0.0955 to 0.0906,
@@ -801,8 +802,8 @@ supporting the value of directly connecting U-B preferences
 with auxiliary views before fusion. Removing post-fusion CL
 causes larger performance drops, while removing both
 contrastive objectives yields the lowest performance.
-These results support applying contrastive constraints to
-both view-specific and fused representations.
+CCL strengthens learning across views, while the post-fusion
+objective constrains the fused representations used for recommendation.
 
 
 
@@ -833,9 +834,11 @@ Random-K can improve over Original UB, but its gap from ReCoBR
 indicates that the selection criterion matters beyond reducing
 the number of connections. Popularity-K's low NDCG@20 reflects
 the limitations of global popularity for personalized ranking.
-Pretrain-Sim also performs worse than Random-K.
-ReCoBR's gains over these strategies support refining historical
-preferences before scoring observed connections.
+Pretrain-Sim also performs worse than Random-K, showing the
+limitations of directly using pretrained user-bundle similarity
+for interaction selection. In contrast, PDGR constructs and
+denoises historical preference representations before scoring
+connections, providing a more effective basis for graph reconstruction.
 
 
 
@@ -857,8 +860,9 @@ with \textbf{w/o CCL}, retaining PDGR in both.
 Figure~\ref{fig:sparse-users} shows improvements across all
 four groups, with the largest relative gains in the sparsest
 group G1: 12.64\% in Recall@20 and 9.32\% in NDCG@20.
-These results support CCL's use of auxiliary information as
-additional supervision for users with few U-B interactions.
+The larger gains in G1 indicate that additional cross-view
+supervision is particularly useful when users have few historical
+bundle interactions.
 
 
 
@@ -876,8 +880,9 @@ and leave the U-I and B-I relations and evaluation data unchanged.
 We rerun ReCoBR's full training pipeline, including U-B pretraining.
 As shown in Figure~\ref{fig:noise-robustness}, ReCoBR maintains
 the highest Recall@20 and NDCG@20 across all datasets and
-tested noise ratios. These results show that ReCoBR retains
-its recommendation advantage when the U-B graph contains additional noisy connections.
+tested noise ratios. By filtering connections using denoised
+preferences, PDGR helps reduce the influence of noisy interactions
+during neighborhood aggregation.
 
 
 
@@ -914,16 +919,17 @@ and ranking objectives.
 \section{Conclusion}
 
 In this paper, we proposed ReCoBR to address noisy and sparse
-U-B interactions in bundle recommendation. PDGR used pretrained
-embeddings and user-conditioned diffusion to refine historical
-preferences for U-B interaction filtering and graph reconstruction.
-During denoising, SetLoss helped preserve useful historical
-preference information. Building on the reconstructed graph,
-CCL introduced cross-view constraints before representation
-fusion to improve bundle preference learning for sparse users.
-Experiments on three public datasets showed that ReCoBR
-outperformed the baseline methods. Ablation studies and
-further analyses supported the effectiveness of the proposed designs.
+U-B interactions in bundle recommendation. PDGR denoised historical
+preference representations from pretrained embeddings with a
+user-conditioned diffusion model, using SetLoss to help retain
+useful preference information. The denoised preferences then
+guided U-B interaction filtering and graph reconstruction.
+Building on the reconstructed graph, CCL introduced cross-view
+constraints before representation fusion to improve bundle
+preference learning for sparse users. In experiments on three
+public datasets, ReCoBR outperformed the baseline methods.
+Further analyses showed improvements for sparse users and a
+consistent recommendation advantage under noisy U-B interactions.
 
 \bibliography{aaai2027}
 

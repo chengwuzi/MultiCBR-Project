@@ -109,11 +109,7 @@ In bundle recommendation, CrossCBR aligns representations of the same user (bund
 
 \subsection{Task Definition and Framework Overview}
 
-Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user.
-
-ReCoBR consists of two modules: PDGR and CCL. To reduce the influence of noisy interactions, PDGR uses a user-conditioned diffusion model to refine historical preference representations constructed from pretrained bundle embeddings. These refined preferences guide U-B interaction filtering and graph reconstruction. Building on the reconstructed graph, CCL introduces cross-view constraints before representation fusion, allowing auxiliary information to support bundle preference learning for sparse users. The fused user and bundle representations are then used for recommendation.
-
-We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
+Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user. ReCoBR first uses PDGR to reconstruct the U-B graph. CCL then applies contrastive learning between the reconstructed U-B view and each auxiliary view before representation fusion. We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
 
 \subsection{Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR)}\label{sec:graph-reconstruction}
 
@@ -178,13 +174,15 @@ Here, $\boldsymbol\epsilon\in\mathbb R^d$ is standard Gaussian noise, and $\math
 
 To personalize denoising, we condition the model on the pretrained user embedding $\mathbf e_u^0$. Following DiffRec \cite{wang2023diffrec}, we use a multilayer perceptron (MLP) as the denoising network. Our denoiser $f_\theta$, parameterized by $\theta$, predicts the historical preference representation from the noisy input:
 \begin{equation}
-\begin{aligned}
+\begin{gathered}
 \widehat{\mathbf p}_{u,0}
-&=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t)\\
-&=\operatorname{MLP}_\theta\bigl([\mathbf p_{u,t};\mathbf e_u^0;
-\mathbf p_{u,t}\odot\mathbf e_u^0;\\
-&\hspace{20mm}|\mathbf p_{u,t}-\mathbf e_u^0|;\boldsymbol\psi(t)]\bigr).
-\end{aligned}
+=f_\theta(\mathbf p_{u,t},\mathbf e_u^0,t)\\
+=\operatorname{MLP}_\theta\!\bigl(
+[\mathbf p_{u,t};\mathbf e_u^0;
+\mathbf p_{u,t}\odot\mathbf e_u^0;
+|\mathbf p_{u,t}-\mathbf e_u^0|;\boldsymbol\psi(t)]
+\bigr).
+\end{gathered}
 \tag{5}
 \end{equation}
 Here, $[\cdot;\cdot]$ denotes concatenation and $\odot$ denotes element-wise multiplication. The input includes the noisy preference, the pretrained user embedding, their element-wise product, and their absolute difference. These features allow the network to model the relationship between the noisy preference and the user condition. We further include a sinusoidal timestep embedding $\boldsymbol\psi(t)\in\mathbb R^{d_t}$ to indicate the noise level. The MLP maps the resulting $(4d+d_t)$-dimensional input to a $d$-dimensional preference representation.

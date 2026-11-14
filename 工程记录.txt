@@ -1627,3 +1627,60 @@ At inference, constructing the cached graph representations costs $O(LEd)$. Scor
 （4）使用本地 TeX Live 完成 pdfLaTeX—BibTeX—重复 pdfLaTeX 的临时编译，直至交叉引用稳定；临时文件位于 tmp/method-review-20261115。最终 PDF 为 11 页，无未定义引用或交叉引用，无 Overfull 内容越界警告。对方法所在第 3—7 页逐页渲染检查，确认模块标题、公式（5）的换行及其他方法公式正常显示。编译日志保留两项 Underfull 提示，分别涉及页高分配及实验段落，不影响方法章内容显示；本轮未为这些提示改动其他章节或浮动布局。
 
 （5）main.tex 保持 UTF-8 无 BOM、CRLF。修改后 SHA-256：65179881f1570e5f09523bc376142bd94d45fb5a5726db7106847b8d6bb0ff46。工程记录仅在此前 125421 字节之后追加本项，保留既有记录，使用 UTF-8 无 BOM、CRLF。完成差异检查及既有记录前缀核对；未运行模型训练、未同步 Overleaf、未提交 Git。
+
+
+第二十三项：实验章文字精修、消融变体模块命名及结论一般过去时改写
+
+记录日期：2026-11-15（北京时间）
+
+一、本轮范围与写作取舍
+
+结合此前实验章全面审阅、用户关于评价协议简洁写法的讨论及消融表模块命名意见，本轮精修 AAAI文件/main.tex 的实验章文字、两处图注和结论，调整消融表变体名称与行序。用户明确要求修改后审阅、结论使用一般过去时，并记录本次修改。
+
+保持原有实验结构、实验设置与结果：总体性能、消融、交互筛选、稀疏用户、抗噪和超参数分析。按照逻辑—语句—词汇的优先级组织结果解读，突出实验目的、具体观察与设计作用，减少方法复述、连续模板化结论及不必要的评价协议细节。所有实验数据、正式图片、公式、参考文献条目均保持不变；不恢复此前已删去的逐数据集默认参数、重复运行次数或训练框架说明。
+
+二、实验章修改明细
+
+（1）评价设置：保留沿用 MultiCBR 数据划分及 full-ranking evaluation protocol 的说明，删除下一句重复的 full-ranking 和 training bundles excluded from the candidates，直接给出 Recall@K、NDCG@K 及 K∈{20,40}。本轮核对 CAFU、MultiCBR、CrossCBR 的实验设置后采用简洁写法，不展开常规候选排除规则；评价方式本身未改变。
+
+（2）基线介绍：增加仅使用 U-B 的四种方法与使用辅助物品信息的方法之间的过渡。CrossCBR 明确为对齐不同视图的表示；MultiCBR 明确为融合三视图表示后进行对比学习，两者用 In contrast 衔接。十个模型和引用均保留，不引入新的基线或额外研究定位。
+
+（3）参数设置：将去噪器结构和训练配置拆成两句，保留网络维度、dropout、批量大小、学习率、权重衰减和全部候选参数值。
+
+（4）消融表命名及行序：原 w/o Graph Recon. 改为 w/o PDGR；原 w/o Pre-fusion CL 改为 w/o CCL。新顺序为 w/o PDGR、w/o SetLoss、w/o CCL、w/o Post-fusion CL、w/o All CL、ReCoBR。完整模型仍位于最后并保留上方分隔线。每一行六个数值随对应变体一起排列，未改动数值。
+
+（5）命名含义：w/o PDGR 使用原始 U-B 图代替重构图；w/o CCL 只移除融合前的跨视图对比目标，并保留融合后目标；w/o All CL 才是同时移除两个对比目标。正文与图注统一该含义，不将 w/o All CL 重命名为 w/o CCL。
+
+（6）总体性能：保留三点组织。第一点删除以 iFashion 用户历史较多解释 NDCG 收益的推测，改为当前表中可直接复算的 NDCG@20、NDCG@40 相对提升 8.89%、6.85%。保留第二点 U-B-only 对比学习基线的有价值观察。第三点压缩方法复述，概括重构图与跨视图对比学习结合带来的整体收益。
+
+（7）消融分析：分为变体定义、PDGR/SetLoss 解读、CCL/融合后目标解读三个自然段。用 iFashion NDCG@20 从 0.1245 到 0.1310、NetEase 移除 CCL 后 Recall@20 从 0.0955 到 0.0906 两组表内结果支撑分析；不声称 SetLoss 证明了有效信息完全不丢失。将含混的 larger losses 和笼统的 representation regularization 改为明确的性能下降及对视图表示/融合表示的约束。
+
+（8）交互筛选：开头明确比较目的；Original UB 定义为不筛选原始图，其余三个变体使用随机、流行度或预训练相似度筛选。保留统一 κ 的控制条件，依次讨论随机删边可带来收益、筛选标准仍影响效果、偏好细化后评分的价值。图注说明横轴 K 是每用户连接保留上限 κ，区分评价指标的截断位置。
+
+（9）稀疏用户：正文和图注将变体名称改为 w/o CCL，并说明两者均保留 PDGR。保留 NetEase 四等分分组以及 G1 的 12.64%/9.32% 提升。删除 direct bundle feedback、U-I behavior and B-I composition 等不自然表达，直接将结果与利用辅助信息为交互较少用户提供额外监督联系起来。
+
+（10）抗噪分析：在开头交代随机添加 U-B 连接及 0%—25% 范围，再说明各方法共用扰动图、原始交互仍作为排序监督、辅助关系及评价数据不变、重跑完整 ReCoBR 流程。保持各噪声比例下性能领先这一已有结论，不增加性能下降最慢等曲线未证明的主张。原图注中每用户噪声比例定义、5% 步长和保留原始连接的说明均不变。
+
+（11）超参数分析：正文按图中 β_T、κ、λ_a、λ_set、λ_c 的顺序讲述，交代各参数含义。解释 κ 时使用保留有用历史和引入较不相关连接之间的取舍，保留数据集差异及 SetLoss 非单调趋势，不修改取值或图表。分成图重构参数与对比/一致性权重两个自然段，便于对照图片。
+
+三、结论修改及英文稿
+
+以 ReCoBR—PDGR—SetLoss—CCL—实验结果的顺序简要收束全文；突出预训练基础、交互筛选与重构图，以及融合前跨视图学习对稀疏用户的作用。全部限定动词使用一般过去时：proposed、used、helped、introduced、showed、outperformed、supported；未增加将来时展望或未验证结论。
+
+In this paper, we proposed ReCoBR to address noisy and sparse U-B interactions in bundle recommendation. PDGR used pretrained embeddings and user-conditioned diffusion to refine historical preferences for U-B interaction filtering and graph reconstruction. During denoising, SetLoss helped preserve useful historical preference information. Building on the reconstructed graph, CCL introduced cross-view constraints before representation fusion to improve bundle preference learning for sparse users. Experiments on three public datasets showed that ReCoBR outperformed the baseline methods. Ablation studies and further analyses supported the effectiveness of the proposed designs.
+
+忠实中文翻译：本文提出了 ReCoBR，以应对捆绑推荐中的 U-B 交互噪声与稀疏问题。PDGR 利用预训练嵌入和以用户为条件的扩散模型细化历史偏好，用于 U-B 交互筛选与图重构。在去噪过程中，SetLoss 帮助保留了有用的历史偏好信息。在重构图的基础上，CCL 在表示融合之前引入了跨视图约束，以改善交互稀疏用户的捆绑偏好学习。三个公开数据集上的实验表明，ReCoBR 优于基线方法。消融实验及进一步分析支持了所提设计的有效性。
+
+四、图文承接与已有待办
+
+（1）按照用户此前将图片留待专门适配的安排，m2recall20.png 和 m2ndcg20.png 内的图例仍为 w/o Pre-fusion CL；本轮已同步正文和图注为 w/o CCL。后续处理图片时须统一这两张图的图例；其含义与新名称相同。正式图片内容、曲线、图例和图片文件均未改动。
+
+（2）DCDL 的 Youshu R@20/N@20（0.2858/0.1701）在已完结工程记录第二册第五十六项仍为待确认，本轮未发现后续确认记录。本轮没有修改数据或把这些值视为已经独立核验的训练结果；源码中较早的九项待确认注释暂未整理。本项仅承接已有待办，不影响当前文字精修。
+
+五、验证与文件状态
+
+核对 15 组修改前后文本，逆向还原后 main.tex 与修改前全文一致，确认无额外修改。摘要、引言、相关工作、方法正文和 21 个编号公式保持不变；数据集统计表和总体性能表逐字不变；消融表六行所有数值逐行对应核对一致。AAAI文件 其余 30 个文件逐一 SHA-256 不变。全稿引用键集合不变，全部 33 个不同引用键均能在原有 bib 中解析。
+
+使用本地 TeX Live 完成 pdfLaTeX—BibTeX—重复 pdfLaTeX 编译直至交叉引用稳定，最终 11 页，无未定义引用、未稳定交叉引用或 Overfull 越界提示；保留 3 项 Underfull 排版提示。对涉及实验与结论的页面进行渲染检查，消融表、实验正文、图注及结论正常显示，结论与参考文献连续排版。临时编译及核验材料保存在 tmp/experiment-refinement-20261115，仅供本地核验，不作为 Overleaf 稿件。
+
+main.tex 和工程记录继续使用 UTF-8 无 BOM、CRLF；工程记录在既有 179205 字节之后追加本项，不改写历史。main.tex SHA-256：c361fe8dd511b6f846bd031f8a82f2035c8ae746bd481bd98f38a3dc9b139779。本轮正式修改仅有 AAAI文件/main.tex 与工程记录.txt；没有运行训练、修改实验结果、同步 Overleaf 或提交 Git。

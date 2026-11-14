@@ -813,3 +813,11 @@ For these users, U-I interactions and B-I affiliations can provide additional in
 用户确认在引言第一段第三句开头新增“To learn users' bundle preferences, ”（为了学习用户的捆绑偏好），明确引出三类关系的目的，改善句间承接及连续三句以 BR 开头的罗列感。
 
 已同步 AAAI文件/main.tex。本次仅增加上述引导语，其余正文、引用及已有排版调整保持不变；差异检查通过，未执行编译。
+
+第十九项：挑战二结尾措辞微调
+
+记录日期：2026-11-14（北京时间）
+
+用户确认将挑战二最后一句的结尾由“under sparse U-B feedback”改为“for sparse users”（面向交互稀疏用户），减少相邻两句句尾的重复，并将挑战目标落到交互稀疏用户的捆绑偏好学习。本项更新第十三项中的对应表述。
+
+已同步 AAAI文件/main.tex，仅替换上述短语，其余正文、引用及排版设置保持不变；差异检查通过，未执行编译。

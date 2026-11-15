@@ -203,7 +203,7 @@ Minimizing this loss trains the denoiser to recover $\mathbf p_{u,0}$ from $\mat
 
 The reconstruction loss in Eq. (6) supervises recovery of the pooled historical preference vector. Graph reconstruction, however, requires scoring each historical bundle against the denoised preference. We therefore introduce a bundle-set consistency loss (SetLoss) to preserve useful preference information from the user's historical bundles.
 
-Let $\cos(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity, with a small numerical safeguard for zero norms. SetLoss encourages consistency between the denoised preference and the user's historical bundle embeddings:
+Let $\cos(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf b\|_2)$ denote cosine similarity. SetLoss encourages consistency between the denoised preference and the user's historical bundle embeddings:
 \begin{equation}
 \mathcal L_{\mathrm{set}}
 =\mathbb E_{u,t,\boldsymbol\epsilon}
@@ -215,7 +215,7 @@ Let $\cos(\mathbf a,\mathbf b)=\mathbf a^\top\mathbf b/(\|\mathbf a\|_2\|\mathbf
 \right].
 \tag{7}
 \end{equation}
-SetLoss supplements the pooled-vector reconstruction with consistency constraints between the denoised preference and individual historical bundle embeddings. Using the same cosine similarity for SetLoss and subsequent interaction scoring connects preference denoising with graph reconstruction. Averaging over the history normalizes each user's loss by their number of observed bundles. We jointly optimize the two losses:
+SetLoss and interaction scoring use the same cosine similarity, linking preference denoising to graph reconstruction. We jointly optimize the two losses:
 \begin{equation}
 \mathcal L_{\mathrm D}
 =\mathcal L_{\mathrm{mse}}
@@ -267,7 +267,7 @@ Building on the reconstructed U-B graph, CCL uses the U-I and B-I views to provi
 
 Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. The encoders share trainable initial embeddings for the same entity. These embeddings are learned during recommendation training, separately from the fixed pretrained embeddings used by PDGR.
 
-Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Within each view, fixed layer weights combine the initial embeddings and the $\ell_2$-normalized propagation outputs. During training, we add small representation perturbations to the propagation outputs and auxiliary item pooling. These perturbations are disabled during evaluation.
+Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Within each view, fixed layer weights combine the initial embeddings and the $\ell_2$-normalized propagation outputs. During training, we augment the propagated representations and the outputs of item pooling with scaled, normalized random noise. These perturbations are disabled during evaluation.
 
 \textbf{U-B view.} Propagation on the reconstructed U-B graph directly produces user representations $\mathbf e_u^{\mathrm{UB}}$ and bundle representations $\mathbf e_b^{\mathrm{UB}}$, capturing collaborative information through the retained interactions.
 
@@ -286,13 +286,13 @@ The two item-pooling operations are
 \sum_{i\in\mathcal I_u}\mathbf e_i^{\mathrm{BI}},
 \tag{12}
 \end{equation}
-where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\mathcal I_u=\{i:y_{ui}=1\}$ contains the items interacted with by user $u$. An empty neighborhood contributes a zero vector.
+where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\mathcal I_u=\{i:y_{ui}=1\}$ contains the items interacted with by user $u$.
 
 After graph propagation and item pooling, each user (bundle) has a representation in all three views. We use these $d$-dimensional representations for cross-view contrastive learning before fusing them for recommendation.
 
 \subsubsection{Cross-View Contrastive Objectives}
 
-For each recommendation minibatch, we collect unique users and unique positive bundles into $\mathcal S_U$ and $\mathcal S_B$, respectively. For each user (bundle), we pair the representation from the reconstructed U-B view with its counterpart in each auxiliary view. Representations of the same entity form a positive pair, while those of other entities of the same type provide in-batch negatives. Using unique entities avoids treating repeated IDs as negative samples. We omit the user-side or bundle-side terms if the corresponding set contains fewer than two entities.
+For each recommendation minibatch, we collect unique users and unique positive bundles into $\mathcal S_U$ and $\mathcal S_B$, respectively. For each user (bundle), we pair the representation from the reconstructed U-B view with its counterpart in each auxiliary view. Representations of the same entity form a positive pair, while those of other entities of the same type provide in-batch negatives. Using unique entities avoids treating repeated IDs as negative samples.
 
 For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n}$ and $\mathbf G=(\mathbf g_j)_{j=1}^{n}$, we define the directional InfoNCE objective \cite{oord2018cpc} as
 \begin{equation}
@@ -800,7 +800,7 @@ CCL also improves recommendation performance. On NetEase,
 removing CCL reduces Recall@20 from 0.0955 to 0.0906,
 supporting the value of directly connecting U-B preferences
 with auxiliary views before fusion. Removing post-fusion CL
-causes larger performance drops, while removing both
+causes larger performance drops, and removing both
 contrastive objectives yields the lowest performance.
 CCL strengthens learning across views, while the post-fusion
 objective constrains the fused representations used for recommendation.

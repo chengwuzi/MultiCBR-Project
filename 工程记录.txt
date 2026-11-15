@@ -1684,3 +1684,50 @@ In this paper, we proposed ReCoBR to address noisy and sparse U-B interactions i
 使用本地 TeX Live 完成 pdfLaTeX—BibTeX—重复 pdfLaTeX 编译直至交叉引用稳定，最终 11 页，无未定义引用、未稳定交叉引用或 Overfull 越界提示；保留 3 项 Underfull 排版提示。对涉及实验与结论的页面进行渲染检查，消融表、实验正文、图注及结论正常显示，结论与参考文献连续排版。临时编译及核验材料保存在 tmp/experiment-refinement-20261115，仅供本地核验，不作为 Overleaf 稿件。
 
 main.tex 和工程记录继续使用 UTF-8 无 BOM、CRLF；工程记录在既有 179205 字节之后追加本项，不改写历史。main.tex SHA-256：c361fe8dd511b6f846bd031f8a82f2035c8ae746bd481bd98f38a3dc9b139779。本轮正式修改仅有 AAAI文件/main.tex 与工程记录.txt；没有运行训练、修改实验结果、同步 Overleaf 或提交 Git。
+
+
+第二十四项：摘要模块介绍重构定稿、评分与跨视图约束的衔接及全文复审
+
+记录日期：2026-11-15（北京时间）
+
+一、本轮背景、授权与新旧决定的关系
+
+用户重新阅读摘要后，提出以机制、关键设计和作用组织 PDGR 的介绍，不再逐步罗列预训练、偏好构建、去噪和交互筛选的操作过程。经多轮讨论、逻辑—语句—词汇复审及全文对照，用户明确要求“记一项，改下AAAI文件”。本项记录最终确认的摘要，并同步 AAAI文件/main.tex。
+
+本轮决定覆盖第七项、第二十项中“SetLoss 从摘要移出”的历史取舍：现在以 bundle-set consistency constraint 简洁介绍其设计目的，不增加 SetLoss 缩写，也不改动正文中的损失名称、公式或实现。前述历史记录保留，用于说明取舍的演变。
+
+二、摘要的具体修改及措辞取舍
+
+（1）PDGR：将原来的三句操作说明改为两句机制介绍。首句将图预训练、用户条件扩散和交互可靠性评分联系起来，同时介绍用于保留原始交互信息的捆绑集合一致性约束；第二句以 These scores 承接评分，说明其有效指导交互筛选和 U-B 图重构，使 CCL 自然接到重构图这一产出。
+
+（2）参考 DCBR 对一致性约束设计目的的概括方式，最终采用 to preserve original interaction information。未采用 anchor denoising 等较具修辞色彩的表达；删除 reduce information loss during denoising 中在摘要当前叙述里出现较突兀的 denoising。为突出作用，保留 effectively guide。删去在该部分末尾重复说明“减少图传播中噪声影响”的短语，其作用已在前面的两个模块总述中交代。
+
+（3）CCL：保留原句的视图对象、融合前位置、辅助信息及稀疏用户落点，补入 direct cross-view constraints，形成“对比学习—直接跨视图约束—辅助信息支持稀疏用户偏好学习”的衔接，呼应引言挑战二。采用“直接跨视图约束”，不将其另命名为动态约束。按用户要求保持一句话，以逗号连接；最后将 and thereby enabling 改为 that enable，使约束的作用直接附着于 constraints，减少连续分词结构带来的拖尾。
+
+（4）本轮仅替换摘要中的 PDGR 和 CCL 介绍。任务定义、现有方法概述、两个挑战、ReCoBR 与模块总述及最后的实验结论均保持原文；引言、相关工作、方法、实验和结论正文无需随之改动。
+
+三、完整英文定稿
+
+Bundle recommendation (BR) aims to match users with collections of items that suit their preferences. Existing graph-based methods learn bundle preferences primarily from user-bundle (U-B) interactions, while incorporating user-item (U-I) interactions and bundle-item (B-I) affiliations as auxiliary information. Despite their effectiveness, limitations in the observed U-B interactions still pose two challenges: (1) noise in the observed U-B graph can introduce misleading preference signals during graph propagation; (2) sparse U-B feedback hinders accurate modeling of users' bundle preferences. To address these challenges, we propose ReCoBR. ReCoBR reduces the impact of noisy interactions through Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR) and improves preference learning under sparse feedback through Cross-View Contrastive Learning (CCL). In PDGR, we combine graph pretraining with user-conditioned diffusion to generate reliability scores for observed U-B interactions, incorporating a bundle-set consistency constraint to preserve original interaction information. These scores effectively guide interaction filtering and U-B graph reconstruction. Next, CCL applies contrastive learning between the reconstructed U-B view and each auxiliary view before representation fusion, introducing direct cross-view constraints that enable auxiliary information to better support bundle preference learning for sparse users. Experiments on three public datasets show that ReCoBR outperforms the baseline methods.
+
+四、词数与本轮可复用经验
+
+（1）统一按空白分隔统计，连字符词算一个词，挑战编号计入，不计 Abstract 标题或代码链接，并先合并 PDF 排版造成的单词断行。当前定稿为 193 词，较落盘前的 201 词减少 8 词；11-2 初稿为 199 词，DCBR 为 195 词，CAFU 为 188 词。讨论中曾出现的 188、194 词分别对应中间版本，不是本次最终稿。
+
+（2）摘要不必展开全部操作步骤，应让读者首先理解机制、关键设计、产出及其作用。是否保留某个细节，取决于它能否帮助理解贡献；SetLoss 可以作为关键设计重新纳入，但须以简短的约束及目的说明呈现。
+
+（3）句数减少不等于词数明显减少。增加设计内容时应同时检查是否存在效果表述重复；必要的压缩优先删除重复信息，而非牺牲机制与作用之间的逻辑桥梁。
+
+（4）说明一种学习目标后，需要交代它通过什么约束发挥作用，不能从“开展对比学习”直接跳到“改善稀疏用户偏好学习”。使用已经在引言确定的直接跨视图约束及额外监督逻辑，避免另造不明确的新术语。
+
+（5）长句按主干、修饰范围和推进顺序判断，不机械拆句。当前 CCL 句保持单句；that enable 明确修饰 constraints。These scores 的先行词是前句明确引入的 reliability scores，指代清楚。
+
+五、复审结论与验证范围
+
+按逻辑、语句和词汇三个层面审阅后，将候选摘要与现有引言、相关工作、方法、实验和结论对照。交互可靠性评分对应挑战一及方法章的偏好评分与图重构；一致性约束对应 SetLoss；融合前直接跨视图约束对应挑战二、方法章的表示配对及稀疏用户实验。摘要概括机制与作用，正文解释实现细节，未发现本轮修改引入的全文不一致。
+
+核对当前结果表中三个数据集的全部 12 项指标，ReCoBR 均高于表内基线，摘要最后一句与当前报告结果相符。该核对是文稿与表内数据的一致性检查，不代表重新运行实验或消除此前记录的待确认数据事项。
+
+本次采用文本级核验：摘要最终词数为 193，逆向还原两处替换可得到修改前的完整 main.tex；摘要环境之外的全部字节保持不变；AAAI文件 目录其余文件逐一哈希核对不变。工程记录仅在原有 187818 字节之后追加本项，既有记录保持不变。两个正式文件保持 UTF-8 无 BOM、CRLF。修改后 main.tex 的 SHA-256 为 65097fedea71c816ea5c3a9686716d17caac67255c74e8065bd8d25e6a039728。
+
+本轮为纯文字替换，未进行本地编译或重新训练，未同步 Overleaf。后续由用户复制更新后的 main.tex 到 Overleaf 查看效果；图表适配、既有实验数据待确认等事项仍按原记录承接。

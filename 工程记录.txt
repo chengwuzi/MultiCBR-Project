@@ -1731,3 +1731,19 @@ Bundle recommendation (BR) aims to match users with collections of items that su
 本次采用文本级核验：摘要最终词数为 193，逆向还原两处替换可得到修改前的完整 main.tex；摘要环境之外的全部字节保持不变；AAAI文件 目录其余文件逐一哈希核对不变。工程记录仅在原有 187818 字节之后追加本项，既有记录保持不变。两个正式文件保持 UTF-8 无 BOM、CRLF。修改后 main.tex 的 SHA-256 为 65097fedea71c816ea5c3a9686716d17caac67255c74e8065bd8d25e6a039728。
 
 本轮为纯文字替换，未进行本地编译或重新训练，未同步 Overleaf。后续由用户复制更新后的 main.tex 到 Overleaf 查看效果；图表适配、既有实验数据待确认等事项仍按原记录承接。
+
+
+第二十五项：引言模型介绍局部精修与 CCL 稀疏监督逻辑定稿
+
+记录日期：2026-11-16（北京时间）
+
+（1）按用户确认稿精修 PDGR 的两句操作说明：偏好构建采用 averaging the pretrained bundle embeddings from their interaction history；去噪改为 Next, we use ... to denoise ... 的主动结构，保持预训练、偏好构建、去噪与 SetLoss 的顺序和承接。
+
+（2）删除本段介绍表示融合及保留融合后对比目标的句子，将篇幅用于解释 CCL 如何回应挑战二。方法章中的融合与融合后对比目标保持原样。
+
+（3）CCL 作用句定稿为：These constraints use auxiliary information to directly guide U-B representation learning, compensating for the limited supervision from sparse users' bundle interactions.
+忠实翻译：这些约束利用辅助信息直接指导 U-B 表示学习，弥补交互稀疏用户的捆绑交互所提供的监督不足。
+
+（4）结合 CAFU、LightGCN、XSimGCL、DirectAU、CrossCBR 的相关论述及本项目损失实现，从逻辑、语言和词汇三个层面复审。跨视图对比损失更新两侧表示，辅助信息直接参与 U-B 表示优化，为稀疏交互补充监督，当前表述与机制一致。写作上重视“用什么、做什么、为何能回应挑战”的清晰承接，避免反复使用 enabling / effective 和空泛效果描述。
+
+本次仅修改 AAAI文件/main.tex 的该引言段落并追加本项记录；保留贡献前的换栏设置。文本级核验确认三处替换之外的 main.tex 字节及已有工程记录不变，引用键均可解析；保持 UTF-8 无 BOM、CRLF。

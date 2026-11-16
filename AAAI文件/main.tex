@@ -122,25 +122,25 @@ PDGR assesses the reliability of observed U-B interactions through preference-ba
 To capture collaborative information from U-B interactions, we pretrain LightGCN \cite{he2020lightgcn} on the observed U-B graph using Bayesian Personalized Ranking (BPR) \cite{rendle2009bpr}. Let $\mathbf h_u^{(0)},\mathbf h_b^{(0)}\in\mathbb R^d$ denote the trainable initial embeddings. The observed neighbors of user $u$ and bundle $b$ are $\mathcal N_u=\{b\in\mathcal B:x_{ub}=1\}$ and $\mathcal N_b=\{u\in\mathcal U:x_{ub}=1\}$, respectively. LightGCN propagates information between users and bundles as follows:
 \begin{equation}
 \begin{aligned}
-\mathbf h_u^{(\ell+1)}
+\mathbf h_u^{(k+1)}
 &=\sum_{b\in\mathcal N_u}
-\frac{\mathbf h_b^{(\ell)}}
+\frac{\mathbf h_b^{(k)}}
 {\sqrt{|\mathcal N_u||\mathcal N_b|}},\\
-\mathbf h_b^{(\ell+1)}
+\mathbf h_b^{(k+1)}
 &=\sum_{u\in\mathcal N_b}
-\frac{\mathbf h_u^{(\ell)}}
+\frac{\mathbf h_u^{(k)}}
 {\sqrt{|\mathcal N_b||\mathcal N_u|}}.
 \end{aligned}
 \tag{1}
 \end{equation}
-After $L_p$ propagation layers, we combine the initial and propagated embeddings to obtain the pretrained user and bundle embeddings:
+After $K_p$ propagation layers, we combine the initial and propagated embeddings to obtain the pretrained user and bundle embeddings:
 \begin{equation}
-\mathbf e_u^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_u^{(\ell)},
+\mathbf e_u^0=\sum_{k=0}^{K_p}\eta_k\mathbf h_u^{(k)},
 \qquad
-\mathbf e_b^0=\sum_{\ell=0}^{L_p}\eta_\ell\mathbf h_b^{(\ell)}.
+\mathbf e_b^0=\sum_{k=0}^{K_p}\eta_k\mathbf h_b^{(k)}.
 \tag{2}
 \end{equation}
-Here, $\eta_\ell$ is the fixed weight assigned to layer $\ell$, with $\eta_\ell\geq0$ and $\sum_{\ell=0}^{L_p}\eta_\ell=1$.
+Here, $\eta_k$ is the fixed weight assigned to layer $k$, with $\eta_k\geq0$ and $\sum_{k=0}^{K_p}\eta_k=1$.
 The pretrained embeddings remain fixed throughout denoiser and recommendation training. We use $\mathbf e_b^0$ to construct historical preference representations and score observed interactions, while $\mathbf e_u^0$ provides the user condition for denoising.
 
 We construct historical preference representations for users with observed U-B interactions, denoted by $\mathcal U_+=\{u\in\mathcal U:|\mathcal N_u|>0\}$. For each $u\in\mathcal U_+$, we average the pretrained embeddings of their historically interacted bundles:
@@ -598,7 +598,7 @@ O\!\left(
 \right).
 \tag{20}
 \end{equation}
-The three terms account for denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(L_pMd)$ per propagation pass. Graph reconstruction retains a subset of the observed interactions, so $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$.
+The three terms account for denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(K_pMd)$ per propagation pass. Graph reconstruction retains a subset of the observed interactions, so $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$.
 
 For space complexity, let $V=|\mathcal U|+|\mathcal B|+|\mathcal I|$ denote the total number of entities. Let $b_d$ be the maximum denoising or reconstruction batch size, and let $P_\theta$ be the number of denoiser parameters. The peak training space is
 \begin{equation}

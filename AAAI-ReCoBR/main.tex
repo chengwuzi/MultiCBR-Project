@@ -83,8 +83,8 @@ Later studies seek richer preference representations by modeling user intents an
 
 \begin{figure*}[!t]
     \centering
-    \includegraphics[width=0.98\textwidth]{Figures/digo_framework-raw.png}
-    \caption{Overall framework of ReCoBR, comprising U-B pretraining, diffusion-driven U-B graph reconstruction, and multi-view recommendation with pre-fusion cross-view contrastive learning.}
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
+    \caption{Overall framework of ReCoBR. PDGR reconstructs the U-B graph using pretrained embeddings and user-conditioned diffusion. The denoiser is trained with reconstruction and bundle-set consistency losses. CCL applies cross-view contrastive learning before representation fusion. Pool denotes mean pooling.}
     \label{fig:framework}
 \end{figure*}
 
@@ -111,7 +111,7 @@ In bundle recommendation, CrossCBR aligns representations of the same user (bund
 
 \subsection{Task Definition and Framework Overview}
 
-Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user. ReCoBR first uses PDGR to reconstruct the U-B graph. CCL then applies contrastive learning between the reconstructed U-B view and each auxiliary view before representation fusion. We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
+Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user. As shown in Figure~\ref{fig:framework}, ReCoBR first uses PDGR to reconstruct the U-B graph. CCL then applies contrastive learning between the reconstructed U-B view and each auxiliary view before representation fusion. We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
 
 \subsection{Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR)}\label{sec:graph-reconstruction}
 
@@ -151,15 +151,6 @@ We construct historical preference representations for users with observed U-B i
 \tag{3}
 \end{equation}
 The resulting vector $\mathbf p_{u,0}$ summarizes the user's historical bundle preferences. Mean pooling maps histories of different lengths to a $d$-dimensional representation. The subscript $0$ denotes the preference representation before Gaussian noise is added.
-
-\begin{figure}[!t]
-    \centering
-    \includegraphics[width=0.98\columnwidth]{Figures/setloss.png}
-    \caption{User-conditioned denoising with reconstruction and
-    bundle-set consistency losses. The trained denoiser is applied
-    iteratively to refine historical preferences.}
-    \label{fig:denoising}
-\end{figure}
 
 \subsubsection{User-Conditioned Diffusion Denoising}
 

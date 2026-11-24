@@ -6,6 +6,7 @@
 \usepackage{graphicx}
 \usepackage{multirow}
 \usepackage{url}
+\usepackage{stfloats}
 
 \begin{document}
 
@@ -64,6 +65,13 @@ Our main contributions are summarized as follows:
 \item We conduct extensive experiments on three public datasets and show that ReCoBR improves bundle recommendation performance by mitigating the effects of noise and sparsity in U-B interactions.
 \end{enumerate}
 
+\begin{figure*}[!t]
+    \centering
+    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
+    \caption{Overall framework of ReCoBR. PDGR reconstructs the U-B graph using pretrained embeddings and user-conditioned diffusion. The denoiser is trained with reconstruction and bundle-set consistency losses. CCL applies cross-view contrastive learning before representation fusion. Pool denotes mean pooling.}
+    \label{fig:framework}
+\end{figure*}
+
 \section{Related Work}
 
 \subsection{Bundle Recommendation}
@@ -93,13 +101,6 @@ ReCoBR combines U-B graph reconstruction with cross-view contrastive learning (F
 \subsection{Task Definition}
 
 Let $\mathcal U$, $\mathcal B$, and $\mathcal I$ denote the sets of users, predefined bundles, and items, respectively. The available training data comprise three binary matrices: user-bundle interactions $\mathbf X\in\{0,1\}^{|\mathcal U|\times|\mathcal B|}$, user-item interactions $\mathbf Y\in\{0,1\}^{|\mathcal U|\times|\mathcal I|}$, and bundle-item affiliations $\mathbf Z\in\{0,1\}^{|\mathcal B|\times|\mathcal I|}$. In $\mathbf X$ and $\mathbf Y$, an entry equal to one denotes an observed interaction; in $\mathbf Z$, it denotes bundle membership. Given these relations, our task is to estimate a preference score $\hat y_{ub}$ for each unobserved user-bundle pair and rank candidate bundles for each user. We distinguish the observed matrix $\mathbf X$ from the reconstructed matrix $\widetilde{\mathbf X}$ throughout this section. The former defines users' training histories and ranking examples; the latter determines the U-B connections used for recommendation graph propagation.
-
-\begin{figure*}[!t]
-    \centering
-    \includegraphics[width=0.98\textwidth]{Figures/digo_framework.png}
-    \caption{Overall framework of ReCoBR. PDGR reconstructs the U-B graph using pretrained embeddings and user-conditioned diffusion. The denoiser is trained with reconstruction and bundle-set consistency losses. CCL applies cross-view contrastive learning before representation fusion. Pool denotes mean pooling.}
-    \label{fig:framework}
-\end{figure*}
 
 \subsection{Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR)}\label{sec:graph-reconstruction}
 
@@ -399,7 +400,7 @@ full-ranking evaluation protocol as MultiCBR~\cite{ma2024multicbr}.
 Performance is measured using Recall@$K$ and
 NDCG@$K$~\cite{wang2019ngcf}, with $K\in\{20,40\}$.
 
-\begin{table}[!b]
+\begin{table}[!htb]
     \centering
     \caption{Dataset statistics. U--I and U--B count user--item
     and user--bundle interactions; Avg. I/B is the average
@@ -415,7 +416,7 @@ NDCG@$K$~\cite{wang2019ngcf}, with $K\in\{20,40\}$.
         & \#Bundles
         & \#U--I
         & \#U--B
-        & \shortstack{\#Avg.\\I/B} \\
+        & Avg.~I/B \\
         \midrule
         Youshu
         & 8,039
@@ -442,62 +443,6 @@ NDCG@$K$~\cite{wang2019ngcf}, with $K\in\{20,40\}$.
     \end{tabular}
     }
 \end{table}
-
-\paragraph{Baselines}
-We compare ReCoBR with ten representative recommendation
-methods. The first four methods treat bundles as items and use only
-U-B interactions.
-\begin{itemize}
-\item \textbf{LightGCN}~\cite{he2020lightgcn}: At each layer, the model aggregates information from neighbors in the U-B graph.
-It combines the initial embeddings with the outputs of all layers to obtain the final user and bundle embeddings.
-\item \textbf{SGL}~\cite{wu2021sgl}: The model augments the interaction graph to create two views.
-The embeddings of the same node in these two views form a positive pair for contrastive learning.
-\item \textbf{XSimGCL}~\cite{yu2024xsimgcl}: The model adds random noise to node embeddings during graph propagation.
-For each node, it contrasts the final embedding with an intermediate-layer embedding.
-\item \textbf{LightGCL}~\cite{cai2023lightgcl}: The model uses singular value decomposition to build a low-rank view of the interaction graph.
-It contrasts embeddings from this view with those from the original graph.
-\end{itemize}
-The remaining six methods also use auxiliary item information.
-\begin{itemize}
-\item \textbf{BGCN}~\cite{chang2020bgcn}: The model uses graph convolution to learn user preferences in the bundle and item views.
-It ranks candidate bundles by adding the scores from the two views.
-\item \textbf{MIDGN}~\cite{zhao2022midgn}: The model disentangles user intents at two levels.
-The global view captures intents across bundles, while the local view captures intents within each bundle.
-\item \textbf{CrossCBR}~\cite{ma2022crosscbr}: The model learns user and bundle representations from the bundle and item views.
-Contrastive learning brings the two representations of the same user or bundle closer together.
-\item \textbf{MultiCBR}~\cite{ma2024multicbr}: The model learns user and bundle representations separately from the U-B, U-I, and B-I graphs.
-It then fuses these representations and applies contrastive learning after fusion.
-\item \textbf{DCDL}~\cite{chen2025dcdl}: The model combines dual-view learning with diffusion to improve recommendation diversity.
-It uses intermediate denoising outputs to make user representations more evenly distributed in the embedding space.
-\item \textbf{EpicCBR}~\cite{li2026epiccbr}: The model uses relations between items to enrich the U-I graph and weights B-I connections according to item popularity.
-It then uses these graphs to learn user and bundle representations through multi-view contrastive learning.
-\end{itemize}
-
-\paragraph{Parameter Settings}
-All experiments are implemented on a GeForce RTX 3090 GPU.
-For ReCoBR, we use 64-dimensional embeddings with
-Xavier~\cite{glorot2010xavier} initialization and two propagation
-layers. Recommendation training uses
-Adam~\cite{kingma2015adam} with learning rate $10^{-3}$,
-batch size 2048, and one negative bundle per positive
-interaction; $\tau=0.20$ and $\lambda_r=10^{-5}$.
-The denoiser is a two-layer MLP with hidden size 128,
-timestep embedding size 16, and dropout 0.1.
-We train the denoiser with batch size 1024, learning rate
-$10^{-3}$, and weight decay $10^{-5}$.
-The minimum noise variance is fixed at $\beta_1=10^{-4}$.
-
-For sensitivity analysis, we vary $\beta_T$ in
-$\{0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.06,\allowbreak 0.08\}$, $\kappa$ in
-$\{1,3,\ldots,19\}$, $\lambda_a$ in
-$\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak \ldots,\allowbreak 0.009\}$,
-$\lambda_{\mathrm{set}}$ in
-$\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$, and $\lambda_c$ in
-$\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
-For the baselines, we tune hyperparameters within the ranges
-specified in their original papers.
-
-\subsection{Overall Performance}
 
 \begin{table*}[!t]
     \centering
@@ -591,6 +536,62 @@ specified in their original papers.
     }
 \end{table*}
 
+\paragraph{Baselines}
+We compare ReCoBR with ten representative recommendation
+methods. The first four methods treat bundles as items and use only
+U-B interactions.
+\begin{itemize}
+\item \textbf{LightGCN}~\cite{he2020lightgcn}: At each layer, the model aggregates information from neighbors in the U-B graph.
+It combines the initial embeddings with the outputs of all layers to obtain the final user and bundle embeddings.
+\item \textbf{SGL}~\cite{wu2021sgl}: The model augments the interaction graph to create two views.
+The embeddings of the same node in these two views form a positive pair for contrastive learning.
+\item \textbf{XSimGCL}~\cite{yu2024xsimgcl}: The model adds random noise to node embeddings during graph propagation.
+For each node, it contrasts the final embedding with an intermediate-layer embedding.
+\item \textbf{LightGCL}~\cite{cai2023lightgcl}: The model uses singular value decomposition to build a low-rank view of the interaction graph.
+It contrasts embeddings from this view with those from the original graph.
+\end{itemize}
+The remaining six methods also use auxiliary item information.
+\begin{itemize}
+\item \textbf{BGCN}~\cite{chang2020bgcn}: The model uses graph convolution to learn user preferences in the bundle and item views.
+It ranks candidate bundles by adding the scores from the two views.
+\item \textbf{MIDGN}~\cite{zhao2022midgn}: The model disentangles user intents at two levels.
+The global view captures intents across bundles, while the local view captures intents within each bundle.
+\item \textbf{CrossCBR}~\cite{ma2022crosscbr}: The model learns user and bundle representations from the bundle and item views.
+Contrastive learning brings the two representations of the same user or bundle closer together.
+\item \textbf{MultiCBR}~\cite{ma2024multicbr}: The model learns user and bundle representations separately from the U-B, U-I, and B-I graphs.
+It then fuses these representations and applies contrastive learning after fusion.
+\item \textbf{DCDL}~\cite{chen2025dcdl}: The model combines dual-view learning with diffusion to improve recommendation diversity.
+It uses intermediate denoising outputs to make user representations more evenly distributed in the embedding space.
+\item \textbf{EpicCBR}~\cite{li2026epiccbr}: The model uses relations between items to enrich the U-I graph and weights B-I connections according to item popularity.
+It then uses these graphs to learn user and bundle representations through multi-view contrastive learning.
+\end{itemize}
+
+\paragraph{Parameter Settings}
+All experiments are implemented on a GeForce RTX 3090 GPU.
+For ReCoBR, we use 64-dimensional embeddings with
+Xavier~\cite{glorot2010xavier} initialization and two propagation
+layers. Recommendation training uses
+Adam~\cite{kingma2015adam} with learning rate $10^{-3}$,
+batch size 2048, and one negative bundle per positive
+interaction; $\tau=0.20$ and $\lambda_r=10^{-5}$.
+The denoiser is a two-layer MLP with hidden size 128,
+timestep embedding size 16, and dropout 0.1.
+We train the denoiser with batch size 1024, learning rate
+$10^{-3}$, and weight decay $10^{-5}$.
+The minimum noise variance is fixed at $\beta_1=10^{-4}$.
+
+For sensitivity analysis, we vary $\beta_T$ in
+$\{0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.06,\allowbreak 0.08\}$, $\kappa$ in
+$\{1,3,\ldots,19\}$, $\lambda_a$ in
+$\{0,\allowbreak 0.001,\allowbreak 0.003,\allowbreak \ldots,\allowbreak 0.009\}$,
+$\lambda_{\mathrm{set}}$ in
+$\{0,\allowbreak 0.005,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20\}$, and $\lambda_c$ in
+$\{0,\allowbreak 0.01,\allowbreak 0.02,\allowbreak 0.04,\allowbreak 0.05,\allowbreak 0.10,\allowbreak 0.20,\allowbreak 0.40\}$.
+For the baselines, we tune hyperparameters within the ranges
+specified in their original papers.
+
+\subsection{Overall Performance}
+
 Table~\ref{tab:overall} compares ReCoBR with ten baselines on three datasets.
 \begin{itemize}
 \item ReCoBR achieves the best results on all four metrics across
@@ -611,9 +612,7 @@ This alignment provides additional supervision for learning
 bundle preferences when U-B feedback is sparse.
 \end{itemize}
 
-\subsection{Ablation Study}
-
-\begin{table}[!t]
+\begin{table}[!htb]
     \centering
     \caption{Component ablations on three datasets, evaluated by
     Recall@20 (R@20) and NDCG@20 (N@20). Bold entries identify
@@ -674,6 +673,9 @@ bundle preferences when U-B feedback is sparse.
     }
 \end{table}
 
+\newpage
+\subsection{Ablation Study}
+
 Table~\ref{tab:ablation} compares ReCoBR with five variants:
 \begin{itemize}
 \item \textbf{w/o PDGR}: This variant uses the original U-B graph for propagation.
@@ -700,9 +702,7 @@ contrastive objectives yields the lowest performance.
 CCL strengthens learning across views, while the post-fusion
 objective constrains the fused representations used for recommendation.
 
-\subsection{In-depth Analysis}
-
-\begin{figure}[!t]
+\begin{figure}[!b]
     \centering
     \begin{tabular}{@{}cc@{}}
         \includegraphics[width=0.46\columnwidth]
@@ -717,6 +717,72 @@ objective constrains the fused representations used for recommendation.
     per-user retention limit $\kappa$.}
     \label{fig:interaction-selection}
 \end{figure}
+
+\subsection{In-depth Analysis}
+
+\begin{figure}[!t]
+    \centering
+    \begin{tabular}{@{}cc@{}}
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2recall20.png} &
+        \includegraphics[width=0.46\columnwidth]
+        {Figures/m2ndcg20.png} \\
+        (a) & (b)
+    \end{tabular}
+
+    \caption{ReCoBR versus w/o CCL on NetEase using Recall@20
+    and NDCG@20, both retaining PDGR.
+    Users are sorted by increasing training U-B interaction counts
+    and divided into four equally sized groups (G1--G4). Lines
+    show relative improvements over w/o CCL.}
+    \label{fig:sparse-users}
+\end{figure}
+
+\begin{figure}[!b]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
+        \includegraphics[width=0.48\columnwidth]{Figures/noise_youshu_r20.png} &
+        \includegraphics[width=0.48\columnwidth]{Figures/noise_youshu_n20.png} \\
+        \multicolumn{2}{c}{(a) Youshu} \\
+        \includegraphics[width=0.48\columnwidth]{Figures/noise_ifashion_r20.png} &
+        \includegraphics[width=0.48\columnwidth]{Figures/noise_ifashion_n20.png} \\
+        \multicolumn{2}{c}{(b) iFashion} \\
+        \includegraphics[width=0.48\columnwidth]{Figures/noise_netease_r20.png} &
+        \includegraphics[width=0.48\columnwidth]{Figures/noise_netease_n20.png} \\
+        \multicolumn{2}{c}{(c) NetEase}
+    \end{tabular}
+    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
+    Youshu, iFashion, and NetEase. We add random edges at ratios from
+    0\% to 25\% in 5\% increments relative to each user's original
+    training interactions, retaining all original edges.}
+    \label{fig:noise-robustness}
+\end{figure}
+
+\begin{figure*}[!t]
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.025\textwidth}}c@{\hspace{0.025\textwidth}}c@{}}
+        \includegraphics[width=0.285\textwidth]{Figures/hp_betaT.png} &
+        \includegraphics[width=0.285\textwidth]{Figures/hp_kappa.png} &
+        \includegraphics[width=0.285\textwidth]{Figures/set_loss.png} \\
+        (a) & (b) & (c)
+    \end{tabular}\par\smallskip
+    \begin{tabular}{@{}c@{\hspace{0.025\textwidth}}c@{}}
+        \includegraphics[width=0.285\textwidth]{Figures/hp_beta2.png} &
+        \includegraphics[width=0.285\textwidth]{Figures/post_fusion_cl.png} \\
+        (d) & (e)
+    \end{tabular}
+
+    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
+    iFashion, and NetEase. (a) Diffusion noise variance endpoint
+    $\beta_T$. (b) U-B retention limit $\kappa$.
+    (c) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (d) Pre-fusion contrastive weight $\lambda_a$.
+    (e) Post-fusion contrastive weight $\lambda_c$.
+    Broken $y$-axes use different scales for the datasets;
+    candidate values are displayed at equally spaced horizontal
+    positions.}
+    \label{fig:hyperparameter}
+\end{figure*}
 
 \paragraph{Interaction Selection Strategies}
 To examine how the selection strategy affects recommendation,
@@ -739,24 +805,6 @@ for interaction selection. In contrast, PDGR constructs and
 denoises historical preference representations before scoring
 connections, providing a more effective basis for graph reconstruction.
 
-\begin{figure}[!b]
-    \centering
-    \begin{tabular}{@{}cc@{}}
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2recall20.png} &
-        \includegraphics[width=0.46\columnwidth]
-        {Figures/m2ndcg20.png} \\
-        (a) & (b)
-    \end{tabular}
-
-    \caption{ReCoBR versus w/o CCL on NetEase using Recall@20
-    and NDCG@20, both retaining PDGR.
-    Users are sorted by increasing training U-B interaction counts
-    and divided into four equally sized groups (G1--G4). Lines
-    show relative improvements over w/o CCL.}
-    \label{fig:sparse-users}
-\end{figure}
-
 \paragraph{Performance on Sparse Users}
 To evaluate CCL for sparse users, we sort NetEase users by
 increasing training U-B interaction counts and divide them
@@ -769,26 +817,6 @@ The larger gains in G1 indicate that additional cross-view
 supervision is particularly useful when users have few historical
 bundle interactions.
 
-\begin{figure}[!t]
-    \centering
-    \begin{tabular}{@{}c@{\hspace{0.02\columnwidth}}c@{}}
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_youshu_n20.png} \\
-        \multicolumn{2}{c}{(a) Youshu} \\
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_ifashion_n20.png} \\
-        \multicolumn{2}{c}{(b) iFashion} \\
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_r20.png} &
-        \includegraphics[width=0.49\columnwidth]{Figures/noise_netease_n20.png} \\
-        \multicolumn{2}{c}{(c) NetEase}
-    \end{tabular}
-    \caption{Recall@20 and NDCG@20 under injected U-B graph noise on
-    Youshu, iFashion, and NetEase. We add random edges at ratios from
-    0\% to 25\% in 5\% increments relative to each user's original
-    training interactions, retaining all original edges.}
-    \label{fig:noise-robustness}
-\end{figure}
-
 \paragraph{Robustness to Noisy U-B Interactions}
 To evaluate robustness to noisy interactions, we add random
 U-B connections at noise ratios from 0\% to 25\%.
@@ -797,6 +825,7 @@ MultiCBR use the same perturbed U-B input graph.
 We keep the original training interactions as ranking supervision
 and leave the U-I and B-I relations and evaluation data unchanged.
 We rerun ReCoBR's full training pipeline, including U-B pretraining.
+
 As shown in Fig.~\ref{fig:noise-robustness}, ReCoBR maintains
 the highest Recall@20 and NDCG@20 across all datasets and
 tested noise ratios. By filtering connections using denoised
@@ -804,32 +833,6 @@ preferences, PDGR helps reduce the influence of noisy interactions
 during neighborhood aggregation.
 
 \subsection{Hyperparameter Sensitivity}
-
-\begin{figure*}[t]
-    \centering
-    \begin{tabular}{@{}c@{\hspace{0.025\textwidth}}c@{\hspace{0.025\textwidth}}c@{}}
-        \includegraphics[width=0.30\textwidth]{Figures/hp_betaT.png} &
-        \includegraphics[width=0.30\textwidth]{Figures/hp_kappa.png} &
-        \includegraphics[width=0.30\textwidth]{Figures/set_loss.png} \\
-        (a) & (b) & (c)
-    \end{tabular}\par\smallskip
-    \begin{tabular}{@{}c@{\hspace{0.025\textwidth}}c@{}}
-        \includegraphics[width=0.30\textwidth]{Figures/hp_beta2.png} &
-        \includegraphics[width=0.30\textwidth]{Figures/post_fusion_cl.png} \\
-        (d) & (e)
-    \end{tabular}
-
-    \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
-    iFashion, and NetEase. (a) Diffusion noise variance endpoint
-    $\beta_T$. (b) U-B retention limit $\kappa$.
-    (c) SetLoss weight $\lambda_{\mathrm{set}}$.
-    (d) Pre-fusion contrastive weight $\lambda_a$.
-    (e) Post-fusion contrastive weight $\lambda_c$.
-    Broken $y$-axes use different scales for the datasets;
-    candidate values are displayed at equally spaced horizontal
-    positions.}
-    \label{fig:hyperparameter}
-\end{figure*}
 
 Fig.~\ref{fig:hyperparameter} reports ReCoBR's sensitivity
 to five key hyperparameters. We vary one parameter at a time

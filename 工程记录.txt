@@ -1890,3 +1890,40 @@ Bundle recommendation (BR) aims to match users with collections of items that su
 （2）论文框架图以 TCSS文件/Figures/digo_framework.png 为准，由 TCSS 主稿作为图 1 引用。后续核对方法说明和图注时，以这张图的流程和标注为依据。
 
 （3）TCSS 主稿已在临时副本中编译核对，输出 9 页。引言文字沿用上一版，11-16 师兄批注可在 TCSS 主稿中按原句继续定位。
+
+第二十八项：落实 TCSS 摘要三处批注并明确读者与精修标准
+
+记录日期：2026-11-24（北京时间）
+
+一、11-16 师兄在摘要上的三处批注
+
+用户先确认前两处修改，再确认第三处只替换一个词。三处均已写入 TCSS文件/main.tex 的摘要并逐字核对。按本项目的空白分词口径，摘要为 204 词。
+
+（1）首次出现 ReCoBR 时补全称。对应批注“我还是觉得要把全称写出来”。沿用引言中已经采用的全称，在摘要首次提出模型时同时给出全称和缩写。
+
+To address these challenges, we propose Reconstruction and Contrastive Learning for Bundle Recommendation (ReCoBR).
+为应对这些挑战，我们提出面向捆绑推荐的重构与对比学习（ReCoBR）。
+
+（2）用 Specifically 承接模型与两个模块。对应批注“具体而言，”。提出 ReCoBR 后，按前文噪声与稀疏的顺序交代 PDGR 和 CCL 各自的作用，随后再介绍机制。
+
+Specifically, ReCoBR reduces the impact of noisy interactions through Pretraining-Based Diffusion-Driven U-B Graph Reconstruction (PDGR) and improves preference learning under sparse feedback through Cross-View Contrastive Learning (CCL).
+具体而言，ReCoBR 通过基于预训练、由扩散驱动的 U-B 图重构（PDGR）减轻噪声交互的影响，并通过跨视图对比学习（CCL）改善稀疏反馈下的偏好学习。
+
+（3）将 direct cross-view constraints 中的 direct 换为 explicit。对应师兄在 direct 旁的“有点奇怪”。用户要求最小幅度改动，确认采用一词替换。原句前半已交代对比发生在表示融合前，以及重构后的 U-B 视图与各辅助视图的配对关系。explicit 强调式（14）把相应的跨视图对比项明确写入训练目标。用词时核对了 CAFU 第 2 页的 explicitly suppress noise、XSimGCL 第 3.2.3 节的 explicit control，以及 MultiCBR 第 2.3 和 2.4.1 节的 explicit cross-view alignment 和 explicit cross-view contrastive loss。按蒋师兄熟悉的研究脉络，这里的 explicit 可自然理解为“显式”。
+
+Next, CCL applies contrastive learning between the reconstructed U-B view and each auxiliary view before representation fusion, introducing explicit cross-view constraints that enable auxiliary information to better support bundle preference learning for sparse users.
+随后，CCL 在表示融合前，分别在重构后的 U-B 视图与各辅助视图之间进行对比学习，引入显式跨视图约束，使辅助信息能够更好地支持交互稀疏用户的捆绑偏好学习。
+
+二、用户再次强调的读者背景与精修标准
+
+（1）用户是第一位读者，CAFU 作者蒋师兄是稿件的实际审阅人。他的意见是重要的改稿依据，CAFU 是首要写作参照。按蒋师兄熟悉的 LightGCN、XSimGCL、DirectAU 到 CAFU 的研究脉络判断解释深度。图传播、表示对齐和对比损失可以简洁交代。要讲清捆绑推荐的三类关系各提供什么信息，以及 ReCoBR 特有的偏好细化、图重构与跨视图学习怎样衔接。
+
+（2）稿件主要面向以中文为母语、具备推荐系统背景的同行。审读英文时，检查主体和动作是否容易找到、修饰范围和指代是否清楚、因果和递进是否顺畅。可用主干清楚、顺着能读完的长句。词汇优先选领域读者熟悉且准确对应方法的搭配。
+
+（3）按“逻辑讲得通、语句说得顺、词汇用得准”的顺序精修。先核实论点、机制和证据，再检查信息顺序和句间关系，最后推敲用词。按问题所在的层次确定改动幅度。英文句子和段落候选稿均须附上准确、忠于对应英文原意的中文翻译。
+
+三、参照论文通读与本轮写作依据
+
+已逐篇通读项目文档/参照论文中的 19 篇论文正文，覆盖问题设定、方法、实验和结论。CAFU 可作为“两项挑战、两个模块的作用、各自关键设计”的写作参照。机制上，PDGR 以用户历史偏好表示为扩散和细化的对象，细化后才给已观测的 U-B 交互评分并重构传播图。CCL 以重构 U-B 视图为共同参照，分别与 U-I、B-I 视图形成融合前的同实体对比，用辅助信息补充稀疏 U-B 反馈提供的监督。这两点是后续解释方法和贡献时的依据。
+
+本次按用户指令追加本项工程记录。

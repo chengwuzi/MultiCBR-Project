@@ -205,7 +205,7 @@ s_{ub}
 \qquad b\in\mathcal N_u.
 \tag{11}
 \end{equation}
-Higher scores indicate a closer match to the user's refined preference. For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles. The positive integer $\kappa$ specifies the maximum number of retained interactions per user:
+A higher score means that the bundle better matches the user's refined preference. For each user, we retain the highest-scoring $\kappa_u=\min(\kappa,|\mathcal N_u|)$ bundles. The positive integer $\kappa$ specifies the maximum number of retained interactions per user:
 \begin{equation}
 \begin{aligned}
 \widetilde{\mathcal N}_u
@@ -226,7 +226,14 @@ Building on the reconstructed U-B graph, CCL uses the U-I and B-I views to provi
 
 Following the three-view backbone of MultiCBR \cite{ma2024multicbr}, we construct the U-B, U-I, and B-I propagation graphs from $\widetilde{\mathbf X}$, $\mathbf Y$, and $\mathbf Z$, respectively. The encoders share trainable initial embeddings for the same entity. These embeddings are learned during recommendation training, separately from the fixed pretrained embeddings used by PDGR.
 
-Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Within each view, fixed layer weights combine the initial embeddings and the $\ell_2$-normalized propagation outputs. During training, we augment the propagated representations and the outputs of item pooling with scaled, normalized random noise. These perturbations are disabled during evaluation.
+Each encoder applies $L$ layers of symmetrically normalized LightGCN-style propagation \cite{he2020lightgcn}. Within each view, fixed layer weights combine the initial embeddings and the $\ell_2$-normalized propagation outputs. During recommendation training, we perturb the output of each propagation layer before normalization. We apply the same rule after item pooling. For an output vector $\mathbf h$ computed using relation $g\in\{\mathrm{UB},\mathrm{UI},\mathrm{BI}\}$, the perturbed vector is
+\begin{equation}
+\widetilde{\mathbf h}
+=\mathbf h+\rho_g\,\operatorname{sign}(\mathbf h)
+\odot\frac{\boldsymbol\xi}{\|\boldsymbol\xi\|_2}.
+\tag{13}
+\end{equation}
+Here, $\rho_g$ denotes the perturbation strength for relation $g$. The entries of $\boldsymbol\xi$ are sampled independently and uniformly from $[0,1)$, and $\operatorname{sign}(\cdot)$ acts element-wise. We omit the perturbation during evaluation.
 
 \textbf{U-B view.} Propagation on the reconstructed U-B graph directly produces user representations $\mathbf e_u^{\mathrm{UB}}$ and bundle representations $\mathbf e_b^{\mathrm{UB}}$, capturing collaborative information through the retained interactions.
 
@@ -243,7 +250,7 @@ The two item-pooling operations are
 \mathbf e_u^{\mathrm{BI}}
 =\frac{1}{|\mathcal I_u|}
 \sum_{i\in\mathcal I_u}\mathbf e_i^{\mathrm{BI}},
-\tag{13}
+\tag{14}
 \end{equation}
 where $\mathcal I_b=\{i:z_{bi}=1\}$ contains the items in bundle $b$, and $\mathcal I_u=\{i:y_{ui}=1\}$ contains the items interacted with by user $u$.
 
@@ -261,7 +268,7 @@ For two equally sized representation sequences $\mathbf H=(\mathbf h_j)_{j=1}^{n
 \frac{\exp\!\left(\cos(\mathbf h_j,\mathbf g_j)/\tau\right)}
 {\sum_{k=1}^{n}
 \exp\!\left(\cos(\mathbf h_j,\mathbf g_k)/\tau\right)}.
-\tag{14}
+\tag{15}
 \end{equation}
 Here, $\tau>0$ is the contrastive temperature. For anchor $\mathbf h_j$, $\mathbf g_j$ is the positive sample, while $\mathbf g_k$ with $k\neq j$ provides a negative sample. Let $\mathbf E_r^v=(\mathbf e_q^v)_{q\in\mathcal S_r}$ for $r\in\{U,B\}$, with the same entity ordering across views. The pre-fusion objective combines U-B--U-I and U-B--B-I pairs for both users and bundles:
 \begin{equation}
@@ -269,7 +276,7 @@ Here, $\tau>0$ is the contrastive temperature. For anchor $\mathbf h_j$, $\mathb
 =\sum_{r\in\{U,B\}}
 \sum_{v\in\{\mathrm{UI},\mathrm{BI}\}}
 \mathcal I_\tau\!\left(\mathbf E_r^{\mathrm{UB}},\mathbf E_r^v\right).
-\tag{15}
+\tag{16}
 \end{equation}
 Minimizing $\mathcal L_{\mathrm A}$ brings representations of the same entity closer across views and separates different entities. The reconstructed U-B view serves as the common anchor, with gradients updating both representations in each pair. Through these constraints, auxiliary information contributes to preference learning before fusion, providing additional supervision for sparse users.
 
@@ -287,12 +294,12 @@ Minimizing $\mathcal L_{\mathrm A}$ brings representations of the same entity cl
 +\omega_2\mathbf e_b^{\mathrm{UI}}
 +\omega_3\mathbf e_b^{\mathrm{BI}}.
 \end{aligned}
-\tag{16}
+\tag{17}
 \end{equation}
 Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B, U-I, and B-I views, respectively. The same coefficients are used for users and bundles; they are nonnegative and satisfy $\omega_1+\omega_2+\omega_3=1$. The inner product of the fused representations gives the preference score:
 \begin{equation}
 \hat y_{ub}=\mathbf e_u^\top\mathbf e_b.
-\tag{17}
+\tag{18}
 \end{equation}
 
 \textbf{Recommendation objectives.} Let $\mathcal Q$ be a minibatch of $m$ ranking triplets, indexed as $(u_j,b_j^+,b_j^-)$ for $j=1,\ldots,m$. Here, $x_{u_jb_j^+}=1$ and $b_j^-\in\mathcal B\setminus\mathcal N_{u_j}$. Let $\mathbf E_U=(\mathbf e_{u_j})_{j=1}^{m}$ and $\mathbf E_B=(\mathbf e_{b_j^+})_{j=1}^{m}$ denote their fused representation sequences. We also retain contrastive learning after fusion, following the strategy of MultiCBR \cite{ma2024multicbr}. Our post-fusion contrastive objective is
@@ -302,9 +309,9 @@ Here, $\omega_1$, $\omega_2$, and $\omega_3$ are fixed coefficients for the U-B,
 \mathcal I_\tau(\mathbf E_U,\mathbf E_U)
 +\mathcal I_\tau(\mathbf E_B,\mathbf E_B)
 \right].
-\tag{18}
+\tag{19}
 \end{equation}
-In Eq. (18), each fused representation is paired with itself, with all representations of the same entity type in the minibatch used for comparison. Repeated users or bundles retain their separate positions in these sequences. This objective encourages separation between different entities in the fused representation space. Together, $\mathcal L_{\mathrm A}$ and $\mathcal L_{\mathrm C}$ constrain view-specific and fused representations, respectively.
+In Eq. (19), each fused representation is paired with itself, with all representations of the same entity type in the minibatch used for comparison. Repeated users or bundles retain their separate positions in these sequences. This objective encourages separation between different entities in the fused representation space. Together, $\mathcal L_{\mathrm A}$ and $\mathcal L_{\mathrm C}$ constrain view-specific and fused representations, respectively.
 
 For recommendation, the BPR loss \cite{rendle2009bpr} encourages higher scores for observed bundles than for unobserved bundles:
 \begin{equation}
@@ -312,7 +319,7 @@ For recommendation, the BPR loss \cite{rendle2009bpr} encourages higher scores f
 =-\frac{1}{m}
 \sum_{j=1}^{m}
 \log\sigma\!\left(\hat y_{u_jb_j^+}-\hat y_{u_jb_j^-}\right).
-\tag{19}
+\tag{20}
 \end{equation}
 Here, $\sigma$ is the sigmoid function. The overall recommendation objective combines BPR, the two contrastive losses, and embedding regularization:
 \begin{equation}
@@ -321,13 +328,13 @@ Here, $\sigma$ is the sigmoid function. The overall recommendation objective com
 +\lambda_a\mathcal L_{\mathrm A}
 +\lambda_c\mathcal L_{\mathrm C}
 +\lambda_r\|\Theta\|_2^2.
-\tag{20}
+\tag{21}
 \end{equation}
 The parameter set $\Theta$ contains the trainable initial user, bundle, and item embeddings of the recommendation backbone. The coefficients $\lambda_a,\lambda_c,\lambda_r\geq0$ balance the loss terms. We sample ranking triplets using the original interactions in $\mathbf X$.
 
 \textbf{Training.} After offline U-B pretraining, each training epoch proceeds in three stages. First, we update the denoiser $f_\theta$ for one pass over $\mathcal U_+$ using $\mathcal L_{\mathrm D}$. Second, we use the updated denoiser to refine historical preferences and score observed U-B interactions for all users in $\mathcal U_+$. The Top-K selection in Eq. (12) then refreshes $\widetilde{\mathbf X}$. Third, we hold $\widetilde{\mathbf X}$ fixed and update the recommendation parameters $\Theta$ on ranking minibatches using $\mathcal L_{\mathrm R}$. The denoiser and recommendation backbone use separate optimizers. Top-K selection is discrete, so recommendation gradients do not propagate through the reconstructed graph to the denoiser.
 
-\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (17) after excluding bundles observed in the training data. The denoiser is used only during graph reconstruction, before candidate scoring.
+\textbf{Inference.} Using the reconstructed graph associated with the selected model, we compute and cache the three view-specific representations and their fused user and bundle embeddings. For each user, we rank candidate bundles by Eq. (18) after excluding bundles observed in the training data. The denoiser is used only during graph reconstruction, before candidate scoring.
 
 \subsection{Computational Complexity}
 
@@ -341,7 +348,7 @@ O\!\left(
 &+Q\bigl(LEd+m^2d\bigr)
 \end{aligned}
 \right).
-\tag{21}
+\tag{22}
 \end{equation}
 The three terms account for denoiser training and refinement, history processing and bounded-heap Top-K graph reconstruction, and recommendation learning, respectively. Offline LightGCN pretraining requires $O(K_pMd)$ per propagation pass. Graph reconstruction retains a subset of the observed interactions, so $|\widetilde{\mathcal E}_{\mathrm{UB}}|\leq M$.
 
@@ -353,7 +360,7 @@ O\!\left(
 &+E+M+m^2+b_dh_{\max}d
 \end{aligned}
 \right).
-\tag{22}
+\tag{23}
 \end{equation}
 At inference, constructing the cached graph representations costs $O(LEd)$. Scoring one user-bundle pair costs $O(d)$, and scoring all candidate bundles for one user costs $O(|\mathcal B|d)$.
 
@@ -421,25 +428,33 @@ NDCG@$K$~\cite{wang2019ngcf}, with $K\in\{20,40\}$.
 
 \paragraph{Baselines}
 We compare ReCoBR with ten representative recommendation
-methods. \textbf{LightGCN}~\cite{he2020lightgcn} learns collaborative
-representations through neighborhood aggregation.
-\textbf{SGL}~\cite{wu2021sgl} applies contrastive learning to augmented
-graphs. \textbf{XSimGCL}~\cite{yu2024xsimgcl} uses noise-based embedding
-augmentation, while \textbf{LightGCL}~\cite{cai2023lightgcl} constructs
-contrastive views using singular value decomposition.
-These four methods treat bundles as items and use only U-B
-interactions. The remaining methods also use auxiliary item information.
-\textbf{BGCN}~\cite{chang2020bgcn} models bundle- and item-level
-preferences through graph convolution, while
-\textbf{MIDGN}~\cite{zhao2022midgn} disentangles global and local intents.
-\textbf{CrossCBR}~\cite{ma2022crosscbr} aligns representations across
-the bundle and item views through contrastive learning.
-In contrast, \textbf{MultiCBR}~\cite{ma2024multicbr} fuses representations
-from three views and applies contrastive learning after fusion.
-\textbf{DCDL}~\cite{chen2025dcdl} combines dual-view modeling with
-diffusion learning to refine user representations and enhance
-recommendation diversity. \textbf{EpicCBR}~\cite{li2026epiccbr}
-combines item-relation enhancement with contrastive learning.
+methods. The first four methods treat bundles as items and use only
+U-B interactions.
+\begin{itemize}
+\item \textbf{LightGCN}~\cite{he2020lightgcn}: At each layer, the model aggregates information from neighbors in the U-B graph.
+It combines the initial embeddings with the outputs of all layers to obtain the final user and bundle embeddings.
+\item \textbf{SGL}~\cite{wu2021sgl}: The model augments the interaction graph to create two views.
+The embeddings of the same node in these two views form a positive pair for contrastive learning.
+\item \textbf{XSimGCL}~\cite{yu2024xsimgcl}: The model adds random noise to node embeddings during graph propagation.
+For each node, it contrasts the final embedding with an intermediate-layer embedding.
+\item \textbf{LightGCL}~\cite{cai2023lightgcl}: The model uses singular value decomposition to build a low-rank view of the interaction graph.
+It contrasts embeddings from this view with those from the original graph.
+\end{itemize}
+The remaining six methods also use auxiliary item information.
+\begin{itemize}
+\item \textbf{BGCN}~\cite{chang2020bgcn}: The model uses graph convolution to learn user preferences in the bundle and item views.
+It ranks candidate bundles by adding the scores from the two views.
+\item \textbf{MIDGN}~\cite{zhao2022midgn}: The model disentangles user intents at two levels.
+The global view captures intents across bundles, while the local view captures intents within each bundle.
+\item \textbf{CrossCBR}~\cite{ma2022crosscbr}: The model learns user and bundle representations from the bundle and item views.
+Contrastive learning brings the two representations of the same user or bundle closer together.
+\item \textbf{MultiCBR}~\cite{ma2024multicbr}: The model learns user and bundle representations separately from the U-B, U-I, and B-I graphs.
+It then fuses these representations and applies contrastive learning after fusion.
+\item \textbf{DCDL}~\cite{chen2025dcdl}: The model combines dual-view learning with diffusion to improve recommendation diversity.
+It uses intermediate denoising outputs to make user representations more evenly distributed in the embedding space.
+\item \textbf{EpicCBR}~\cite{li2026epiccbr}: The model uses relations between items to enrich the U-I graph and weights B-I connections according to item popularity.
+It then uses these graphs to learn user and bundle representations through multi-view contrastive learning.
+\end{itemize}
 
 \paragraph{Parameter Settings}
 All experiments are implemented on a GeForce RTX 3090 GPU.
@@ -642,12 +657,13 @@ recommendation.
 \end{table}
 
 Table~\ref{tab:ablation} compares ReCoBR with five variants:
-\textbf{w/o PDGR} uses the original U-B graph instead of the
-reconstructed graph; \textbf{w/o SetLoss} removes the bundle-set
-consistency loss; \textbf{w/o CCL} removes the pre-fusion
-cross-view contrastive objective; \textbf{w/o Post CL}
-removes the post-fusion contrastive objective; and
-\textbf{w/o All CL} removes both contrastive objectives.
+\begin{itemize}
+\item \textbf{w/o PDGR}: This variant uses the original U-B graph for propagation.
+\item \textbf{w/o SetLoss}: This variant removes the bundle-set consistency loss from denoiser training.
+\item \textbf{w/o CCL}: This variant removes the cross-view contrastive objective applied before fusion.
+\item \textbf{w/o Post CL}: This variant removes the contrastive objective applied after fusion.
+\item \textbf{w/o All CL}: This variant removes both the pre-fusion and post-fusion contrastive objectives.
+\end{itemize}
 
 PDGR improves performance on all three datasets. On iFashion,
 NDCG@20 increases from 0.1245 to 0.1310 with PDGR, showing

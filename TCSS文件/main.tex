@@ -789,20 +789,23 @@ during neighborhood aggregation.
 
 \begin{figure*}[t]
     \centering
-    \begin{tabular}{@{}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{\hspace{0.0025\textwidth}}c@{}}
-        \includegraphics[width=0.197\textwidth]{Figures/hp_betaT.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/hp_kappa.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/hp_beta2.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/set_loss.png} &
-        \includegraphics[width=0.197\textwidth]{Figures/post_fusion_cl.png} \\
-        (a) & (b) & (c) & (d) & (e)
+    \begin{tabular}{@{}c@{\hspace{0.025\textwidth}}c@{\hspace{0.025\textwidth}}c@{}}
+        \includegraphics[width=0.30\textwidth]{Figures/hp_betaT.png} &
+        \includegraphics[width=0.30\textwidth]{Figures/hp_kappa.png} &
+        \includegraphics[width=0.30\textwidth]{Figures/set_loss.png} \\
+        (a) & (b) & (c)
+    \end{tabular}\par\smallskip
+    \begin{tabular}{@{}c@{\hspace{0.025\textwidth}}c@{}}
+        \includegraphics[width=0.30\textwidth]{Figures/hp_beta2.png} &
+        \includegraphics[width=0.30\textwidth]{Figures/post_fusion_cl.png} \\
+        (d) & (e)
     \end{tabular}
 
     \caption{Hyperparameter sensitivity in Recall@20 on Youshu,
     iFashion, and NetEase. (a) Diffusion noise variance endpoint
     $\beta_T$. (b) U-B retention limit $\kappa$.
-    (c) Pre-fusion contrastive weight $\lambda_a$.
-    (d) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (c) SetLoss weight $\lambda_{\mathrm{set}}$.
+    (d) Pre-fusion contrastive weight $\lambda_a$.
     (e) Post-fusion contrastive weight $\lambda_c$.
     Broken $y$-axes use different scales for the datasets;
     candidate values are displayed at equally spaced horizontal
@@ -819,14 +822,14 @@ from moderate perturbation. A smaller retention limit $\kappa$
 works better on iFashion, whereas NetEase benefits from
 retaining more connections. This difference illustrates the
 tradeoff between retaining useful history and including less
-relevant connections in graph propagation.
-
-For the CCL weight $\lambda_a$, moderate nonzero values improve
-performance, while larger values can reduce it. Nonzero
+relevant connections in graph propagation. Nonzero
 SetLoss weights $\lambda_{\mathrm{set}}$ improve performance
 on Youshu, while iFashion and NetEase show only small,
 nonmonotonic changes. Increasing this weight does not
-consistently yield further gains. Similarly, post-fusion
+consistently yield further gains.
+
+For the CCL weight $\lambda_a$, moderate nonzero values improve
+performance, while larger values can reduce it. Similarly, post-fusion
 contrastive learning benefits from a moderate $\lambda_c$.
 Larger weights cause pronounced performance drops on Youshu
 and NetEase, highlighting the need to balance the contrastive
